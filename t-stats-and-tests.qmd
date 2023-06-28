@@ -1,0 +1,366 @@
+---
+title: "The t-statistic and t-distribution"
+---
+
+## Background
+
+The t-test is a [statistical hypothesis test](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing) that is 
+commonly used when the data are normally distributed (follow a normal 
+distribution) if the value of the population standard deviation were known. When
+the population standard deviation is not known and is replaced by an estimate
+based no the data, the test statistic follows a Student's t distribution. 
+
+T-tests are 
+handy hypothesis tests in statistics when you want to compare means. You can 
+compare a sample mean to a hypothesized or target value using a one-sample 
+t-test. You can compare the means of two groups with a two-sample t-test. If 
+you have two groups with paired observations (e.g., before and after 
+measurements), use the paired t-test.
+
+A t-test looks at the t-statistic, the t-distribution values, and 
+the degrees of freedom to determine the statistical significance. 
+To conduct a test with three or more means, we would use an analysis 
+of variance.
+
+The distriubution that the t-statistic follows was described in a famous 
+paper [@student_probable_1908] by "Student", a pseudonym for [William Sealy Gosset](https://en.wikipedia.org/wiki/William_Sealy_Gosset). 
+
+## The Z-score and probability
+
+Before talking about the t-distribution and t-scores, lets review the Z-score, 
+its relation to the normal distribution, and probability.
+
+The Z-score is defined as:
+
+$$Z = \frac{x - \mu}{\sigma}$$ {#eq-zscore}
+
+where $\mu$ is a the population mean from which $x$ is drawn and $\sigma$ is
+the population standard deviation (taken as known, not estimated from the data).
+
+The probability of observing a $Z$ score of $z$ or greater can be calculated by
+$pnorm(z,\mu,\sigma)$.
+
+For example, let's assume that our "population" is known and it truly
+has a mean 0 and standard deviation 1. If we have observations drawn from
+that population, we can assign a probability of seeing that observation
+by random chance _under the assumption that the null hypothesis is **TRUE**_. 
+
+```{r}
+zscore = seq(-5,5,1)
+```
+
+For each value of zscore, let's calculate the p-value and put the results in a `data.frame`.
+
+```{r}
+df = data.frame(
+    zscore = zscore,
+    pval   = pnorm(zscore, 0, 1)
+)
+df
+```
+
+Why is the p-value of something 5 population standard deviations away from
+the mean (zscore=5) nearly 1 in this calculation? What is the default for
+`pnorm` with respect to being one-sided or two-sided?
+
+Let's plot the values of probability vs z-score:
+
+```{r}
+plot(df$zscore, df$pval, type='b')
+```
+
+This plot is the *empirical* cumulative density function (cdf) for our data.
+How can we use it? If we know the z-score, we can look up the probability of
+observing that value. Since we have constructed our experiment to follow the
+standard normal distribution, this cdf also represents the cdf of the standard
+normal distribution.
+
+### Small diversion: two-sided pnorm function
+
+The `pnorm` function returns the "one-sided" probability of having
+a value at least as extreme as the observed $x$ and uses the "lower" tail
+by default. Let's create a function that computes two-sided p-values.
+
+1. Take the absolute value of x
+2. Compute `pnorm` with `lower.tail=FALSE` so we get lower p-values with
+larger values of $x$.
+3. Since we want to include both tails, we need to multiply the area 
+(probability) returned by pnorm by 2.
+
+```{r}
+twosidedpnorm = function(x,mu=0,sd=1) {
+    2*pnorm(x,mu,sd,lower.tail=FALSE)
+}
+```
+
+And we can test this to see how likely it is to be 2 or 3 standard deviations
+from the mean:
+
+```{r}
+twosidedpnorm(2)
+twosidedpnorm(3)
+```
+
+## The t-distribution
+
+We spent time above working with z-scores and probability. An important
+aspect of working with the normal distribution is that we MUST assume
+that we know the standard deviation. Remember that the Z-score is defined
+as:
+
+$$Z = \frac{x - \mu}{\sigma}$$
+
+The formula for the *population*
+standard deviation is:
+
+$$\sigma = \sqrt{\frac{1}{N}\sum_{i=1}^{N}({xi - \mu)^2}}$$ {#eq-pop-sd}
+
+In general, the population standard deviation is taken as "known" as
+we did above. 
+
+If we do not but only have a *sample*
+from the population, instead of using the Z-score, we use the t-score 
+defined as:
+
+$$t = \frac{x - \bar{x}}{s}$$ {#eq-tscore}
+
+This looks quite similar to the formula for Z-score, but here we have to
+*estimate* the standard deviation, $s$ from the data. The formula for $s$
+is:
+
+$$s = \sqrt{\frac{1}{N-1}\sum_{i=1}^{N}({x_{i} - \bar{x})^2}}$$ {#eq-sample-sd}
+
+Since we are estimating the standard deviation from the data, this leads
+to extra variability that shows up as "fatter tails" for smaller sample
+sizes than for larger sample sizes. We can see this by comparing the
+_t-distribution_ for various numbers of degrees of freedom (sample sizes).
+
+We can look at the effect of sample size on the distributions graphically
+by looking at the densities for 3, 5, 10, 20 degrees of freedom and
+the normal distribution:
+
+```{r #fig-t-vs-z,message=FALSE, fig.cap="t-distributions for various degrees of freedom. Note that the tails are fatter for smaller degrees of freedom, which is a result of estimating the standard deviation from the data."}
+library(dplyr)
+library(ggplot2)
+t_values = seq(-6,6,0.01)
+df = data.frame(
+    value = t_values,
+    t_3   = dt(t_values,3),
+    t_6   = dt(t_values,6),
+    t_10  = dt(t_values,10),
+    t_20  = dt(t_values,20),
+    Normal= dnorm(t_values)
+) |>
+    tidyr::gather("Distribution", "density", -value)
+ggplot(df, aes(x=value, y=density, color=Distribution)) + 
+    geom_line()
+```
+
+The `dt` and `dnorm` functions give the density of the distributions
+for each point. 
+
+
+```{r}
+df2 = df |> 
+    group_by(Distribution) |>
+    arrange(value) |> 
+    mutate(cdf=cumsum(density))
+ggplot(df2, aes(x=value, y=cdf, color=Distribution)) + 
+    geom_line()
+```
+
+### p-values based on Z vs t
+
+When we have a "sample" of data and want to compute the statistical 
+significance of the difference of the mean from the population mean, 
+we calculate the standard deviation of the sample means (standard error).
+
+$$z = \frac{x - \mu}{\sigma/\sqrt{n}}$$
+
+Let's look at the relationship between the p-values of Z (from the normal distribution) vs t for a **sample** of data.
+
+```{r}
+set.seed(5432)
+samp = rnorm(5)
+z = sqrt(length(samp)) * mean(samp) #simplifying assumption (sigma=1, mu=0)
+```
+
+And the p-value if we assume we know the standard deviation:
+
+```{r}
+pnorm(z)
+```
+
+```{r}
+ts = sqrt(length(samp)) * mean(samp) / sd(samp)
+pnorm(ts)
+pt(ts,5)
+```
+
+### Experiment
+
+When sampling from a normal distribution, we often calculate p-values to test
+hypotheses or determine the statistical significance of our results. The
+p-value represents the probability of obtaining a test statistic as extreme or
+more extreme than the one observed, under the null hypothesis.
+
+In a typical scenario, we assume that the population mean and standard
+deviation are known. However, in many real-life situations, we don't know the
+true population standard deviation, and we have to estimate it using the sample
+standard deviation (@eq-sample-sd). This estimation introduces some uncertainty into our
+calculations, which affects the p-values. When we include an estimate of the standard deviation, we switch from using the
+standard normal (z) distribution to the t-distribution for calculating
+p-values. 
+
+What would happen if we used the normal distribution to calculate p-values
+when we use the sample standard deviation? Let's find out!
+
+1. Simulate a bunch of samples of size `n` from the standard normal distribution
+2. Calculate the p-value distribution for those samples based on the 
+normal.
+3. Calculate the p-value distribution for those samples based on the 
+normal, but with the *estimated* standard deviation.
+4. Calculate the p-value distribution for those samples based on the 
+t-distribution.
+
+
+Create a function that draws a sample of size `n` from the standard
+normal distribution.
+
+```{r}
+zf = function(n) {
+    samp = rnorm(n)
+    z = sqrt(length(samp)) * mean(samp) / 1 #simplifying assumption (sigma=1, mu=0)
+    z
+}
+```
+
+And give it a try:
+
+```{r}
+zf(5)
+```
+
+Perform 10000 replicates of our sampling and z-scoring. We are using the assumption
+that we know the population standard deviation; in this case, we do know since we 
+are sampling from the standard normal distribution.
+
+```{r}
+z10k = replicate(10000,zf(5))
+hist(pnorm(z10k))
+```
+
+And do the same, but now creating a t-score function. We are using the assumption
+that we *don't* know the population standard deviation; in this case, we must
+estimate it from the data. Note the difference in the calculation of the t-score (`ts`)
+as compared to the z-score (`z`).
+
+
+```{r}
+tf = function(n) {
+    samp = rnorm(n)
+    # now, using the sample standard deviation since we 
+    # "don't know" the population standard deviation
+    ts = sqrt(length(samp)) * mean(samp) / sd(samp)
+    ts
+}
+```
+
+If we use those t-scores and calculate the p-values based on the normal distribution, the 
+histogram of those p-values looks like:
+
+```{r}
+t10k = replicate(10000,tf(5))
+hist(pnorm(t10k))
+```
+
+Since we are using the normal distribution to calculate the p-values, we are, in effect,
+assuming that we know the population standard deviation. This assumption is incorrect,
+and we can see that the p-values are not uniformly distributed between 0 and 1.
+
+If we use those t-scores and calculate the p-values based on the t-distribution, the
+histogram of those p-values looks like:
+
+```{r}
+hist(pt(t10k,5))
+```
+
+Now, the p-values are uniformly distributed between 0 and 1, as expected.
+
+What is a qqplot and how do we use it? A qqplot is a plot of the quantiles of
+two distributions against each other. If the two distributions are identical,
+the points will fall on a straight line. If the two distributions are different,
+the points will deviate from the straight line. We can use a qqplot to compare
+the t-distribution to the normal distribution. If the t-distribution is
+identical to the normal distribution, the points will fall on a straight line.
+If the t-distribution is different from the normal distribution, the points
+will deviate from the straight line. In this case, we can see that the
+t-distribution is different from the normal distribution, as the points deviate
+from the straight line. What would happen if we increased the sample size? The
+t-distribution would approach the normal distribution, and the points would
+fall closer and closer to the straight line.
+
+```{r}
+qqplot(z10k,t10k)
+abline(0,1)
+```
+
+## Summary of t-distribution vs normal distribution
+
+The t-distribution is a family of probability distributions that depends on a
+parameter called degrees of freedom, which is related to the sample size. The
+t-distribution approaches the standard normal distribution as the sample size
+increases but has heavier tails for smaller sample sizes. This means that the
+t-distribution is more conservative in calculating p-values for small samples,
+making it harder to reject the null hypothesis. Including an estimate of the
+standard deviation changes the way we calculate p-values by switching from the
+standard normal distribution to the t-distribution, which accounts for the
+uncertainty introduced by estimating the population standard deviation from the
+sample. This adjustment is particularly important for small sample sizes, as it
+provides a more accurate assessment of the statistical significance of our
+results.
+
+
+## t.test
+
+### One-sample
+
+```{r}
+x = rnorm(20,1)
+# small sample
+t.test(x[1:5])
+```
+
+Increase sample size:
+
+```{r}
+t.test(x[1:20])
+```
+
+### two-sample
+
+```{r}
+x = rnorm(10,0.5)
+y = rnorm(10,-0.5)
+t.test(x,y)
+```
+
+### from a data.frame
+
+```{r}
+df = data.frame(value=c(x,y),group=as.factor(rep(c('g1','g2'),each=10)))
+t.test(value ~ group, data=df)
+```
+
+### Equivalence to linear model
+
+```{r}
+t.test(value ~ group, data=df, var.equal=TRUE)
+```
+
+This is *equivalent* to:
+
+```{r}
+res = lm(value ~ group, data=df)
+summary(res)
+```

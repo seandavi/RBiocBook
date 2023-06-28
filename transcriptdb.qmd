@@ -1,0 +1,141 @@
+---
+title: "TxDb: Genes, Transcripts, and Genomic Locations"
+author: 
+- name: Sean Davis
+  affiliation: Center for Cancer Research, National Cancer Institute, NIH
+  email: seandavi@gmail.com
+output: 
+  html_document
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r init, include=FALSE}
+library(knitr)
+opts_chunk$set(message=FALSE, cache=TRUE, eval=FALSE)
+```
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+
+The `r Biocpkg("GenomicFeatures")` package retrieves and manages transcript-related features from
+the UCSC Genome Bioinformatics[^ucsc]
+and BioMart[^biomart] data resources. The package is
+useful for ChIP-chip, ChIP-seq, and RNA-seq analyses.
+
+[^ucsc]: https://genome.ucsc.edu
+[^biomart]: http://www.biomart.org/
+
+```{r library}
+library('GenomicFeatures')
+```
+                               
+# Gene annotation
+
+Gene annotation resources in Bioconductor are extensive. Here is an overview and an example of how to build
+resources from text files. The first section is background on the GTF format and then we build a TxDb object
+from an appropriate GTF file.
+
+Note that matching up the GTF file, the genome build, and the transcript sequences is really important
+to getting an analysis right.
+
+## The GTF format
+
+GTF stands for Gene transfer format[^gtf]. It borrows from GFF, but has additional structure that warrants a separate definition and format name. Structure is as GFF, so the fields are: 
+
+```
+<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+```
+
+[^gtf]: http://mblab.wustl.edu/GTF22.html
+
+Here is a simple example with 3 translated exons. Order of rows is not important.
+
+```
+381 Twinscan  CDS          380   401   .   +   0  gene_id "001"; transcript_id "001.1";
+381 Twinscan  CDS          501   650   .   +   2  gene_id "001"; transcript_id "001.1";
+381 Twinscan  CDS          700   707   .   +   2  gene_id "001"; transcript_id "001.1";
+381 Twinscan  start_codon  380   382   .   +   0  gene_id "001"; transcript_id "001.1";
+381 Twinscan  stop_codon   708   710   .   +   0  gene_id "001"; transcript_id "001.1";
+```
+
+The whitespace in this example is provided only for readability. In GTF, fields must be separated by a single TAB and no white space. 
+
+GTF fields definitions are here:
+
+- *<seqname>*: The name of the sequence. Commonly, this is the chromosome ID or contig ID. Note that the coordinates used must be unique within each sequence name in all GTFs for an annotation set.
+
+- *<source>*: The source column should be a unique label indicating where the annotations came from --- typically the name of either a prediction program or a public database.
+
+- *<feature>*: The following feature types are required: "CDS", "start_codon", "stop_codon". The features "5UTR", "3UTR", "inter", "inter_CNS", "intron_CNS" and "exon" are optional. All other features will be ignored. The types must have the correct capitalization shown here. CDS represents the coding sequence starting with the first translated codon and proceeding to the last translated codon. Unlike Genbank annotation, the stop codon is not included in the CDS for the terminal exon. The optional feature "5UTR" represents regions from the transcription start site or beginning of the known 5' UTR to the base before the start codon of the transcript. If this region is interrupted by introns then each exon or partial exon is annotated as a separate 5UTR feature. Similarly, "3UTR" represents regions after the stop codon and before the polyadenylation site or end of the known 3' untranslated region. Note that the UTR features can only be used to annotate portions of mRNA genes, not non-coding RNA genes. The feature "exon" more generically describes any transcribed exon. Therefore, exon boundaries will be the transcription start site, splice donor, splice acceptor and poly-adenylation site. The start or stop codon will not necessarily lie on an exon boundary. The "start_codon" feature is up to 3bp long in total and is included in the coordinates for the "CDS" features. The "stop_codon" feature similarly is up to 3bp long and is excluded from the coordinates for the "3UTR" features, if used. The "start_codon" and "stop_codon" features are not required to be atomic; they may be interrupted by valid splice sites. A split start or stop codon appears as two distinct features. All "start_codon" and "stop_codon" features must have a 0,1,2 in the <frame> field indicating which part of the codon is represented by this feature. Contiguous start and stop codons will always have frame 0. The "inter" feature describes an intergenic region, one which is by almost all accounts not transcribed. The "inter_CNS" feature describes an intergenic conserved noncoding sequence region. All of these should have an empty transcript_id attribute, since they are not transcribed and do not belong to any transcript. The "intron_CNS" feature describes a conserved noncoding sequence region within an intron of a transcript, and should have a transcript_id associated with it.
+
+- *<start> and <end>*: Integer start and end coordinates of the feature relative to the beginning of the sequence named in <seqname>.  <start> must be less than or equal to <end>. Sequence numbering starts at 1. Values of <start> and <end> that extend outside the reference sequence are technically acceptable, but they are discouraged.
+
+- *<score>*: The score field indicates a degree of confidence in the feature's existence and coordinates. The value of this field has no global scale but may have relative significance when the <source> field indicates the prediction program used to create this annotation. It may be a floating point number or integer, and not necessary and may be replaced with a dot.
+
+- *<frame>*: 0 indicates that the feature begins with a whole codon at the 5' most base. 1 means that there is one extra base (the third base of a codon) before the first whole codon and 2 means that there are two extra bases (the second and third bases of the codon) before the first codon. Note that for reverse strand features, the 5' most base is the <end> coordinate.
+
+- *[attributes]*: All nine features have the same two mandatory attributes at the end of the record. These attributes are designed for handling multiple transcripts from the same genomic region. Any other attributes or comments must appear after these two and may be ignored. Attributes must end in a semicolon which must then be separated from the start of any subsequent attribute by exactly one space character (NOT a tab character). Textual attributes should be surrounded by doublequotes. These two attributes are required even for non-mRNA transcribed regions such as "inter" and "inter_CNS" features.
+    - gene_id value; A globally unique identifier for the genomic locus of the transcript. If empty, no gene is associated with this feature.
+    - transcript_id value; A globally unique identifier for the predicted transcript. If empty, no transcript is associated with this feature.
+
+
+- *[comments]*: Comments begin with a hash ('#') and continue to the end of the line. Nothing beyond a hash will be parsed. These may occur anywhere in the file, including at the end of a feature line.
+
+
+# Making a TxDb object
+
+Using the GTF file from ENCODE for gencode v24, we will be building a TxDb object. First, download the 
+GTF file.
+
+```{r gencodegtf}
+download.file("https://www.encodeproject.org/files/gencode.v24.primary_assembly.annotation/@@download/gencode.v24.primary_assembly.annotation.gtf.gz", "gencode.v24.primary_assembly.annotation.gtf.gz")
+```
+
+Then, in one line, build the TxDb object.
+
+```{r txdb}
+library(GenomicFeatures)
+txdb = makeTxDbFromGFF('gencode.v24.primary_assembly.annotation.gtf.gz')
+```
+
+To save the `txdb` database for later and avoid having to recreate it 
+every time we use it, we can use `saveDb()` and, later, `loadDb()`
+
+```{r savetxdb}
+library(AnnotationDbi)
+saveDb(txdb, 'txdb.gencode24.sqlite')
+```
+
+Once the database is stored to disk, it can be reloaded later, almost instantly.
+
+```{r exploreTxDb}
+library(AnnotationDbi)
+txdb = loadDb(file = 'txdb.gencode24.sqlite')
+genes(txdb)
+```
+
+# Exercises
+
+- Use the `genes` accessor to extract a `GRanges` object of the genes. How many genes are there? Make a histogram
+of the lengths of the genes (see ?width from the GenomicRanges package). You may have to transform the data
+to make the plot useful.
+
+- Use the `transcripts` accessor to extract the transcripts as `GRanges` object. How many 
+transcripts are present? Make a table of the number of transcripts per chromosome. For each
+transcript, find out how many other transcripts overlap it. 
+
+- Use the `transcriptsBy` accessor to get a `GRangesList` of transcripts, grouped by gene. 
+What is the length of the result? What are the names of the result? Make a histogram of the
+number of transcripts per gene (see `elementNROWS`).
+
+- The AnnotationHub record, "AH57956", contains clinically annotated snps. Get this record
+from the AnnotationHub and then read it into R with `readVcf` from the VariantAnnotation 
+package. How many of these SNPs overlap genes (you should double-check the seqlevels)?
+
+

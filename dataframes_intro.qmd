@@ -1,0 +1,280 @@
+---
+title: "Data Frames"
+---
+
+While R has many different data types, the one that is central to much of the power
+and popularity of R is the `data.frame`. A data.frame looks a bit like an R matrix in
+that it has two dimensions, rows and columns. However, data.frames are usually viewed
+as a set of columns representing variables and the rows representing the values of
+those variables. Importantly, a data.frame may contain *different* data types in each 
+of its columns; matrices **must** contain only one data type. This distinction is 
+important to remember, as there are *specific* approaches to working with R data.frames
+that may be different than those for working with matrices.
+
+
+## Learning goals
+
+* Understand how data.frames are different from matrices.
+* Know a few functions for examing the contents of a data.frame.
+* List approaches for subsetting data.frames.
+* Be able to load and save tabular data from and to disk.
+* Show how to create a data.frames from scratch.
+
+## Learning objectives
+
+* Load the yeast growth dataset into R using `read.csv`.
+* Examine the contents of the dataset.
+* Use subsetting to find genes that may be involved with nutrient metabolism and transport.
+* Summarize data measurements by categories.
+
+## Dataset
+
+The data used here are borrowed directly from the [fantastic
+Bioconnector tutorials](http://bioconnector.org/index.html) and are a
+cleaned up version of the data from [Brauer et al. Coordination of
+Growth Rate, Cell Cycle, Stress Response, and Metabolic Activity in
+Yeast (2008) Mol Biol Cell
+19:352-367](http://www.ncbi.nlm.nih.gov/pubmed/17959824). These data
+are from a gene expression microarray, and in this paper the authors
+examine the relationship between growth rate and gene expression in
+yeast cultures limited by one of six different nutrients (glucose,
+leucine, ammonium, sulfate, phosphate, uracil). If you give yeast a
+rich media loaded with nutrients except restrict the supply of a
+single nutrient, you can control the growth rate to any rate you
+choose. By starving yeast of specific nutrients you can find genes
+that:
+
+1. Raise or lower their expression in response to growth
+   rate. Growth-rate dependent expression patterns can tell us a lot
+   about cell cycle control, and how the cell responds to stress. The
+   authors found that expression of >25% of all yeast genes is
+   linearly correlated with growth rate, independent of the limiting
+   nutrient. They also found that the subset of negatively
+   growth-correlated genes is enriched for peroxisomal functions, and
+   positively correlated genes mainly encode ribosomal functions.
+2. Respond differently when different nutrients are being limited. If
+   you see particular genes that respond very differently when a
+   nutrient is sharply restricted, these genes might be involved in
+   the transport or metabolism of that specific nutrient.
+
+The dataset can be downloaded directly from:
+
+- [brauer2007_tidy.csv](https://raw.githubusercontent.com/bioconnector/workshops/master/data/brauer2007_tidy.csv)
+
+We are going to read this dataset into R and then use it as a playground for learning about data.frames.
+
+## Reading in data
+
+R has many capabilities for reading in data. Many of the functions
+have names that help us to understand what data format is to be
+expected. In this case, the filename that we want to read ends in
+`.csv`, meaning comma-separated-values. The `read.csv()` function
+reads in `.csv` files.  As usual, it is worth reading
+`help('read.csv')` to get a better sense of the possible
+bells-and-whistles.
+
+The `read.csv()` function can read directly from a URL, so we do not
+need to download the file directly.  This dataset is relatively large
+(about 16MB), so this may take a bit depending on your network
+connection speed.
+
+```{r}
+options(width=60)
+```
+
+
+```{r cache=TRUE}
+url = paste0(
+    'https://raw.githubusercontent.com',
+    '/bioconnector/workshops/master/data/brauer2007_tidy.csv'
+)
+ydat <- read.csv(url)
+```
+
+Our variable, `ydat`, now "contains" the downloaded and read data. We can check to see what data type 
+read.csv gave us:
+
+```{r}
+class(ydat)
+```
+
+## Inspecting data.frames
+
+Our `ydat` variable is a data.frame. As I mentioned, the dataset is fairly large, so we will not be
+able to look at it all at once on the screen. However, R gives us many tools to inspect a data.frame.
+
+- Overviews of content
+  + `head()` to show first few rows
+  + `tail()` to show last few rows
+- Size
+  + `dim()` for dimensions (rows, columns)
+  + `nrow()`
+  + `ncol()`
+  + `object.size()` for power users interested in the memory used to store an object
+- Data and attribute summaries
+  + `colnames()` to get the names of the columns
+  + `rownames()` to get the "names" of the rows--may not be present
+  + `summary()` to get per-column summaries of the data in the data.frame.
+  
+```{r dataframeinspection}
+head(ydat)
+tail(ydat)
+dim(ydat)
+nrow(ydat)
+ncol(ydat)
+colnames(ydat)
+summary(ydat)
+```
+
+In RStudio, there is an additional function, `View()` (note the capital "V") that opens the first
+1000 rows (default) in the RStudio window, akin to a spreadsheet view. 
+
+```{r eval=FALSE}
+View(ydat)
+```
+
+## Accessing variables (columns) and subsetting
+
+In R, data.frames can be subset similarly to other two-dimensional data structures. The `[` in R is used 
+to denote subsetting of any kind. When working with two-dimensional data, we need two values inside the `[ ]`
+to specify the details. The specification is `[rows, columns]`. For example, to get the first three rows of `ydat`,
+use:
+
+```{r}
+ydat[1:3, ]
+```
+
+Note how the second number, the columns, is blank. R takes that to mean "all the columns". Similarly, we can
+combine rows and columns specification arbitrarily.
+
+```{r}
+ydat[1:3, 1:3]
+```
+
+Because selecting a single variable, or column, is such a common operation, there are two shortcuts for
+doing so *with data.frames*. The first, the `$` operator works like so:
+
+```{r}
+# Look at the column names, just to refresh memory
+colnames(ydat)
+# Note that I am using "head" here to limit the output
+head(ydat$symbol)
+# What is the actual length of "symbol"?
+length(ydat$symbol)
+```
+
+The second is related to the fact that, in R, data.frames are also lists. We subset a list by using `[[]]` notation.
+To get the second column of `ydat`, we can use:
+
+```{r}
+head(ydat[[2]])
+```
+
+Alternatively, we can use the column name:
+
+```{r}
+head(ydat[["systematic_name"]])
+```
+
+### Some data exploration
+
+There are a couple of columns that include numeric values. Which columns are numeric?
+
+```{r}
+class(ydat$symbol)
+class(ydat$rate)
+class(ydat$expression)
+```
+
+Make histograms of:
+- the expression values
+- the rate values
+
+What does the `table()` function do? Could you use that to look a the
+`rate` column given that that column appears to have repeated values?
+
+What `rate` corresponds to the most nutrient-starved condition?
+
+### More advanced indexing and subsetting
+
+We can use, for example, logical values (TRUE/FALSE) to subset data.frames.
+
+```{r}
+head(ydat[ydat$symbol == 'LEU1', ])
+tail(ydat[ydat$symbol == 'LEU1', ])
+```
+
+What is the problem with this approach? It appears that there are a bunch of `NA` values. Taking a quick look at the 
+`symbol` column, we see what the problem. 
+
+```{r}
+summary(ydat$symbol)
+```
+
+Using the `is.na()` function, we can make filter further to get down to values of interest.
+
+```{r}
+head(ydat[ydat$symbol == 'LEU1' & !is.na(ydat$symbol), ])
+```
+
+Sometimes, looking at the data themselves is not that important. Using `dim()` is one possibility to look at the
+number of rows and columns after subsetting.
+
+```{r}
+dim(ydat[ydat$expression > 3, ])
+```
+
+Find the high expressed genes when leucine-starved. For this task we can also use `subset` which allows 
+us to treat column names as R variables (no `$` needed).
+
+```{r}
+subset(ydat, nutrient == 'Leucine' & rate == 0.05 & expression > 3)
+```
+
+## Aggregating data
+
+Aggregating data, or summarizing by category, is a common way to look
+for trends or differences in measurements between categories. Use `aggregate`
+to find the mean expression by gene symbol.
+
+```{r}
+head(aggregate(ydat$expression, by=list( ydat$symbol), mean))
+# or 
+head(aggregate(expression ~ symbol, mean, data=ydat))
+```
+
+## Creating a data.frame from scratch
+
+Sometimes it is useful to combine related data into one object. For example, let's simulate some data.
+
+```{r}
+smoker = factor(rep(c("smoker", "non-smoker"), each=50))
+smoker_numeric = as.numeric(smoker)
+x = rnorm(100)
+risk = x + 2*smoker_numeric
+```
+
+We have two varibles, `risk` and `smoker` that are related. We can make a data.frame out of them:
+
+```{r}
+smoker_risk = data.frame(smoker = smoker, risk = risk)
+head(smoker_risk)
+```
+
+R also has plotting shortcuts that work with data.frames to simplify plotting
+
+```{r}
+plot( risk ~ smoker, data=smoker_risk)
+```
+
+## Saving a data.frame
+
+Once we have a data.frame of interest, we may want to save it. The most
+portable way to save a data.frame is to use one of the `write` functions. In
+this case, let's save the data as a `.csv` file.
+
+```{r eval=FALSE}
+write.csv(smoker_risk, "smoker_risk.csv")
+```
+
+

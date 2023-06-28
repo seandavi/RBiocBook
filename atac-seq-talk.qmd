@@ -1,0 +1,107 @@
+---
+title: "ATAC-seq Data Analysis"
+author: "Sean Davis"
+format: revealjs
+---
+
+## I. Introduction
+- Brief overview of ATAC-seq technology
+- Importance of data analysis for interpreting ATAC-seq results
+
+## II. Experimental Design
+- Sample collection and preparation
+  - Selection of appropriate cell or tissue types
+  - Optimization of cell lysis and nuclei isolation
+  - Considerations for experimental variables (e.g., treatment, time points)
+- Library preparation and sequencing
+  - DNA fragmentation using Tn5 transposase
+  - Library construction and indexing
+  - Sequencing platforms and parameters
+- Considerations for experimental design
+  - Biological replicates to account for variability
+  - Controls (e.g., input DNA, negative control) for background subtraction
+
+## III. Quality Control
+- Overview of quality control metrics
+  - Assessment of sequencing depth (number of reads)
+  - Examination of read quality (e.g., Phred scores)
+  - Evaluation of GC content bias
+- Assessment of sequencing depth and read quality
+  - Trimming of adapter sequences and low-quality bases using [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
+  - Removal of PCR duplicates with [Picard](https://broadinstitute.github.io/picard/)
+- Quality control visualization plots
+  - Read distribution across genome using [BEDTools](https://bedtools.readthedocs.io/)
+  - Insert size distribution with [ATACseqQC](https://bioconductor.org/packages/release/bioc/html/ATACseqQC.html)
+  - GC content bias plots using [deepTools](https://deeptools.readthedocs.io/)
+
+## IV. Preprocessing and Alignment
+- Trimming and filtering of reads
+  - Removal of low-quality reads based on quality scores
+  - Trimming of adapter sequences and low-quality bases with [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
+- Alignment to a reference genome
+  - Selection of appropriate aligner (e.g., Bowtie2, BWA)
+  - Generation of a genome index
+  - Alignment of trimmed reads to the reference genome using [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/) or [BWA](http://bio-bwa.sourceforge.net/)
+- Assessment of alignment quality
+  - Calculation of alignment statistics (e.g., mapping rate, duplication rate) with [SAMtools](http://www.htslib.org/)
+  - Visual inspection of alignment tracks using genome browsers like [UCSC Genome Browser](https://genome.ucsc.edu/) or [Integrated Genome Viewer (IGV)](https://software.broadinstitute.org/software/igv/)
+- Fragment size estimation
+  - Determination of the fragment size distribution from aligned reads using [ATACseqQC](https://bioconductor.org/packages/release/bioc/html/ATACseqQC.html)
+  - Plotting fragment size distribution for quality assessment
+
+## V. Peak Calling
+- Definition of peaks and their significance
+  - Peaks represent regions of open chromatin or DNA accessibility
+  - Significance is determined based on background noise levels
+- Overview of peak calling algorithms (e.g., MACS2, F-seq)
+  - Explanation of algorithm principles
+  - Considerations for parameter selection
+- Parameters and considerations for peak calling
+  - Selection of significance threshold (e.g., p-value, q-value)
+  - Adjustment for multiple testing (e.g., false discovery rate)
+  - Filtering of peaks based on read depth or fold change
+- Quality control of called peaks
+  - Assessment of peak characteristics (e.g., width, enrichment)
+  - Visual inspection of peak tracks using genome browsers like
+
+ [UCSC Genome Browser](https://genome.ucsc.edu/) or [Integrated Genome Viewer (IGV)](https://software.broadinstitute.org/software/igv/)
+  - Comparison with known genomic features (e.g., gene annotations)
+
+## VI. Visualization of Results
+- Generation of genome-wide signal tracks
+  - Conversion of aligned reads to signal tracks (e.g., bedGraph, bigWig) using [BEDTools](https://bedtools.readthedocs.io/)
+  - Normalization of signal tracks (e.g., reads per million, RPKM)
+- Visualization of peak profiles and footprints
+  - Generation of average peak profiles
+  - Heatmap visualization of peak patterns using [deepTools](https://deeptools.readthedocs.io/)
+  - Identification and analysis of footprints using tools like [HINT-ATAC](https://github.com/shenlab-sinai/hint-atac)
+- Visualization of differential accessibility between conditions
+  - Generation of differential accessibility plots (e.g., volcano plot) using R packages like [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) or [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+  - Heatmap visualization of differential peaks using [deepTools](https://deeptools.readthedocs.io/)
+- Use of genome browsers for result exploration (e.g., UCSC, IGV)
+  - Loading and visualization of aligned reads and peaks
+  - Overlaying other genomic features (e.g., gene tracks, conservation scores)
+
+## VII. Downstream Analysis
+- Gene association analysis using peak-gene assignment
+  - Identification of genes associated with nearby peaks using tools like [ChIPseeker](https://bioconductor.org/packages/release/bioc/html/ChIPseeker.html) or [HOMER](http://homer.ucsd.edu/homer/ngs/annotation.html)
+  - Analysis of differential gene expression using tools like [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) or [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+- Enrichment analysis of functional annotations
+  - Gene ontology analysis to identify enriched biological processes using tools like [clusterProfiler](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html) or [GOstats](https://bioconductor.org/packages/release/bioc/html/GOstats.html)
+  - Pathway analysis to identify enriched signaling pathways using tools like [ReactomePA](https://bioconductor.org/packages/release/bioc/html/ReactomePA.html) or [KEGG.db](https://bioconductor.org/packages/release/data/annotation/html/KEGG.db.html)
+- Motif enrichment analysis to identify transcription factor binding sites
+  - Identification of enriched motifs within peak regions using tools like [HOMER](http://homer.ucsd.edu/homer/ngs/peakMotifs.html) or [MEME Suite](http://meme-suite.org/)
+  - Comparison with known transcription factor motifs using databases like [JASPAR](http://jaspar.genereg.net/) or [TRANSFAC](https://portal.biobase-international.com/cgi-bin/index.cgi)
+- Integration of ATAC-seq data with other omics data
+  - Integration with RNA-seq data for correlation analysis using tools like [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) or [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+  - Integration with ChIP-seq data for co-localization analysis using
+
+ tools like [HOMER](http://homer.ucsd.edu/homer/ngs/peakMotifs.html) or [BEDTools](https://bedtools.readthedocs.io/)
+
+## VIII. Conclusion
+- Summary of key points covered in the talk
+- Importance of proper data analysis for ATAC-seq interpretation
+- Future directions and emerging trends in ATAC-seq analysis
+
+Please note that the software tools mentioned are commonly used, but there may be alternative tools available. It is important to choose the most suitable tools based on your specific requirements and preferences.
+

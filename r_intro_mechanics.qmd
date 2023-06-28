@@ -1,0 +1,258 @@
+---
+title: "R mechanics"
+output: 
+    html_document
+---
+
+```{r style, echo = FALSE, results = 'asis'}
+knitr::opts_chunk$set(
+    eval=as.logical(Sys.getenv("KNITR_EVAL", "TRUE")),
+    cache=as.logical(Sys.getenv("KNITR_CACHE", "TRUE")))
+```
+
+## Learning objectives
+
+- Be able to start R and RStudio
+- Learn to interact with the R console
+- Know the difference between expressions and assignment
+- Recognize valid and invalid R names
+- Know how to access the R help system
+- Know how to assign values to variables, find what is in R memory, and remove values from R memory
+
+## Starting R
+
+How to start R depends a bit on the operating system (Mac, Windows,
+Linux) and interface.  In this course, we will largely be using an
+Integrated Development Environment (IDE) called *RStudio*, but there
+is nothing to prohibit using R at the command line or in some other
+interface (and there are a few).
+
+## _RStudio_: A Quick Tour
+
+
+The RStudio interface has multiple panes. All of these panes are
+simply for convenience except the "Console" panel, typically in the
+lower left corner (by default). The console pane contains the running R
+interface. If you choose to run R outside RStudio, the interaction
+will be *identical* to working in the console pane. This is useful to
+keep in mind as some environments, such as a computer cluster,
+encourage using R without RStudio.
+
+- Panes
+- Options
+- Help
+- Environment, History, and Files
+
+
+## Interacting with R
+
+
+The only meaningful way of interacting with R is by typing into the R console. At the most basic level, anything that we type at the command line will fall into one of two categories:
+
+1.  Assignments
+    
+    ```{r}
+    x = 1
+    y <- 2
+    ```
+    
+2.  Expressions
+
+    ```{r}
+    1 + pi + sin(42)
+    ```
+
+The assignment type is obvious because either the The `<-` or `=` are used. Note that when we type expressions, R will return a result.  In this case, the result of R evaluating `1 + pi + sin(42)` is `r 1 + pi + sin(42)`.
+
+The standard R prompt is a ">" sign. When present, R is waiting for the next expression or assignment.  If a line is not a complete R command, R will continue the next line with a "+". For example, typing the fillowing with a "Return" after the second "+" will result in R giving back a "+" on the next line, a prompt to keep typing.
+
+```{r tidy=FALSE}
+1 + pi +
+sin(3.7)
+```
+
+R can be used as a glorified calculator by using R expressions. Mathematical operations include:
+
+- Addition: `+`
+- Subtraction: `-`
+- Multiplication: `*`
+- Division: `/`
+- Exponentiation: `^`
+- Modulo: `%%`
+
+The `^` operator raises the number to its left to the power of the number to its right: for example `3^2` is `9`.
+The modulo returns the remainder of the division of the number to the left by the number on its right, for example 5 modulo 3 or `5 %% 3` is 2.
+
+### Expressions
+
+```{r calculator10, eval=FALSE}
+5 + 2
+28 %% 3
+3^2
+5 + 4 * 4 + 4 ^ 4 / 10
+```
+
+Note that R follows order-of-operations and groupings based on parentheses.
+
+```{r calculator20, eval=FALSE}
+5 + 4 / 9
+(5 + 4) / 9
+```
+
+### Assignment
+
+While using R as a calculator is interesting, to do useful and interesting things, we need to assign _values_ to _objects_. To create objects, we need to give it a name followed by the assignment operator `<-` (or, entirely equivalently, `=`) and the value we want to give it:
+
+```{r assignment}
+weight_kg <- 55 
+```
+
+`<-` is the assignment operator. Assigns values on the right to objects on the left, it is like an arrow that points from the value to the object. Using an `=` is equivalent (in nearly all cases). Learn to use `<-` as it is good programming practice. 
+
+Objects can be given any name such as `x`, `current_temperature`, or `subject_id` (see below). You want your object names to be explicit and not too long. They cannot start with a number (`2x` is not valid but `x2` is). R is case sensitive (e.g., `weight_kg` is different from `Weight_kg`). There are some names that cannot be used because they represent the names of fundamental functions in R (e.g., `if`, `else`, `for`, see [here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html) for a complete list). In general, even if it's allowed, it's best to not use other function names, which we'll get into shortly (e.g., `c`, `T`, `mean`, `data`, `df`, `weights`). When in doubt, check the help to see if the name is already in use. It's also best to avoid dots (`.`) within a variable name as in `my.dataset`. It is also recommended to use nouns for variable names, and verbs for function names.
+
+When assigning a value to an object, R does not print anything. You can force to print the value by typing the name:
+
+```{r printAssignment}
+weight_kg
+```
+
+Now that R has `weight_kg` in memory, which R refers to as the "global environment", we can do arithmetic with it. For instance, we may want to convert this weight in pounds (weight in pounds is 2.2 times the weight in kg).
+
+```{r modAssignment}
+2.2 * weight_kg
+```
+
+We can also change a variable's value by assigning it a new one:
+
+```{r newAssignment}
+weight_kg <- 57.5
+2.2 * weight_kg
+```
+
+This means that assigning a value to one variable does not change the values of other variables. For example, let's store the animal's weight in pounds in a variable.
+
+```{r calculationWithVar}
+weight_lb <- 2.2 * weight_kg
+```
+
+and then change `weight_kg` to 100.
+
+```{r modAssignment2}
+weight_kg <- 100
+```
+
+What do you think is the current content of the object `weight_lb`, 126.5 or 220?
+
+You can see what objects (variables) are stored by viewing the Environment tab in Rstudio. You can also use the `ls()` function. You can remove objects (variables) with the `rm()` function. You can do this one at a time or remove several objects at once. You can also use the little broom button in your environment pane to remove everything from your environment.
+
+```{r rm, eval=FALSE}
+ls()
+rm(weight_lb, weight_kg)
+ls()
+```
+
+What happens when you type the following, now?
+
+```{r errorAfterrm, eval=FALSE}
+weight_lb # oops! you should get an error because weight_lb no longer exists!
+```
+
+## Rules for Names in R
+
+R allows users to assign names to objects such as variables, functions, and even dimensions of data. However, these names must follow a few rules.
+
+- Names may contain any combination of letters, numbers, underscore, and "."
+- Names may not start with numbers, underscore.
+- R names are case-sensitive.
+
+Examples of valid R names include:
+
+```
+pi
+x
+camelCaps
+my_stuff
+MY_Stuff
+this.is.the.name.of.the.man
+ABC123
+abc1234asdf
+.hi
+```
+
+## Resources for Getting Help
+
+There is extensive built-in help and documentation within R. A separate page contains a collection of  [additional resources](further_resources.html).
+
+If the name of the function or object on which help is sought is known, the following approaches with the name of the function or object will be helpful. For a concrete example, examine the help for the `print` method.
+
+```{r eval=FALSE}
+help(print)
+help('print')
+?print
+```
+
+If the name of the function or object on which help is sought is *not* known, the following from within R will be helpful. 
+
+```{r eval=FALSE}
+help.search('microarray')
+RSiteSearch('microarray')
+apropos('histogram')
+```
+
+There are also tons of online resources that Google will include in searches if online searching feels more appropriate.
+
+I strongly recommend using `help("newfunction"")` for all
+functions that are new or unfamiliar to you.
+
+## Further practice
+
+If you are entirely new to R, you may want to complete an R tutorial to gain further experience with the basics of programming and R syntax. 
+
+One R-based system, [swirl](http://swirlstats.com/), teaches you R programming and data science interactively, at your own pace and in the R console. Once you have R installed, you can install `swirl` and run it the following way: 
+
+```{r, eval=FALSE}
+install.packages("swirl")
+library(swirl)
+swirl()
+```
+
+Alternatively you can take the [try R](http://tryr.codeschool.com/) interactive class from Code School. 
+
+There are also many open and free resources and reference
+guides for R. Two examples are:
+
+* [Quick-R](http://www.statmethods.net/): a quick online reference for data input, basic statistics and plots
+* R reference card [PDF](https://cran.r-project.org/doc/contrib/Short-refcard.pdf) by Tom Short
+* Rstudio [cheatsheets](https://www.rstudio.com/resources/cheatsheets/)
+
+## Exercises
+
+- Without using R, what are the values of the following?
+
+```r
+mass <- 50              # mass?
+age  <- 30              # age?
+mass <- mass * 2        # mass?
+age  <- age - 10        # age?
+mass_index <- mass/age  # massIndex?
+```
+
+- Use the R `help()` function to find information about the "hist" function. Follow up with running the example using `example("hist")`.
+
+- Which of these is a valid R name for a variable?
+
+```r
+x2
+2x
+.abc
+abc.123
+.123
+_my_value
+my_value
+my.value
+```
+
+
+
+

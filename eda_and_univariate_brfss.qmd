@@ -1,0 +1,327 @@
+---
+title: "Case Study: Behavioral Risk Factor Surveillance System"
+---
+
+
+<!-- Thanks to Martin Morgan for much of this material! -->
+
+```{r style-A3, echo = FALSE, results = 'asis'}
+knitr::opts_chunk$set(
+    eval=as.logical(Sys.getenv("KNITR_EVAL", "TRUE")),
+    cache=as.logical(Sys.getenv("KNITR_CACHE", "TRUE")))
+```
+
+## A Case Study on the Behavioral Risk Factor Surveillance System
+
+The Behavioral Risk Factor Surveillance System (BRFSS) is a large-scale health
+survey conducted annually by the Centers for Disease Control and Prevention
+(CDC) in the United States. The BRFSS collects information on various
+health-related behaviors, chronic health conditions, and the use of preventive
+services among the adult population (18 years and older) through telephone
+interviews. The main goal of the BRFSS is to identify and monitor the
+prevalence of risk factors associated with chronic diseases, inform public
+health policies, and evaluate the effectiveness of health promotion and disease
+prevention programs. The data collected through BRFSS is crucial for
+understanding the health status and needs of the population, and it serves as a
+valuable resource for researchers, policy makers, and healthcare professionals
+in making informed decisions and designing targeted interventions.
+ 
+In this chapter, we will walk through an exploratory data analysis (EDA) of the
+Behavioral Risk Factor Surveillance System dataset using R. EDA is an important
+step in the data analysis process, as it helps you to understand your data,
+identify trends, and detect any anomalies before performing more advanced
+analyses. We will use various R functions and packages to explore the dataset,
+with a focus on active learning and hands-on experience.
+
+## Loading the Dataset
+ 
+First, let's load the dataset into R. We will use the read.csv() function from
+the base R package to read the data and store it in a data frame called brfss.
+Make sure the CSV file is in your working directory, or provide the full path
+to the file.
+
+First, we need to get the data. Either download the data
+from [THIS LINK](data/BRFSS-subset.csv) or have R do it directly from the
+command-line (preferred):
+
+```{r}
+download.file('https://raw.githubusercontent.com/seandavi/ITR/master/BRFSS-subset.csv',
+              destfile = 'BRFSS-subset.csv')
+
+```
+
+
+<!--
+```{r echo=FALSE}
+path <- "BRFSS-subset.csv"
+```
+-->
+```{r ALL-choose-A3, eval=FALSE}
+path <- file.choose()    # look for BRFSS-subset.csv
+```
+
+```{r ALL-input-A3}
+stopifnot(file.exists(path))
+brfss <- read.csv(path)
+```
+
+
+
+## Inspecting the Data
+ 
+Once the data is loaded, let's take a look at the first few rows of the dataset
+using the `head()` function:
+
+```{r}
+head(brfss)
+```
+ 
+This will display the first six rows of the dataset, allowing you to get a feel
+for the data structure and variable types.
+
+Next, let's check the dimensions of the dataset using the `dim()` function:
+
+```{r}
+dim(brfss)
+```
+ 
+This will return the number of rows and columns in the dataset, which is
+important to know for subsequent analyses.
+
+## Summary Statistics
+ 
+Now that we have a basic understanding of the data structure, let's calculate
+some summary statistics. The `summary()` function in R provides a quick overview
+of the main statistics for each variable in the dataset:
+
+```{r}
+summary(brfss)
+```
+
+This will display the minimum, first quartile, median, mean, third quartile,
+and maximum for each numeric variable, and the frequency counts for each factor
+level for categorical variables.
+
+## Data Visualization
+ 
+Visualizing the data can help you identify patterns and trends in the dataset.
+Let's start by creating a histogram of the Age variable using the `hist()`
+function.
+
+This will create a histogram showing the frequency distribution of ages in the
+dataset. You can customize the appearance of the histogram by adjusting the
+parameters within the `hist()` function.
+
+```{r}
+hist(brfss$Age, main = "Age Distribution", 
+     xlab = "Age", col = "lightblue")
+```
+
+::: {.callout-tip}
+## What are the options for a histogram?
+
+The `hist()` function has many options.  For example, you can change the number
+of bins, the color of the bars, the title, and the x-axis label.  You can also
+add a vertical line at the mean or median, or add a normal curve to the
+histogram.  For more information, type `?hist` in the R console.
+
+More generally, it is important to understand the options available for each
+function you use.  You can do this by reading the documentation for the
+function, which can be accessed by typing `?function_name` or
+`help("function_name")`in the R console.
+:::
+
+
+Next, let's create a boxplot to compare the distribution of Weight between
+males and females. We will use the `boxplot()` function for this. This will
+create a boxplot comparing the weight distribution between males and females.
+You can customize the appearance of the boxplot by adjusting the parameters
+within the `boxplot()` function.
+
+```{r}
+boxplot(brfss$Weight ~ brfss$Sex, main = "Weight Distribution by Sex", 
+        xlab = "Sex", ylab = "Weight", col = c("pink", "lightblue"))  
+```
+
+## Analyzing Relationships Between Variables
+ 
+To further explore the data, let's investigate the relationship between age and
+weight using a scatterplot. We will use the plot() function for this:
+
+This will create a scatterplot of age and weight, allowing you to visually
+assess the relationship between these two variables.
+
+```{r}
+plot(brfss$Age, brfss$Weight, main = "Scatterplot of Age and Weight", 
+     xlab = "Age", ylab = "Weight", col = "darkblue")  
+```
+
+To quantify the strength of the relationship between age and weight, we can calculate the correlation coefficient using the cor() function:
+
+This will return the correlation coefficient between age and weight, which can help you determine whether there is a linear relationship between these variables.
+
+```{r}
+cor(brfss$Age, brfss$Weight)
+```
+
+Why does `cor()` give a value of `NA`?  What can we do about it? A quick glance at `help("cor")` will give you the answer.
+
+```{r}
+cor(brfss$Age, brfss$Weight, use = "complete.obs")
+```
+
+## Exercises
+
+1.  What is the mean weight in this dataset?  How about the median?  What is the
+    difference between the two?  What does this tell you about the distribution
+    of weights in the dataset?
+    
+    ```{r}
+    #| code-fold: true
+    #| code-summary: Show answer
+    mean(brfss$Weight, na.rm = TRUE)
+    median(brfss$Weight, na.rm = TRUE)
+    mean(brfss$Weight, na.rm=TRUE) - median(brfss$Weight, na.rm = TRUE)
+    ```
+
+2.  Given the findings about the `mean` and `median` in the previous exercise,
+    use the `hist()` function to create a histogram of the weight distribution
+    in this dataset.  How would you describe the shape of this distribution?
+
+    ```{r}
+    #| code-fold: true
+    #| code-summary: Show answer
+    hist(brfss$Weight, xlab="Weight (kg)", breaks = 30)
+    ```
+
+
+2.  Use `plot()` to examine the relationship between height and weight in this dataset.
+
+    ```{r}
+    #| code-fold: true
+    #| code-summary: Show answer
+    plot(brfss$Height, brfss$Weight)
+    ```
+
+3.  What is the correlation between height and weight?  What does this tell you about the relationship between these two variables?
+
+    ```{r}
+    #| code-fold: true
+    #| code-summary: Show answer
+    cor(brfss$Height, brfss$Weight, use = "complete.obs")
+    ```
+
+4.  Create a histogram of the height distribution in this dataset. How would you describe the shape of this distribution?
+
+    ```{r}
+    #| code-fold: true
+    #| code-summary: Show answer
+    hist(brfss$Height, xlab="Height (cm)", breaks = 30)
+    ```
+
+## Conclusion
+ 
+In this chapter, we have demonstrated how to perform an exploratory data analysis on the Behavioral Risk Factor Surveillance System dataset using R. We covered data loading, inspection, summary statistics, visualization, and the analysis of relationships between variables. By actively engaging with the R code and data, you have gained valuable experience in using R for EDA and are well-equipped to tackle more complex analyses in your future work.
+
+Remember that EDA is just the beginning of the data analysis process, and further statistical modeling and hypothesis testing will likely be necessary to draw meaningful conclusions from your data. However, EDA is a crucial step in understanding your data and informing your subsequent analyses.
+
+
+## Learn about the data
+
+Using the data exploration techniques you have seen to explore the brfss dataset.
+
+- summary()
+- dim()
+- colnames()
+- head()
+- tail()
+- class()
+- View()
+
+You may want to investigate individual columns visually using plotting like `hist()`. For categorical 
+data, consider using something like `table()`. 
+
+## Clean data
+
+_R_ read `Year` as an integer value, but it's really a `factor`
+
+```{r}
+brfss$Year <- factor(brfss$Year)
+```
+
+## Weight in 1990 vs. 2010 Females
+
+- Create a subset of the data
+
+```{r}
+brfssFemale <- brfss[brfss$Sex == "Female",]
+summary(brfssFemale)
+```
+
+- Visualize
+
+```{r}
+plot(Weight ~ Year, brfssFemale)
+```
+
+- Statistical test
+
+```{r}
+t.test(Weight ~ Year, brfssFemale)
+```
+
+## Weight and height in 2010 Males
+
+- Create a subset of the data
+
+```{r}
+brfss2010Male <- subset(brfss,  Year == 2010 & Sex == "Male")
+summary(brfss2010Male)
+```
+
+- Visualize the relationship
+
+```{r}
+hist(brfss2010Male$Weight)
+hist(brfss2010Male$Height)
+plot(Weight ~ Height, brfss2010Male)
+```
+
+- Fit a linear model (regression)
+
+```{r}
+fit <- lm(Weight ~ Height, brfss2010Male)
+fit
+```
+
+Summarize as ANOVA table
+
+```{r}
+anova(fit)
+```
+
+- Plot points, superpose fitted regression line; where am I?
+
+```{r}
+plot(Weight ~ Height, brfss2010Male)
+abline(fit, col="blue", lwd=2)
+# Substitute your own weight and height...
+points(73 * 2.54, 178 / 2.2, col="red", cex=4, pch=20)
+```
+
+- Class and available 'methods'
+
+```{r, eval=FALSE}
+class(fit)                 # 'noun'
+methods(class=class(fit))  # 'verb'
+```
+
+- Diagnostics
+
+```{r, eval=FALSE}
+plot(fit)
+# Note that the "plot" above does not have a ".lm"
+# However, R will use "plot.lm". Why?
+?plot.lm
+```
+

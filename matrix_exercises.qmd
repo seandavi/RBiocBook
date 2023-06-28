@@ -1,0 +1,139 @@
+---
+title: "Matrix Exercises"
+output: 
+  html_document:
+    code_folding: "hide"
+---
+
+```{r include=FALSE}
+library(knitr)
+opts_chunk$set(results='hide',fig.keep='inhibit')
+```
+
+## Data preparation
+
+For this set of exercises, we are going to rely on a dataset that comes with R.
+It gives the number of sunspots per month from 1749-1983. The dataset comes as 
+a `ts` or time series data type which I convert to a matrix using the following
+code. 
+
+Just run the code as is and focus on the rest of the exercises. 
+
+```{r}
+data(sunspots)
+sunspot_mat <- matrix(as.vector(sunspots),ncol=12,byrow = TRUE)
+colnames(sunspot_mat) <- as.character(1:12)
+rownames(sunspot_mat) <- as.character(1749:1983)
+```
+
+## Exercises
+
+- After the conversion above, what does `sunspot_mat` look like? Use functions
+to find the number of rows, the number of columns, the class, and some basic
+summary statistics.
+
+```{r}
+ncol(sunspot_mat)
+nrow(sunspot_mat)
+dim(sunspot_mat)
+summary(sunspot_mat)
+head(sunspot_mat)
+tail(sunspot_mat)
+```
+
+
+- Practice subsetting the matrix a bit by selecting:
+  - The first 10 years (rows)
+  - The month of July (7th column)
+  - The value for July, 1979 using the rowname to do the selection.
+  
+```{r}
+sunspot_mat[1:10,]
+sunspot_mat[,7]
+sunspot_mat['1979',7]
+```
+
+
+These next few exercises take advantage of the fact that calling a univariate
+statistical function (one that expects a vector) works for matrices by just making
+a vector of all the values in the matrix. 
+
+- What is the highest (max) number of sunspots recorded in these data?
+
+```{r}
+max(sunspot_mat)
+```
+
+- And the minimum?
+
+```{r}
+min(sunspot_mat)
+```
+
+- And the overall mean and median?
+
+```{r}
+mean(sunspot_mat)
+median(sunspot_mat)
+```
+
+- Use the `hist()` function to look at the distribution of all the monthly 
+sunspot data. 
+
+```{r eval=FALSE}
+hist(sunspot_mat)
+```
+- Read about the `breaks` argument to `hist()` to try to increase the number of
+breaks in the histogram to increase the resolution slightly. Adjust your `hist()`
+and breaks to your liking.
+
+```{r eval=FALSE}
+hist(sunspot_mat, breaks=40)
+```
+
+Now, let's move on to summarizing the data a bit to learn about the pattern of 
+sunspots varies by month or by year. 
+
+- Examine the dataset again. What do the columns represent? And the rows?
+
+```{r}
+# just a quick glimpse of the data will give us a sense
+head(sunspot_mat)
+```
+
+- We'd like to look at the distribution of sunspots by month. How can we do that?
+
+```{r}
+# the mean of the columns is the mean number of sunspots per month.
+colMeans(sunspot_mat)
+
+# Another way to write the same thing:
+apply(sunspot_mat, 2, mean)
+```
+
+- Assign the month summary above to a variable and summarize it to get a sense
+of the spread over months.
+
+```{r}
+monthmeans = colMeans(sunspot_mat)
+summary(monthmeans)
+```
+
+- Play the same game for years to get the per-year mean?
+
+```{r}
+ymeans = rowMeans(sunspot_mat)
+summary(ymeans)
+```
+
+- Make a plot of the yearly means. Do you see a pattern?
+
+```{r eval=FALSE}
+plot(ymeans)
+# or make it clearer
+plot(ymeans, type='l')
+```
+
+
+
+
