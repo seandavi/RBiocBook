@@ -404,6 +404,8 @@ div.csl-indent {
   <li><a href="#from-a-data.frame" id="toc-from-a-data.frame" class="nav-link" data-scroll-target="#from-a-data.frame"><span class="header-section-number">11.5.3</span> from a data.frame</a></li>
   <li><a href="#equivalence-to-linear-model" id="toc-equivalence-to-linear-model" class="nav-link" data-scroll-target="#equivalence-to-linear-model"><span class="header-section-number">11.5.4</span> Equivalence to linear model</a></li>
   </ul></li>
+  <li><a href="#power-calculations" id="toc-power-calculations" class="nav-link" data-scroll-target="#power-calculations"><span class="header-section-number">11.6</span> Power calculations</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources"><span class="header-section-number">11.7</span> Resources</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/seandavi/RBiocBook/edit/main/t-stats-and-tests.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
     </div>
@@ -579,25 +581,26 @@ div.csl-indent {
 <p>Let’s look at the relationship between the p-values of Z (from the normal distribution) vs t for a <strong>sample</strong> of data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5432</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>samp <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">5</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>samp <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">5</span>,<span class="at">mean =</span> <span class="fl">0.5</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>z <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(samp)) <span class="sc">*</span> <span class="fu">mean</span>(samp) <span class="co">#simplifying assumption (sigma=1, mu=0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And the p-value if we assume we know the standard deviation:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(z)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8035432</code></pre>
+<pre><code>[1] 0.02428316</code></pre>
 </div>
 </div>
+<p>In reality, we don’t know the standard deviation, so we have to estimate it from the data. We can do this by calculating the sample standard deviation:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ts <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(samp)) <span class="sc">*</span> <span class="fu">mean</span>(samp) <span class="sc">/</span> <span class="fu">sd</span>(samp)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(ts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(ts, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8215048</code></pre>
+<pre><code>[1] 0.0167297</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pt</span>(ts,<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pt</span>(ts,<span class="at">df =</span> <span class="fu">length</span>(samp)<span class="sc">-</span><span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.800373</code></pre>
+<pre><code>[1] 0.0503001</code></pre>
 </div>
 </div>
 </section>
@@ -680,10 +683,12 @@ div.csl-indent {
 <h2 data-number="11.5" class="anchored" data-anchor-id="t.test"><span class="header-section-number">11.5</span> t.test</h2>
 <section id="one-sample" class="level3" data-number="11.5.1">
 <h3 data-number="11.5.1" class="anchored" data-anchor-id="one-sample"><span class="header-section-number">11.5.1</span> One-sample</h3>
+<p>We are going to use the <code>t.test</code> function to perform a one-sample t-test. The <code>t.test</code> function takes a vector of values as input that represents the sample values. In this case, we’ll simulate our sample using the <code>rnorm</code> function and presume that our “effect-size” is 1.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">20</span>,<span class="dv">1</span>)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co"># small sample</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(x[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Just use the first 5 values of the sample</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(x[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     One Sample t-test
@@ -698,7 +703,8 @@ mean of x
 0.5581214 </code></pre>
 </div>
 </div>
-<p>Increase sample size:</p>
+<p>In this case, we set up the experiment so that the null hypothesis is true (the true mean is not zero, but actually 1). However, we only have a small sample size that leads to a modest p-value.</p>
+<p>Increasing the sample size allows us to see the effect more clearly.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(x[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -739,9 +745,37 @@ sample estimates:
 </section>
 <section id="from-a-data.frame" class="level3" data-number="11.5.3">
 <h3 data-number="11.5.3" class="anchored" data-anchor-id="from-a-data.frame"><span class="header-section-number">11.5.3</span> from a data.frame</h3>
+<p>In some situations, you may have data and groups as columns in a data.frame. See the following data.frame, for example</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">value=</span><span class="fu">c</span>(x,y),<span class="at">group=</span><span class="fu">as.factor</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">'g1'</span>,<span class="st">'g2'</span>),<span class="at">each=</span><span class="dv">10</span>)))</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         value group
+1   1.12896674    g1
+2  -1.26838101    g1
+3   1.04577597    g1
+4   1.69075585    g1
+5   0.18672204    g1
+6   1.99715092    g1
+7   1.15424947    g1
+8   0.37671442    g1
+9  -0.09565723    g1
+10  0.82290783    g1
+11 -1.48530261    g2
+12 -1.29200440    g2
+13 -0.18778362    g2
+14  0.59205742    g2
+15 -2.10065248    g2
+16 -0.29961560    g2
+17 -0.38985115    g2
+18 -2.47126235    g2
+19 -0.63654380    g2
+20  0.30245611    g2</code></pre>
+</div>
+</div>
+<p>R allows us to perform a t-test using the <code>formula</code> notation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Welch Two Sample t-test
@@ -756,11 +790,12 @@ mean in group g1 mean in group g2
        0.7039205       -0.7968502 </code></pre>
 </div>
 </div>
+<p>You read that as <code>value</code> <strong>is a function of</strong> <code>group</code>. In practice, this will do a t-test between the <code>values</code> in <code>g1</code> vs <code>g2</code>.</p>
 </section>
 <section id="equivalence-to-linear-model" class="level3" data-number="11.5.4">
 <h3 data-number="11.5.4" class="anchored" data-anchor-id="equivalence-to-linear-model"><span class="header-section-number">11.5.4</span> Equivalence to linear model</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data=</span>df, <span class="at">var.equal=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(value <span class="sc">~</span> group, <span class="at">data=</span>df, <span class="at">var.equal=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     Two Sample t-test
@@ -777,8 +812,8 @@ mean in group g1 mean in group g2
 </div>
 <p>This is <em>equivalent</em> to:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">lm</span>(value <span class="sc">~</span> group, <span class="at">data=</span>df)</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">lm</span>(value <span class="sc">~</span> group, <span class="at">data=</span>df)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -800,6 +835,125 @@ Multiple R-squared:  0.3952,    Adjusted R-squared:  0.3616
 F-statistic: 11.76 on 1 and 18 DF,  p-value: 0.002989</code></pre>
 </div>
 </div>
+</section>
+</section>
+<section id="power-calculations" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="power-calculations"><span class="header-section-number">11.6</span> Power calculations</h2>
+<p>The power of a statistical test is the probability that the test will reject the null hypothesis when the alternative hypothesis is true. In other words, the power of a statistical test is the probability of not making a Type II error. The power of a statistical test depends on the significance level (alpha), the sample size, and the effect size.</p>
+<p>The <code>power.t.test</code> function can be used to calculate the power of a one-sample t-test.</p>
+<p>Looking at <code>help("power.t.test")</code>, we see that the function takes the following arguments:</p>
+<ul>
+<li><code>n</code> - sample size</li>
+<li><code>delta</code> - effect size</li>
+<li><code>sd</code> - standard deviation of the sample</li>
+<li><code>sig.level</code> - significance level</li>
+<li><code>power</code> - power</li>
+</ul>
+<p>We need to supply four of these arguments to calculate the fifth. For example, if we want to calculate the power of a one-sample t-test with a sample size of 5, a standard deviation of 1, and an effect size of 1, we can use the following command:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     Two-sample t test power calculation 
+
+              n = 5
+          delta = 1
+             sd = 1
+      sig.level = 0.05
+          power = 0.2859276
+    alternative = two.sided
+
+NOTE: n is number in *each* group</code></pre>
+</div>
+</div>
+<p>This gives a nice summary of the power calculation. We can also extract the power value from the result:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sig.level =</span> <span class="fl">0.05</span>, <span class="at">type=</span><span class="st">'one.sample'</span>)<span class="sc">$</span>power</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4013203</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When getting results from a function that don’t look “computable” such as those from <code>power.t.test</code>, you can use the <code>$</code> operator to extract the value you want. In this case, we want the <code>power</code> value from the result of <code>power.t.test</code>.</p>
+<p>How would you know what to extract? You can use the <code>names</code> function or the <code>str</code> function to see the structure of the result. For example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sig.level =</span> <span class="fl">0.05</span>, <span class="at">type=</span><span class="st">'one.sample'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "n"           "delta"       "sd"          "sig.level"   "power"      
+[6] "alternative" "note"        "method"     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(<span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">sig.level =</span> <span class="fl">0.05</span>, <span class="at">type=</span><span class="st">'one.sample'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 8
+ $ n          : num 5
+ $ delta      : num 1
+ $ sd         : num 1
+ $ sig.level  : num 0.05
+ $ power      : num 0.401
+ $ alternative: chr "two.sided"
+ $ note       : NULL
+ $ method     : chr "One-sample t test power calculation"
+ - attr(*, "class")= chr "power.htest"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<p>Alternatively, we may know a lot about our experimental system and want to calculate the sample size needed to achieve a certain power. For example, if we want to achieve a power of 0.8 with a standard deviation of 1 and an effect size of 1, we can use the following command:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>, <span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">type =</span> <span class="st">"one.sample"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     One-sample t test power calculation 
+
+              n = 9.937864
+          delta = 1
+             sd = 1
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided</code></pre>
+</div>
+</div>
+<p>The power.t.test function is convenient and quite fast. As we’ve seen before, though, sometimes the distribution of the test statistics is now easily calculated. In those cases, we can use simulation to calculate the power of a statistical test. For example, if we want to calculate the power of a one-sample t-test with a sample size of 5, a standard deviation of 1, and an effect size of 1, we can use the following command:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>sim_t_test_pval <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> <span class="fu">rnorm</span>(n, delta, sd)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t.test</span>(x)<span class="sc">$</span>p.value <span class="sc">&lt;=</span> sig.level</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>pow <span class="ot">=</span> <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">1000</span>, <span class="fu">sim_t_test_pval</span>()))</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>pow</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.405</code></pre>
+</div>
+</div>
+<p>Let’s break this down. First, we define a function called <code>sim_t_test_pval</code> that takes the same arguments as the <code>power.t.test</code> function. Inside the function, we simulate a sample of size <code>n</code> from a normal distribution with mean <code>delta</code> and standard deviation <code>sd</code>. Then, we perform a one-sample t-test on the sample and return a logical value indicating whether the p-value is less than the significance level. Next, we use the <code>replicate</code> function to repeat the simulation 1000 times. Finally, we calculate the proportion of simulations in which the p-value was less than the significance level. This proportion is an estimate of the power of the one-sample t-test.</p>
+<p>Let’s compare the results of the <code>power.t.test</code> function and our simulation-based approach:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>, <span class="at">type=</span><span class="st">'one.sample'</span>)<span class="sc">$</span>power</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4013203</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">1000</span>, <span class="fu">sim_t_test_pval</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.414</code></pre>
+</div>
+</div>
+</section>
+<section id="resources" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="resources"><span class="header-section-number">11.7</span> Resources</h2>
+<p>See the <a href="https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html">pwr package</a> for more information on power calculations.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -807,7 +961,6 @@ F-statistic: 11.76 on 1 and 18 DF,  p-value: 0.002989</code></pre>
 Student. 1908. <span>“The <span>Probable</span> <span>Error</span> of a <span>Mean</span>.”</span> <em>Biometrika</em> 6 (1): 1–25. <a href="https://doi.org/10.2307/2331554">https://doi.org/10.2307/2331554</a>.
 </div>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
