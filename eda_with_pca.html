@@ -383,10 +383,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#pca" id="toc-pca" class="nav-link active" data-scroll-target="#pca"><span class="header-section-number">16.1</span> PCA</a></li>
-  <li><a href="#variance-explained" id="toc-variance-explained" class="nav-link" data-scroll-target="#variance-explained"><span class="header-section-number">16.2</span> Variance explained</a></li>
-  <li><a href="#add-pcs-to-our-summarizedexperiment-object" id="toc-add-pcs-to-our-summarizedexperiment-object" class="nav-link" data-scroll-target="#add-pcs-to-our-summarizedexperiment-object"><span class="header-section-number">16.3</span> Add PCs to our SummarizedExperiment object</a></li>
-  <li><a href="#variable-relationships" id="toc-variable-relationships" class="nav-link" data-scroll-target="#variable-relationships"><span class="header-section-number">16.4</span> Variable relationships</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">16.1</span> Introduction</a></li>
+  <li><a href="#downloading-data-from-geo" id="toc-downloading-data-from-geo" class="nav-link" data-scroll-target="#downloading-data-from-geo"><span class="header-section-number">16.2</span> Downloading data from GEO</a></li>
+  <li><a href="#filtering-genes" id="toc-filtering-genes" class="nav-link" data-scroll-target="#filtering-genes"><span class="header-section-number">16.3</span> Filtering genes</a></li>
+  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca"><span class="header-section-number">16.4</span> PCA</a></li>
+  <li><a href="#variance-explained" id="toc-variance-explained" class="nav-link" data-scroll-target="#variance-explained"><span class="header-section-number">16.5</span> Variance explained</a></li>
+  <li><a href="#add-pcs-to-our-summarizedexperiment-object" id="toc-add-pcs-to-our-summarizedexperiment-object" class="nav-link" data-scroll-target="#add-pcs-to-our-summarizedexperiment-object"><span class="header-section-number">16.6</span> Add PCs to our SummarizedExperiment object</a></li>
+  <li><a href="#variable-relationships" id="toc-variable-relationships" class="nav-link" data-scroll-target="#variable-relationships"><span class="header-section-number">16.7</span> Variable relationships</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/seandavi/RBiocBook/edit/main/eda_with_pca.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
     </div>
@@ -431,10 +434,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
+<section id="introduction" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">16.1</span> Introduction</h2>
+<p>In this tutorial, we will use the GEOquery package to download a dataset from the Gene Expression Omnibus (GEO) and perform some exploratory data analysis (EDA) using principal components analysis (PCA).</p>
+</section>
+<section id="downloading-data-from-geo" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="downloading-data-from-geo"><span class="header-section-number">16.2</span> Downloading data from GEO</h2>
+<p>The GEOquery package can be used to download data from GEO. The <code>getGEO</code> function takes a GEO accession number as an argument and returns a list of ExpressionSet objects. The <code>[[1]]</code> at the end of the <code>getGEO</code> call is used to extract the first (and only) ExpressionSet object from the list.</p>
+<p>Historically, it was not uncommon for GEO datasets to contain multiple separate experiments. In those cases, the <code>[[1]]</code> would need to be replaced with the index of the experiment of interest. However, it is now uncommon for GEO datasets to contain multiple experiments, but the <code>[[1]]</code> is still needed to extract the ExpressionSet object from the list.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GEOquery)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SummarizedExperiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>ExpressionSet objects are a type of Bioconductor object that is used to store gene expression data. The <code>as</code> function can be used to convert the ExpressionSet object to a SummarizedExperiment object, which is a newer Bioconductor object that is used to store gene expression data. The SummarizedExperiment object is preferred over the ExpressionSet object so we immediately convert the ExpressionSet object to a SummarizedExperiment.</p>
 <div class="cell" data-hash="eda_with_pca_cache/html/unnamed-chunk-2_6a4f47ce617ee8d44dda92e3f40659ee">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gse <span class="ot">&lt;-</span> <span class="fu">getGEO</span>(<span class="st">"GSE30219"</span>)[[<span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -445,6 +457,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">as</span>(gse, <span class="st">"SummarizedExperiment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="filtering-genes" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="filtering-genes"><span class="header-section-number">16.3</span> Filtering genes</h2>
+<p>When performing PCA, it is common to filter to the most variable genes before performing the PCA. Limiting genes to the most variable genes can help to reduce the computational burden of the PCA.</p>
+<p>We can calculate the standard deviation of each gene using the <code>apply</code> function. The <code>apply</code> function takes a matrix as the first argument and a 1 or 2 to indicate whether the function should be applied to the rows or columns of the matrix. The <code>sd</code> function calculates the standard deviation of a vector and is performed on each row of the matrix.</p>
+<p>A histogram of the standard deviations is not that useful, but it is easy to make.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sds <span class="ot">=</span> <span class="fu">apply</span>(<span class="fu">assay</span>(se, <span class="st">'exprs'</span>), <span class="dv">1</span>, sd)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -452,11 +470,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="eda_with_pca_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Here, we produce a subset of the SummarizedExperiment object that contains only the 500 most variable genes. We’ll use this subset for the rest of the tutorial. Feel free to revisit the number of genes you choose to keep and see how it affects the PCA.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sub_se <span class="ot">=</span> se[<span class="fu">order</span>(sds,<span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>],]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="pca" class="level2 page-columns page-full" data-number="16.1">
-<h2 data-number="16.1" class="anchored" data-anchor-id="pca"><span class="header-section-number">16.1</span> PCA</h2>
+</section>
+<section id="pca" class="level2 page-columns page-full" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="pca"><span class="header-section-number">16.4</span> PCA</h2>
 <p>PCA is a method for dimensionality reduction. It is a linear transformation that finds the directions of maximum variance in a dataset and projects it onto a new subspace with equal or fewer dimensions than the original one. The orthogonal axes (principal components) of the new subspace can be interpreted as the directions of maximum variance given the constraint that the new feature axes are orthogonal to each other.</p>
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
@@ -550,8 +570,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="variance-explained" class="level2" data-number="16.2">
-<h2 data-number="16.2" class="anchored" data-anchor-id="variance-explained"><span class="header-section-number">16.2</span> Variance explained</h2>
+<section id="variance-explained" class="level2" data-number="16.5">
+<h2 data-number="16.5" class="anchored" data-anchor-id="variance-explained"><span class="header-section-number">16.5</span> Variance explained</h2>
 <p>Often, we want to know how much of the variance in the data is explained by each PC. The <code>pca</code> object has a slot called <code>sdev</code> that represents the standard deviation of the principle component. Variance is the square of <code>sdev</code>, so we can calculate the variance by squaring <code>sdev</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>var_explained <span class="ot">=</span> pca<span class="sc">$</span>sdev <span class="sc">^</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -577,8 +597,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Examine the plot. How many PCs would you keep?</p>
 </section>
-<section id="add-pcs-to-our-summarizedexperiment-object" class="level2" data-number="16.3">
-<h2 data-number="16.3" class="anchored" data-anchor-id="add-pcs-to-our-summarizedexperiment-object"><span class="header-section-number">16.3</span> Add PCs to our SummarizedExperiment object</h2>
+<section id="add-pcs-to-our-summarizedexperiment-object" class="level2" data-number="16.6">
+<h2 data-number="16.6" class="anchored" data-anchor-id="add-pcs-to-our-summarizedexperiment-object"><span class="header-section-number">16.6</span> Add PCs to our SummarizedExperiment object</h2>
 <p>Recall that the <code>x</code> matrix stored in the <code>pca</code> object represent the coordinates of the samples in the new subspace. We can look at the first five rows and columns of the <code>x</code> matrix to see what it looks like.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>x[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -962,8 +982,8 @@ GSM748057   1.2726085 30.640997 10.562888   6.294335  7.1601434</code></pre>
 </div>
 </div>
 </section>
-<section id="variable-relationships" class="level2 page-columns page-full" data-number="16.4">
-<h2 data-number="16.4" class="anchored" data-anchor-id="variable-relationships"><span class="header-section-number">16.4</span> Variable relationships</h2>
+<section id="variable-relationships" class="level2 page-columns page-full" data-number="16.7">
+<h2 data-number="16.7" class="anchored" data-anchor-id="variable-relationships"><span class="header-section-number">16.7</span> Variable relationships</h2>
 <p>Looking at relationships between variables can be a really useful way of generating hypotheses, performing quality control, and suggesting areas to focus in analysis. One common approach to looking at a few variables and their relationships is the “pairs” plot.</p>
 <p>The GGally package has a function called ggpairs that can be used to generate a pairs plot for a few variables.</p>
 <div class="cell">
