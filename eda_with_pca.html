@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sean Davis">
-<meta name="dcterms.date" content="2023-07-02">
+<meta name="dcterms.date" content="2023-07-03">
 <meta name="description" content="A collection of chapters more than a book, but….">
 
 <title>The RBioc Book - 16&nbsp; EDA with PCA</title>
@@ -385,7 +385,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#pca" id="toc-pca" class="nav-link active" data-scroll-target="#pca"><span class="header-section-number">16.1</span> PCA</a></li>
   <li><a href="#variance-explained" id="toc-variance-explained" class="nav-link" data-scroll-target="#variance-explained"><span class="header-section-number">16.2</span> Variance explained</a></li>
-  <li><a href="#add-pcs-to-our-summarizedobject" id="toc-add-pcs-to-our-summarizedobject" class="nav-link" data-scroll-target="#add-pcs-to-our-summarizedobject"><span class="header-section-number">16.3</span> Add PCs to our SummarizedObject</a></li>
+  <li><a href="#add-pcs-to-our-summarizedexperiment-object" id="toc-add-pcs-to-our-summarizedexperiment-object" class="nav-link" data-scroll-target="#add-pcs-to-our-summarizedexperiment-object"><span class="header-section-number">16.3</span> Add PCs to our SummarizedExperiment object</a></li>
   <li><a href="#variable-relationships" id="toc-variable-relationships" class="nav-link" data-scroll-target="#variable-relationships"><span class="header-section-number">16.4</span> Variable relationships</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/seandavi/RBiocBook/edit/main/eda_with_pca.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
@@ -421,7 +421,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 2, 2023</p>
+      <p class="date">July 3, 2023</p>
     </div>
   </div>
   
@@ -465,36 +465,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">=</span> <span class="fu">prcomp</span>(<span class="fu">assay</span>(sub_se,<span class="st">'exprs'</span>),<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read the help for prcomp here to see what the arguments are</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ?prcomp</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">=</span> <span class="fu">prcomp</span>(<span class="fu">t</span>(<span class="fu">assay</span>(sub_se,<span class="st">'exprs'</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The PCA algorithm results in a rotation matrix that can be used to transform the original data into the new subspace. The rotation matrix is stored in the <code>rotation</code> slot of the <code>prcomp</code> object. The <code>prcomp</code> function also stores the coordinates of the samples in the new subspace in the <code>x</code> slot.</p>
+<p>The PCA algorithm results in a rotation matrix that can be used to transform the original data into the new subspace. The rotation matrix is stored in the <code>rotation</code> slot of the <code>prcomp</code> object and represents the <em>loadings</em> of each gene for each principle component. The <code>prcomp</code> function also stores the coordinates of the samples in the new subspace in the <code>x</code> slot, which represents the locations of the samples in principle component space.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of 5
- $ sdev    : num [1:307] 32.98 19.42 13.91 9.79 7.65 ...
- $ rotation: num [1:307, 1:307] 0.0704 0.0724 0.0612 0.0786 0.0735 ...
-  ..- attr(*, "dimnames")=List of 2
-  .. ..$ : chr [1:307] "GSM748053" "GSM748054" "GSM748055" "GSM748056" ...
-  .. ..$ : chr [1:307] "PC1" "PC2" "PC3" "PC4" ...
- $ center  : Named num [1:307] 6.79 6.73 6.69 7.53 6.72 ...
-  ..- attr(*, "names")= chr [1:307] "GSM748053" "GSM748054" "GSM748055" "GSM748056" ...
- $ scale   : logi FALSE
- $ x       : num [1:500, 1:307] 2.97 -28.99 35.21 73.57 16.08 ...
+ $ sdev    : num [1:307] 27.01 22.78 13.46 10.43 9.35 ...
+ $ rotation: num [1:500, 1:307] -0.1091 0.0598 -0.0474 -0.0513 -0.0903 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:500] "209125_at" "209988_s_at" "223678_s_at" "218835_at" ...
+  .. ..$ : chr [1:307] "PC1" "PC2" "PC3" "PC4" ...
+ $ center  : Named num [1:500] 6.86 5.56 7.99 10.39 7.82 ...
+  ..- attr(*, "names")= chr [1:500] "209125_at" "209988_s_at" "223678_s_at" "218835_at" ...
+ $ scale   : logi FALSE
+ $ x       : num [1:307, 1:307] 0.571 -3.528 5.289 -31.486 1.273 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr [1:307] "GSM748053" "GSM748054" "GSM748055" "GSM748056" ...
   .. ..$ : chr [1:307] "PC1" "PC2" "PC3" "PC4" ...
  - attr(*, "class")= chr "prcomp"</code></pre>
 </div>
 </div>
+<p>The <code>prcomp</code> function also centers the data by default. The centering values are stored in the <code>center</code> slot. The <code>x</code> slot contains the coordinates of the samples in the new subspace. The</p>
 <p>We can plot the samples using the first two PCs as the x and y axes.</p>
 <div class="cell page-columns page-full">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span>], pca<span class="sc">$</span>x[,<span class="dv">2</span>], <span class="at">pch=</span><span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span>], pca<span class="sc">$</span>x[,<span class="dv">2</span>], <span class="at">pch=</span><span class="dv">20</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span>], pca<span class="sc">$</span>x[,<span class="dv">2</span>], <span class="at">pch=</span><span class="dv">20</span>, <span class="at">col=</span><span class="fu">as.factor</span>(<span class="fu">colData</span>(sub_se)<span class="sc">$</span>histology.ch1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display page-columns page-full">
-<div id="fig-pca-plot" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-pca-plot-1" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="eda_with_pca_files/figure-html/fig-pca-plot-1.png" class="img-fluid figure-img" width="672"></p>
 <figcaption class="figure-caption margin-caption">Figure&nbsp;16.1: PCA plot of samples in the first two PCs.</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-pca-plot-2" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><img src="eda_with_pca_files/figure-html/fig-pca-plot-2.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;16.2: PCA plot of samples in the first two PCs.</figcaption>
 </figure>
 </div>
 </div>
@@ -504,12 +516,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>orig_data <span class="ot">=</span> pca<span class="sc">$</span>rotation <span class="sc">%*%</span> <span class="fu">t</span>(pca<span class="sc">$</span>x) <span class="sc">+</span> pca<span class="sc">$</span>center</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>orig_data[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          209125_at 209988_s_at 223678_s_at 218835_at 201820_at
-GSM748053  4.400830    3.078285   11.389715 13.541261  5.056486
-GSM748054  4.349534    3.079797   10.637554 12.944545  5.030666
-GSM748055  3.661923    3.467936    5.956831  9.725079  4.986433
-GSM748056 10.289194    3.447669    9.311594 12.744177 11.284134
-GSM748057  3.354648    3.141168   10.467811 12.896846  5.132626</code></pre>
+<pre><code>            GSM748053 GSM748054 GSM748055 GSM748056 GSM748057
+209125_at    4.400830  4.349534  3.661922 10.289194  3.354648
+209988_s_at  3.078285  3.079797  3.467936  3.447669  3.141168
+223678_s_at 11.389715 10.637554  5.956832  9.311594 10.467811
+218835_at   13.541261 12.944545  9.725079 12.744177 12.896846
+201820_at    5.056486  5.030666  4.986433 11.284134  5.132626</code></pre>
 </div>
 </div>
 <p>Compare to the original data:</p>
@@ -529,18 +541,18 @@ GSM748057  3.354648    3.141168   10.467811 12.896846  5.132626</code></pre>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>orig_data_3pcs <span class="ot">=</span> pca<span class="sc">$</span>rotation[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>] <span class="sc">%*%</span> <span class="fu">t</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]) <span class="sc">+</span> pca<span class="sc">$</span>center</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>orig_data_3pcs[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          209125_at 209988_s_at 223678_s_at 218835_at 201820_at
-GSM748053  3.741698    5.017506   12.556488  14.14917  4.494767
-GSM748054  4.984482    4.849935   11.163909  13.32128  5.858529
-GSM748055  4.278005    5.601578   10.669427  12.52485  5.169032
-GSM748056  9.992930    4.184458    9.537825  12.58268 10.721712
-GSM748057  3.935526    5.254038   11.660657  13.79476  4.936521</code></pre>
+<pre><code>            GSM748053 GSM748054 GSM748055 GSM748056 GSM748057
+209125_at    4.302207  5.319141  4.660544  9.765880  4.368261
+209988_s_at  3.509123  4.372072  4.644271  4.552902  4.251617
+223678_s_at 12.637489 11.381274 10.702921  9.672075 11.985243
+218835_at   14.587942 13.535895 12.807482 12.279706 14.037817
+201820_at    5.300632  6.248694  5.741837 10.170421  5.391310</code></pre>
 </div>
 </div>
 </section>
 <section id="variance-explained" class="level2" data-number="16.2">
 <h2 data-number="16.2" class="anchored" data-anchor-id="variance-explained"><span class="header-section-number">16.2</span> Variance explained</h2>
-<p>The <code>pca</code> object has a slot called <code>sdev</code>. Variance is the square of <code>sdev</code>, so we can calculate the variance by squaring <code>sdev</code>.</p>
+<p>Often, we want to know how much of the variance in the data is explained by each PC. The <code>pca</code> object has a slot called <code>sdev</code> that represents the standard deviation of the principle component. Variance is the square of <code>sdev</code>, so we can calculate the variance by squaring <code>sdev</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>var_explained <span class="ot">=</span> pca<span class="sc">$</span>sdev <span class="sc">^</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -553,7 +565,7 @@ GSM748057  3.935526    5.254038   11.660657  13.79476  4.936521</code></pre>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>prop_var_explained <span class="ot">=</span> var_explained<span class="sc">/</span>tot_variance</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(prop_var_explained)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.44491221 0.15436508 0.07911613 0.03923027 0.02394878 0.01996772</code></pre>
+<pre><code>[1] 0.27748451 0.19747527 0.06892190 0.04138543 0.03325101 0.02956515</code></pre>
 </div>
 </div>
 <p>If we plot the <code>prop_var_explained</code>, it is called a scree plot and can help us to choose an appropriate number of PCs to “keep” in order to reduce the dimensionality.</p>
@@ -565,85 +577,433 @@ GSM748057  3.935526    5.254038   11.660657  13.79476  4.936521</code></pre>
 </div>
 <p>Examine the plot. How many PCs would you keep?</p>
 </section>
-<section id="add-pcs-to-our-summarizedobject" class="level2" data-number="16.3">
-<h2 data-number="16.3" class="anchored" data-anchor-id="add-pcs-to-our-summarizedobject"><span class="header-section-number">16.3</span> Add PCs to our SummarizedObject</h2>
-<p>The rotation matrix looks like this:</p>
+<section id="add-pcs-to-our-summarizedexperiment-object" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="add-pcs-to-our-summarizedexperiment-object"><span class="header-section-number">16.3</span> Add PCs to our SummarizedExperiment object</h2>
+<p>Recall that the <code>x</code> matrix stored in the <code>pca</code> object represent the coordinates of the samples in the new subspace. We can look at the first five rows and columns of the <code>x</code> matrix to see what it looks like.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>rotation[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>x[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                 PC1         PC2          PC3          PC4         PC5
-GSM748053 0.07039994  0.04923152  0.071208811  0.043105679 -0.01380099
-GSM748054 0.07240983  0.02995164  0.040128439  0.022083881 -0.04919873
-GSM748055 0.06121408  0.04178774  0.033921667  0.026014251  0.02475344
-GSM748056 0.07864141 -0.03850656 -0.006069839 -0.001976577  0.01670609
-GSM748057 0.07348980  0.04772108  0.045980275  0.043630946  0.06304790</code></pre>
+<pre><code>                  PC1       PC2       PC3        PC4        PC5
+GSM748053   0.5712872 34.105929 15.208118  -4.738482  3.4101384
+GSM748054  -3.5283223 24.664382  7.632319 -11.746590  0.1405872
+GSM748055   5.2892621 21.841834  9.092392  -3.022823 11.7810845
+GSM748056 -31.4864198  3.762922 -5.332805   9.695495 -8.8944295
+GSM748057   1.2726085 30.640997 10.562888   6.294335  7.1601434</code></pre>
 </div>
 </div>
-<p>So, PC components for each sample are in columns and samples are in rows. For colData, the samples are also in rows. So, we can join the first (in my case) six PCs to the SummarizedExperiment, sub_se, for later use.</p>
+<p>So, PC components for each sample are in columns and samples are in rows. For colData, the samples are also in rows. So, we can join the PC values to the SummarizedExperiment, sub_se, for later use and for comparison to other sample metadata.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>pcmat <span class="ot">=</span> pca<span class="sc">$</span>rotation[,<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>]</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The names must be set and must match the samplenames in colData</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(pcmat) <span class="ot">=</span> <span class="fu">rownames</span>(pca<span class="sc">$</span>rotation)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(sub_se) <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">colData</span>(sub_se), pcmat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We can use cbind to join the PC values to the colData</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># note that the names of the rows are the same for both</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(sub_se) <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">colData</span>(sub_se), pca<span class="sc">$</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We now have the PCs stored conveniently with our SummarizedExperiment.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(<span class="fu">colData</span>(sub_se))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] "title"                               "geo_accession"                      
- [3] "status"                              "submission_date"                    
- [5] "last_update_date"                    "type"                               
- [7] "channel_count"                       "source_name_ch1"                    
- [9] "organism_ch1"                        "characteristics_ch1"                
-[11] "characteristics_ch1.1"               "characteristics_ch1.2"              
-[13] "characteristics_ch1.3"               "characteristics_ch1.4"              
-[15] "characteristics_ch1.5"               "characteristics_ch1.6"              
-[17] "characteristics_ch1.7"               "characteristics_ch1.8"              
-[19] "characteristics_ch1.9"               "characteristics_ch1.10"             
-[21] "molecule_ch1"                        "extract_protocol_ch1"               
-[23] "label_ch1"                           "label_protocol_ch1"                 
-[25] "taxid_ch1"                           "hyb_protocol"                       
-[27] "scan_protocol"                       "description"                        
-[29] "data_processing"                     "platform_id"                        
-[31] "contact_name"                        "contact_laboratory"                 
-[33] "contact_department"                  "contact_institute"                  
-[35] "contact_address"                     "contact_city"                       
-[37] "contact_zip.postal_code"             "contact_country"                    
-[39] "supplementary_file"                  "data_row_count"                     
-[41] "age.at.surgery.ch1"                  "disease.free.survival.in.months.ch1"
-[43] "follow.up.time..months..ch1"         "gender.ch1"                         
-[45] "histology.ch1"                       "pm.stage.ch1"                       
-[47] "pn.stage.ch1"                        "pt.stage.ch1"                       
-[49] "relapse..event.1..no.event.0..ch1"   "status.ch1"                         
-[51] "tissue.ch1"                          "PC1"                                
-[53] "PC2"                                 "PC3"                                
-[55] "PC4"                                 "PC5"                                
-[57] "PC6"                                </code></pre>
+<pre><code>  [1] "title"                              
+  [2] "geo_accession"                      
+  [3] "status"                             
+  [4] "submission_date"                    
+  [5] "last_update_date"                   
+  [6] "type"                               
+  [7] "channel_count"                      
+  [8] "source_name_ch1"                    
+  [9] "organism_ch1"                       
+ [10] "characteristics_ch1"                
+ [11] "characteristics_ch1.1"              
+ [12] "characteristics_ch1.2"              
+ [13] "characteristics_ch1.3"              
+ [14] "characteristics_ch1.4"              
+ [15] "characteristics_ch1.5"              
+ [16] "characteristics_ch1.6"              
+ [17] "characteristics_ch1.7"              
+ [18] "characteristics_ch1.8"              
+ [19] "characteristics_ch1.9"              
+ [20] "characteristics_ch1.10"             
+ [21] "molecule_ch1"                       
+ [22] "extract_protocol_ch1"               
+ [23] "label_ch1"                          
+ [24] "label_protocol_ch1"                 
+ [25] "taxid_ch1"                          
+ [26] "hyb_protocol"                       
+ [27] "scan_protocol"                      
+ [28] "description"                        
+ [29] "data_processing"                    
+ [30] "platform_id"                        
+ [31] "contact_name"                       
+ [32] "contact_laboratory"                 
+ [33] "contact_department"                 
+ [34] "contact_institute"                  
+ [35] "contact_address"                    
+ [36] "contact_city"                       
+ [37] "contact_zip.postal_code"            
+ [38] "contact_country"                    
+ [39] "supplementary_file"                 
+ [40] "data_row_count"                     
+ [41] "age.at.surgery.ch1"                 
+ [42] "disease.free.survival.in.months.ch1"
+ [43] "follow.up.time..months..ch1"        
+ [44] "gender.ch1"                         
+ [45] "histology.ch1"                      
+ [46] "pm.stage.ch1"                       
+ [47] "pn.stage.ch1"                       
+ [48] "pt.stage.ch1"                       
+ [49] "relapse..event.1..no.event.0..ch1"  
+ [50] "status.ch1"                         
+ [51] "tissue.ch1"                         
+ [52] "PC1"                                
+ [53] "PC2"                                
+ [54] "PC3"                                
+ [55] "PC4"                                
+ [56] "PC5"                                
+ [57] "PC6"                                
+ [58] "PC7"                                
+ [59] "PC8"                                
+ [60] "PC9"                                
+ [61] "PC10"                               
+ [62] "PC11"                               
+ [63] "PC12"                               
+ [64] "PC13"                               
+ [65] "PC14"                               
+ [66] "PC15"                               
+ [67] "PC16"                               
+ [68] "PC17"                               
+ [69] "PC18"                               
+ [70] "PC19"                               
+ [71] "PC20"                               
+ [72] "PC21"                               
+ [73] "PC22"                               
+ [74] "PC23"                               
+ [75] "PC24"                               
+ [76] "PC25"                               
+ [77] "PC26"                               
+ [78] "PC27"                               
+ [79] "PC28"                               
+ [80] "PC29"                               
+ [81] "PC30"                               
+ [82] "PC31"                               
+ [83] "PC32"                               
+ [84] "PC33"                               
+ [85] "PC34"                               
+ [86] "PC35"                               
+ [87] "PC36"                               
+ [88] "PC37"                               
+ [89] "PC38"                               
+ [90] "PC39"                               
+ [91] "PC40"                               
+ [92] "PC41"                               
+ [93] "PC42"                               
+ [94] "PC43"                               
+ [95] "PC44"                               
+ [96] "PC45"                               
+ [97] "PC46"                               
+ [98] "PC47"                               
+ [99] "PC48"                               
+[100] "PC49"                               
+[101] "PC50"                               
+[102] "PC51"                               
+[103] "PC52"                               
+[104] "PC53"                               
+[105] "PC54"                               
+[106] "PC55"                               
+[107] "PC56"                               
+[108] "PC57"                               
+[109] "PC58"                               
+[110] "PC59"                               
+[111] "PC60"                               
+[112] "PC61"                               
+[113] "PC62"                               
+[114] "PC63"                               
+[115] "PC64"                               
+[116] "PC65"                               
+[117] "PC66"                               
+[118] "PC67"                               
+[119] "PC68"                               
+[120] "PC69"                               
+[121] "PC70"                               
+[122] "PC71"                               
+[123] "PC72"                               
+[124] "PC73"                               
+[125] "PC74"                               
+[126] "PC75"                               
+[127] "PC76"                               
+[128] "PC77"                               
+[129] "PC78"                               
+[130] "PC79"                               
+[131] "PC80"                               
+[132] "PC81"                               
+[133] "PC82"                               
+[134] "PC83"                               
+[135] "PC84"                               
+[136] "PC85"                               
+[137] "PC86"                               
+[138] "PC87"                               
+[139] "PC88"                               
+[140] "PC89"                               
+[141] "PC90"                               
+[142] "PC91"                               
+[143] "PC92"                               
+[144] "PC93"                               
+[145] "PC94"                               
+[146] "PC95"                               
+[147] "PC96"                               
+[148] "PC97"                               
+[149] "PC98"                               
+[150] "PC99"                               
+[151] "PC100"                              
+[152] "PC101"                              
+[153] "PC102"                              
+[154] "PC103"                              
+[155] "PC104"                              
+[156] "PC105"                              
+[157] "PC106"                              
+[158] "PC107"                              
+[159] "PC108"                              
+[160] "PC109"                              
+[161] "PC110"                              
+[162] "PC111"                              
+[163] "PC112"                              
+[164] "PC113"                              
+[165] "PC114"                              
+[166] "PC115"                              
+[167] "PC116"                              
+[168] "PC117"                              
+[169] "PC118"                              
+[170] "PC119"                              
+[171] "PC120"                              
+[172] "PC121"                              
+[173] "PC122"                              
+[174] "PC123"                              
+[175] "PC124"                              
+[176] "PC125"                              
+[177] "PC126"                              
+[178] "PC127"                              
+[179] "PC128"                              
+[180] "PC129"                              
+[181] "PC130"                              
+[182] "PC131"                              
+[183] "PC132"                              
+[184] "PC133"                              
+[185] "PC134"                              
+[186] "PC135"                              
+[187] "PC136"                              
+[188] "PC137"                              
+[189] "PC138"                              
+[190] "PC139"                              
+[191] "PC140"                              
+[192] "PC141"                              
+[193] "PC142"                              
+[194] "PC143"                              
+[195] "PC144"                              
+[196] "PC145"                              
+[197] "PC146"                              
+[198] "PC147"                              
+[199] "PC148"                              
+[200] "PC149"                              
+[201] "PC150"                              
+[202] "PC151"                              
+[203] "PC152"                              
+[204] "PC153"                              
+[205] "PC154"                              
+[206] "PC155"                              
+[207] "PC156"                              
+[208] "PC157"                              
+[209] "PC158"                              
+[210] "PC159"                              
+[211] "PC160"                              
+[212] "PC161"                              
+[213] "PC162"                              
+[214] "PC163"                              
+[215] "PC164"                              
+[216] "PC165"                              
+[217] "PC166"                              
+[218] "PC167"                              
+[219] "PC168"                              
+[220] "PC169"                              
+[221] "PC170"                              
+[222] "PC171"                              
+[223] "PC172"                              
+[224] "PC173"                              
+[225] "PC174"                              
+[226] "PC175"                              
+[227] "PC176"                              
+[228] "PC177"                              
+[229] "PC178"                              
+[230] "PC179"                              
+[231] "PC180"                              
+[232] "PC181"                              
+[233] "PC182"                              
+[234] "PC183"                              
+[235] "PC184"                              
+[236] "PC185"                              
+[237] "PC186"                              
+[238] "PC187"                              
+[239] "PC188"                              
+[240] "PC189"                              
+[241] "PC190"                              
+[242] "PC191"                              
+[243] "PC192"                              
+[244] "PC193"                              
+[245] "PC194"                              
+[246] "PC195"                              
+[247] "PC196"                              
+[248] "PC197"                              
+[249] "PC198"                              
+[250] "PC199"                              
+[251] "PC200"                              
+[252] "PC201"                              
+[253] "PC202"                              
+[254] "PC203"                              
+[255] "PC204"                              
+[256] "PC205"                              
+[257] "PC206"                              
+[258] "PC207"                              
+[259] "PC208"                              
+[260] "PC209"                              
+[261] "PC210"                              
+[262] "PC211"                              
+[263] "PC212"                              
+[264] "PC213"                              
+[265] "PC214"                              
+[266] "PC215"                              
+[267] "PC216"                              
+[268] "PC217"                              
+[269] "PC218"                              
+[270] "PC219"                              
+[271] "PC220"                              
+[272] "PC221"                              
+[273] "PC222"                              
+[274] "PC223"                              
+[275] "PC224"                              
+[276] "PC225"                              
+[277] "PC226"                              
+[278] "PC227"                              
+[279] "PC228"                              
+[280] "PC229"                              
+[281] "PC230"                              
+[282] "PC231"                              
+[283] "PC232"                              
+[284] "PC233"                              
+[285] "PC234"                              
+[286] "PC235"                              
+[287] "PC236"                              
+[288] "PC237"                              
+[289] "PC238"                              
+[290] "PC239"                              
+[291] "PC240"                              
+[292] "PC241"                              
+[293] "PC242"                              
+[294] "PC243"                              
+[295] "PC244"                              
+[296] "PC245"                              
+[297] "PC246"                              
+[298] "PC247"                              
+[299] "PC248"                              
+[300] "PC249"                              
+[301] "PC250"                              
+[302] "PC251"                              
+[303] "PC252"                              
+[304] "PC253"                              
+[305] "PC254"                              
+[306] "PC255"                              
+[307] "PC256"                              
+[308] "PC257"                              
+[309] "PC258"                              
+[310] "PC259"                              
+[311] "PC260"                              
+[312] "PC261"                              
+[313] "PC262"                              
+[314] "PC263"                              
+[315] "PC264"                              
+[316] "PC265"                              
+[317] "PC266"                              
+[318] "PC267"                              
+[319] "PC268"                              
+[320] "PC269"                              
+[321] "PC270"                              
+[322] "PC271"                              
+[323] "PC272"                              
+[324] "PC273"                              
+[325] "PC274"                              
+[326] "PC275"                              
+[327] "PC276"                              
+[328] "PC277"                              
+[329] "PC278"                              
+[330] "PC279"                              
+[331] "PC280"                              
+[332] "PC281"                              
+[333] "PC282"                              
+[334] "PC283"                              
+[335] "PC284"                              
+[336] "PC285"                              
+[337] "PC286"                              
+[338] "PC287"                              
+[339] "PC288"                              
+[340] "PC289"                              
+[341] "PC290"                              
+[342] "PC291"                              
+[343] "PC292"                              
+[344] "PC293"                              
+[345] "PC294"                              
+[346] "PC295"                              
+[347] "PC296"                              
+[348] "PC297"                              
+[349] "PC298"                              
+[350] "PC299"                              
+[351] "PC300"                              
+[352] "PC301"                              
+[353] "PC302"                              
+[354] "PC303"                              
+[355] "PC304"                              
+[356] "PC305"                              
+[357] "PC306"                              
+[358] "PC307"                              </code></pre>
 </div>
 </div>
 </section>
-<section id="variable-relationships" class="level2" data-number="16.4">
+<section id="variable-relationships" class="level2 page-columns page-full" data-number="16.4">
 <h2 data-number="16.4" class="anchored" data-anchor-id="variable-relationships"><span class="header-section-number">16.4</span> Variable relationships</h2>
 <p>Looking at relationships between variables can be a really useful way of generating hypotheses, performing quality control, and suggesting areas to focus in analysis. One common approach to looking at a few variables and their relationships is the “pairs” plot.</p>
+<p>The GGally package has a function called ggpairs that can be used to generate a pairs plot for a few variables.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GGally)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Take a look at <a href="https://r-charts.com/correlation/ggpairs/">this website</a> and examine some variable relationships in the colData(sub_se). When working with ggplot (and ggpairs), you’ll likely want to convert the colData() to a data.frame first.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>col_df <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(sub_se))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggpairs</span>(col_df,<span class="at">columns=</span>(<span class="fu">c</span>(<span class="st">"PC1"</span>,<span class="st">"PC2"</span>,<span class="st">"PC3"</span>,<span class="st">"gender.ch1"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Take a look at <a href="https://r-charts.com/correlation/ggpairs/">this website</a> and examine some variable relationships in the colData(sub_se). When working with ggplot (and ggpairs), you’ll likely want to convert the colData() to a data.frame first. See <a href="#fig-ggpairs">Figure&nbsp;<span>16.3</span></a> for an example.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggpairs</span>(<span class="fu">as.data.frame</span>(<span class="fu">colData</span>(sub_se)),<span class="at">columns=</span>(<span class="fu">c</span>(<span class="st">"PC1"</span>,<span class="st">"PC2"</span>,<span class="st">"PC3"</span>,<span class="st">"gender.ch1"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 </div>
-<div class="cell-output-display">
-<p><img src="eda_with_pca_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-ggpairs" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><img src="eda_with_pca_files/figure-html/fig-ggpairs-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;16.3: A pairs plot of a few variables.</figcaption>
+</figure>
 </div>
 </div>
-<p>Look at other variables that you might want to include. Add colors, etc.</p>
+</div>
+<p>The ggpairs function is very flexible and plays well with ggplot. Therefore, you can add aes() to the ggpairs function to add colors, etc. to the plot (see <a href="#fig-ggpairs-colors">Figure&nbsp;<span>16.4</span></a>). Look at other variables that you might want to include and style the plot to your liking.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggpairs</span>(<span class="fu">as.data.frame</span>(<span class="fu">colData</span>(sub_se)),<span class="at">columns=</span>(<span class="fu">c</span>(<span class="st">"PC1"</span>,<span class="st">"PC2"</span>,<span class="st">"PC3"</span>,<span class="st">"gender.ch1"</span>)), </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">aes</span>(<span class="at">color=</span>gender.ch1, <span class="at">alpha=</span><span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-ggpairs-colors" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><img src="eda_with_pca_files/figure-html/fig-ggpairs-colors-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;16.4: A pairs plot colored by a variable of interest.</figcaption>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
