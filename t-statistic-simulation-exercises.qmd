@@ -1,0 +1,235 @@
+---
+title: "The T-statistic"
+author: "Sean Davis"
+date: '2022-06-30'
+output: html_document
+---
+
+# Learning objectives
+
+- Know how the t-statistic differs from the z-score, and how the Student’s t-distribution differs from the
+normal distribution.
+- Practice using numerical simulations of the null distribution to check that the p-values are computed
+correctly.
+- Understand why the Student’s t-distribution depends on the number of degrees of freedom.
+- Understand how computing p-values using an incorrect distribution can give false positives.
+
+# Background
+
+## Significance of a single measurement:
+- You have performed a single measurement x1 and want to test if the result is consistent with the null
+hypothesis.
+- Under the null hypothesis, these measurements are drawn from the normal distribution N(μ,  2).
+- Because the system you are studying is well characterized, you know the values of μ and  .
+- To test if the obsevation x1 is consistent with the null hypothesis, we compute the z-score z   x−μ
+  .
+- The z-score follows the standard normal distribution N(0, 1).
+- We then use pnorm to compute the p-value.
+
+## Significance of multiple measurements:
+- To gain statistical power, you next repeat the measurement n times, giving the values x1...xn and the
+mean value ¯x.
+- In this case, the mean follows the distribution N(μ,  2/n).
+- To test if the observed mean ¯x is consistent with the null hypothesis, we compute the z-score z = ¯x−μ
+ /
+p
+n.
+- As before, the z-score follows the standard normal distribution N(0, 1) and we use pnorm to compute
+the p-value.
+
+## Experiments with unknown  :
+- Next assume that the expected value of xi is zero under the null hypothesis (i.e. μ = 0). This would be
+the case if xi corresponds to the difference in signal between a treament and a control experiment (that
+is, we don’t expect a difference if the treament is ineffective, which is the null hypothesis).
+- Further assume that you don’t know the variance parameter  2. This means that you don’t know all
+the variables needed to compute the z-score.
+- We learned earlier that s  
+q
+1
+n−1
+Pn
+i=1(xi − ¯x)2 is an unbiased estimate of  . This is comuted using
+the sd command. Feeling lucky, you guess that you can compute the z-score (and thus the p-value)
+using the formula above and substituting s in place of  . The resulting value will differ sligthtly from
+the true z-score since s differs from   by statistical fluctuations. You therefore define it to be the
+t-statistic t = ¯x
+s/
+p
+n. Hoping that the differences between z and t are small on average, you go ahead
+and compute the p-values for your experiment using t and the normal distribution.
+- However, the night before you submit your paper you decide to run some numerical expereriments in R
+to verify that your statistic t indeed behaves like z and follows the normal distribution under the null
+hypothesis.
+
+# Exercises
+
+In this experiment, we assume that the measurment xi is drawn from the standard normal distribution N(0, 1)
+under the null hypothesis. We will draw numbers from the null distribution, compute z and t, and analyze if
+they follow the same distribution. As a warmup exercise, we start by experimenting with the z-score:
+
+1. Generate a vector x5 containing five random numbers drawn from the standard normal distribution
+using rnorm. Compute the z-score of the mean of this vector.
+
+```{r}
+x5=rnorm(5)
+sqrt(length(x5)) * mean(x5)
+```
+
+2. Generalize the above calculation by writing a function named `zf` that takes a vector `x` as input and
+computes the z score (Hint: zf = function(x) {...} and use the code from question 1). Check so
+zf(x5) gives the same answer as in the first question. It is a good coding strategy to start with a
+concrete example and then write a general function building on this experience.
+
+```{r}
+zf = function(x) { sqrt(length(x)) * mean(x)}
+zf(x5)
+```
+
+The function should show the same value as above in question 1.
+
+3. Repeat the calculation in Question 2 10,000 times and store the resulting z-scores in z10k (Hint: use
+replicate).
+
+```{r}
+z10k = replicate(10000,zf(rnorm(5)))
+```
+
+4. What distribution do you expect that numbers in ‘z10k’ to follow? Use pnorm to and hist to plot
+distribution of p values. 
+   - What fraction of the values in pnorm(z10k) are smaller than 0.05? 
+   - Is this what you expected given that the numbers were drawn from the 
+     null distribution?
+z10k should follow the standard normal distribution N(0, 1); given that the sample mean ¯x
+follows the normal distribution (in fact, it follows N(0, 1/
+p
+n)), the z-score for ¯x is constructed
+to be a rescaling of ¯x such that it follows the standard normal distribution.
+
+```{r}
+hist(pnorm(z10k))
+```
+
+2
+Histogram of pnorm(z10k)
+pnorm(z10k)
+Frequency
+0.0 0.2 0.4 0.6 0.8 1.0
+0 100 200 300 400 500
+mean(pnorm(z10k)<0.05)
+## [1] 0.0488
+If you draw numbers from a continous distribution (for example using rnorm) and compute
+the lower cumulative p-value according to the same distribution (for example using pnorm),
+then the p-values will be uniformly distributed. pnorm(z10k)<0.05 is TRUE for the entries
+in z10k with values belonging to the bottom 5% tail of N(0, 1). Since the values in z10k follow
+N(0, 1) this should happen 5% of the time. The fact that we observe this, and the uniform
+histogram, means that we are computing the p-values for ¯x correctly.
+
+We will now repeat question 1-4 but for the t statistic:
+
+5. First compute the value of the t-statistic for the five random numbers x5 that you generated in Question
+1.
+
+```{r}
+sqrt(length(x5)) * mean(x5) / sd(x5)
+```
+
+6. Next write a function `tf` that computes the value of t for an a arbritrary vector x. Test that tf(x5)
+reproducese the answer in question 5.
+
+```{r}
+tf = function(x) { sqrt(length(x)) * mean(x) / sd(x) }
+tf(x5)
+```
+The function should have computed the same value.
+
+7. Repeat the calculation in Question 6 10,000 times and store the resulting t values in t10k.
+
+```{r}
+t10k = replicate(10000,tf(rnorm(5)))
+```
+
+8. Use qqplot to compare the z-scores in z10k and the values of the t-statistic in t10k. Do they follow the
+same distribution? (Hint: Adding a diagonal line using abline(0,1) makes it easier to see deviations
+from the diagonal)
+
+```{r}
+qqplot(z10k, t10k)
+abline(0,1)
+```
+
+The values in z10k and t10k do not follow the same distribution. The more extreme quantiles
+in t10k have larger absolute values than the corresponding quantiles in z10k. This means that
+the values in t10k follow a distribution with fatter tails.
+
+9. Plot the distribution of pnorm(t10k) using hist. Does pnorm(t10k) have more values close to 0 and 1
+than you expected? 
+   - What fraction of the values in pnorm(t10k) are smaller than 0.05?
+```{r}
+hist(pnorm(t10k))
+```
+
+```{r}
+mean(pnorm(t10k)<0.05)
+```
+
+In the in the introduction we hoped that t would follow the same distribution as z, that is
+N(0, 1) (we only cheated a little bit when we replaced   with s after all). If this was the case,
+we would expect 5% of the p-values to be below 0.05 (as in question 4). However, we observe
+more values below 0.05 since the t does not follow the normal distribution.
+
+10. If you improperly assume that t follows the same distribution as z (that is, N(0, 1)), would your
+hypothesis test be be conservative (that is, have few false positives but tend to miss true deviation
+from the null hypothesis) or liberal (that is, tend to falsely reject the null hypothesis when no signal is
+present)?
+
+If we did not realize that it was a mistake to think that t follows N(0, 1), we would have
+interpreted the excess of values around 0 as statistically significant event. Given that all the
+numbers were generated according to the null hypothesis, our (incorrect) calcualtion would
+therefore have generated more than 5% false positives meaning that the test was liberal.
+Given that the true variance   often it unkown, it would be nice if we could use the t-statisic for hypothesis
+testing (since then s can be computed form the data but z cannot). Statisticians have defined the Student’s
+t-distribution so that the t-statistic follows it.
+
+The t distribution depends on the number of data points used to compute ¯x and s. To understand this, recall
+that the reason t does not follow N(0, 1) is that random errors perturb s. These errors are large when few
+data points are used (above we used only five), so the t-distribution and the normal distribution will differ
+significantly in this case. Conversely, s will be close to   if many datapoints are used, meaning that t will be
+very close to z and, thus, that the t-distribution and the normal distribution will be similar.
+
+In R, the functions for manipulating the t-distribution have the same naming convention as the normal
+distribution:
+5
+Task Normal Distribution t(distribution)
+Computes probability density dnorm(z) dt(t,df)
+Computes cumulative probability pnorm(z) pt(t,df)
+Computes quantiles given p qnorm(p) qt(p,df)
+Generates n random values rnorm(n) rt(n,df)
+Note that the t-distribution functions need one additional parameter df that specifies to the “number of
+degrees of freedom”. This corresponds to how many data points were used to estimate s, which, for technical
+reasons, is less than the number of data points.
+
+11. Draw 10,000 numbers from the t-distribution with df = 5 − 1 = 4 degrees of freedom and store in
+t10k_true (Hint: use rt). Compare the distribution of t10k and t10k_true (Hint: use qqplot). Are
+t10k and t10k_true drawn from the same distribution?
+
+```{r}
+t10k_true=rt(10000,4)
+qqplot(t10k, t10k_true)
+abline(0,1)
+```
+
+The points follow the diagonal (except for the scattering at the ends), meaning that t10k_true
+and t10k follow the same distribution
+
+12. Compute the p-values of t10k using the t-distribution with df = 4 and plot the distribution using hist
+(Hint: use pt). Does the distribution of p-values look good given that t10k is based on values drawn
+according to the hypothesis? What fraction of values computed using p have p < 0.05? Is it appropriate
+to test for deviations from the null hypothesis using the t-statistic and the Student’s t distribution?
+
+```{r}
+hist(pt(t10k,4))
+```
+
+The p-values are uniformly distributed. Given that the values that t10k were computed from
+were generated according to the null hypothesis, this means that we are coomputing the
+p-values correctly.

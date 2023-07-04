@@ -1,0 +1,225 @@
+# EDA with PCA
+
+## Introduction
+
+In this tutorial, we will use the GEOquery package to download a dataset
+from the Gene Expression Omnibus (GEO) and perform some exploratory data
+analysis (EDA) using principal components analysis (PCA).
+
+## Downloading data from GEO
+
+The GEOquery package can be used to download data from GEO. The `getGEO`
+function takes a GEO accession number as an argument and returns a list
+of ExpressionSet objects. The `[[1]]` at the end of the `getGEO` call
+is used to extract the first (and only) ExpressionSet object from the list.
+
+Historically, it was not uncommon for GEO datasets to contain multiple
+separate experiments. In those cases, the `[[1]]` would need to be replaced
+with the index of the experiment of interest. However, it is now uncommon 
+for GEO datasets to contain multiple experiments, but the `[[1]]` is still
+needed to extract the ExpressionSet object from the list.
+
+
+```{r message=FALSE}
+library(GEOquery)
+library(SummarizedExperiment)
+```
+
+ExpressionSet objects are a type of Bioconductor object that is used to
+store gene expression data. The `as` function can be used to convert the
+ExpressionSet object to a SummarizedExperiment object, which is a newer
+Bioconductor object that is used to store gene expression data. The
+SummarizedExperiment object is preferred over the ExpressionSet object
+so we immediately convert the ExpressionSet object to a SummarizedExperiment.
+
+```{r cache=TRUE}
+gse <- getGEO("GSE30219")[[1]]
+se <- as(gse, "SummarizedExperiment")
+```
+
+## Filtering genes
+
+When performing PCA, it is common to filter to the most variable genes
+before performing the PCA. Limiting genes to the most variable genes
+can help to reduce the computational burden of the PCA. 
+
+We can calculate the standard deviation of each gene using the `apply`
+function. The `apply` function takes a matrix as the first argument and
+a 1 or 2 to indicate whether the function should be applied to the rows
+or columns of the matrix. The `sd` function calculates the standard
+deviation of a vector and is performed on each row of the matrix.
+
+A histogram of the standard deviations is not that useful, but it is 
+easy to make.
+
+```{r}
+sds = apply(assay(se, 'exprs'), 1, sd)
+hist(sds)
+```
+
+Here, we produce a subset of the SummarizedExperiment object that contains
+only the 500 most variable genes. We'll use this subset for the rest of 
+the tutorial. Feel free to revisit the number of genes you choose to keep
+and see how it affects the PCA.
+
+
+```{r}
+sub_se = se[order(sds,decreasing = TRUE)[1:500],]
+```
+
+## PCA
+
+PCA is a method for dimensionality reduction. It is a linear transformation
+that finds the directions of maximum variance in a dataset and projects it
+onto a new subspace with equal or fewer dimensions than the original one.
+The orthogonal axes (principal components) of the new subspace can be
+interpreted as the directions of maximum variance given the constraint that
+the new feature axes are orthogonal to each other.
+
+
+![The matrix decomposition of the first PC and how we can use it to construct the dimensionally-reduced dataset.](images/pca_1d.png)
+
+
+```{r}
+# read the help for prcomp here to see what the arguments are
+# ?prcomp
+pca = prcomp(t(assay(sub_se,'exprs')))
+```
+
+The PCA algorithm results in a rotation matrix that can be used to transform
+the original data into the new subspace. The rotation matrix is stored in the
+`rotation` slot of the `prcomp` object and represents the *loadings* of each
+gene for each principle component.  The `prcomp` function also stores the
+coordinates of the samples in the new subspace in the `x` slot, which represents
+the locations of the samples in principle component space.
+
+```{r}
+str(pca)
+```
+
+The `prcomp` function also centers the data by default. The centering values
+are stored in the `center` slot. The `x` slot contains the coordinates of the
+samples in the new subspace. The 
+
+We can plot the samples using the first two PCs as the x and y axes.
+
+```{r fig-pca-plot, fig.cap="PCA plot of samples in the first two PCs."}
+plot(pca$x[,1], pca$x[,2], pch=20)
+```
+
+If we use ALL the PCs, we can perform a matrix multiplication to get the
+original data back.
+
+```{r}
+orig_data = pca$rotation %*% t(pca$x) + pca$center
+orig_data[1:5,1:5]
+```
+
+Compare to the original data:
+
+```{r}
+assay(sub_se,'exprs')[1:5,1:5]
+```
+
+And the same thing, but using only the first 3 PCs:
+
+```{r}
+orig_data_3pcs = pca$rotation[,1:3] %*% t(pca$x[,1:3]) + pca$center
+orig_data_3pcs[1:5,1:5]
+```
+
+## Variance explained
+
+Often, we want to know how much of the variance in the data is explained by
+each PC. The `pca` object has a slot called `sdev` that represents the standard
+deviation of the principle component. Variance is the square of `sdev`, so
+we can calculate the variance by squaring `sdev`.
+
+```{r}
+var_explained = pca$sdev ^ 2
+```
+
+The total variance is just the sum of all the variances:
+
+```{r}
+tot_variance = sum(var_explained)
+```
+
+And the proportion of the variance explained by each PC is then
+
+```{r}
+prop_var_explained = var_explained/tot_variance
+head(prop_var_explained)
+```
+
+If we plot the `prop_var_explained`, it is called a scree plot and 
+can help us to choose an appropriate number of PCs to "keep" in order
+to reduce the dimensionality.
+
+```{r}
+plot(prop_var_explained[1:15], type='b')
+```
+
+Examine the plot. How many PCs would you keep? 
+
+## Add PCs to our SummarizedExperiment object
+
+Recall that the `x` matrix stored in the `pca` object represent the
+coordinates of the samples in the new subspace. We can look at the first
+five rows and columns of the `x` matrix to see what it looks like.
+
+```{r}
+pca$x[1:5,1:5]
+```
+
+So, PC components for each sample are in columns and samples are in rows.
+For colData, the samples are also in rows. So, we can join the PC values 
+to the SummarizedExperiment, sub_se, for later use and for comparison to 
+other sample metadata. 
+
+```{r}
+# We can use cbind to join the PC values to the colData
+# note that the names of the rows are the same for both
+colData(sub_se) = cbind(colData(sub_se), pca$x)
+```
+
+We now have the PCs stored conveniently with our SummarizedExperiment.
+
+```{r}
+colnames(colData(sub_se))
+```
+
+## Variable relationships
+
+Looking at relationships between variables can be a really useful way of
+generating hypotheses, performing quality control, and suggesting areas to
+focus in analysis. One common approach to looking at a few variables and 
+their relationships is the "pairs" plot.
+
+The GGally package has a function called ggpairs that can be used to
+generate a pairs plot for a few variables. 
+
+```{r message=FALSE}
+library(GGally)
+```
+Take a look at [this website](https://r-charts.com/correlation/ggpairs/) and 
+examine some variable relationships in the colData(sub_se). When working
+with ggplot (and ggpairs), you'll likely want to convert the colData() to 
+a data.frame first. See @fig-ggpairs for an example.
+
+```{r fig-ggpairs, fig.cap="A pairs plot of a few variables."}
+ggpairs(as.data.frame(colData(sub_se)),columns=(c("PC1","PC2","PC3","gender.ch1")))
+```
+
+The ggpairs function is very flexible and plays well with ggplot. Therefore,
+you can add aes() to the ggpairs function to add colors, etc. to the plot (see @fig-ggpairs-colors).
+Look at other variables that you might want to include and style the plot
+to your liking.
+
+```{r fig-ggpairs-colors, fig.cap="A pairs plot colored by a variable of interest."}
+ggpairs(as.data.frame(colData(sub_se)),columns=(c("PC1","PC2","PC3","gender.ch1")), 
+        aes(color=gender.ch1, alpha=0.5))
+```
+
+
+

@@ -1,0 +1,79 @@
+In this chapter, we will explore the concept of probability distribution, with
+a particular focus on the normal distribution, using the example of IQ
+(intelligence quotient) scores. We will demonstrate the use of R functions to
+work with the normal distribution, and provide examples and interpretations of
+the results.
+
+## Normal Distribution, visualized
+
+The normal distribution, also known as the Gaussian distribution, is a
+continuous probability distribution characterized by its bell-shaped curve. It
+is defined by two parameters: the mean (µ) and the standard deviation (σ). The
+mean represents the central tendency of the distribution, while the standard
+deviation represents the dispersion or spread of the data.
+
+We've all seen a picture of the normal distribution. But what does the normal
+bell-shaped curve actually represent? 
+
+```{r fig-normal-distribution, fig.cap="The Normal Distribution. When we make a picture that looks like this, we are looking at the probability density function, or sometimes just the `density`.", echo=FALSE}
+z = seq(-4, 4, by = 0.01)
+plot(z, dnorm(z), type = "l", xlab = "z", ylab = "Density")
+```
+
+- What is the mean of _this_ normal distribution?
+- What is the standard deviation of _this_ normal distribution?
+- What are the values of the density function at z = 0, z = 1, and z = 2?
+- What is another term for the values on the x-axis? (Hint: it starts with a "z".)
+
+The density of the normal distribution is highest at the mean, and decreases
+symmetrically in both directions. The area under the curve represents the
+probability of observing a value within a certain range. For example, the area
+under the curve between z = -1 and z = 1 represents the probability of
+observing a value between -1 and 1. This area is equal to 0.6827, or 68.27%.
+
+```{r}
+# Prep the distribution data
+x <- seq(-4, 4, 0.005)
+y <- dnorm(x)
+normal <- as.data.frame(cbind(x,y))
+```
+
+## IQ Scores
+
+The IQ scores are an excellent example of the normal distribution, as they are
+designed to follow this distribution pattern. The mean IQ score is set at 100,
+and the standard deviation is set at 15. This means that the majority of the
+population (about 68%) have an IQ score between 85 and 115, while 95% of the
+population have an IQ score between 70 and 130.
+
+## R Functions for Normal Distribution
+
+There are four main functions in R to work with the normal distribution (or any distribution, for that matter): `pnorm`,
+`qnorm`, `dnorm`, and `rnorm`. We will describe each function and provide examples of
+their usage and interpretation.
+
+pnorm: This function calculates the cumulative distribution function (CDF) for the normal distribution. It gives the probability of observing a value less than or equal to a specified value (x).
+Example: What is the probability of having an IQ score of 120 or lower?
+pnorm(120, mean = 100, sd = 15)  
+ 
+Interpretation: The output value represents the probability of having an IQ score of 120 or lower. In this case, the probability is approximately 0.91, meaning that about 91% of the population have an IQ score of 120 or lower.
+qnorm: This function calculates the quantiles of the normal distribution. It returns the value (x) corresponding to a specified probability (p).
+
+Example: What is the IQ score at the 90th percentile?
+qnorm(0.9, mean = 100, sd = 15)  
+ 
+Interpretation: The output value represents the IQ score at the 90th percentile. In this case, the IQ score is approximately 119. This means that 90% of the population have an IQ score of 119 or lower.
+dnorm: This function calculates the probability density function (PDF) for the normal distribution. It gives the probability density (height of the curve) at a specified value (x).
+
+Example: What is the probability density of having an IQ score of 110?
+dnorm(110, mean = 100, sd = 15)  
+ 
+Interpretation: The output value represents the probability density of having an IQ score of 110. In this case, the density is approximately 0.024. Note that this value does not represent a probability, but rather the height of the curve at the specified value.
+rnorm: This function generates random numbers from a normal distribution with specified mean and standard deviation.
+
+Example: Generate 10 random IQ scores.
+rnorm(10, mean = 100, sd = 15)  
+ 
+Interpretation: The output will be a vector of 10 random IQ scores generated from a normal distribution with a mean of 100 and a standard deviation of 15. These values can be used for simulation purposes or to create a sample dataset for further analysis.
+
+In conclusion, the normal distribution is a fundamental concept in probability and statistics, and the IQ scores provide a practical example of its application. The R functions pnorm, qnorm, dnorm, and rnorm offer powerful tools to work with the normal distribution, allowing for the calculation of probabilities, quantiles, densities, and the generation of random samples.

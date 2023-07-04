@@ -1,0 +1,451 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggfortify)
+library(ggthemes)
+library(gridExtra)
+```
+
+# Working with distribution functions
+
+Which values do pnorm, dnorm, qnorm, and rnorm return? How do I remember the difference between these?
+
+I find it helpful to have visual representations of distributions as pictures. It is difficult for me to think of distributions, or differences between probability, density, and quantiles without visualizing the shape of the distribution. So I figured it would be helpful to have a visual guide to pnorm, dnorm, qnorm, and rnorm.
+
+
+```{r echo=FALSE}
+# Prep the distribution data
+x <- seq(-3, 3, 0.005)
+y <- dnorm(x)
+normal <- as.data.frame(cbind(x,y))
+```
+
+| Function | Input | Output |
+|----------|-------|--------|
+| pnorm    | x     | P(X < x) |
+| dnorm    | x     | f(x), or the height of the density curve at x   |
+| qnorm    | q, a quantile from 0 to 1    | x such that P(X < x) = q |
+| rnorm    | n     | n random samples from the distribution |
+
+: Table 1.1: Functions for the normal distribution
+
+## pnorm
+
+This function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal. @fig-pnorm-1
+
+
+```{r eval=FALSE}
+pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+```
+
+The R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.
+```{r echo=FALSE}
+# pnorm plot 1
+# pnorm(0)
+x2 <- c(x[1:600], rep(0,601))
+y2 <- c(y[1:600], rep(0,601))
+
+p <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(linewidth = 1.3) +
+     geom_vline(xintercept = 0, color = "blue", linewidth = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "pnorm(0)", x = NULL, y = NULL, 
+          subtitle = "P is for Probability") +
+     geom_area(inherit.aes = F, mapping = aes(x=x2, y=y2), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -2.6, xmax = -2, ymin = 0.12, ymax = 0.18,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.50", x = -2.3, y = 0.15, size = 6) +
+     annotate(geom = "segment", x = -2.7, xend = 0, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# pnorm plot 1.2
+# 1-pnorm(0)
+x9 <- c(rep(0,600), x[601:1201])
+y9 <- c(rep(0,600), y[601:1201])
+
+p1 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(linewidth = 1.3) +
+     geom_vline(xintercept = 0, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "1-pnorm(0)", x = NULL, y = NULL, 
+          subtitle = "P is for Probability") +
+     geom_area(inherit.aes = F, mapping = aes(x=x9, y=y9), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = 2.6, xmax = 2, ymin = 0.12, ymax = 0.18,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.50", x = 2.3, y = 0.15, size = 6) +
+     annotate(geom = "segment", x = 2.7, xend = 0, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# pnorm plot 2
+# pnorm(1)
+x3 <- c(x[1:801], rep(1,400))
+y3 <- c(y[1:801], rep(0,400))
+
+p2 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = 1, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "pnorm(1)", subtitle = "P is for probability", 
+          x = NULL, y = NULL) +
+     geom_area(inherit.aes = F, mapping = aes(x=x3, y=y3), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -2.6, xmax = -2, ymin = 0.12, ymax = 0.18,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.84", x = -2.3, y = 0.15, size = 6) +
+     annotate(geom = "segment", x = -2.7, xend = 1, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# pnorm plot 3
+# pnorm(-1)
+x4 <- c(x[1:401], rep(-1,800))
+y4 <- c(y[1:401], rep(0,800))
+
+p3 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = -1, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "pnorm(-1)", subtitle = "P is for probability", 
+          x = NULL, y = NULL) +
+     geom_area(inherit.aes = F, mapping = aes(x=x4, y=y4), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -2.6, xmax = -2, ymin = 0.12, ymax = 0.18,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.16", x = -2.3, y = 0.15, size = 6) +
+     annotate(geom = "segment", x = -2.7, xend = -1, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+This function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal.
+
+pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+The R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.
+
+The option lower.tail = TRUE tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to lower.tail = FALSE, or simply calculate 1-pnorm() instead. This is demonstrated below.
+
+
+```{r echo=FALSE}
+#| label: fig-pnorm
+#| fig-cap: "The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value."
+
+print(p)
+print(p1)
+print(p2)
+print(p3)
+```
+
+The option `lower.tail = TRUE` tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to `lower.tail = FALSE`, or simply calculate `1-pnorm()` instead.
+
+
+
+## dnorm
+
+This function calculates the probability density function (PDF) for the normal distribution. It gives the probability density (height of the curve) at a specified value (x).
+
+```{r echo=FALSE}
+# dnorm plot 1
+# dnorm(0)
+
+d1 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = 0, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "dnorm(0)", subtitle = "D is for Distribution", 
+          x = NULL, y = NULL) +
+     annotate(geom = "rect", xmin = -3, xmax = -2.4, ymin = 0.33, ymax = 0.39,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.40", x = -2.7, y = 0.36, size = 6) +
+     annotate(geom = "segment", y = 0.4, yend = 0.4, x = -3, xend = 0, 
+              color = "tomato", size = 1.25, linetype = 6) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# dnorm plot 2
+# dnorm(1)
+
+d2 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = 1, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "dnorm(1)", subtitle = "D is for Distribution", 
+          x = NULL, y = NULL) +
+     annotate(geom = "rect", xmin = -3, xmax = -2.4, ymin = 0.17, ymax = 0.23,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.24", x = -2.7, y = 0.2, size = 6) +
+     annotate(geom = "segment", y = 0.24, yend = 0.24, x = -3, xend = 1, 
+              color = "tomato", size = 1.1, linetype = 6) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
+           plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# dnorm plot 3
+# dnorm(-1)
+
+d3 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = -1, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "dnorm(-1)", subtitle = "D is for Distribution", 
+          x = NULL, y = NULL) +
+     annotate(geom = "rect", xmin = -3, xmax = -2.4, ymin = 0.17, ymax = 0.23,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.24", x = -2.7, y = 0.2, size = 6) +
+     annotate(geom = "segment", y = 0.24, yend = 0.24, x = -3, xend = -1, 
+              color = "tomato", size = 1.1, linetype = 6) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
+           plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+#| label: fig-dnorm
+#| fig-cap: "The `dnorm` function returns the height of the normal distribution at a given point."
+
+print(d1)
+print(d2)
+print(d3)
+```
+
+## qnorm
+
+This function calculates the quantiles of the normal distribution. It returns the value (x) corresponding to a specified probability (p). It is the inverse of the`pnorm` function. 
+
+```{r echo=FALSE}
+# qnorm plot 1
+# qnorm(0.5)
+
+q1 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = 0, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "qnorm(0.5)", x = NULL, y = NULL, 
+          subtitle = "Q is for Quantile") +
+     geom_area(inherit.aes = F, mapping = aes(x=x2, y=y2), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -0.25, xmax = 0.25, ymin = 0.03, ymax = 0.09,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0", x = 0, y = 0.06, size = 6) +
+     annotate(geom = "segment", x = -2.7, xend = 0, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     annotate(geom = "text", label = "50%", x = -1.25, y = 0.025, size = 4) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# qnorm plot 2
+# qnorm(0.25)
+x5 <- c(x[1:466], rep(-0.6745,735))
+y5 <- c(y[1:466], rep(0,735))
+
+q2 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = -0.6745, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "qnorm(0.25)", x = NULL, y = NULL, 
+          subtitle = "Q is for Quantile") +
+     geom_area(inherit.aes = F, mapping = aes(x=x5, y=y5), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -0.3, xmax = 0.3, ymin = 0.03, ymax = 0.09,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "-0.67", x = 0, y = 0.06, size = 5) +
+     annotate(geom = "segment", x = -2.7, xend = -0.6745, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     annotate(geom = "text", label = "25%", x = -1.65, y = 0.025, size = 4) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# qnorm plot 3
+# qnorm(0.1)
+x6 <- c(x[1:345], rep(-1.28,856))
+y6 <- c(y[1:345], rep(0,856))
+
+q3 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = -1.28, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "qnorm(0.1)", x = NULL, y = NULL, 
+          subtitle = "Q is for Quantile") +
+     geom_area(inherit.aes = F, mapping = aes(x=x6, y=y6), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -0.3, xmax = 0.3, ymin = 0.03, ymax = 0.09,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "-1.28", x = 0, y = 0.06, size = 5) +
+     annotate(geom = "segment", x = -2.7, xend = -1.28, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     annotate(geom = "text", label = "10%", x = -1.85, y = 0.025, size = 4) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# qnorm plot 4
+# qnorm(0.75)
+x7 <- c(x[1:735], rep(0.6745,466))
+y7 <- c(y[1:735], rep(0,466))
+
+q4 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = 0.6745, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "qnorm(0.75)", x = NULL, y = NULL, 
+          subtitle = "Q is for Quantile") +
+     geom_area(inherit.aes = F, mapping = aes(x=x7, y=y7), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -0.3, xmax = 0.3, ymin = 0.03, ymax = 0.09,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "0.67", x = 0, y = 0.06, size = 5) +
+     annotate(geom = "segment", x = -2.7, xend = 0.6745, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     annotate(geom = "text", label = "75%", x = -.95, y = 0.025, size = 4) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+# qnorm plot 5
+# qnorm(0.9)
+x8 <- c(x[1:856], rep(1.28,345))
+y8 <- c(y[1:856], rep(0,345))
+
+q5 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     geom_vline(xintercept = 1.28, color = "blue", size = 1.3, linetype = 2) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "qnorm(0.9)", x = NULL, y = NULL, 
+          subtitle = "Q is for Quantile") +
+     geom_area(inherit.aes = F, mapping = aes(x=x8, y=y8), fill = "tomato", 
+               alpha = 0.2) +
+     annotate(geom = "rect", xmin = -0.3, xmax = 0.3, ymin = 0.03, ymax = 0.09,
+              alpha = 1, fill = "white", color = "black") +
+     annotate(geom = "text", label = "1.28", x = 0, y = 0.06, size = 5) +
+     annotate(geom = "segment", x = -2.7, xend = 1.28, y = 0.01, yend = 0.01, 
+              size = 1.1, arrow = arrow(length = unit(3, "mm"))) +
+     annotate(geom = "text", label = "90%", x = 0.8, y = 0.025, 
+              size = 4) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
+```
+
+```{r echo=FALSE}
+#| label: fig-qnorm
+#| fig-cap: "The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile." 
+#| layout-ncol: 2
+
+print(q1)
+print(q2)
+print(q3)
+print(q4)
+print(q5)
+```
+
+
+## rnorm
+
+```{r echo=FALSE}
+# rnorm plot
+# rnorm(5)
+
+r1 <- ggplot(mapping = aes(x, y), data = normal) +
+     geom_line(size = 1.3) +
+     scale_x_continuous(n.breaks = 7) +
+     labs(title = "rnorm(n=5)", subtitle = "R is for Random generation", 
+          x = NULL, y = NULL, caption = "Output: c(-1.8, -0.8, 0.1, 0.45, 1.1)") +
+     annotate(geom = "segment", y = 0, yend = 0.4, x = 1.1, xend = 1.1,
+              color = "blue", linetype = 2) +
+     annotate(geom = "segment", y = 0, yend = 0.4, x = 0.45, xend = 0.45,
+              color = "blue", linetype = 2) +
+     annotate(geom = "segment", y = 0, yend = 0.4, x = -0.8, xend = -0.8,
+              color = "blue", linetype = 2) +
+     annotate(geom = "segment", y = 0, yend = 0.4, x = 0.1, xend = 0.1,
+              color = "blue", linetype = 2) +
+     annotate(geom = "segment", y = 0, yend = 0.4, x = -1.8, xend = -1.8,
+              color = "blue", linetype = 2) +
+     theme_classic(base_size = 14, base_family = "Courier") +
+     theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5)) +
+     theme(plot.subtitle = element_text(face = "italic", hjust = 0.5)) +
+     theme(plot.caption = element_text(face = "bold", size = 14, hjust = 0.5))
+```
+
+
+```{r}
+#| label: fig-rnorm
+#| fig-cap: "The rnorm function takes a number of samples and returns a vector of random numbers from the normal distribution (with mean=0, sd=1 as defaults)"
+print(r1)
+```
+
+
+## IQ scores
+
+Normal Distribution and its Application with IQ
+
+The normal distribution, also known as the Gaussian distribution, is a continuous probability distribution characterized by its bell-shaped curve. It is defined by two parameters: the mean (µ) and the standard deviation (σ). The mean represents the central tendency of the distribution, while the standard deviation represents the dispersion or spread of the data.
+
+The IQ scores are an excellent example of the normal distribution, as they are designed to follow this distribution pattern. The mean IQ score is set at 100, and the standard deviation is set at 15. This means that the majority of the population (about 68%) have an IQ score between 85 and 115, while 95% of the population have an IQ score between 70 and 130.
+
+*   What is the probability of having an IQ score between 85 and 115?
+
+    ```{r eval=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show answer"
+    pnorm(115, mean = 100, sd = 15) - pnorm(85, mean = 100, sd = 15)
+    ```
+
+*   What is the 90th percentile of the IQ scores?
+
+    ```{r eval=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show answer"
+    qnorm(0.9, mean = 100, sd = 15)
+    ```
+
+*   What is the probability of having an IQ score above 130?
+
+    ```{r eval=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show answer"
+    1 - pnorm(130, mean = 100, sd = 15)
+    ```
+
+*   What is the probability of having an IQ score below 70?
+
+    ```{r eval=FALSE}
+    #| code-fold: true
+    #| code-summary: "Show answer"
+    pnorm(70, mean = 100, sd = 15)
+    ```
+
+
+
+    

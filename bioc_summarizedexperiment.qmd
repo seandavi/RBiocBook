@@ -1,4 +1,10 @@
-# Introduction to `SummarizedExperiment`
+---
+output:
+  html_document:
+    toc: true
+---
+
+# Introduction
 
 <!-- This is taken from the summarizedExperiment package vignette -->
 
@@ -28,7 +34,7 @@ BiocManager::install('airway')
 BiocManager::install('SummarizedExperiment')
 ```
 
-##  Anatomy of a `SummarizedExperiment`
+#  Anatomy of a `SummarizedExperiment`
 
 The _SummarizedExperiment_ package contains two classes: 
 `SummarizedExperiment` and `RangedSummarizedExperiment`.
@@ -54,13 +60,19 @@ instead of a `DataFrame` of features. The `RangedSummarizedExperiment` ranges
 are described by a `GRanges` or a `GRangesList` object, accessible using the
 `rowRanges()` function.
 
-@fig-se-diagram displays the class geometry and highlights the
+The following graphic displays the class geometry and highlights the
 vertical (column) and horizontal (row) relationships.
 
 
-![Summarized Experiment. There are three main components, the `colData()`, the `rowData()` and the `assays()`. The accessors for the various parts of a complete SummarizedExperiment object match the names. ](images/se.png){#fig-se-diagram}
+```{r include = FALSE}
+# download current version of SE diagram
+#download.file("https://docs.google.com/feeds/download/drawings/Export?id=18OcDb80FpvSGRYnFl-8vUqwNNLaNHrG1I9SWKHCselo&exportFormat=svg", "SE.svg")
+download.file("https://docs.google.com/feeds/download/drawings/Export?id=1kiC8Qlo1mhSnLDqkGiRNPSo6GWn3C2duBszCFbJCB-g&exportFormat=svg", "SE.svg")
+```
 
-### Assays
+![Summarized Experiment](SE.svg)
+
+## Assays
 
 The `airway` package contains an example dataset from an RNA-Seq experiment of
 read counts per gene for airway smooth muscles.  These data are stored
@@ -70,7 +82,7 @@ experimental and assays 64,102 gene transcripts.
 ```{r, echo=FALSE}
 suppressPackageStartupMessages(library(SummarizedExperiment))
 if(!require(airway)) {
-    BiocManager::install('airway')
+    BiocInstaller::biocLite('airway')
 }
 suppressPackageStartupMessages(data(airway, package="airway"))
 ```
@@ -96,8 +108,7 @@ assays(se)$counts
 knitr::kable(assays(se)$counts[1:10,])
 ```
 
-### 'Row' (regions-of-interest) data
-
+## 'Row' (regions-of-interest) data
 The `rowRanges()` accessor is used to view the range information for a
 `RangedSummarizedExperiment`. (Note if this were the parent 
 `SummarizedExperiment` class we'd use `rowData()`). The data are stored in a 
@@ -109,7 +120,7 @@ transcript.
 rowRanges(se)
 ```
 
-### 'Column' (sample) data
+## 'Column' (sample) data
 
 Sample meta-data describing the samples can be accessed using `colData()`, and
 is a `DataFrame` that can store any number of descriptive columns for each
@@ -127,7 +138,7 @@ easy to subset the entire object by a given phenotype.
 se[, se$dex == "trt"]
 ```
 
-### Experiment-wide metadata
+## Experiment-wide metadata
 
 Meta-data describing the experimental methods and publication references can be
 accessed using `metadata()`.
@@ -146,9 +157,9 @@ metadata(se)$formula <- counts ~ dex + albut
 metadata(se)
 ```
 
-## Common operations on `SummarizedExperiment`
+# Common operations on `SummarizedExperiment`
 
-### Subsetting
+## Subsetting
 
 - `[` Performs two dimensional subsetting, just like subsetting a matrix
     or data frame.
@@ -161,7 +172,7 @@ se[1:5, 1:3]
 se[, se$cell == "N61311"]
 ```
 
-### Getters and setters
+## Getters and setters
 
 - `rowRanges()` / (`rowData()`), `colData()`, `metadata()`
 ```{r getSet}
@@ -192,7 +203,7 @@ assay(se)[1:5, 1:5]
 assay(se, 1)[1:5, 1:5]
 ```
 
-### Range-based operations
+## Range-based operations
 
 - `subsetByOverlaps()`
 `SummarizedExperiment` objects support all of the `findOverlaps()` methods and
@@ -212,7 +223,7 @@ dim(sub_se)
 ```
 
 
-## Constructing a `SummarizedExperiment` 
+# Constructing a `SummarizedExperiment` 
 
 Often, `SummarizedExperiment` or `RangedSummarizedExperiment` objects are 
 returned by functions written by other packages. However it is possible to 
@@ -246,4 +257,9 @@ a `DataFrame` for the _rowData_ argument:
 SummarizedExperiment(assays=list(counts=counts), colData=colData)
 ```
 
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
 

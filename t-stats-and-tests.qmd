@@ -89,7 +89,7 @@ larger values of $x$.
 
 ```{r}
 twosidedpnorm = function(x,mu=0,sd=1) {
-    2*pnorm(x,mu,sd,lower.tail=FALSE)
+    2*pnorm(abs(x),mu,sd,lower.tail=FALSE)
 }
 ```
 
@@ -181,20 +181,23 @@ Let's look at the relationship between the p-values of Z (from the normal distri
 
 ```{r}
 set.seed(5432)
-samp = rnorm(5)
+samp = rnorm(5,mean = 0.5)
 z = sqrt(length(samp)) * mean(samp) #simplifying assumption (sigma=1, mu=0)
 ```
 
 And the p-value if we assume we know the standard deviation:
 
 ```{r}
-pnorm(z)
+pnorm(z, lower.tail = FALSE)
 ```
+
+In reality, we don't know the standard deviation, so we have to estimate it
+from the data. We can do this by calculating the sample standard deviation:
 
 ```{r}
 ts = sqrt(length(samp)) * mean(samp) / sd(samp)
-pnorm(ts)
-pt(ts,5)
+pnorm(ts, lower.tail = FALSE)
+pt(ts,df = length(samp)-1, lower.tail = FALSE)
 ```
 
 ### Experiment
@@ -325,13 +328,23 @@ results.
 
 ### One-sample
 
+We are going to use the `t.test` function to perform a one-sample t-test. The 
+`t.test` function takes a vector of values as input that represents the sample 
+values. In this case, we'll simulate our sample using the `rnorm` function and
+presume that our "effect-size" is 1. 
+
 ```{r}
 x = rnorm(20,1)
 # small sample
+# Just use the first 5 values of the sample
 t.test(x[1:5])
 ```
 
-Increase sample size:
+In this case, we set up the experiment so that the null hypothesis is true (the 
+true mean is not zero, but actually 1). However, we only have a small sample size
+that leads to a modest p-value. 
+
+Increasing the sample size allows us to see the effect more clearly. 
 
 ```{r}
 t.test(x[1:20])
@@ -347,10 +360,23 @@ t.test(x,y)
 
 ### from a data.frame
 
+In some situations, you may have data and groups as columns in a data.frame.
+See the following data.frame, for example
+
 ```{r}
 df = data.frame(value=c(x,y),group=as.factor(rep(c('g1','g2'),each=10)))
+df
+```
+
+R allows us to perform a t-test using the `formula` notation. 
+
+```{r}
 t.test(value ~ group, data=df)
 ```
+
+You read that as `value` **is a function of** `group`. In practice, this will
+do a t-test between the `values` in `g1` vs `g2`.
+
 
 ### Equivalence to linear model
 
@@ -364,3 +390,105 @@ This is *equivalent* to:
 res = lm(value ~ group, data=df)
 summary(res)
 ```
+
+## Power calculations
+
+The power of a statistical test is the probability that the test will reject
+the null hypothesis when the alternative hypothesis is true. In other words,
+the power of a statistical test is the probability of not making a Type II
+error. The power of a statistical test depends on the significance level
+(alpha), the sample size, and the effect size.
+
+The `power.t.test` function can be used to calculate the power of a
+one-sample t-test. 
+
+Looking at `help("power.t.test")`, we see that the function takes the following
+arguments:
+
+* `n` - sample size
+* `delta` - effect size
+* `sd` - standard deviation of the sample
+* `sig.level` - significance level
+* `power` - power
+
+We need to supply four of these arguments to calculate the fifth. For example,
+if we want to calculate the power of a one-sample t-test with a sample size of
+5, a standard deviation of 1, and an effect size of 1, we can use the
+following command:
+
+```{r}
+power.t.test(n = 5, delta = 1, sd = 1, sig.level = 0.05)
+```
+
+This gives a nice summary of the power calculation. We can also extract the
+power value from the result:
+
+```{r}
+power.t.test(n = 5, delta = 1, sd = 1, 
+             sig.level = 0.05, type='one.sample')$power
+```
+
+::: {.callout-tip}
+When getting results from a function that don't look "computable" such as 
+those from `power.t.test`, you can use the `$` operator to extract the
+value you want. In this case, we want the `power` value from the result
+of `power.t.test`. 
+
+How would you know what to extract? You can use the `names` function
+or the `str` function to see the structure of the result. For example:
+
+```{r}
+names(power.t.test(n = 5, delta = 1, sd = 1, 
+             sig.level = 0.05, type='one.sample'))
+# or 
+str(power.t.test(n = 5, delta = 1, sd = 1, 
+             sig.level = 0.05, type='one.sample'))
+```
+:::
+
+Alternatively, we may know a lot about our experimental system and want to 
+calculate the sample size needed to achieve a certain power. For example, if
+we want to achieve a power of 0.8 with a standard deviation of 1 and an effect
+size of 1, we can use the following command:
+
+```{r}
+power.t.test(delta = 1, sd = 1, sig.level = 0.05, power = 0.8, type = "one.sample")
+```
+
+The power.t.test function is convenient and quite fast. As we've seen before, though,
+sometimes the distribution of the test statistics is now easily calculated. In those
+cases, we can use simulation to calculate the power of a statistical test. For example,
+if we want to calculate the power of a one-sample t-test with a sample size of 5, a
+standard deviation of 1, and an effect size of 1, we can use the following command:
+
+```{r}
+sim_t_test_pval <- function(n = 5, delta = 1, sd = 1, sig.level = 0.05) {
+    x = rnorm(n, delta, sd)
+    t.test(x)$p.value <= sig.level
+}
+pow = mean(replicate(1000, sim_t_test_pval()))
+pow
+```
+
+Let's break this down. First, we define a function called `sim_t_test_pval` that
+takes the same arguments as the `power.t.test` function. Inside the function, we
+simulate a sample of size `n` from a normal distribution with mean `delta` and
+standard deviation `sd`. Then, we perform a one-sample t-test on the sample and
+return a logical value indicating whether the p-value is less than the
+significance level. Next, we use the `replicate` function to repeat the
+simulation 1000 times. Finally, we calculate the proportion of simulations in
+which the p-value was less than the significance level. This proportion is an
+estimate of the power of the one-sample t-test.
+
+Let's compare the results of the `power.t.test` function and our simulation-based
+approach:
+
+```{r}
+power.t.test(n = 5, delta = 1, sd = 1, sig.level = 0.05, type='one.sample')$power
+mean(replicate(1000, sim_t_test_pval(n = 5, delta = 1, sd = 1, sig.level = 0.05)))
+```
+
+## Resources
+
+See the [pwr package](https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html) for more information on power calculations.
+
