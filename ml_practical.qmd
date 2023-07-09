@@ -1,3 +1,272 @@
+# Machine Learning
+
+## What is Machine Learning?
+
+Machine learning is a subfield of artificial intelligence that focuses on the
+development of algorithms and models that enable computers to learn and make
+decisions or predictions without explicit programming. It has emerged as a
+powerful tool for solving complex problems across various industries, including
+healthcare, finance, marketing, and natural language processing. This chapter
+provides an overview of machine learning, its types, key concepts,
+applications, and challenges.
+
+Machine learning in biology is a really broad topic. @greener_guide_2022 present
+a nice overview of the different types of machine learning methods that are
+used in biology. @libbrecht_machine_2015 also present an early review of machine
+learning in genetics and genomics.
+
+## Classes of Machine Learning
+
+```{r engine='tikz', out.width=300}
+\usetikzlibrary{fit, graphs, matrix, positioning}
+\begin{tikzpicture}[node distance=2cm]
+\graph [grow right sep, branch down=1cm, simple, nodes={draw, rectangle}] {
+  Data[as=data $D$] -> {dtrain[as=$D_{train}$], dtest[as=$D_{test}$]};
+  dtrain -> Learner;
+  dtest -> Model;
+  Learner -> Model;
+  Model -> Prediction;
+  dtest -> Measure;
+  Prediction -> Measure;
+  Measure -> Performance;
+};
+\end{tikzpicture}
+```
+
+
+### Supervised learning 
+
+Supervised learning is a type of machine learning where the model learns from
+labeled data, i.e., input-output pairs, to make predictions. It includes tasks
+like regression (predicting continuous values) and classification (predicting
+discrete classes or categories).
+
+### Unsupervised learning 
+
+Unsupervised learning involves learning from unlabeled data, where the model
+discovers patterns or structures within the data. Common unsupervised learning
+tasks include clustering (grouping similar data points), dimensionality
+reduction (reducing the number of features or variables), and anomaly detection
+(identifying unusual data points).
+
+### Other types of machine learning 
+
+Reinforcement learning is a type of machine learning where an agent learns to
+make decisions based on interactions with an environment. The agent receives
+feedback in the form of rewards or penalties and adjusts its actions to
+maximize the cumulative reward over time.
+
+::: {.callout-note} 
+# Terminology and Concepts
+
+*  Data 
+  : Data is the foundation of machine learning and can be structured
+  (tabular) or unstructured (text, images, audio). It is usually divided into
+  training, validation, and testing sets for model development and evaluation.
+
+*  Features 
+  : Features are the variables or attributes used to describe the data
+  points. Feature engineering and selection are crucial steps in machine
+  learning to improve model performance and interpretability.
+
+*  Models and Algorithms 
+  : Models are mathematical representations of the
+  relationship between features and the target variable(s). Algorithms are the
+  methods used to train models, such as linear regression, decision trees, and
+  neaural networks.
+
+*  Hyperparameters and Tuning 
+  : Hyperparameters are adjustable parameters that
+  control the learning process of an algorithm. Tuning involves finding the
+  optimal set of hyperparameters to improve model performance.
+
+*  Evaluation Metrics 
+  : Evaluation metrics quantify the performance of a model,
+  such as accuracy, precision, recall, F1-score (for classification), and mean
+  squared error, R-squared (for regression).
+::: 
+
+*  Supervised
+  - Classification
+  - Regression
+*  Unsupervised
+  - "Clustering"
+  - Dimensionality reduction
+
+```{r fig-fitting, fig.cap="Data simulated according to the function $f(x) = sin(2 \\pi x) + N(0,0.25)$ fitted with four different models. A) A simple linear model demonstrates _underfitting_. B) A linear model with a sin function ($y = sin(2 \\pi x)$) and C) a loess model with a wide span (0.5) demonstrate _good fits_. D) A loess model with a narrow span (0.1) is a good example of _overfitting_. "}
+#| code-fold: true
+set.seed(123)
+sinsim <- function(n,sd=0.1) {
+  x <- seq(0,1,length.out=n)
+  y <- sin(2*pi*x) + rnorm(n,0,sd)
+  return(data.frame(x=x,y=y))
+}
+dat <- sinsim(100,0.25)
+library(ggplot2)
+library(patchwork)
+p_base <- ggplot(dat,aes(x=x,y=y)) +
+ geom_point(alpha=0.7) +
+ theme_bw()
+p_lm <- p_base + 
+ geom_smooth(method="lm", se=FALSE, alpha=0.6, formula = y ~ x) 
+p_lmsin <- p_base +
+ geom_smooth(method="lm",formula=y~sin(2*pi*x), se=FALSE, alpha=0.6) 
+p_loess_wide <- p_base +
+  geom_smooth(method="loess",span=0.5, se=FALSE, alpha=0.6, formula = y ~ x) 
+p_loess_narrow <- p_base + 
+ geom_smooth(method="loess",span=0.1, se=FALSE, alpha=0.6, formula = y ~ x) 
+p_lm + p_lmsin + p_loess_wide + p_loess_narrow + plot_layout(ncol=2) +
+  plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 8))
+```
+
+
+
+![A simple view of machine learning according the sklearn. ](https://1.bp.blogspot.com/-ME24ePzpzIM/UQLWTwurfXI/AAAAAAAAANw/W3EETIroA80/s1600/drop_shadows_background.png){#fig-sklearn}
+
+
+## Specific methods
+
+### Linear regression
+
+In [statistics](https://en.wikipedia.org/wiki/Statistics "Statistics"), **linear regression** is a [linear](https://en.wikipedia.org/wiki/Linearity "Linearity") approach for modelling the relationship between a [scalar](https://en.wikipedia.org/wiki/Scalar_(mathematics) "Scalar (mathematics)") response and one or more explanatory variables (also known as [dependent and independent variables](https://en.wikipedia.org/wiki/Dependent_and_independent_variables "Dependent and independent variables")). The case of one explanatory variable is called _[simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression "Simple linear regression")_; for more than one, the process is called **multiple linear regression**. This term is distinct from [multivariate linear regression](https://en.wikipedia.org/wiki/Multivariate_linear_regression "Multivariate linear regression"), where multiple [correlated](https://en.wikipedia.org/wiki/Correlation_and_dependence "Correlation and dependence") dependent variables are predicted, rather than a single scalar variable.
+
+In linear regression, the relationships are modeled using [linear predictor functions](https://en.wikipedia.org/wiki/Linear_predictor_function "Linear predictor function") whose unknown model [parameters](https://en.wikipedia.org/wiki/Parameters "Parameters") are [estimated](https://en.wikipedia.org/wiki/Estimation_theory "Estimation theory") from the [data](https://en.wikipedia.org/wiki/Data "Data"). Such models are called [linear models](https://en.wikipedia.org/wiki/Linear_model "Linear model"). Most commonly, the [conditional mean](https://en.wikipedia.org/wiki/Conditional_expectation "Conditional expectation") of the response given the values of the explanatory variables (or predictors) is assumed to be an [affine function](https://en.wikipedia.org/wiki/Affine_transformation "Affine transformation") of those values; less commonly, the conditional [median](https://en.wikipedia.org/wiki/Median "Median") or some other [quantile](https://en.wikipedia.org/wiki/Quantile "Quantile") is used. Like all forms of [regression analysis](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis"), linear regression focuses on the [conditional probability distribution](https://en.wikipedia.org/wiki/Conditional_probability_distribution "Conditional probability distribution") of the response given the values of the predictors, rather than on the [joint probability distribution](https://en.wikipedia.org/wiki/Joint_probability_distribution "Joint probability distribution") of all of these variables, which is the domain of [multivariate analysis](https://en.wikipedia.org/wiki/Multivariate_analysis "Multivariate analysis").
+
+Linear regression was the first type of regression analysis to be studied rigorously, and to be used extensively in practical applications. This is because models which depend linearly on their unknown parameters are easier to fit than models which are non-linearly related to their parameters and because the statistical properties of the resulting estimators are easier to determine.
+
+### K-nearest Neighbor
+
+```{r echo=FALSE, fig.cap="**Figure**. The k-nearest neighbor algorithm can be used for regression or classification. "}
+knitr::include_graphics('https://www.kdnuggets.com/wp-content/uploads/rapidminer-knn-image1.jpg')
+```
+
+The **_k_\-nearest neighbors algorithm** (**_k_\-NN**) is a [non-parametric](https://en.wikipedia.org/wiki/Non-parametric_statistics "Non-parametric statistics") [supervised learning](https://en.wikipedia.org/wiki/Supervised_learning "Supervised learning") method first developed by [Evelyn Fix](https://en.wikipedia.org/wiki/Evelyn_Fix "Evelyn Fix") and [Joseph Hodges](https://en.wikipedia.org/wiki/Joseph_Lawson_Hodges_Jr. "Joseph Lawson Hodges Jr.") in 1951, and later expanded by [Thomas Cover](https://en.wikipedia.org/wiki/Thomas_M._Cover "Thomas M. Cover"). It is used for [classification](https://en.wikipedia.org/wiki/Statistical_classification "Statistical classification") and [regression](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis"). In both cases, the input consists of the _k_ closest training examples in a [data set](https://en.wikipedia.org/wiki/Data_set "Data set"). 
+
+The k-nearest neighbor (k-NN) algorithm is a simple, yet powerful, supervised
+machine learning method used for classification and regression tasks. It is an
+instance-based, non-parametric learning method that stores the entire training
+dataset and makes predictions based on the similarity between data points. The
+underlying principle of the k-NN algorithm is that similar data points (those
+that are close to each other in multidimensional space) are likely to have
+similar outcomes or belong to the same class.
+
+Here's a description of how the k-NN algorithm works:
+
+1. Determine the value of k: The first step is to choose the number of nearest
+   neighbors (k) to consider when making predictions. The value of k is a
+   user-defined hyperparameter and can significantly impact the algorithm's
+   performance. A small value of k can lead to overfitting, while a large value
+   may result in underfitting.
+1. Compute distance: Calculate the distance between the new data point (query
+   point) and each data point in the training dataset. The most common distance
+   metrics used are Euclidean, Manhattan, and Minkowski distance. The choice of
+   distance metric depends on the problem and the nature of the data.
+1. Find k-nearest neighbors: Identify the k data points in the training dataset
+   that are closest to the query point, based on the chosen distance metric.
+1. Make predictions: Once the k-nearest neighbors are identified, the final
+   step is to make predictions. The prediction for the query point can be made
+   in two ways:
+    a. For classification, determine the class labels of the k-nearest
+    neighbors and assign the class label with the highest frequency (majority
+    vote) to the query point. In case of a tie, one can choose the class with
+    the smallest average distance to the query point or randomly select one
+    among the tied classes.
+    b. For regression tasks, the k-NN algorithm follows a similar process, but
+    instead of majority voting, it calculates the mean (or median) of the
+    target values of the k-nearest neighbors and assigns it as the prediction
+    for the query point.
+
+The k-NN algorithm is known for its simplicity, ease of implementation, and
+ability to handle multi-class problems. However, it has some drawbacks, such as
+high computational cost (especially for large datasets), sensitivity to the
+choice of k and distance metric, and poor performance with high-dimensional or
+noisy data. Scaling and preprocessing the data, as well as using dimensionality
+reduction techniques, can help mitigate some of these issues.
+
+
+
+*  In _k-NN classification_, the output is a class membership. An object is
+  classified by a plurality vote of its neighbors, with the object being
+  assigned to the class most common among its _k_ nearest neighbors (_k_ is a
+  positive [integer](https://en.wikipedia.org/wiki/Integer "Integer"),
+  typically small). If _k_ = 1, then the object is simply assigned to the class
+  of that single nearest neighbor.
+
+*  In _k-NN regression_, the output is the property value for the object. This
+  value is the average of the values of _k_ nearest neighbors.
+
+_k_\-NN is a type of
+[classification](https://en.wikipedia.org/wiki/Classification "Classification")
+where the function is only approximated locally and all computation is deferred
+until function evaluation. Since this algorithm relies on distance for
+classification, if the features represent different physical units or come in
+vastly different scales then
+[normalizing](https://en.wikipedia.org/wiki/Normalization_(statistics)
+"Normalization (statistics)") the training data can improve its accuracy
+dramatically.
+
+Both for classification and regression, a useful technique can be to assign
+weights to the contributions of the neighbors, so that the nearer neighbors
+contribute more to the average than the more distant ones. For example, a
+common weighting scheme consists in giving each neighbor a weight of 1/_d_,
+where _d_ is the distance to the neighbor.
+
+The neighbors are taken from a set of objects for which the class (for _k_\-NN
+classification) or the object property value (for _k_\-NN regression) is known.
+This can be thought of as the training set for the algorithm, though no
+explicit training step is required.
+
+
+### Classification and Regression Trees (CART)
+
+[Decision Tree Learning](https://en.wikipedia.org/wiki/Decision_tree_learning) is supervised learning approach used in statistics, data mining and machine learning. In this formalism, a classification or regression decision tree is used as a predictive model to draw conclusions about a set of observations. Decision trees are a popular machine learning method used for both classification and regression tasks. They are hierarchical, tree-like structures that model the relationship between features and the target variable by recursively splitting the data into subsets based on the feature values. Each internal node in the tree represents a decision or test on a feature, and each branch represents the outcome of that test. The leaf nodes contain the final prediction, which is the majority class for classification tasks or the mean/median of the target values for regression tasks.
+
+
+Here's an overview of the decision tree learning process:
+
+*  Select the best feature and split value: Start at the root node and choose the feature and split value that results in the maximum reduction of impurity (or increase in information gain) in the child nodes. For classification tasks, impurity measures like Gini index or entropy are commonly used, while for regression tasks, mean squared error (MSE) or mean absolute error (MAE) can be used.
+*  Split the data: Partition the dataset into subsets based on the chosen feature and split value.
+*  Recursion: Repeat steps 1 and 2 for each subset until a stopping criterion is met. Stopping criteria can include reaching a maximum tree depth, a minimum number of samples per leaf, or no further improvement in impurity.
+*  Prune the tree (optional): To reduce overfitting, decision trees can be pruned by removing branches that do not significantly improve the model's performance on the validation dataset. This can be done using techniques like reduced error pruning or cost-complexity pruning.
+
+Decision trees have several advantages, such as:
+
+*  Interpretability
+  : They are easy to understand, visualize, and explain, even for non-experts.
+*  Minimal data preprocessing
+  : Decision trees can handle both numerical and categorical data, and they are robust to outliers and missing values.
+*  Non-linear relationships
+  : They can capture complex non-linear relationships between features and the target variable.
+
+However, decision trees also have some drawbacks:
+
+*  Overfitting
+  : They are prone to overfitting, especially when the tree is deep or has few samples per leaf. Pruning and setting stopping criteria can help mitigate this issue.
+*  Instability
+  : Small changes in the data can lead to different tree structures. This can be addressed by using ensemble methods like random forests or gradient boosting machines (GBMs).
+*  Greedy learning
+  : Decision tree algorithms use a greedy approach, meaning they make locally optimal choices at each node. This may not always result in a globally optimal tree.
+
+Despite these limitations, decision trees are widely used in various applications due to their simplicity, interpretability, and ability to handle diverse data types.
+
+### RandomForest
+
+**Random forests** or **random decision forests** is an [ensemble learning](https://en.wikipedia.org/wiki/Ensemble_learning "Ensemble learning") method for [classification](https://en.wikipedia.org/wiki/Statistical_classification "Statistical classification"), [regression](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis") and other tasks that operates by constructing a multitude of [decision trees](https://en.wikipedia.org/wiki/Decision_tree_learning "Decision tree learning") at training time. For classification tasks, the output of the random forest is the class selected by most trees. For regression tasks, the mean or average prediction of the individual trees is returned. Random decision forests correct for decision trees' habit of [overfitting](https://en.wikipedia.org/wiki/Overfitting "Overfitting") to their [training set](https://en.wikipedia.org/wiki/Test_set "Test set"). Random forests generally outperform [decision trees](https://en.wikipedia.org/wiki/Decision_tree_learning "Decision tree learning"), but their accuracy is lower than gradient boosted trees\[_[citation needed](https://en.wikipedia.org/wiki/Wikipedia:Citation_needed "Wikipedia:Citation needed")_\]. However, data characteristics can affect their performance.
+
+The first algorithm for random decision forests was created in 1995 by [Tin Kam Ho](https://en.wikipedia.org/wiki/Tin_Kam_Ho "Tin Kam Ho") using the [random subspace method](https://en.wikipedia.org/wiki/Random_subspace_method "Random subspace method"), which, in Ho's formulation, is a way to implement the "stochastic discrimination" approach to classification proposed by Eugene Kleinberg.
+
+An extension of the algorithm was developed by [Leo Breiman](https://en.wikipedia.org/wiki/Leo_Breiman "Leo Breiman") and [Adele Cutler](https://en.wikipedia.org/wiki/Adele_Cutler "Adele Cutler"), who registered "Random Forests" as a [trademark](https://en.wikipedia.org/wiki/Trademark "Trademark") in 2006 (as of 2019[\[update\]](https://en.wikipedia.org/w/index.php?title=Random_forest&action=edit), owned by [Minitab, Inc.](https://en.wikipedia.org/wiki/Minitab "Minitab")). The extension combines Breiman's "[bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating "Bootstrap aggregating")" idea and random selection of features, introduced first by Ho and later independently by Amit and [Geman](https://en.wikipedia.org/wiki/Donald_Geman "Donald Geman") in order to construct a collection of decision trees with controlled variance.
+
+Random forests are frequently used as "blackbox" models in businesses, as they generate reasonable predictions across a wide range of data while requiring little configuration.
+
+
+```{r echo=FALSE, fig.cap="**Figure**. Random forests or random decision forests is an ensemble learning method for classification, regression and other tasks that operates by constructing a multitude of decision trees at training time." }
+download.file("https://upload.wikimedia.org/wikipedia/commons/7/76/Random_forest_diagram_complete.png", "images/Random_forest_diagram_complete.png", mode = "auto")
+knitr::include_graphics('images/Random_forest_diagram_complete.png')
+```
+## Practical Machine Learning with R and mlr3
+
 The mlr3 R package is a modern, object-oriented machine learning framework in R
 that builds on the success of its predecessor, the mlr package. It provides a
 flexible and extensible platform for handling common machine learning tasks
@@ -5,8 +274,15 @@ such as data preprocessing, model training, hyperparameter tuning, and model
 evaluation @fig-mlr3-ecosystem. The package is designed to simplify the process of creating and
 deploying complex machine learning pipelines.
 
-![The mlr3 ecosystem](https://mlr3book.mlr-org.com/chapters/chapter1/Figures/mlr3_ecosystem.svg){#fig-mlr3-ecosystem}
-
+```{r fig-mlr3-ecosystem, echo=FALSE, fig.cap='The mlr3 ecosystem.', dpi=100}
+if(!file.exists("images/mlr3_ecosystem.svg")) {
+  download.file(
+    url = "https://mlr3book.mlr-org.com/chapters/chapter1/Figures/mlr3_ecosystem.svg",
+    destfile = "images/mlr3_ecosystem.svg", 
+    mode = "auto") 
+  }
+knitr::include_graphics("images/mlr3_ecosystem.svg")
+```
 
 ### Key features of mlr3
 
@@ -36,6 +312,6 @@ deploying complex machine learning pipelines.
   simplifying the process of comparing and selecting the best models.
 
 You can find more information, including tutorials and examples, on the
-official mlr3 GitHub repository (https://github.com/mlr-org/mlr3) and the mlr3
-book (https://mlr3book.mlr-org.com/).
+official mlr3 GitHub repository^[<https://github.com/mlr-org/mlr3>] and the mlr3
+book^[<https://mlr3book.mlr-org.com/>].
 

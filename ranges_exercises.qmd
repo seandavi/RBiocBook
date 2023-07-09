@@ -1,0 +1,196 @@
+---
+title: "Ranges Exercises"
+output: 
+  html_document:
+    code_folding: "hide"
+---
+
+```{r init, include=FALSE}
+library(knitr)
+opts_chunk$set(cache=TRUE, message=FALSE, results='hide')
+```
+
+# Exercises
+
+## Exercise 1
+
+In this exercise, we will use DNAse hypersensitivity data to explore range operations.
+
+- Use the `AnnotationHub` package to find the `goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz` `GRanges` object. Load
+that into R as the variable dnase.
+
+```{r dnase}
+library(AnnotationHub)
+ah = AnnotationHub()
+query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz")
+# the thing above should have only one record, so we can 
+# just grab it
+dnase = query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz")[[1]]
+```
+
+- What type of object is dnase?
+
+```{r}
+dnase
+class(dnase)
+```
+
+- What metadata is stored in dnase?
+
+```{r}
+mcols(dnase)
+```
+
+- How many peaks are on each chromosome?
+
+```{r}
+library(GenomicFeatures)
+table(seqnames(dnase))
+```
+
+- What are the mean, min, max, and median widths of the peaks?
+
+```{r}
+summary(width(dnase))
+```
+
+- What are the sequences that were used in the analysis? Do the names have "chr" or not? Experiment with changing the
+`seqlevelsStyle` to adjust the sequence names. 
+
+```{r}
+seqlevels(dnase)
+seqlevelsStyle(dnase)
+seqlevelsStyle(dnase) = 'ensembl'
+seqlevelsStyle(dnase)
+seqlevels(dnase)
+```
+
+- What is the total amount of "landscape" covered by the peaks? Assume that the peaks do not overlap. What portion
+of the genome does this represent?
+
+```{r}
+sum(width(dnase))
+sum(seqlengths(dnase))
+sum(width(dnase))/sum(seqlengths(dnase))
+```
+
+## Exercise 2
+
+In this exercise, we are going to load the second DNAse hypersensitivity replicate to investigate overlaps with
+the first replicate.
+
+- Use the AnnotationHub to find the second replicate, `goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz`. Load that as `dnase2`.
+
+```{r}
+query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz")
+# the thing above should have only one record, so we can 
+# just grab it
+dnase2 = query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz")[[1]]
+```
+
+- How many peaks are there in `dnase` and `dnase2`? Are there are similar number?
+
+```{r}
+length(dnase)
+length(dnase2)
+```
+
+- What are the peak sizes for `dnase2`?
+
+```{r}
+summary(width(dnase2))
+```
+
+- What proportion of the genome does `dnase2` cover?
+
+```{r}
+sum(width(dnase))/sum(seqlengths(dnase))
+```
+
+- Count the number of peaks from `dnase` that overlap with `dnase2`.
+
+```{r}
+sum(dnase %over% dnase2)
+```
+
+- Assume that your peak-caller was "too specific" and that you want to expand your peaks
+by 50 bp on each end (so make them 100 bp larger). Use a combination of `resize` (and pay
+attention to the `fix` argument) and `width` to do this expansion to dnase and call the
+new `GRanges` object "dnase_wide".
+
+```{r}
+w = width(dnase)
+dnase_wide = resize(dnase, width=w+100, fix='center') #make a copy
+width(dnase_wide)
+```
+
+## Exercise 3
+
+In this exercise, we are going to look at the overlap of DNAse sites relative to genes/transcripts.
+To get started, install and load the `TxDb.Hsapiens.UCSC.hg19.knownGene` txdb object.
+
+```
+BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")
+library("TxDb.Hsapiens.UCSC.hg19.knownGene")
+kg = TxDb.Hsapiens.UCSC.hg19.knownGene
+```
+
+- Load the transcripts from the knownGene txdb into a variable. What is the class of this object?
+
+```{r}
+library("TxDb.Hsapiens.UCSC.hg19.knownGene")
+kg = TxDb.Hsapiens.UCSC.hg19.knownGene
+tx = transcripts(kg)
+class(tx)
+length(tx)
+```
+
+- Read about the `flank` method for GRanges objects. How could you use that to 
+get the "promoter" regions of the transcripts? Let's assume that the promoter region is
+2kb upstream of the gene.
+
+```{r}
+flank(tx,2000)
+```
+
+- Instead of using flank, could you do the same thing with the TxDb object? (See `?promoters`).
+
+```{r}
+proms = promoters(kg)
+```
+
+- Do any of the regions in the promoters overlap with each other? 
+
+```{r}
+summary(countOverlaps(proms))
+```
+
+- To find overlap of our DNAse sites with promoters, let's collapse overlapping "promoters" to 
+just keep the contiguous regions by using `reduce`. 
+
+```{r}
+prom_regions = reduce(proms)
+summary(countOverlaps(prom_regions))
+```
+
+- Count the number of DNAse sites that overlap with our promoter regions.
+
+```{r}
+sum(dnase %over% prom_regions)
+# if you notice no overlap, check the seqlevels
+# and seqlevelsStyle
+seqlevelsStyle(dnase) = "UCSC"
+sum(dnase %over% prom_regions)
+sum(dnase2 %over% prom_regions)
+```
+- Is this surprising? If we were to assume that the promoter and dnase regions
+are "independent" of each other, what number of overlaps would we expect?
+
+```{r}
+prop_proms = sum(width(prom_regions))/sum(seqlengths(prom_regions))
+prop_dnase = sum(width(dnase))/sum(seqlengths(prom_regions))
+# Iff the dnase and promoter regions are 
+# not related, then we would expect this number
+# of DNAse overlaps with promoters.
+prop_proms * prop_dnase * length(dnase) 
+```
