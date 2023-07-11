@@ -952,18 +952,18 @@
     "text": "20.3 Viewing data in IGV\nInstall IGV from here.\nWe export the greenleaf data as a BigWig file.\n\nlibrary(rtracklayer)\nexport.bw(coverage(greenleaf),'greenleaf.bw')\n\nExercise: In IGV, choose hg19. Then, load the greenleaf.bw file and explore chromosomes 21 and 22. Exercise: Export the nucleosome-free portion of the data as a BigWig file and examine that in IGV. Where do you expect to see the strongest signals?"
   },
   {
+    "objectID": "atac.html#seqences-in-peaks",
+    "href": "atac.html#seqences-in-peaks",
+    "title": "\n20  ATAC-Seq with Bioconductor\n",
+    "section": "\n20.4 Seqences in peaks",
+    "text": "20.4 Seqences in peaks\nWe can use the BSgenome.Hsapiens.UCSC.hg19 package to extract sequences from the peaks.\n\nif(!require(BSgenome.Hsapiens.UCSC.hg19)){BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')}\nlibrary(BSgenome.Hsapiens.UCSC.hg38)"
+  },
+  {
     "objectID": "atac.html#additional-work",
     "href": "atac.html#additional-work",
     "title": "\n20  ATAC-Seq with Bioconductor\n",
-    "section": "\n20.4 Additional work",
-    "text": "20.4 Additional work\nFor those working extensively on ATAC-Seq, there is a great workflow/tutorial available from Thomas Carrol:\nhttps://rockefelleruniversity.github.io/RU_ATAC_Workshop.html\nFeel free to work through it. In addition to the work above, there is also the ATACseqQC package vignette that offers more than just QC. At least a couple more packages are available in Bioconductor."
-  },
-  {
-    "objectID": "atac.html#expression-prediction",
-    "href": "atac.html#expression-prediction",
-    "title": "\n20  ATAC-Seq with Bioconductor\n",
-    "section": "\n20.5 Expression prediction",
-    "text": "20.5 Expression prediction\n\nk562_exp = read.table('https://www.encodeproject.org/files/ENCFF913LYH/@@download/ENCFF913LYH.tsv',\n  header = TRUE)\n\n\ndownload.file(\n    \"https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz\",\n    \"gencode.v29.annotation.gtf.gz\")\n\n\nlibrary(GenomicFeatures)\ntxdb = GenomicFeatures::makeTxDbFromGFF(\"gencode.v29.annotation.gtf.gz\", format=\"gtf\")\n\n\ngr_genes = genes(txdb)\ngr_promoters = promoters(txdb, upstream=1000, downstream=1000)\n\n\nrownames(k562_exp) = k562_exp$gene_id\n\nMatch the gene names in the expression data to the gene names in the TxDb object.\n\nk562_exp_matched = k562_exp[names(gr_genes),]\n\n\natac_bed &lt;- readr::read_tsv(\"https://www.encodeproject.org/files/ENCFF333TAT/@@download/ENCFF333TAT.bed.gz\", col_names=FALSE)\ncolnames(atac_bed)[1:6] &lt;- c(\"chrom\", \"start\", \"end\", \"name\", \"score\", \"strand\")\n\n\nlibrary(GenomicRanges)\ngr_atac = makeGRangesFromDataFrame(atac_bed)\nn = distanceToNearest(gr_genes, gr_atac)"
+    "section": "\n20.5 Additional work",
+    "text": "20.5 Additional work\nFor those working extensively on ATAC-Seq, there is a great workflow/tutorial available from Thomas Carrol:\nhttps://rockefelleruniversity.github.io/RU_ATAC_Workshop.html\nFeel free to work through it. In addition to the work above, there is also the ATACseqQC package vignette that offers more than just QC. At least a couple more packages are available in Bioconductor."
   },
   {
     "objectID": "atac.html#appendix",

@@ -420,8 +420,8 @@ div.csl-indent {
   </ul>
 </li>
   <li><a href="#viewing-data-in-igv" id="toc-viewing-data-in-igv" class="nav-link" data-scroll-target="#viewing-data-in-igv"><span class="header-section-number">20.3</span> Viewing data in IGV</a></li>
-  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">20.4</span> Additional work</a></li>
-  <li><a href="#expression-prediction" id="toc-expression-prediction" class="nav-link" data-scroll-target="#expression-prediction"><span class="header-section-number">20.5</span> Expression prediction</a></li>
+  <li><a href="#seqences-in-peaks" id="toc-seqences-in-peaks" class="nav-link" data-scroll-target="#seqences-in-peaks"><span class="header-section-number">20.4</span> Seqences in peaks</a></li>
+  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">20.5</span> Additional work</a></li>
   <li>
 <a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
   <ul class="collapse">
@@ -847,46 +847,18 @@ attr(,"package")
 <span><span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">export.bw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span>,<span class="st">'greenleaf.bw'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><em>Exercise</em>: In IGV, choose <code>hg19</code>. Then, load the <code>greenleaf.bw</code> file and explore chromosomes 21 and 22. <em>Exercise</em>: Export the nucleosome-free portion of the data as a BigWig file and examine that in IGV. Where do you expect to see the strongest signals?</p>
-</section><section id="additional-work" class="level2" data-number="20.4"><h2 data-number="20.4" class="anchored" data-anchor-id="additional-work">
-<span class="header-section-number">20.4</span> Additional work</h2>
+</section><section id="seqences-in-peaks" class="level2" data-number="20.4"><h2 data-number="20.4" class="anchored" data-anchor-id="seqences-in-peaks">
+<span class="header-section-number">20.4</span> Seqences in peaks</h2>
+<p>We can use the <a href="http://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19"><code>BSgenome.Hsapiens.UCSC.hg19</code></a> package to extract sequences from the peaks.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-16_de87c648f42be3d77ba1b4b8a9606e05">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg19</span><span class="op">)</span><span class="op">)</span><span class="op">{</span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">'BSgenome.Hsapiens.UCSC.hg38'</span><span class="op">)</span><span class="op">}</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg38</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="additional-work" class="level2" data-number="20.5"><h2 data-number="20.5" class="anchored" data-anchor-id="additional-work">
+<span class="header-section-number">20.5</span> Additional work</h2>
 <p>For those working extensively on ATAC-Seq, there is a great workflow/tutorial available from Thomas Carrol:</p>
 <p>https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html</p>
 <p>Feel free to work through it. In addition to the work above, there is also the <a href="http://bioconductor.org/packages/ATACseqQC"><code>ATACseqQC</code></a> package vignette that offers more than just QC. At least a couple more packages are available in <em>Bioconductor</em>.</p>
-</section><section id="expression-prediction" class="level2" data-number="20.5"><h2 data-number="20.5" class="anchored" data-anchor-id="expression-prediction">
-<span class="header-section-number">20.5</span> Expression prediction</h2>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-16_e63bec6c52f424766731b15621adf48c">
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">k562_exp</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.table</a></span><span class="op">(</span><span class="st">'https://www.encodeproject.org/files/ENCFF913LYH/@@download/ENCFF913LYH.tsv'</span>,</span>
-<span>  header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-17_02b753c2b877463c61f5725f1fb65ec4">
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span></span>
-<span>    <span class="st">"https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gtf.gz"</span>,</span>
-<span>    <span class="st">"gencode.v29.annotation.gtf.gz"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-18_8fc965bee703911e4c91e4d8d2d097b9">
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicFeatures">GenomicFeatures</a></span><span class="op">)</span></span>
-<span><span class="va">txdb</span> <span class="op">=</span> <span class="fu">GenomicFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/makeTxDbFromGFF.html">makeTxDbFromGFF</a></span><span class="op">(</span><span class="st">"gencode.v29.annotation.gtf.gz"</span>, format<span class="op">=</span><span class="st">"gtf"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-19_9cd8a0a8238c32c1856cff34e4a89d44">
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr_genes</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span>
-<span><span class="va">gr_promoters</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters</a></span><span class="op">(</span><span class="va">txdb</span>, upstream<span class="op">=</span><span class="fl">1000</span>, downstream<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-20_216f92e61b21f150e5c7af80bf6373fd">
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html">rownames</a></span><span class="op">(</span><span class="va">k562_exp</span><span class="op">)</span> <span class="op">=</span> <span class="va">k562_exp</span><span class="op">$</span><span class="va">gene_id</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Match the gene names in the expression data to the gene names in the TxDb object.</p>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-21_c837267071429d5940ee7d3bbc556ebd">
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">k562_exp_matched</span> <span class="op">=</span> <span class="va">k562_exp</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">gr_genes</span><span class="op">)</span>,<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-22_ea4268191073f47019f1be67415537dc">
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">atac_bed</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_tsv</a></span><span class="op">(</span><span class="st">"https://www.encodeproject.org/files/ENCFF333TAT/@@download/ENCFF333TAT.bed.gz"</span>, col_names<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html">colnames</a></span><span class="op">(</span><span class="va">atac_bed</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"chrom"</span>, <span class="st">"start"</span>, <span class="st">"end"</span>, <span class="st">"name"</span>, <span class="st">"score"</span>, <span class="st">"strand"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-23_d77f7a2f768c316a415582e7c7cdc45a">
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span>
-<span><span class="va">gr_atac</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/makeGRangesFromDataFrame.html">makeGRangesFromDataFrame</a></span><span class="op">(</span><span class="va">atac_bed</span><span class="op">)</span></span>
-<span><span class="va">n</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest</a></span><span class="op">(</span><span class="va">gr_genes</span>, <span class="va">gr_atac</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section><section id="appendix" class="level2 unnumbered page-columns page-full"><h2 class="unnumbered anchored" data-anchor-id="appendix">Appendix</h2>
 <section id="session-info" class="level3 unnumbered"><h3 class="unnumbered anchored" data-anchor-id="session-info">Session info</h3>
 <div class="cell" data-hash="atac_cache/html/sessionInfo_33d5ccc41c27ca559bb5bf668b19499d">
