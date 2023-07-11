@@ -420,8 +420,15 @@ div.csl-indent {
   </ul>
 </li>
   <li><a href="#viewing-data-in-igv" id="toc-viewing-data-in-igv" class="nav-link" data-scroll-target="#viewing-data-in-igv"><span class="header-section-number">20.3</span> Viewing data in IGV</a></li>
-  <li><a href="#seqences-in-peaks" id="toc-seqences-in-peaks" class="nav-link" data-scroll-target="#seqences-in-peaks"><span class="header-section-number">20.4</span> Seqences in peaks</a></li>
-  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">20.5</span> Additional work</a></li>
+  <li>
+<a href="#seqence-extraction" id="toc-seqence-extraction" class="nav-link" data-scroll-target="#seqence-extraction"><span class="header-section-number">20.4</span> Seqence extraction</a>
+  <ul class="collapse">
+<li><a href="#sequences-in-bioconductor" id="toc-sequences-in-bioconductor" class="nav-link" data-scroll-target="#sequences-in-bioconductor"><span class="header-section-number">20.4.1</span> Sequences in Bioconductor</a></li>
+  <li><a href="#bsgenomes" id="toc-bsgenomes" class="nav-link" data-scroll-target="#bsgenomes"><span class="header-section-number">20.4.2</span> BSGenome(s)</a></li>
+  </ul>
+</li>
+  <li><a href="#common-peaks" id="toc-common-peaks" class="nav-link" data-scroll-target="#common-peaks"><span class="header-section-number">20.5</span> Common peaks</a></li>
+  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">20.6</span> Additional work</a></li>
   <li>
 <a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
   <ul class="collapse">
@@ -847,15 +854,310 @@ attr(,"package")
 <span><span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">export.bw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span>,<span class="st">'greenleaf.bw'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><em>Exercise</em>: In IGV, choose <code>hg19</code>. Then, load the <code>greenleaf.bw</code> file and explore chromosomes 21 and 22. <em>Exercise</em>: Export the nucleosome-free portion of the data as a BigWig file and examine that in IGV. Where do you expect to see the strongest signals?</p>
-</section><section id="seqences-in-peaks" class="level2" data-number="20.4"><h2 data-number="20.4" class="anchored" data-anchor-id="seqences-in-peaks">
-<span class="header-section-number">20.4</span> Seqences in peaks</h2>
-<p>We can use the <a href="http://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19"><code>BSgenome.Hsapiens.UCSC.hg19</code></a> package to extract sequences from the peaks.</p>
-<div class="cell" data-hash="atac_cache/html/unnamed-chunk-16_de87c648f42be3d77ba1b4b8a9606e05">
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg19</span><span class="op">)</span><span class="op">)</span><span class="op">{</span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">'BSgenome.Hsapiens.UCSC.hg38'</span><span class="op">)</span><span class="op">}</span></span>
+</section><section id="seqence-extraction" class="level2" data-number="20.4"><h2 data-number="20.4" class="anchored" data-anchor-id="seqence-extraction">
+<span class="header-section-number">20.4</span> Seqence extraction</h2>
+<section id="sequences-in-bioconductor" class="level3" data-number="20.4.1"><h3 data-number="20.4.1" class="anchored" data-anchor-id="sequences-in-bioconductor">
+<span class="header-section-number">20.4.1</span> Sequences in Bioconductor</h3>
+<p>The BioStrings package provides a number of functions for working with sequences.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-16_57b8a0db0f59c68acbcf443904224a0e">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/Biostrings">Biostrings</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can create a DNAString object from a string of nucleotides.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-17_7e7fbddb05ac90b86d665830561e14c7">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dna</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/DNAString-class.html">DNAString</a></span><span class="op">(</span><span class="st">'gcgctgctggatgcgaccgcgcatgcgagcgcgacctatccggaa'</span><span class="op">)</span></span>
+<span><span class="va">dna</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>45-letter DNAString object
+seq: GCGCTGCTGGATGCGACCGCGCATGCGAGCGCGACCTATCCGGAA</code></pre>
+</div>
+</div>
+<p>You may not have known that DNA has a convention for including multiple possible bases. The entire possible alphabet for DNA is given by:</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-18_78ae5455f41706a006b6d13ffec0191a">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">Biostrings</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/XString-class.html">alphabet</a></span><span class="op">(</span><span class="va">dna</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "A" "C" "G" "T" "M" "R" "W" "S" "Y" "K" "V" "H" "D" "B" "N" "-" "+" "."</code></pre>
+</div>
+</div>
+<p>Try to create a DNAString object from a string of amino acids, for example. What happens?</p>
+<p>We can reverse complement the sequence.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-19_c5f1dc78a640ee3e84a7bc1f553e923d">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/reverseComplement.html">reverseComplement</a></span><span class="op">(</span><span class="va">dna</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>45-letter DNAString object
+seq: TTCCGGATAGGTCGCGCTCGCATGCGCGGTCGCATCCAGCAGCGC</code></pre>
+</div>
+</div>
+<p>We can translate the sequence into amino acids.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-20_e7f1df68cc0ce46757ecf8ec996097fa">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/translate.html">translate</a></span><span class="op">(</span><span class="va">dna</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15-letter AAString object
+seq: ALLDATAHASATYPE</code></pre>
+</div>
+</div>
+<p>Subsetting a DNAString object returns another DNAString object.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-21_e27b6d8dea2af17295b4e4c96d69b867">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dna</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>10-letter DNAString object
+seq: GCGCTGCTGG</code></pre>
+</div>
+</div>
+<p>We can extract the nucleotide frequencies (or amino acid frequencies) from a DNAStringSet object.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-22_6bfc79e09e9ae4f5fa4dd8c7ee59dec8">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html">alphabetFrequency</a></span><span class="op">(</span><span class="va">dna</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> A  C  G  T  M  R  W  S  Y  K  V  H  D  B  N  -  +  . 
+ 8 15 16  6  0  0  0  0  0  0  0  0  0  0  0  0  0  0 </code></pre>
+</div>
+</div>
+</section><section id="bsgenomes" class="level3" data-number="20.4.2"><h3 data-number="20.4.2" class="anchored" data-anchor-id="bsgenomes">
+<span class="header-section-number">20.4.2</span> BSGenome(s)</h3>
+<p>The <a href="https://bioconductor.org/packages/BSgenome">BSgenome</a> package provides functionality to interact with genome sequences that come pre-packaged.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-23_7579a7f1726b684dd84d37367dd948e2">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/BSgenome">BSgenome</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The names of available genomes are below. They are all named <code>BSgenome.&lt;species&gt;.&lt;source&gt;.&lt;assembly&gt;</code> as in <code>BSgenome.Hsapiens.UCSC.hg19</code>, <code>BSgenome.Mmusculus.UCSC.mm10</code>, etc.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-24_2b29c05249b0627a4d1790a61d13303f">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/available.genomes.html">available.genomes</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "BSgenome.Alyrata.JGI.v1"                           
+  [2] "BSgenome.Amellifera.BeeBase.assembly4"             
+  [3] "BSgenome.Amellifera.NCBI.AmelHAv3.1"               
+  [4] "BSgenome.Amellifera.UCSC.apiMel2"                  
+  [5] "BSgenome.Amellifera.UCSC.apiMel2.masked"           
+  [6] "BSgenome.Aofficinalis.NCBI.V1"                     
+  [7] "BSgenome.Athaliana.TAIR.04232008"                  
+  [8] "BSgenome.Athaliana.TAIR.TAIR9"                     
+  [9] "BSgenome.Btaurus.UCSC.bosTau3"                     
+ [10] "BSgenome.Btaurus.UCSC.bosTau3.masked"              
+ [11] "BSgenome.Btaurus.UCSC.bosTau4"                     
+ [12] "BSgenome.Btaurus.UCSC.bosTau4.masked"              
+ [13] "BSgenome.Btaurus.UCSC.bosTau6"                     
+ [14] "BSgenome.Btaurus.UCSC.bosTau6.masked"              
+ [15] "BSgenome.Btaurus.UCSC.bosTau8"                     
+ [16] "BSgenome.Btaurus.UCSC.bosTau9"                     
+ [17] "BSgenome.Btaurus.UCSC.bosTau9.masked"              
+ [18] "BSgenome.Carietinum.NCBI.v1"                       
+ [19] "BSgenome.Celegans.UCSC.ce10"                       
+ [20] "BSgenome.Celegans.UCSC.ce11"                       
+ [21] "BSgenome.Celegans.UCSC.ce2"                        
+ [22] "BSgenome.Celegans.UCSC.ce6"                        
+ [23] "BSgenome.Cfamiliaris.UCSC.canFam2"                 
+ [24] "BSgenome.Cfamiliaris.UCSC.canFam2.masked"          
+ [25] "BSgenome.Cfamiliaris.UCSC.canFam3"                 
+ [26] "BSgenome.Cfamiliaris.UCSC.canFam3.masked"          
+ [27] "BSgenome.Cjacchus.UCSC.calJac3"                    
+ [28] "BSgenome.Cjacchus.UCSC.calJac4"                    
+ [29] "BSgenome.CneoformansVarGrubiiKN99.NCBI.ASM221672v1"
+ [30] "BSgenome.Creinhardtii.JGI.v5.6"                    
+ [31] "BSgenome.Dmelanogaster.UCSC.dm2"                   
+ [32] "BSgenome.Dmelanogaster.UCSC.dm2.masked"            
+ [33] "BSgenome.Dmelanogaster.UCSC.dm3"                   
+ [34] "BSgenome.Dmelanogaster.UCSC.dm3.masked"            
+ [35] "BSgenome.Dmelanogaster.UCSC.dm6"                   
+ [36] "BSgenome.Drerio.UCSC.danRer10"                     
+ [37] "BSgenome.Drerio.UCSC.danRer11"                     
+ [38] "BSgenome.Drerio.UCSC.danRer5"                      
+ [39] "BSgenome.Drerio.UCSC.danRer5.masked"               
+ [40] "BSgenome.Drerio.UCSC.danRer6"                      
+ [41] "BSgenome.Drerio.UCSC.danRer6.masked"               
+ [42] "BSgenome.Drerio.UCSC.danRer7"                      
+ [43] "BSgenome.Drerio.UCSC.danRer7.masked"               
+ [44] "BSgenome.Dvirilis.Ensembl.dvircaf1"                
+ [45] "BSgenome.Ecoli.NCBI.20080805"                      
+ [46] "BSgenome.Gaculeatus.UCSC.gasAcu1"                  
+ [47] "BSgenome.Gaculeatus.UCSC.gasAcu1.masked"           
+ [48] "BSgenome.Ggallus.UCSC.galGal3"                     
+ [49] "BSgenome.Ggallus.UCSC.galGal3.masked"              
+ [50] "BSgenome.Ggallus.UCSC.galGal4"                     
+ [51] "BSgenome.Ggallus.UCSC.galGal4.masked"              
+ [52] "BSgenome.Ggallus.UCSC.galGal5"                     
+ [53] "BSgenome.Ggallus.UCSC.galGal6"                     
+ [54] "BSgenome.Gmax.NCBI.Gmv40"                          
+ [55] "BSgenome.Hsapiens.1000genomes.hs37d5"              
+ [56] "BSgenome.Hsapiens.NCBI.GRCh38"                     
+ [57] "BSgenome.Hsapiens.NCBI.T2T.CHM13v2.0"              
+ [58] "BSgenome.Hsapiens.UCSC.hg17"                       
+ [59] "BSgenome.Hsapiens.UCSC.hg17.masked"                
+ [60] "BSgenome.Hsapiens.UCSC.hg18"                       
+ [61] "BSgenome.Hsapiens.UCSC.hg18.masked"                
+ [62] "BSgenome.Hsapiens.UCSC.hg19"                       
+ [63] "BSgenome.Hsapiens.UCSC.hg19.masked"                
+ [64] "BSgenome.Hsapiens.UCSC.hg38"                       
+ [65] "BSgenome.Hsapiens.UCSC.hg38.dbSNP151.major"        
+ [66] "BSgenome.Hsapiens.UCSC.hg38.dbSNP151.minor"        
+ [67] "BSgenome.Hsapiens.UCSC.hg38.masked"                
+ [68] "BSgenome.Hsapiens.UCSC.hs1"                        
+ [69] "BSgenome.Mdomestica.UCSC.monDom5"                  
+ [70] "BSgenome.Mfascicularis.NCBI.5.0"                   
+ [71] "BSgenome.Mfascicularis.NCBI.6.0"                   
+ [72] "BSgenome.Mfuro.UCSC.musFur1"                       
+ [73] "BSgenome.Mmulatta.UCSC.rheMac10"                   
+ [74] "BSgenome.Mmulatta.UCSC.rheMac2"                    
+ [75] "BSgenome.Mmulatta.UCSC.rheMac2.masked"             
+ [76] "BSgenome.Mmulatta.UCSC.rheMac3"                    
+ [77] "BSgenome.Mmulatta.UCSC.rheMac3.masked"             
+ [78] "BSgenome.Mmulatta.UCSC.rheMac8"                    
+ [79] "BSgenome.Mmusculus.UCSC.mm10"                      
+ [80] "BSgenome.Mmusculus.UCSC.mm10.masked"               
+ [81] "BSgenome.Mmusculus.UCSC.mm39"                      
+ [82] "BSgenome.Mmusculus.UCSC.mm8"                       
+ [83] "BSgenome.Mmusculus.UCSC.mm8.masked"                
+ [84] "BSgenome.Mmusculus.UCSC.mm9"                       
+ [85] "BSgenome.Mmusculus.UCSC.mm9.masked"                
+ [86] "BSgenome.Osativa.MSU.MSU7"                         
+ [87] "BSgenome.Ppaniscus.UCSC.panPan1"                   
+ [88] "BSgenome.Ppaniscus.UCSC.panPan2"                   
+ [89] "BSgenome.Ptroglodytes.UCSC.panTro2"                
+ [90] "BSgenome.Ptroglodytes.UCSC.panTro2.masked"         
+ [91] "BSgenome.Ptroglodytes.UCSC.panTro3"                
+ [92] "BSgenome.Ptroglodytes.UCSC.panTro3.masked"         
+ [93] "BSgenome.Ptroglodytes.UCSC.panTro5"                
+ [94] "BSgenome.Ptroglodytes.UCSC.panTro6"                
+ [95] "BSgenome.Rnorvegicus.UCSC.rn4"                     
+ [96] "BSgenome.Rnorvegicus.UCSC.rn4.masked"              
+ [97] "BSgenome.Rnorvegicus.UCSC.rn5"                     
+ [98] "BSgenome.Rnorvegicus.UCSC.rn5.masked"              
+ [99] "BSgenome.Rnorvegicus.UCSC.rn6"                     
+[100] "BSgenome.Rnorvegicus.UCSC.rn7"                     
+[101] "BSgenome.Scerevisiae.UCSC.sacCer1"                 
+[102] "BSgenome.Scerevisiae.UCSC.sacCer2"                 
+[103] "BSgenome.Scerevisiae.UCSC.sacCer3"                 
+[104] "BSgenome.Sscrofa.UCSC.susScr11"                    
+[105] "BSgenome.Sscrofa.UCSC.susScr3"                     
+[106] "BSgenome.Sscrofa.UCSC.susScr3.masked"              
+[107] "BSgenome.Tgondii.ToxoDB.7.0"                       
+[108] "BSgenome.Tguttata.UCSC.taeGut1"                    
+[109] "BSgenome.Tguttata.UCSC.taeGut1.masked"             
+[110] "BSgenome.Tguttata.UCSC.taeGut2"                    
+[111] "BSgenome.Vvinifera.URGI.IGGP12Xv0"                 
+[112] "BSgenome.Vvinifera.URGI.IGGP12Xv2"                 
+[113] "BSgenome.Vvinifera.URGI.IGGP8X"                    </code></pre>
+</div>
+</div>
+<p>We can use the <a href="http://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg38"><code>BSgenome.Hsapiens.UCSC.hg38</code></a> package to extract sequences from peaks.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-25_f30ca8c6edcadab50ef476ac744f8b48">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg38</span><span class="op">)</span><span class="op">)</span><span class="op">{</span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">'BSgenome.Hsapiens.UCSC.hg38'</span><span class="op">)</span><span class="op">}</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg38</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="additional-work" class="level2" data-number="20.5"><h2 data-number="20.5" class="anchored" data-anchor-id="additional-work">
-<span class="header-section-number">20.5</span> Additional work</h2>
+<p>The ENCODE project has thousands of datasets available for download. We’ll grab an arbitrary ATAC-seq dataset from here:</p>
+<ul>
+<li><a href="https://www.encodeproject.org/files/ENCFF994UIF/@@download/ENCFF994UIF.bed.gz" class="uri">https://www.encodeproject.org/files/ENCFF994UIF/@@download/ENCFF994UIF.bed.gz</a></li>
+</ul>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-26_1be396288077ddbfa83c727c65aa2098">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">adrenal_atac</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_tsv</a></span><span class="op">(</span><span class="st">'https://www.encodeproject.org/files/ENCFF994UIF/@@download/ENCFF994UIF.bed.gz'</span>,</span>
+<span>                                col_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html">colnames</a></span><span class="op">(</span><span class="va">adrenal_atac</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'chrom'</span>,<span class="st">'start'</span>,<span class="st">'end'</span>,<span class="st">'name'</span>,<span class="st">'score'</span>,<span class="st">'strand'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">adrenal_atac</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 10
+  chrom     start       end name        score strand    ``     ``     ``    ``
+  &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1 chr1  100037554 100039053 Peak_2668    1000 .      18.8  2883.  2879.    506
+2 chr1  100037554 100039053 Peak_40256   1000 .       5.92  434.   431.   1016
+3 chr1  100037554 100039053 Peak_57398   1000 .       4.71  278.   275.    811
+4 chr1  100037554 100039053 Peak_78482   1000 .       3.77  174.   172.   1287
+5 chr1  100046439 100046610 Peak_244701   146 .       2.75   14.7   12.9    83
+6 chr1  100060446 100060954 Peak_138710   597 .       5.32   59.7   57.7   275</code></pre>
+</div>
+</div>
+<p>We can convert the data to a <code>GRanges</code> object after ensureing that the column names are correct.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-27_98cdc0f33717ee10e0341d6908757308">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">adrenal_atac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span><span class="va">adrenal_atac</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">adrenal_atac</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 6 ranges and 6 metadata columns:
+      seqnames              ranges strand |        name     score      &lt;NA&gt;
+         &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;
+  [1]     chr1 100037554-100039053      * |   Peak_2668      1000  18.84493
+  [2]     chr1 100037554-100039053      * |  Peak_40256      1000   5.91615
+  [3]     chr1 100037554-100039053      * |  Peak_57398      1000   4.70575
+  [4]     chr1 100037554-100039053      * |  Peak_78482      1000   3.76879
+  [5]     chr1 100046439-100046610      * | Peak_244701       146   2.74992
+  [6]     chr1 100060446-100060954      * | Peak_138710       597   5.32355
+           &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;
+      &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+  [1] 2882.5295 2878.5525       506
+  [2]  433.6264  431.0128      1016
+  [3]  277.7893  275.3472       811
+  [4]  174.3991  172.1142      1287
+  [5]   14.6544   12.9433        83
+  [6]   59.7187   57.7244       275
+  -------
+  seqinfo: 24 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">adrenal_atac</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 273730</code></pre>
+</div>
+</div>
+<p>We can extract the sequences from the peaks using the <a href="http://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg38"><code>BSgenome.Hsapiens.UCSC.hg38</code></a> package.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-28_7b6bcef284e14f2633783ba0c09304af">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">adrenal_atac_seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html">getSeq</a></span><span class="op">(</span><span class="va">BSgenome.Hsapiens.UCSC.hg38</span>, <span class="va">adrenal_atac</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">adrenal_atac_seqs</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DNAStringSet object of length 6:
+    width seq
+[1]  1500 CAAAGGGTGACATCGGTCAGGTAAGGTATTTTTT...GATCGGAGGAGGACACTTTGAAGGGAAGAAAGG
+[2]  1500 CAAAGGGTGACATCGGTCAGGTAAGGTATTTTTT...GATCGGAGGAGGACACTTTGAAGGGAAGAAAGG
+[3]  1500 CAAAGGGTGACATCGGTCAGGTAAGGTATTTTTT...GATCGGAGGAGGACACTTTGAAGGGAAGAAAGG
+[4]  1500 CAAAGGGTGACATCGGTCAGGTAAGGTATTTTTT...GATCGGAGGAGGACACTTTGAAGGGAAGAAAGG
+[5]   172 TGGTCTTGAACTCCTGACCTCAGGTGATCCGCCC...GTTCCATATAAGTTTTAGGATTTAAAAGAAAAA
+[6]   509 TGCAAGTTGAGCAGTCTGGAGCTGGTATGGCAGT...CCATGGTGTTATCTACAAAGGCCCAAAGGTTTA</code></pre>
+</div>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">adrenal_atac_seqs</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 273730</code></pre>
+</div>
+</div>
+<p>We can then write the sequences to a FASTA file.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-29_bd59124ebb9c6eb3175950e2aebf1a27">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/XStringSet-io.html">writeXStringSet</a></span><span class="op">(</span><span class="va">adrenal_atac_seqs</span>, <span class="st">'adrenal_atac_seqs.fa'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section><section id="common-peaks" class="level2" data-number="20.5"><h2 data-number="20.5" class="anchored" data-anchor-id="common-peaks">
+<span class="header-section-number">20.5</span> Common peaks</h2>
+<p>Let’s grab another dataset from the ENCODE project. This time, we’ll use a dataset from the <a href="https://www.encodeproject.org/">ENCODE Project</a>.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-30_7a06fe0e4db0079fc611af9c0f4b4880">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cardiac_atac</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_tsv</a></span><span class="op">(</span><span class="st">'https://www.encodeproject.org/files/ENCFF012BKZ/@@download/ENCFF012BKZ.bed.gz'</span>,</span>
+<span>                                col_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html">colnames</a></span><span class="op">(</span><span class="va">cardiac_atac</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'chrom'</span>,<span class="st">'start'</span>,<span class="st">'end'</span>,<span class="st">'name'</span>,<span class="st">'score'</span>,<span class="st">'strand'</span><span class="op">)</span></span>
+<span><span class="va">cardiac_atac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span><span class="va">cardiac_atac</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">cardiac_atac</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 6 ranges and 6 metadata columns:
+      seqnames              ranges strand |        name     score      &lt;NA&gt;
+         &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;numeric&gt; &lt;numeric&gt;
+  [1]     chr1 100006549-100007015      * | Peak_126876       195   4.37594
+  [2]     chr1 100006549-100007015      * | Peak_228935        62   2.54600
+  [3]     chr1 100023516-100023841      * |  Peak_53548       741   9.38837
+  [4]     chr1 100037565-100038984      * | Peak_140410       162   2.53385
+  [5]     chr1 100037565-100038984      * | Peak_243001        56   1.78235
+  [6]     chr1 100037565-100038984      * |   Peak_4079      1000  20.92354
+           &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;
+      &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+  [1]  19.54719  17.50513       340
+  [2]   6.23524   4.47481       104
+  [3]  74.18277  71.72324       156
+  [4]  16.24701  14.25361      1006
+  [5]   5.63139   3.89871        82
+  [6] 768.94092 765.21680       489
+  -------
+  seqinfo: 24 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+</div>
+<p>Using what we know about overlaps, we can look for peaks that are common between the two datasets.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-31_f9ae680aa126bdd39a010a5f6f704e5e">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">adrenal_over_cardiac</span> <span class="op">&lt;-</span> <span class="va">adrenal_atac</span><span class="op">[</span><span class="va">adrenal_atac</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">cardiac_atac</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To export the GRanges as a BED file, we can use the <a href="http://bioconductor.org/packages/rtracklayer"><code>rtracklayer</code></a> package.</p>
+<div class="cell" data-hash="atac_cache/html/unnamed-chunk-32_1d3de72755d8e35fd62e545269682df4">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
+<span><span class="fu">export</span><span class="op">(</span><span class="va">adrenal_over_cardiac</span>, <span class="st">'adrenal_over_cardiac.bed'</span>, format<span class="op">=</span><span class="st">'bed'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Open the BED file in IGV. What do you see? What do you expect to see?</p>
+</section><section id="additional-work" class="level2" data-number="20.6"><h2 data-number="20.6" class="anchored" data-anchor-id="additional-work">
+<span class="header-section-number">20.6</span> Additional work</h2>
 <p>For those working extensively on ATAC-Seq, there is a great workflow/tutorial available from Thomas Carrol:</p>
 <p>https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html</p>
 <p>Feel free to work through it. In addition to the work above, there is also the <a href="http://bioconductor.org/packages/ATACseqQC"><code>ATACseqQC</code></a> package vignette that offers more than just QC. At least a couple more packages are available in <em>Bioconductor</em>.</p>
