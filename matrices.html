@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.353">
+<meta name="generator" content="quarto-1.4.550">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
-<meta name="dcterms.date" content="2023-07-11">
+<meta name="dcterms.date" content="2024-06-06">
 <meta name="description" content="A collection of chapters more than a book, but….">
 <title>The RBioc Book - 6&nbsp; Matrices</title>
 <style>
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -79,7 +79,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -88,8 +94,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script><style>html{ scroll-behavior: smooth; }</style>
 </head>
@@ -97,19 +105,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./data_structures_overview.html">Overview of R Data Structures</a></li><li class="breadcrumb-item"><a href="./matrices.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Matrices</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./data_structures_overview.html">Overview of R Data Structures</a></li><li class="breadcrumb-item"><a href="./matrices.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Matrices</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">The RBioc Book</a> 
         <div class="sidebar-tools-main tools-wide">
@@ -260,7 +268,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
- <span class="menu-text">Statistics and Machine Learning</span></a>
+ <span class="menu-text">statististics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -284,18 +292,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">K-means clustering</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./ml_practical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Machine Learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./machine_learning_mlr3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Machine Learning 2</span></span></a>
-  </div>
-</li>
       </ul>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -310,31 +306,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./geoquery.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./eda_with_pca.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">EDA with PCA</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./ranges_and_signals.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Genomic ranges and features</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./atac.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">EDA with PCA</span></span></a>
   </div>
 </li>
       </ul>
@@ -370,7 +354,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
     </ul>
 </div>
-</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
@@ -387,10 +371,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">6.5.2</span> Questions</a></li>
   </ul>
 </li>
-  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/seandavi/RBiocBook/edit/main/matrices.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/matrices.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./data_structures_overview.html">Overview of R Data Structures</a></li><li class="breadcrumb-item"><a href="./matrices.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Matrices</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
 <span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Matrices</span>
 </h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/matrices.qmd">View Source</a></li></ul></div></div>
@@ -402,16 +386,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="quarto-title-meta-heading">Affiliation</div>
   
     <div class="quarto-title-meta-contents">
-    <p class="author"><a href="https://seandavi.github.io/">Sean Davis</a> </p>
+    <p class="author"><a href="https://seandavi.github.io/">Sean Davis</a> <a href="mailto:seandavi@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
   </div>
-    <div class="quarto-title-meta-contents">
+  <div class="quarto-title-meta-contents">
         <p class="affiliation">
             <a href="https://medschool.cuanschutz.edu/">
             University of Colorado<br>Anschutz School of Medicine
             </a>
           </p>
       </div>
-    </div>
+  </div>
 
 <div class="quarto-title-meta">
 
@@ -419,7 +403,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 11, 2023</p>
+      <p class="date">June 6, 2024</p>
     </div>
   </div>
   
@@ -427,10 +411,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
-</header><p>A <em>matrix</em> is a rectangular collection of the same data type (see <a href="#fig-datastructures_schematic">Figure&nbsp;<span>6.1</span></a>). It can be viewed as a collection of column vectors all of the same length and the same type (i.e.&nbsp;numeric, character or logical) OR a collection of row vectors, again all of the same type and length. A <em>data.frame</em> is <em>also</em> a rectangular array. All of the columns must be the same length, but they <strong>may be</strong> of <em>different</em> types. The rows and columns of a matrix or data frame can be given names. However these are implemented differently in R; many operations will work for one but not both, often a source of confusion.</p>
-<div id="fig-datastructures_schematic" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full"><p><img src="images/datastructures_schematic.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;6.1: A matrix is a collection of column vectors.</figcaption></figure>
+
+</header><p>A <em>matrix</em> is a rectangular collection of the same data type (see <a href="#fig-datastructures_schematic" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>). It can be viewed as a collection of column vectors all of the same length and the same type (i.e.&nbsp;numeric, character or logical) OR a collection of row vectors, again all of the same type and length. A <em>data.frame</em> is <em>also</em> a rectangular array. All of the columns must be the same length, but they <strong>may be</strong> of <em>different</em> types. The rows and columns of a matrix or data frame can be given names. However these are implemented differently in R; many operations will work for one but not both, often a source of confusion.</p>
+<div id="fig-datastructures_schematic" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-datastructures_schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/datastructures_schematic.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-datastructures_schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: A matrix is a collection of column vectors.
+</figcaption></figure>
 </div>
 <section id="creating-a-matrix" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="creating-a-matrix">
 <span class="header-section-number">6.1</span> Creating a matrix</h2>
@@ -469,12 +458,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span></span>
 <span><span class="va">mat</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       [,1]      [,2]    [,3]      [,4]      [,5]     [,6]       [,7]      [,8]
-x 1.0000000 2.0000000 3.00000  4.000000  5.000000 6.000000  7.0000000  8.000000
-y 0.4213429 0.4326436 1.28799 -2.153729 -0.955121 1.369986 -0.1474719 -1.594401
-      [,9]      [,10]
-x 9.000000 10.0000000
-y 1.166565  0.5907749</code></pre>
+<pre><code>        [,1]      [,2]      [,3]       [,4]       [,5]       [,6]       [,7]
+x  1.0000000  2.000000 3.0000000  4.0000000  5.0000000  6.0000000  7.0000000
+y -0.2260241 -1.094141 0.1714483 -0.2555133 -0.1925184 -0.7936755 -0.8252991
+        [,8]      [,9]     [,10]
+x  8.0000000 9.0000000 10.000000
+y -0.8556162 0.7268338 -1.243649</code></pre>
 </div>
 </div>
 <p>The alternative to <code>rbind</code> is <code>cbind</code> that binds columns (<strong>c</strong>) together.</p>
@@ -483,16 +472,16 @@ y 1.166565  0.5907749</code></pre>
 <span><span class="va">mat</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       x          y
- [1,]  1  0.4213429
- [2,]  2  0.4326436
- [3,]  3  1.2879903
- [4,]  4 -2.1537293
- [5,]  5 -0.9551210
- [6,]  6  1.3699864
- [7,]  7 -0.1474719
- [8,]  8 -1.5944011
- [9,]  9  1.1665650
-[10,] 10  0.5907749</code></pre>
+ [1,]  1 -0.2260241
+ [2,]  2 -1.0941408
+ [3,]  3  0.1714483
+ [4,]  4 -0.2555133
+ [5,]  5 -0.1925184
+ [6,]  6 -0.7936755
+ [7,]  7 -0.8252991
+ [8,]  8 -0.8556162
+ [9,]  9  0.7268338
+[10,] 10 -1.2436490</code></pre>
 </div>
 </div>
 <p>Inspecting the names associated with rows and columns is often useful, particularly if the names have human meaning.</p>
@@ -516,16 +505,16 @@ y 1.166565  0.5907749</code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      apples    oranges
- [1,]      1  0.4213429
- [2,]      2  0.4326436
- [3,]      3  1.2879903
- [4,]      4 -2.1537293
- [5,]      5 -0.9551210
- [6,]      6  1.3699864
- [7,]      7 -0.1474719
- [8,]      8 -1.5944011
- [9,]      9  1.1665650
-[10,]     10  0.5907749</code></pre>
+ [1,]      1 -0.2260241
+ [2,]      2 -1.0941408
+ [3,]      3  0.1714483
+ [4,]      4 -0.2555133
+ [5,]      5 -0.1925184
+ [6,]      6 -0.7936755
+ [7,]      7 -0.8252991
+ [8,]      8 -0.8556162
+ [9,]      9  0.7268338
+[10,]     10 -1.2436490</code></pre>
 </div>
 </div>
 <p>Matrices have dimensions.</p>
@@ -565,14 +554,14 @@ Important
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The 2nd element of the 1st row of mat</span></span>
 <span><span class="va">mat</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  oranges 
-0.4213429 </code></pre>
+<pre><code>   oranges 
+-0.2260241 </code></pre>
 </div>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The first ROW of mat</span></span>
 <span><span class="va">mat</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   apples   oranges 
-1.0000000 0.4213429 </code></pre>
+<pre><code>    apples    oranges 
+ 1.0000000 -0.2260241 </code></pre>
 </div>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The first COLUMN of mat</span></span>
 <span><span class="va">mat</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -603,17 +592,17 @@ Caution
 <div class="cell">
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span><span class="op">[</span>,<span class="op">-</span><span class="fl">1</span><span class="op">]</span>       <span class="co"># remove first column</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1]  0.4213429  0.4326436  1.2879903 -2.1537293 -0.9551210  1.3699864
- [7] -0.1474719 -1.5944011  1.1665650  0.5907749</code></pre>
+<pre><code> [1] -0.2260241 -1.0941408  0.1714483 -0.2555133 -0.1925184 -0.7936755
+ [7] -0.8252991 -0.8556162  0.7268338 -1.2436490</code></pre>
 </div>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,<span class="op">]</span>  <span class="co"># remove first five rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     apples    oranges
-[1,]      6  1.3699864
-[2,]      7 -0.1474719
-[3,]      8 -1.5944011
-[4,]      9  1.1665650
-[5,]     10  0.5907749</code></pre>
+[1,]      6 -0.7936755
+[2,]      7 -0.8252991
+[3,]      8 -0.8556162
+[4,]      9  0.7268338
+[5,]     10 -1.2436490</code></pre>
 </div>
 </div>
 </section><section id="changing-values-in-a-matrix" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="changing-values-in-a-matrix">
@@ -624,12 +613,12 @@ Caution
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       V1                V2         
- Min.   :-1.6420   Min.   :-0.7456  
- 1st Qu.:-0.8393   1st Qu.:-0.5711  
- Median : 0.2474   Median :-0.2029  
- Mean   : 0.2034   Mean   : 0.1043  
- 3rd Qu.: 0.5573   3rd Qu.: 0.2300  
- Max.   : 2.9066   Max.   : 2.1126  </code></pre>
+ Min.   :-1.2254   Min.   :-1.4417  
+ 1st Qu.:-0.6030   1st Qu.:-1.0352  
+ Median : 0.3881   Median :-0.1091  
+ Mean   : 0.2752   Mean   : 0.1471  
+ 3rd Qu.: 1.1030   3rd Qu.: 0.9386  
+ Max.   : 1.6500   Max.   : 2.8153  </code></pre>
 </div>
 </div>
 <p>Multiplication and division works similarly to vectors. When multiplying by a vector, for example, the values of the vector are reused. In the simplest case, let’s multiply the matrix by a constant (vector of length 1).</p>
@@ -639,12 +628,12 @@ Caution
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       V1                V2         
- Min.   :-32.840   Min.   :-14.912  
- 1st Qu.:-16.786   1st Qu.:-11.422  
- Median :  4.947   Median : -4.059  
- Mean   :  4.068   Mean   :  2.086  
- 3rd Qu.: 11.147   3rd Qu.:  4.599  
- Max.   : 58.131   Max.   : 42.251  </code></pre>
+ Min.   :-24.508   Min.   :-28.834  
+ 1st Qu.:-12.059   1st Qu.:-20.703  
+ Median :  7.761   Median : -2.181  
+ Mean   :  5.505   Mean   :  2.943  
+ 3rd Qu.: 22.059   3rd Qu.: 18.772  
+ Max.   : 33.000   Max.   : 56.306  </code></pre>
 </div>
 </div>
 <p>By combining subsetting with assignment, we can make changes to just part of a matrix.</p>
@@ -655,24 +644,24 @@ Caution
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       V1               V2         
- Min.   : 67.16   Min.   :-14.912  
- 1st Qu.: 83.21   1st Qu.:-11.422  
- Median :104.95   Median : -4.059  
- Mean   :104.07   Mean   :  2.086  
- 3rd Qu.:111.15   3rd Qu.:  4.599  
- Max.   :158.13   Max.   : 42.251  </code></pre>
+ Min.   : 75.49   Min.   :-28.834  
+ 1st Qu.: 87.94   1st Qu.:-20.703  
+ Median :107.76   Median : -2.181  
+ Mean   :105.50   Mean   :  2.943  
+ 3rd Qu.:122.06   3rd Qu.: 18.772  
+ Max.   :133.00   Max.   : 56.306  </code></pre>
 </div>
 </div>
 <p>A somewhat common transformation for a matrix is to transpose which changes rows to columns. One might need to do this if an assay output from a lab machine puts samples in rows and genes in columns, for example, while in Bioconductor/R, we often want the samples in columns and the genes in rows.</p>
 <div class="cell">
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          [,1]        [,2]      [,3]       [,4]     [,5]       [,6]      [,7]
-[1,] 107.96863 104.0960114 101.49678 158.131297 105.7981 133.993020 72.711332
-[2,] -14.33319  -0.4561012  29.42504  -7.661384 -12.3741  -8.565006  5.457562
-          [,8]     [,9]     [,10]
-[1,] 77.119850 67.15979 112.20585
-[2,]  2.023542 42.25148 -14.91248</code></pre>
+<pre><code>          [,1]      [,2]     [,3]      [,4]      [,5]      [,6]       [,7]
+[1,]  86.90116 113.48913 75.49234 133.00012 108.15383 129.18570 107.368657
+[2,] -27.62233  19.16009 56.30615 -14.23669  17.60645 -28.83382  -3.364782
+           [,8]      [,9]     [,10]
+[1,] 85.4795888  91.05885 124.91609
+[2,] -0.9980966 -22.85878  34.26772</code></pre>
 </div>
 </div>
 </section><section id="calculations-on-matrix-rows-and-columns" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="calculations-on-matrix-rows-and-columns">
@@ -685,43 +674,43 @@ Caution
 <div class="cell">
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">m3</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 4.720436</code></pre>
+<pre><code>[1] 5.80262</code></pre>
 </div>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">m3</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 2.204187</code></pre>
+<pre><code>[1] 2.140594</code></pre>
 </div>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># or a row</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">m3</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 4.330586</code></pre>
+<pre><code>[1] 4.987707</code></pre>
 </div>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">m3</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.328035</code></pre>
+<pre><code>[1] 1.03461</code></pre>
 </div>
 </div>
 <p>There are some useful convenience functions for computing means and sums of data in <strong>all</strong> of the columns and rows of matrices.</p>
 <div class="cell">
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 4.720436 4.901195 4.912108 5.326346 5.300867 4.462975 3.948073 4.793714
- [9] 5.383735 4.405058</code></pre>
+<pre><code> [1] 5.802620 5.460025 4.821321 4.992476 3.679565 5.079196 4.623018 4.522687
+ [9] 4.943004 4.878935</code></pre>
 </div>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 4.330586 4.098086 5.515398 4.497942 5.170548 5.157355 4.960425 5.033872
- [9] 4.735140 4.655157</code></pre>
+<pre><code> [1] 4.987707 5.146057 5.552158 5.725254 4.228795 5.374928 4.062281 4.421042
+ [9] 5.316340 3.988285</code></pre>
 </div>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 43.30586 40.98086 55.15398 44.97942 51.70548 51.57355 49.60425 50.33872
- [9] 47.35140 46.55157</code></pre>
+<pre><code> [1] 49.87707 51.46057 55.52158 57.25254 42.28795 53.74928 40.62281 44.21042
+ [9] 53.16340 39.88285</code></pre>
 </div>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 47.20436 49.01195 49.12108 53.26346 53.00867 44.62975 39.48073 47.93714
- [9] 53.83735 44.05058</code></pre>
+<pre><code> [1] 58.02620 54.60025 48.21321 49.92476 36.79565 50.79196 46.23018 45.22687
+ [9] 49.43004 48.78935</code></pre>
 </div>
 </div>
 <p>We can look at the distribution of column means:</p>
@@ -731,7 +720,7 @@ Caution
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">cmeans</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  3.948   4.527   4.847   4.815   5.204   5.384 </code></pre>
+  3.680   4.673   4.911   4.880   5.058   5.803 </code></pre>
 </div>
 </div>
 <p>Note that this is centered pretty closely around the selected mean of <code>5</code> above.</p>
@@ -741,7 +730,7 @@ Caution
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">csds</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  1.106   1.710   1.995   1.869   2.193   2.286 </code></pre>
+  1.249   1.723   1.985   1.909   2.215   2.327 </code></pre>
 </div>
 </div>
 <p>Again, take a look at the distribution which is centered quite close to the selected standard deviation when we created our matrix.</p>
@@ -763,7 +752,7 @@ Caution
 <li>
 <p>After the conversion above, what does <code>sunspot_mat</code> look like? Use functions to find the number of rows, the number of columns, the class, and some basic summary statistics.</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
@@ -780,7 +769,7 @@ Caution
 <li>The value for July, 1979 using the rowname to do the selection.</li>
 </ul>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sunspot_mat</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sunspot_mat</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span></span>
 <span><span class="va">sunspot_mat</span><span class="op">[</span>,<span class="fl">7</span><span class="op">]</span></span>
 <span><span class="va">sunspot_mat</span><span class="op">[</span><span class="st">'1979'</span>,<span class="fl">7</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -791,21 +780,21 @@ Caution
 <li>
 <p>These next few exercises take advantage of the fact that calling a univariate statistical function (one that expects a vector) works for matrices by just making a vector of all the values in the matrix. What is the highest (max) number of sunspots recorded in these data?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </li>
 <li>
 <p>And the minimum?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </li>
 <li>
 <p>And the overall mean and median?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -813,21 +802,21 @@ Caution
 <li>
 <p>Use the <code><a href="https://rdrr.io/r/graphics/hist.html">hist()</a></code> function to look at the distribution of all the monthly sunspot data.</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </li>
 <li>
 <p>Read about the <code>breaks</code> argument to <code><a href="https://rdrr.io/r/graphics/hist.html">hist()</a></code> to try to increase the number of breaks in the histogram to increase the resolution slightly. Adjust your <code><a href="https://rdrr.io/r/graphics/hist.html">hist()</a></code> and breaks to your liking.</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="va">sunspot_mat</span>, breaks<span class="op">=</span><span class="fl">40</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="va">sunspot_mat</span>, breaks<span class="op">=</span><span class="fl">40</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </li>
 <li>
 <p>Now, let’s move on to summarizing the data a bit to learn about the pattern of sunspots varies by month or by year. Examine the dataset again. What do the columns represent? And the rows?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># just a quick glimpse of the data will give us a sense</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># just a quick glimpse of the data will give us a sense</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -835,7 +824,7 @@ Caution
 <li>
 <p>We’d like to look at the distribution of sunspots by month. How can we do that?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># the mean of the columns is the mean number of sunspots per month.</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># the mean of the columns is the mean number of sunspots per month.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Another way to write the same thing:</span></span>
@@ -846,7 +835,7 @@ Caution
 <li>
 <p>Assign the month summary above to a variable and summarize it to get a sense of the spread over months.</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">monthmeans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">monthmeans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">monthmeans</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -854,7 +843,7 @@ Caution
 <li>
 <p>Play the same game for years to get the per-year mean?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ymeans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ymeans</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="va">sunspot_mat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">ymeans</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -862,7 +851,7 @@ Caution
 <li>
 <p>Make a plot of the yearly means. Do you see a pattern?</p>
 <div class="cell">
-<details><summary>Show answer</summary><div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ymeans</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show answer</summary><div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ymeans</span><span class="op">)</span></span>
 <span><span class="co"># or make it clearer</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ymeans</span>, type<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1001,10 +990,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1014,8 +1002,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1028,6 +1025,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1071,6 +1187,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1096,6 +1213,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1155,12 +1298,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./vectors.html" class="pagination-link">
+      <a href="./vectors.html" class="pagination-link" aria-label="Vectors">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Vectors</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./dataframes_intro.html" class="pagination-link">
+      <a href="./dataframes_intro.html" class="pagination-link" aria-label="Data Frames">
         <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Frames</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -1173,10 +1316,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     <div class="nav-footer-center">
       <ul class="footer-items list-unstyled">
 <li class="nav-item">
-    <a class="nav-link" href="./license.html">License</a>
+    <a class="nav-link" href="./license.html">
+<p>License</p>
+</a>
   </li>  
 </ul>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/matrices.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
