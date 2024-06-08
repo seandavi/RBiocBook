@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.555">
+<meta name="generator" content="quarto-1.4.550">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
-<meta name="dcterms.date" content="2024-06-06">
+<meta name="dcterms.date" content="2024-06-07">
 <meta name="description" content="A collection of chapters more than a book, but….">
 <title>The RBioc Book - 14&nbsp; Accessing and working with public omics data</title>
 <style>
@@ -210,7 +210,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a href="./data_structures_overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Overview of R Data Structures</span></a>
+ <span class="menu-text">R Data Structures</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -360,12 +360,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#the-data" id="toc-the-data" class="nav-link active" data-scroll-target="#the-data"><span class="header-section-number">15</span> The data</a>
-  <ul class="collapse">
-<li><a href="#geoquery-to-multidimensional-scaling" id="toc-geoquery-to-multidimensional-scaling" class="nav-link" data-scroll-target="#geoquery-to-multidimensional-scaling"><span class="header-section-number">15.1</span> GEOquery to multidimensional scaling</a></li>
-  </ul>
-</li>
+<li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">14.1</span> Background</a></li>
+  <li><a href="#geoquery-to-multidimensional-scaling" id="toc-geoquery-to-multidimensional-scaling" class="nav-link" data-scroll-target="#geoquery-to-multidimensional-scaling"><span class="header-section-number">14.2</span> GEOquery to multidimensional scaling</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/geoquery.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -398,7 +394,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 6, 2024</p>
+      <p class="date">June 7, 2024</p>
     </div>
   </div>
   
@@ -407,8 +403,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   
 
 
-</header><section id="the-data" class="level1" data-number="15"><h1 data-number="15">
-<span class="header-section-number">15</span> The data</h1>
+</header><section id="background" class="level2" data-number="14.1"><h2 data-number="14.1" class="anchored" data-anchor-id="background">
+<span class="header-section-number">14.1</span> Background</h2>
 <p>The data we are going to access are from <a href="https://doi.org/10.1158/1055-9965.EPI-17-0461">this paper</a>.</p>
 <blockquote class="blockquote">
 <p>Background: The tumor microenvironment is an important factor in cancer immunotherapy response. To further understand how a tumor affects the local immune system, we analyzed immune gene expression differences between matching normal and tumor tissue.Methods: We analyzed public and new gene expression data from solid cancers and isolated immune cell populations. We also determined the correlation between CD8, FoxP3 IHC, and our gene signatures.Results: We observed that regulatory T cells (Tregs) were one of the main drivers of immune gene expression differences between normal and tumor tissue. A tumor-specific CD8 signature was slightly lower in tumor tissue compared with normal of most (12 of 16) cancers, whereas a Treg signature was higher in tumor tissue of all cancers except liver. Clustering by Treg signature found two groups in colorectal cancer datasets. The high Treg cluster had more samples that were consensus molecular subtype 1/4, right-sided, and microsatellite-instable, compared with the low Treg cluster. Finally, we found that the correlation between signature and IHC was low in our small dataset, but samples in the high Treg cluster had significantly more CD8+ and FoxP3+ cells compared with the low Treg cluster.Conclusions: Treg gene expression is highly indicative of the overall tumor immune environment.Impact: In comparison with the consensus molecular subtype and microsatellite status, the Treg signature identifies more colorectal tumors with high immune activation that may benefit from cancer immunotherapy.</p>
@@ -418,9 +414,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Access public omics data using the GEOquery package</li>
 <li>Get an opportunity to work with another SummarizedExperiment object.</li>
 <li>Perform a simple unsupervised analysis to visualize these public data.</li>
-</ol>
-<section id="geoquery-to-multidimensional-scaling" class="level2" data-number="15.1"><h2 data-number="15.1" class="anchored" data-anchor-id="geoquery-to-multidimensional-scaling">
-<span class="header-section-number">15.1</span> GEOquery to multidimensional scaling</h2>
+</ol></section><section id="geoquery-to-multidimensional-scaling" class="level2" data-number="14.2"><h2 data-number="14.2" class="anchored" data-anchor-id="geoquery-to-multidimensional-scaling">
+<span class="header-section-number">14.2</span> GEOquery to multidimensional scaling</h2>
 <p>The first step is to install the <a href="https://cran.r-project.org/">R</a> package <a href="https://bioconductor.org/packages/GEOquery">GEOquery</a>. This package allows us to access data from the Gene Expression Omnibus (GEO) database. GEO is a public repository of omics data.</p>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">"GEOquery"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -485,7 +480,7 @@ cancer.type.ch1 no yes
 </ul>
 
 
-</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -615,24 +610,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -667,11 +644,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
+      return note.innerHTML;
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
