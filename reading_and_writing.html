@@ -7,7 +7,7 @@
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-08">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>The RBioc Book - 15&nbsp; Accessing and working with public omics data</title>
+<title>The RBioc Book - 5&nbsp; Reading and writing data files</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -63,8 +63,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./bioc-summarizedexperiment.html" rel="next">
-<link href="./kmeans.html" rel="prev">
+<link href="./data_structures_overview.html" rel="next">
+<link href="./packages_and_dice.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -108,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./geoquery.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html">Introduction</a></li><li class="breadcrumb-item"><a href="./reading_and_writing.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -207,7 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reading_and_writing.html" class="sidebar-item-text sidebar-link">
+  <a href="./reading_and_writing.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></span></a>
   </div>
 </li>
@@ -311,7 +311,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./geoquery.html" class="sidebar-item-text sidebar-link active">
+  <a href="./geoquery.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></span></a>
   </div>
 </li>
@@ -366,15 +366,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">15.1</span> Background</a></li>
-  <li><a href="#geoquery-to-multidimensional-scaling" id="toc-geoquery-to-multidimensional-scaling" class="nav-link" data-scroll-target="#geoquery-to-multidimensional-scaling"><span class="header-section-number">15.2</span> GEOquery to multidimensional scaling</a></li>
-  </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/geoquery.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">5.1</span> Introduction</a></li>
+  <li>
+<a href="#csv-files" id="toc-csv-files" class="nav-link" data-scroll-target="#csv-files"><span class="header-section-number">5.2</span> CSV files</a>
+  <ul class="collapse">
+<li><a href="#writing-a-csv-file" id="toc-writing-a-csv-file" class="nav-link" data-scroll-target="#writing-a-csv-file"><span class="header-section-number">5.2.1</span> Writing a CSV file</a></li>
+  <li><a href="#reading-a-csv-file" id="toc-reading-a-csv-file" class="nav-link" data-scroll-target="#reading-a-csv-file"><span class="header-section-number">5.2.2</span> Reading a CSV file</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#excel-files" id="toc-excel-files" class="nav-link" data-scroll-target="#excel-files"><span class="header-section-number">5.3</span> Excel files</a>
+  <ul class="collapse">
+<li><a href="#reading-an-excel-file" id="toc-reading-an-excel-file" class="nav-link" data-scroll-target="#reading-an-excel-file"><span class="header-section-number">5.3.1</span> Reading an Excel file</a></li>
+  <li><a href="#writing-an-excel-file" id="toc-writing-an-excel-file" class="nav-link" data-scroll-target="#writing-an-excel-file"><span class="header-section-number">5.3.2</span> Writing an Excel file</a></li>
+  </ul>
+</li>
+  <li><a href="#additional-options" id="toc-additional-options" class="nav-link" data-scroll-target="#additional-options"><span class="header-section-number">5.4</span> Additional options</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/reading_and_writing.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./geoquery.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></a></li></ol></nav><div class="quarto-title">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html">Introduction</a></li><li class="breadcrumb-item"><a href="./reading_and_writing.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span>
-</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/geoquery.qmd"><i class="bi"></i> Code</button></div></div>
+<span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Reading and writing data files</span>
+</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/reading_and_writing.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
@@ -409,80 +423,168 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   
 
 
-</header><section id="background" class="level2" data-number="15.1"><h2 data-number="15.1" class="anchored" data-anchor-id="background">
-<span class="header-section-number">15.1</span> Background</h2>
-<p>The data we are going to access are from <a href="https://doi.org/10.1158/1055-9965.EPI-17-0461">this paper</a>.</p>
-<blockquote class="blockquote">
-<p>Background: The tumor microenvironment is an important factor in cancer immunotherapy response. To further understand how a tumor affects the local immune system, we analyzed immune gene expression differences between matching normal and tumor tissue.Methods: We analyzed public and new gene expression data from solid cancers and isolated immune cell populations. We also determined the correlation between CD8, FoxP3 IHC, and our gene signatures.Results: We observed that regulatory T cells (Tregs) were one of the main drivers of immune gene expression differences between normal and tumor tissue. A tumor-specific CD8 signature was slightly lower in tumor tissue compared with normal of most (12 of 16) cancers, whereas a Treg signature was higher in tumor tissue of all cancers except liver. Clustering by Treg signature found two groups in colorectal cancer datasets. The high Treg cluster had more samples that were consensus molecular subtype 1/4, right-sided, and microsatellite-instable, compared with the low Treg cluster. Finally, we found that the correlation between signature and IHC was low in our small dataset, but samples in the high Treg cluster had significantly more CD8+ and FoxP3+ cells compared with the low Treg cluster.Conclusions: Treg gene expression is highly indicative of the overall tumor immune environment.Impact: In comparison with the consensus molecular subtype and microsatellite status, the Treg signature identifies more colorectal tumors with high immune activation that may benefit from cancer immunotherapy.</p>
-</blockquote>
-<p>In this little exercise, we will:</p>
-<ol type="1">
-<li>Access public omics data using the GEOquery package</li>
-<li>Get an opportunity to work with another SummarizedExperiment object.</li>
-<li>Perform a simple unsupervised analysis to visualize these public data.</li>
-</ol></section><section id="geoquery-to-multidimensional-scaling" class="level2" data-number="15.2"><h2 data-number="15.2" class="anchored" data-anchor-id="geoquery-to-multidimensional-scaling">
-<span class="header-section-number">15.2</span> GEOquery to multidimensional scaling</h2>
-<p>The first step is to install the <a href="https://cran.r-project.org/">R</a> package <a href="https://bioconductor.org/packages/GEOquery">GEOquery</a>. This package allows us to access data from the Gene Expression Omnibus (GEO) database. GEO is a public repository of omics data.</p>
+</header><section id="introduction" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="introduction">
+<span class="header-section-number">5.1</span> Introduction</h2>
+<p>In this chapter, we will discuss how to read and write data files in R. Data files are essential for storing and sharing data across different platforms and applications. R provides a variety of functions and packages to read and write data files in different formats, such as text files, CSV files, Excel files. By mastering these functions, you can efficiently import and export data in R, enabling you to perform data analysis and visualization tasks effectively.</p>
+</section><section id="csv-files" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="csv-files">
+<span class="header-section-number">5.2</span> CSV files</h2>
+<p>Comma-Separated Values (CSV) files are a common file format for storing tabular data. They consist of rows and columns, with each row representing a record and each column representing a variable or attribute. CSV files are widely used for data storage and exchange due to their simplicity and compatibility with various software applications. In R, you can read and write CSV files using the <code><a href="https://rdrr.io/r/utils/read.table.html">read.csv()</a></code> and <code><a href="https://rdrr.io/r/utils/write.table.html">write.csv()</a></code> functions, respectively. A commonly used alternative is to use the <code>readr</code> package, which provides faster and more user-friendly functions for reading and writing CSV files.</p>
+<section id="writing-a-csv-file" class="level3" data-number="5.2.1"><h3 data-number="5.2.1" class="anchored" data-anchor-id="writing-a-csv-file">
+<span class="header-section-number">5.2.1</span> Writing a CSV file</h3>
+<p>Since we are going to use the <code>readr</code> package, we need to install it first. You can install the <code>readr</code> package using the following command:</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">"GEOquery"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"readr"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>GEOquery has only one commonly used function, <code><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO()</a></code> which takes a GEO accession number as an argument. The GEO accession number is a unique identifier for a dataset.</p>
-<p>Use the <a href="https://bioconductor.org/packages/GEOquery">GEOquery</a> package to fetch data about <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103512">GSE103512</a>.</p>
+<p>Once the package is installed, you can load it into your R session using the <code><a href="https://rdrr.io/r/base/library.html">library()</a></code> function:</p>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span></span>
-<span><span class="va">gse</span> <span class="op">=</span> <span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE103512"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The first step, a detail, is to convert from the older Bioconductor data structure (GEOquery was written in 2007), the <code>ExpressionSet</code>, to the newer <code>SummarizedExperiment</code>.</p>
+<p>Since we don’t have a CSV file sitting around, let’s create a simple data frame to write to a CSV file. Here’s an example data frame:</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment">SummarizedExperiment</a></span><span class="op">)</span></span>
-<span><span class="va">se</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">gse</span>, <span class="st">"SummarizedExperiment"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Alice"</span>, <span class="st">"Bob"</span>, <span class="st">"Charlie"</span>, <span class="st">"David"</span>, <span class="st">"Eve"</span><span class="op">)</span>,</span>
+<span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">30</span>, <span class="fl">35</span>, <span class="fl">40</span>, <span class="fl">45</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<ul>
-<li>What is the class of <code>se</code>?</li>
-<li>What are the dimensions of <code>se</code>?</li>
-<li>What are the dimensions of the <code>assay</code> slot of <code>se</code>?</li>
-<li>What are the dimensions of the <code>colData</code> slot of <code>se</code>?</li>
-<li>What variables are in the <code>colData</code> slot of <code>se</code>?</li>
-</ul>
-<p>Examine two variables of interest, cancer type and tumor/normal status. The <code>with</code> function is a convenience to allow us to access variables in a data frame by name (rather than having to do <code>dataframe$variable_name</code>.</p>
+<p>Now, you can write this data frame to a CSV file using the <code><a href="https://readr.tidyverse.org/reference/write_delim.html">write_csv()</a></code> function from the <code>readr</code> package. Here’s how you can do it:</p>
 <div class="cell">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">`cancer.type.ch1`</span>,<span class="va">`normal.ch1`</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html">write_csv</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"data.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can check the current working directory to see if the CSV file was created successfully. If you want to specify a different directory or file path, you can provide the full path in the <code><a href="https://readr.tidyverse.org/reference/write_delim.html">write_csv()</a></code> function.</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># see what the current working directory is</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html">getwd</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>               normal.ch1
-cancer.type.ch1 no yes
-          BC    65  10
-          CRC   57  12
-          NSCLC 60   9
-          PCA   60   7</code></pre>
+<pre><code>[1] "/Users/seandavis/Documents/git/RBiocBook"</code></pre>
+</div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># and check to see that the file was created</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">dir</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"data.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "data.csv"</code></pre>
 </div>
 </div>
-<p>Filter gene expression by variance to find most informative genes. It is common practice to filter genes by standard deviation or some other measure of variability and keep the top X percent of them when performing dimensionality reduction. There is not a single right answer to what percentage to use, so try a few to see what happens.</p>
-<p>In the example code, I chose to use the top 500 genes by standard deviation.</p>
+</section><section id="reading-a-csv-file" class="level3" data-number="5.2.2"><h3 data-number="5.2.2" class="anchored" data-anchor-id="reading-a-csv-file">
+<span class="header-section-number">5.2.2</span> Reading a CSV file</h3>
+<p>Now that we have a CSV file, let’s read it back into R using the <code><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv()</a></code> function from the <code>readr</code> package. Here’s how you can do it:</p>
 <div class="cell">
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sds</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">'exprs'</span><span class="op">)</span>,<span class="fl">1</span>,<span class="va">sd</span><span class="op">)</span></span>
-<span><span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">'exprs'</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">sds</span>,decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">500</span><span class="op">]</span>,<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 5 Columns: 3
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (1): name
+dbl (2): id, age
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<p>Perform <a href="https://en.wikipedia.org/wiki/Multidimensional_scaling">multidimensional scaling</a> and prepare for plotting. We will be using ggplot2, so we need to make a data.frame before plotting.</p>
+</div>
+<p>You can check the structure of the data frame <code>df2</code> to verify that the data was read correctly:</p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mdsvals</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cmdscale.html">cmdscale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">mdsvals</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">mdsvals</span><span class="op">)</span></span>
-<span><span class="va">mdsvals</span><span class="op">$</span><span class="va">Type</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">[</span>,<span class="st">'cancer.type.ch1'</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">mdsvals</span><span class="op">$</span><span class="va">Normal</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">[</span>,<span class="st">'normal.ch1'</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>And do the plot.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">mdsvals</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">V1</span>,y<span class="op">=</span><span class="va">V2</span>,shape<span class="op">=</span><span class="va">Normal</span>,color<span class="op">=</span><span class="va">Type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> alpha<span class="op">=</span><span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>text<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">18</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="geoquery_files/figure-html/mdsplot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
-</figure>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+     id name      age
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      25
+2     2 Bob        30
+3     3 Charlie    35
+4     4 David      40
+5     5 Eve        45</code></pre>
 </div>
 </div>
+<p>The <code>readr</code> package can read CSV files with various delimiters, headers, and data types, making it a versatile tool for handling tabular data in R. It can also read CSV files directly from web locations like so:</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"https://data.cdc.gov/resource/pwn4-m3yp.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 1000 Columns: 10
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (1): state
+dbl  (6): tot_cases, new_cases, tot_deaths, new_deaths, new_historic_cases, ...
+dttm (3): date_updated, start_date, end_date
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
+</div>
+<p>The dataset that you just downloaded is described here: <a href="https://data.cdc.gov/Case-Surveillance/Weekly-United-States-COVID-19-Cases-and-Deaths-by-/pwn4-m3yp/about_data">Covid-19 data from CDC</a></p>
+</section></section><section id="excel-files" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="excel-files">
+<span class="header-section-number">5.3</span> Excel files</h2>
+<p>Microsoft Excel files are another common file format for storing tabular data. Excel files can contain multiple sheets, formulas, and formatting options, making them a popular choice for data storage and analysis. In R, you can read and write Excel files using the <code>readxl</code> package. This package provides functions to import and export data from Excel files, enabling you to work with Excel data in R.</p>
+<section id="reading-an-excel-file" class="level3" data-number="5.3.1"><h3 data-number="5.3.1" class="anchored" data-anchor-id="reading-an-excel-file">
+<span class="header-section-number">5.3.1</span> Reading an Excel file</h3>
+<p>To read an Excel file in R, you need to install and load the <code>readxl</code> package. You can install the <code>readxl</code> package using the following command:</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"readxl"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Once the package is installed, you can load it into your R session using the <code><a href="https://rdrr.io/r/base/library.html">library()</a></code> function:</p>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readxl.tidyverse.org">readxl</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, you can read an Excel file using the <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel()</a></code> function from the <code>readxl</code> package. We don’t have an excel file available, so let’s download one from the internet. Here’s an example:</p>
+<div class="cell">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span><span class="st">'https://www.w3resource.com/python-exercises/pandas/excel/SaleData.xlsx'</span>, <span class="st">'SaleData.xlsx'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, you can read the Excel file into R using the <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel()</a></code> function:</p>
+<div class="cell">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df_excel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span><span class="op">(</span><span class="st">"SaleData.xlsx"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can check the structure of the data frame <code>df_excel</code> to verify that the data was read correctly:</p>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df_excel</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 45 × 8
+   OrderDate           Region  Manager SalesMan  Item  Units Unit_price Sale_amt
+   &lt;dttm&gt;              &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt; &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+ 1 2018-01-06 00:00:00 East    Martha  Alexander Tele…    95       1198   113810
+ 2 2018-01-23 00:00:00 Central Hermann Shelli    Home…    50        500    25000
+ 3 2018-02-09 00:00:00 Central Hermann Luis      Tele…    36       1198    43128
+ 4 2018-02-26 00:00:00 Central Timothy David     Cell…    27        225     6075
+ 5 2018-03-15 00:00:00 West    Timothy Stephen   Tele…    56       1198    67088
+ 6 2018-04-01 00:00:00 East    Martha  Alexander Home…    60        500    30000
+ 7 2018-04-18 00:00:00 Central Martha  Steven    Tele…    75       1198    89850
+ 8 2018-05-05 00:00:00 Central Hermann Luis      Tele…    90       1198   107820
+ 9 2018-05-22 00:00:00 West    Douglas Michael   Tele…    32       1198    38336
+10 2018-06-08 00:00:00 East    Martha  Alexander Home…    60        500    30000
+# ℹ 35 more rows</code></pre>
+</div>
+</div>
+<p>The <code>readxl</code> package provides various options to read Excel files with multiple sheets, specific ranges, and data types, making it a versatile tool for handling Excel data in R.</p>
+</section><section id="writing-an-excel-file" class="level3" data-number="5.3.2"><h3 data-number="5.3.2" class="anchored" data-anchor-id="writing-an-excel-file">
+<span class="header-section-number">5.3.2</span> Writing an Excel file</h3>
+<p>To write an Excel file in R, you can use the <code><a href="https://docs.ropensci.org/writexl/reference/write_xlsx.html">write_xlsx()</a></code> function from the <code>writexl</code> package. You can install the <code>writexl</code> package using the following command:</p>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"writexl"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Once the package is installed, you can load it into your R session using the <code><a href="https://rdrr.io/r/base/library.html">library()</a></code> function:</p>
+<div class="cell">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/writexl/">writexl</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code><a href="https://docs.ropensci.org/writexl/reference/write_xlsx.html">write_xlsx()</a></code> function allows you to write a data frame to an Excel file. Here’s an example:</p>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://docs.ropensci.org/writexl/reference/write_xlsx.html">write_xlsx</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"data.xlsx"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can check the current working directory to see if the Excel file was created successfully. If you want to specify a different directory or file path, you can provide the full path in the <code><a href="https://docs.ropensci.org/writexl/reference/write_xlsx.html">write_xlsx()</a></code> function.</p>
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># see what the current working directory is</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html">getwd</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "/Users/seandavis/Documents/git/RBiocBook"</code></pre>
+</div>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># and check to see that the file was created</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">dir</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"data.xlsx"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "data.xlsx"</code></pre>
+</div>
+</div>
+</section></section><section id="additional-options" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="additional-options">
+<span class="header-section-number">5.4</span> Additional options</h2>
 <ul>
-<li>What do you see?</li>
+<li>Google Sheets: You can read and write data from Google Sheets using the <code>googlesheets4</code> package. This package provides functions to interact with Google Sheets, enabling you to import and export data from Google Sheets to R.</li>
+<li>JSON files: You can read and write JSON files using the <code>jsonlite</code> package. This package provides functions to convert R objects to JSON format and vice versa, enabling you to work with JSON data in R.</li>
+<li>Database files: You can read and write data from database files using the <code>DBI</code> and <code>RSQLite</code> packages. These packages provide functions to interact with various database systems, enabling you to import and export data from databases to R.</li>
 </ul>
 
 
@@ -924,13 +1026,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./kmeans.html" class="pagination-link" aria-label="K-means clustering">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">K-means clustering</span></span>
+      <a href="./packages_and_dice.html" class="pagination-link" aria-label="Packages and more dice">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Packages and more dice</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./bioc-summarizedexperiment.html" class="pagination-link" aria-label="Introduction to `SummarizedExperiment`">
-        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./data_structures_overview.html" class="pagination-link" aria-label="R Data Structures">
+        <span class="nav-page-text">R Data Structures</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -947,7 +1049,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </a>
   </li>  
 </ul>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/geoquery.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/reading_and_writing.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
