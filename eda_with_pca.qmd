@@ -180,7 +180,7 @@ other sample metadata.
 ```{r}
 # We can use cbind to join the PC values to the colData
 # note that the names of the rows are the same for both
-colData(sub_se) = cbind(colData(sub_se), pca$x)
+colData(sub_se) = cbind(colData(sub_se), pca$x[,1:5])
 ```
 
 We now have the PCs stored conveniently with our SummarizedExperiment.
@@ -208,7 +208,7 @@ with ggplot (and ggpairs), you'll likely want to convert the colData() to
 a data.frame first. See @fig-ggpairs for an example.
 
 ```{r fig-ggpairs, fig.cap="A pairs plot of a few variables."}
-ggpairs(as.data.frame(colData(sub_se)),columns=(c("PC1","PC2","PC3","gender.ch1")))
+ggpairs(as.data.frame(colData(sub_se)),columns=(c("PC1","PC2","PC3","histology.ch1")))
 ```
 
 The ggpairs function is very flexible and plays well with ggplot. Therefore,
@@ -217,8 +217,8 @@ Look at other variables that you might want to include and style the plot
 to your liking.
 
 ```{r fig-ggpairs-colors, fig.cap="A pairs plot colored by a variable of interest."}
-ggpairs(as.data.frame(colData(sub_se)),columns=(c("PC1","PC2","PC3","gender.ch1")), 
-        aes(color=gender.ch1, alpha=0.5))
+ggpairs(as.data.frame(colData(sub_se)),columns=(c("PC1","PC2","PC3","histology.ch1")), 
+        aes(color=histology.ch1, alpha=0.5))
 ```
 
 
