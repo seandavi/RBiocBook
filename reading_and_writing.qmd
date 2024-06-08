@@ -1,0 +1,147 @@
+---
+title: "Reading and writing data files"
+---
+
+## Introduction
+
+In this chapter, we will discuss how to read and write data files in R. Data files are essential for storing and sharing data across different platforms and applications. R provides a variety of functions and packages to read and write data files in different formats, such as text files, CSV files, Excel files. By mastering these functions, you can efficiently import and export data in R, enabling you to perform data analysis and visualization tasks effectively.
+
+## CSV files
+
+Comma-Separated Values (CSV) files are a common file format for storing tabular data. They consist of rows and columns, with each row representing a record and each column representing a variable or attribute. CSV files are widely used for data storage and exchange due to their simplicity and compatibility with various software applications. In R, you can read and write CSV files using the `read.csv()` and `write.csv()` functions, respectively. A commonly used alternative is to use the `readr` package, which provides faster and more user-friendly functions for reading and writing CSV files.
+
+### Writing a CSV file
+
+Since we are going to use the `readr` package, we need to install it first. You can install the `readr` package using the following command:
+
+```{r eval=FALSE}
+install.packages("readr")
+```
+
+Once the package is installed, you can load it into your R session using the `library()` function:
+
+```{r}
+library(readr)
+```
+
+Since we don't have a CSV file sitting around, let's create a simple data frame to write to a CSV file. Here's an example data frame:
+
+```{r}
+df <- data.frame(
+  id = c(1, 2, 3, 4, 5),
+  name = c("Alice", "Bob", "Charlie", "David", "Eve"),
+  age = c(25, 30, 35, 40, 45)
+)
+```
+
+Now, you can write this data frame to a CSV file using the `write_csv()` function from the `readr` package. Here's how you can do it:
+
+```{r}
+write_csv(df, "data.csv")
+```
+
+You can check the current working directory to see if the CSV file was created successfully. If you want to specify a different directory or file path, you can provide the full path in the `write_csv()` function.
+
+```{r}
+# see what the current working directory is
+getwd()
+# and check to see that the file was created
+dir(pattern = "data.csv")
+```
+
+### Reading a CSV file
+
+Now that we have a CSV file, let's read it back into R using the `read_csv()` function from the `readr` package. Here's how you can do it:
+
+```{r}
+df2 <- read_csv("data.csv")
+```
+
+You can check the structure of the data frame `df2` to verify that the data was read correctly:
+
+```{r}
+df2
+```
+
+The `readr` package can read CSV files with various delimiters, headers, and data types, making it a versatile tool for handling tabular data in R. It can also read CSV files directly from web locations like so:
+
+```{r}
+df3 <- read_csv("https://data.cdc.gov/resource/pwn4-m3yp.csv")
+```
+
+The dataset that you just downloaded is described here: [Covid-19 data from CDC](https://data.cdc.gov/Case-Surveillance/Weekly-United-States-COVID-19-Cases-and-Deaths-by-/pwn4-m3yp/about_data)
+
+## Excel files
+
+Microsoft Excel files are another common file format for storing tabular data. Excel files can contain multiple sheets, formulas, and formatting options, making them a popular choice for data storage and analysis. In R, you can read and write Excel files using the `readxl` package. This package provides functions to import and export data from Excel files, enabling you to work with Excel data in R.
+
+### Reading an Excel file
+
+To read an Excel file in R, you need to install and load the `readxl` package. You can install the `readxl` package using the following command:
+
+```{r eval=FALSE}
+install.packages("readxl")
+```
+
+Once the package is installed, you can load it into your R session using the `library()` function:
+
+```{r}
+library(readxl)
+```
+
+Now, you can read an Excel file using the `read_excel()` function from the `readxl` package. We don't have an excel file available, so let's download one from the internet. Here's an example:
+
+```{r}
+download.file('https://www.w3resource.com/python-exercises/pandas/excel/SaleData.xlsx', 'SaleData.xlsx')
+```
+
+Now, you can read the Excel file into R using the `read_excel()` function:
+
+```{r}
+df_excel <- read_excel("SaleData.xlsx")
+```
+
+You can check the structure of the data frame `df_excel` to verify that the data was read correctly:
+
+```{r}
+df_excel
+```
+
+The `readxl` package provides various options to read Excel files with multiple sheets, specific ranges, and data types, making it a versatile tool for handling Excel data in R.
+
+### Writing an Excel file
+
+To write an Excel file in R, you can use the `write_xlsx()` function from the `writexl` package. You can install the `writexl` package using the following command:
+
+```{r eval=FALSE}
+install.packages("writexl")
+```
+
+Once the package is installed, you can load it into your R session using the `library()` function:
+
+```{r}
+library(writexl)
+```
+
+The `write_xlsx()` function allows you to write a data frame to an Excel file. Here's an example:
+
+```{r}
+write_xlsx(df, "data.xlsx")
+```
+
+You can check the current working directory to see if the Excel file was created successfully. If you want to specify a different directory or file path, you can provide the full path in the `write_xlsx()` function.
+
+```{r}
+# see what the current working directory is
+getwd()
+# and check to see that the file was created
+dir(pattern = "data.xlsx")
+```
+
+## Additional options
+
+- Google Sheets: You can read and write data from Google Sheets using the `googlesheets4` package. This package provides functions to interact with Google Sheets, enabling you to import and export data from Google Sheets to R.
+- JSON files: You can read and write JSON files using the `jsonlite` package. This package provides functions to convert R objects to JSON format and vice versa, enabling you to work with JSON data in R.
+- Database files: You can read and write data from database files using the `DBI` and `RSQLite` packages. These packages provide functions to interact with various database systems, enabling you to import and export data from databases to R.
+
+
