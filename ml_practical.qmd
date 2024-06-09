@@ -1,0 +1,354 @@
+# Machine Learning
+
+## What is Machine Learning?
+
+Machine learning is a subfield of artificial intelligence that focuses on the
+development of algorithms and models that enable computers to learn and make
+decisions or predictions without explicit programming. It has emerged as a
+powerful tool for solving complex problems across various industries, including
+healthcare, finance, marketing, and natural language processing. This chapter
+provides an overview of machine learning, its types, key concepts,
+applications, and challenges.
+
+Machine learning in biology is a really broad topic. @greener_guide_2022 present
+a nice overview of the different types of machine learning methods that are
+used in biology. @libbrecht_machine_2015 also present an early review of machine
+learning in genetics and genomics.
+
+## Classes of Machine Learning
+
+### Supervised learning 
+
+Supervised learning is a type of machine learning where the model learns from
+labeled data, i.e., input-output pairs, to make predictions. It includes tasks
+like regression (predicting continuous values) and classification (predicting
+discrete classes or categories).
+
+### Unsupervised learning 
+
+Unsupervised learning involves learning from unlabeled data, where the model
+discovers patterns or structures within the data. Common unsupervised learning
+tasks include clustering (grouping similar data points), dimensionality
+reduction (reducing the number of features or variables), and anomaly detection
+(identifying unusual data points).
+
+
+::: {.callout-note} 
+# Terminology and Concepts
+
+*  Data 
+  : Data is the foundation of machine learning and can be structured
+  (tabular) or unstructured (text, images, audio). It is usually divided into
+  training, validation, and testing sets for model development and evaluation.
+
+*  Features 
+  : Features are the variables or attributes used to describe the data
+  points. Feature engineering and selection are crucial steps in machine
+  learning to improve model performance and interpretability.
+
+*  Models and Algorithms 
+  : Models are mathematical representations of the
+  relationship between features and the target variable(s). Algorithms are the
+  methods used to train models, such as linear regression, decision trees, and
+  neaural networks.
+
+*  Hyperparameters and Tuning 
+  : Hyperparameters are adjustable parameters that
+  control the learning process of an algorithm. Tuning involves finding the
+  optimal set of hyperparameters to improve model performance.
+
+*  Evaluation Metrics 
+  : Evaluation metrics quantify the performance of a model,
+  such as accuracy, precision, recall, F1-score (for classification), and mean
+  squared error, R-squared (for regression).
+::: 
+
+```{r fig-fitting, fig.cap="Data simulated according to the function $f(x) = sin(2 \\pi x) + N(0,0.25)$ fitted with four different models. A) A simple linear model demonstrates _underfitting_. B) A linear model with a sin function ($y = sin(2 \\pi x)$) and C) a loess model with a wide span (0.5) demonstrate _good fits_. D) A loess model with a narrow span (0.1) is a good example of _overfitting_. "}
+#| code-fold: true
+set.seed(123)
+sinsim <- function(n,sd=0.1) {
+  x <- seq(0,1,length.out=n)
+  y <- sin(2*pi*x) + rnorm(n,0,sd)
+  return(data.frame(x=x,y=y))
+}
+dat <- sinsim(100,0.25)
+library(ggplot2)
+library(patchwork)
+p_base <- ggplot(dat,aes(x=x,y=y)) +
+ geom_point(alpha=0.7) +
+ theme_bw()
+p_lm <- p_base + 
+ geom_smooth(method="lm", se=FALSE, alpha=0.6, formula = y ~ x) 
+p_lmsin <- p_base +
+ geom_smooth(method="lm",formula=y~sin(2*pi*x), se=FALSE, alpha=0.6) 
+p_loess_wide <- p_base +
+  geom_smooth(method="loess",span=0.5, se=FALSE, alpha=0.6, formula = y ~ x) 
+p_loess_narrow <- p_base + 
+ geom_smooth(method="loess",span=0.1, se=FALSE, alpha=0.6, formula = y ~ x) 
+p_lm + p_lmsin + p_loess_wide + p_loess_narrow + plot_layout(ncol=2) +
+  plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 8))
+```
+
+In @fig-fitting, we simulate data according to the function $f(x) = sin(2 \pi x) + N(0,0.25)$ and fit four different models. 
+Choosing a model that is too simple (A) will result in _underfitting_ the data, while choosing a model that is too complex (D) will result in _overfitting_ the data. 
+
+When thinking about machine learning, it can help to have a simple framework in mind. In @fig-sklearn, we present a simple view of machine learning according to the [scikit-learn](https://scikit-learn.org/stable/) package. 
+
+![A simple view of machine learning according the sklearn. ](https://1.bp.blogspot.com/-ME24ePzpzIM/UQLWTwurfXI/AAAAAAAAANw/W3EETIroA80/s1600/drop_shadows_background.png){#fig-sklearn}
+
+We're going to focus on supervised learning here. Here is a rough schematic (see @fig-mlr3-supervised) of the supervised learning process from 
+the mlr3 book.
+
+![A schematic of the supervised learning process. ](images/mlr3_process.png){#fig-mlr3-supervised}
+
+In nearly all cases, we will have a training set and a test set. The training set is used to train the model, and the test set is used to evaluate the model (see @fig-train-test-split). Even when we don't have a separate test set, we will usually create one by splitting the data.
+
+![Training and testing sets. ](images/mlr3_train_test.png){#fig-train-test-split}
+
+## Supervised Learning
+
+### Linear regression
+
+In [statistics](https://en.wikipedia.org/wiki/Statistics "Statistics"), **linear regression** is a [linear](https://en.wikipedia.org/wiki/Linearity "Linearity") approach for modelling the relationship between a [scalar](https://en.wikipedia.org/wiki/Scalar_(mathematics) "Scalar (mathematics)") response and one or more explanatory variables (also known as [dependent and independent variables](https://en.wikipedia.org/wiki/Dependent_and_independent_variables "Dependent and independent variables")). The case of one explanatory variable is called _[simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression "Simple linear regression")_; for more than one, the process is called **multiple linear regression**. This term is distinct from [multivariate linear regression](https://en.wikipedia.org/wiki/Multivariate_linear_regression "Multivariate linear regression"), where multiple [correlated](https://en.wikipedia.org/wiki/Correlation_and_dependence "Correlation and dependence") dependent variables are predicted, rather than a single scalar variable.
+
+In linear regression, the relationships are modeled using [linear predictor functions](https://en.wikipedia.org/wiki/Linear_predictor_function "Linear predictor function") whose unknown model [parameters](https://en.wikipedia.org/wiki/Parameters "Parameters") are [estimated](https://en.wikipedia.org/wiki/Estimation_theory "Estimation theory") from the [data](https://en.wikipedia.org/wiki/Data "Data"). Such models are called [linear models](https://en.wikipedia.org/wiki/Linear_model "Linear model"). Most commonly, the [conditional mean](https://en.wikipedia.org/wiki/Conditional_expectation "Conditional expectation") of the response given the values of the explanatory variables (or predictors) is assumed to be an [affine function](https://en.wikipedia.org/wiki/Affine_transformation "Affine transformation") of those values; less commonly, the conditional [median](https://en.wikipedia.org/wiki/Median "Median") or some other [quantile](https://en.wikipedia.org/wiki/Quantile "Quantile") is used. Like all forms of [regression analysis](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis"), linear regression focuses on the [conditional probability distribution](https://en.wikipedia.org/wiki/Conditional_probability_distribution "Conditional probability distribution") of the response given the values of the predictors, rather than on the [joint probability distribution](https://en.wikipedia.org/wiki/Joint_probability_distribution "Joint probability distribution") of all of these variables, which is the domain of [multivariate analysis](https://en.wikipedia.org/wiki/Multivariate_analysis "Multivariate analysis").
+
+Linear regression was the first type of regression analysis to be studied rigorously, and to be used extensively in practical applications. This is because models which depend linearly on their unknown parameters are easier to fit than models which are non-linearly related to their parameters and because the statistical properties of the resulting estimators are easier to determine.
+
+### K-nearest Neighbor
+
+```{r echo=FALSE, fig.cap="**Figure**. The k-nearest neighbor algorithm can be used for regression or classification. "}
+knitr::include_graphics('https://www.kdnuggets.com/wp-content/uploads/rapidminer-knn-image1.jpg')
+```
+
+The **_k_\-nearest neighbors algorithm** (**_k_\-NN**) is a [non-parametric](https://en.wikipedia.org/wiki/Non-parametric_statistics "Non-parametric statistics") [supervised learning](https://en.wikipedia.org/wiki/Supervised_learning "Supervised learning") method first developed by [Evelyn Fix](https://en.wikipedia.org/wiki/Evelyn_Fix "Evelyn Fix") and [Joseph Hodges](https://en.wikipedia.org/wiki/Joseph_Lawson_Hodges_Jr. "Joseph Lawson Hodges Jr.") in 1951, and later expanded by [Thomas Cover](https://en.wikipedia.org/wiki/Thomas_M._Cover "Thomas M. Cover"). It is used for [classification](https://en.wikipedia.org/wiki/Statistical_classification "Statistical classification") and [regression](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis"). In both cases, the input consists of the _k_ closest training examples in a [data set](https://en.wikipedia.org/wiki/Data_set "Data set"). 
+
+The k-nearest neighbor (k-NN) algorithm is a simple, yet powerful, supervised
+machine learning method used for classification and regression tasks. It is an
+instance-based, non-parametric learning method that stores the entire training
+dataset and makes predictions based on the similarity between data points. The
+underlying principle of the k-NN algorithm is that similar data points (those
+that are close to each other in multidimensional space) are likely to have
+similar outcomes or belong to the same class.
+
+Here's a description of how the k-NN algorithm works:
+
+1. Determine the value of k: The first step is to choose the number of nearest
+   neighbors (k) to consider when making predictions. The value of k is a
+   user-defined hyperparameter and can significantly impact the algorithm's
+   performance. A small value of k can lead to overfitting, while a large value
+   may result in underfitting.
+1. Compute distance: Calculate the distance between the new data point (query
+   point) and each data point in the training dataset. The most common distance
+   metrics used are Euclidean, Manhattan, and Minkowski distance. The choice of
+   distance metric depends on the problem and the nature of the data.
+1. Find k-nearest neighbors: Identify the k data points in the training dataset
+   that are closest to the query point, based on the chosen distance metric.
+1. Make predictions: Once the k-nearest neighbors are identified, the final
+   step is to make predictions. The prediction for the query point can be made
+   in two ways:
+    a. For classification, determine the class labels of the k-nearest
+    neighbors and assign the class label with the highest frequency (majority
+    vote) to the query point. In case of a tie, one can choose the class with
+    the smallest average distance to the query point or randomly select one
+    among the tied classes.
+    b. For regression tasks, the k-NN algorithm follows a similar process, but
+    instead of majority voting, it calculates the mean (or median) of the
+    target values of the k-nearest neighbors and assigns it as the prediction
+    for the query point.
+
+The k-NN algorithm is known for its simplicity, ease of implementation, and
+ability to handle multi-class problems. However, it has some drawbacks, such as
+high computational cost (especially for large datasets), sensitivity to the
+choice of k and distance metric, and poor performance with high-dimensional or
+noisy data. Scaling and preprocessing the data, as well as using dimensionality
+reduction techniques, can help mitigate some of these issues.
+
+
+
+*  In _k-NN classification_, the output is a class membership. An object is
+  classified by a plurality vote of its neighbors, with the object being
+  assigned to the class most common among its _k_ nearest neighbors (_k_ is a
+  positive [integer](https://en.wikipedia.org/wiki/Integer "Integer"),
+  typically small). If _k_ = 1, then the object is simply assigned to the class
+  of that single nearest neighbor.
+
+*  In _k-NN regression_, the output is the property value for the object. This
+  value is the average of the values of _k_ nearest neighbors.
+
+_k_\-NN is a type of
+[classification](https://en.wikipedia.org/wiki/Classification "Classification")
+where the function is only approximated locally and all computation is deferred
+until function evaluation. Since this algorithm relies on distance for
+classification, if the features represent different physical units or come in
+vastly different scales then
+[normalizing](https://en.wikipedia.org/wiki/Normalization_(statistics)
+"Normalization (statistics)") the training data can improve its accuracy
+dramatically.
+
+Both for classification and regression, a useful technique can be to assign
+weights to the contributions of the neighbors, so that the nearer neighbors
+contribute more to the average than the more distant ones. For example, a
+common weighting scheme consists in giving each neighbor a weight of 1/_d_,
+where _d_ is the distance to the neighbor.
+
+The neighbors are taken from a set of objects for which the class (for _k_\-NN
+classification) or the object property value (for _k_\-NN regression) is known.
+This can be thought of as the training set for the algorithm, though no
+explicit training step is required.
+
+## Penalized regression
+
+Adapted from http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/.
+
+Penalized regression is a type of regression analysis that introduces a penalty term to the loss function in order to prevent overfitting and improve the model's ability to generalize. Remember that in regression, the *loss* function is the sum of squares @eq-sum-of-squares.
+
+$$L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2$$ {#eq-sum-of-squares}
+
+In @eq-sum-of-squares, $\hat{y}_i$ is the predicted output, $y_i$ is the actual output, and n is the number of observations. The goal of regression is to minimize the loss function by finding the optimal values of the model parameters or coefficients. The model parameters are estimated using the training data. The model is then evaluated using the test data. If the model performs well on the training data but poorly on the test data, it is said to be overfit. Overfitting occurs when the model learns the training data too well, including the noise, and is not able to generalize well to new data. This is a common problem in machine learning, particularly when there are a large number of predictors compared to the number of observations, and can be addressed by penalized regression.
+
+
+The two most common types of penalized regression are Ridge Regression (L2 penalty) and LASSO Regression (L1 penalty). Both Ridge and LASSO help to reduce model complexity and prevent over-fitting which may result from simple linear regression. However, the choice between Ridge and LASSO depends on the situation and the dataset at hand. If feature selection is important for the interpretation of the model, LASSO might be preferred. If the goal is prediction accuracy and the model needs to retain all features, Ridge might be the better choice.
+
+### Ridge regression
+
+Ridge regression shrinks the regression coefficients, so that variables, with
+minor contribution to the outcome, have their coefficients close to zero. The
+shrinkage of the coefficients is achieved by penalizing the regression model
+with a penalty term called L2-norm, which is the sum of the squared
+coefficients. The amount of the penalty can be fine-tuned using a constant
+called lambda (λ). Selecting a good value for λ is critical. When λ=0, the
+penalty term has no effect, and ridge regression will produce the classical
+least square coefficients. However, as λ increases to infinite, the impact of
+the shrinkage penalty grows, and the ridge regression coefficients will get
+close zero. The loss function for Ridge Regression is:
+
+$$L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=0}^{k} \beta_j^2$$ {#eq-ridge} 
+
+Here, $\hat{y}_i$ is the predicted output, $y_i$ is the actual output,
+${\beta_j}$ represents the model parameters or coefficients, and λ is the
+regularization parameter. The second term, λ∑βj^2, is the penalty term where
+all parameters are squared and summed. Ridge regression tends to shrink the
+coefficients but doesn't necessarily zero them.
+
+
+
+Note that, in contrast to the ordinary least square regression, ridge
+regression is highly affected by the scale of the predictors. Therefore, it is
+better to standardize (i.e., scale) the predictors before applying the ridge
+regression (James et al. 2014), so that all the predictors are on the same
+scale. The standardization of a predictor x, can be achieved using the formula
+$x' = \frac{x}{sd(x)}$, where $sd(x)$ is the standard deviation of $x$. The consequence of
+this is that, all standardized predictors will have a standard deviation of one
+allowing the final fit to not depend on the scale on which the predictors are
+measured.
+
+One important advantage of the ridge regression, is that it still performs
+well, compared to the ordinary least square method (see @eq-sum-of-squares), 
+in a situation where you have a large multivariate
+data with the number of predictors (p) larger than the number of observations
+(n). One disadvantage of the ridge regression is that, it will include all the
+predictors in the final model, unlike the stepwise regression methods, which
+will generally select models that involve a reduced set of variables. Ridge
+regression shrinks the coefficients towards zero, but it will not set any of
+them exactly to zero. The LASSO regression is an alternative that overcomes
+this drawback.
+
+### LASSO regression
+
+LASSO stands for _Least Absolute Shrinkage and Selection Operator_. It shrinks
+the regression coefficients toward zero by penalizing the regression model with
+a penalty term called L1-norm, which is the sum of the absolute coefficients.
+In the case of LASSO regression, the penalty has the effect of forcing some of
+the coefficient estimates, with a minor contribution to the model, to be
+exactly equal to zero. This means that, LASSO can be also seen as an
+alternative to the subset selection methods for performing variable selection
+in order to reduce the complexity of the model. As in ridge regression,
+selecting a good value of $\lambda$ for the LASSO is critical. The loss function for
+LASSO Regression is:
+
+$$L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=0}^{k} |\beta_j|$$ {#eq-lasso}
+
+Similar to Ridge, ŷi is the predicted output, yi is the actual output, βj
+represents the model parameters or coefficients, and λ is the regularization
+parameter. The second term, λ∑|βj|, is the penalty term where the absolute
+values of all parameters are summed. LASSO regression tends to shrink the
+coefficients and can zero out some of them, effectively performing variable
+selection.
+
+
+One obvious advantage of LASSO regression over ridge regression, is that it
+produces simpler and more interpretable models that incorporate only a reduced
+set of the predictors. However, neither ridge regression nor the LASSO will
+universally dominate the other. Generally, LASSO might perform better in a
+situation where some of the predictors have large coefficients, and the
+remaining predictors have very small coefficients. Ridge regression will
+perform better when the outcome is a function of many predictors, all with
+coefficients of roughly equal size (James et al. 2014).
+
+Cross-validation methods can be used for identifying which of these two
+techniques is better on a particular data set.
+
+### Elastic Net
+
+Elastic Net produces a regression model that is penalized with both the L1-norm
+and L2-norm. The consequence of this is to effectively shrink coefficients
+(like in ridge regression) and to set some coefficients to zero (as in LASSO).
+
+
+
+
+### Classification and Regression Trees (CART)
+
+[Decision Tree Learning](https://en.wikipedia.org/wiki/Decision_tree_learning) is supervised learning approach used in statistics, data mining and machine learning. In this formalism, a classification or regression decision tree is used as a predictive model to draw conclusions about a set of observations. Decision trees are a popular machine learning method used for both classification and regression tasks. They are hierarchical, tree-like structures that model the relationship between features and the target variable by recursively splitting the data into subsets based on the feature values. Each internal node in the tree represents a decision or test on a feature, and each branch represents the outcome of that test. The leaf nodes contain the final prediction, which is the majority class for classification tasks or the mean/median of the target values for regression tasks.
+
+```{r fig-decision-tree, echo=FALSE,fig.cap='An example of a decision tree that performs classification, also sometimes called a classification tree. '}
+download.file('https://upload.wikimedia.org/wikipedia/commons/e/eb/Decision_Tree.jpg', 'images/Decision_Tree.jpg')
+knitr::include_graphics('images/Decision_Tree.jpg')
+```
+
+
+
+Here's an overview of the decision tree learning process:
+
+*  Select the best feature and split value: Start at the root node and choose the feature and split value that results in the maximum reduction of impurity (or increase in information gain) in the child nodes. For classification tasks, impurity measures like Gini index or entropy are commonly used, while for regression tasks, mean squared error (MSE) or mean absolute error (MAE) can be used.
+*  Split the data: Partition the dataset into subsets based on the chosen feature and split value.
+*  Recursion: Repeat steps 1 and 2 for each subset until a stopping criterion is met. Stopping criteria can include reaching a maximum tree depth, a minimum number of samples per leaf, or no further improvement in impurity.
+*  Prune the tree (optional): To reduce overfitting, decision trees can be pruned by removing branches that do not significantly improve the model's performance on the validation dataset. This can be done using techniques like reduced error pruning or cost-complexity pruning.
+
+Decision trees have several advantages, such as:
+
+*  Interpretability
+  : They are easy to understand, visualize, and explain, even for non-experts.
+*  Minimal data preprocessing
+  : Decision trees can handle both numerical and categorical data, and they are robust to outliers and missing values.
+*  Non-linear relationships
+  : They can capture complex non-linear relationships between features and the target variable.
+
+However, decision trees also have some drawbacks:
+
+*  Overfitting
+  : They are prone to overfitting, especially when the tree is deep or has few samples per leaf. Pruning and setting stopping criteria can help mitigate this issue.
+*  Instability
+  : Small changes in the data can lead to different tree structures. This can be addressed by using ensemble methods like random forests or gradient boosting machines (GBMs).
+*  Greedy learning
+  : Decision tree algorithms use a greedy approach, meaning they make locally optimal choices at each node. This may not always result in a globally optimal tree.
+
+Despite these limitations, decision trees are widely used in various applications due to their simplicity, interpretability, and ability to handle diverse data types.
+
+### RandomForest
+
+**Random forests** or **random decision forests** is an [ensemble learning](https://en.wikipedia.org/wiki/Ensemble_learning "Ensemble learning") method for [classification](https://en.wikipedia.org/wiki/Statistical_classification "Statistical classification"), [regression](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis") and other tasks that operates by constructing a multitude of [decision trees](https://en.wikipedia.org/wiki/Decision_tree_learning "Decision tree learning") at training time. For classification tasks, the output of the random forest is the class selected by most trees. For regression tasks, the mean or average prediction of the individual trees is returned. Random decision forests correct for decision trees' habit of [overfitting](https://en.wikipedia.org/wiki/Overfitting "Overfitting") to their [training set](https://en.wikipedia.org/wiki/Test_set "Test set"). Random forests generally outperform [decision trees](https://en.wikipedia.org/wiki/Decision_tree_learning "Decision tree learning"), but their accuracy is lower than gradient boosted trees\[_[citation needed](https://en.wikipedia.org/wiki/Wikipedia:Citation_needed "Wikipedia:Citation needed")_\]. However, data characteristics can affect their performance.
+
+The first algorithm for random decision forests was created in 1995 by [Tin Kam Ho](https://en.wikipedia.org/wiki/Tin_Kam_Ho "Tin Kam Ho") using the [random subspace method](https://en.wikipedia.org/wiki/Random_subspace_method "Random subspace method"), which, in Ho's formulation, is a way to implement the "stochastic discrimination" approach to classification proposed by Eugene Kleinberg.
+
+An extension of the algorithm was developed by [Leo Breiman](https://en.wikipedia.org/wiki/Leo_Breiman "Leo Breiman") and [Adele Cutler](https://en.wikipedia.org/wiki/Adele_Cutler "Adele Cutler"), who registered "Random Forests" as a [trademark](https://en.wikipedia.org/wiki/Trademark "Trademark") in 2006 (as of 2019[\[update\]](https://en.wikipedia.org/w/index.php?title=Random_forest&action=edit), owned by [Minitab, Inc.](https://en.wikipedia.org/wiki/Minitab "Minitab")). The extension combines Breiman's "[bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating "Bootstrap aggregating")" idea and random selection of features, introduced first by Ho and later independently by Amit and [Geman](https://en.wikipedia.org/wiki/Donald_Geman "Donald Geman") in order to construct a collection of decision trees with controlled variance.
+
+Random forests are frequently used as "blackbox" models in businesses, as they generate reasonable predictions across a wide range of data while requiring little configuration.
+
+
+```{r fig-randomforest-diagram, echo=FALSE, fig.cap="Random forests or random decision forests is an ensemble learning method for classification, regression and other tasks that operates by constructing a multitude of decision trees at training time.", fig.width=6}
+download.file("https://miro.medium.com/v2/resize:fit:592/1*i0o8mjFfCn-uD79-F1Cqkw.png", "images/RandomForest.png", mode = "auto")
+knitr::include_graphics('images/RandomForest.png')
+```
