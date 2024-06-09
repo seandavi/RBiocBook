@@ -13,7 +13,7 @@ In this little exercise, we will:
 2. Get an opportunity to work with another SummarizedExperiment object.
 3. Perform a simple unsupervised analysis to visualize these public data.
 
-## GEOquery to multidimensional scaling
+## GEOquery to PCA
 
 The first step is to install the [R] package [GEOquery]. This package allows us to access data from the Gene Expression Omnibus (GEO) database. GEO is a public repository of omics data. 
 
@@ -32,12 +32,18 @@ library(GEOquery)
 gse = getGEO("GSE103512")[[1]]
 ```
 
-The first step, a detail, is to convert from the older Bioconductor data structure (GEOquery was written in 2007), the `ExpressionSet`, to the newer `SummarizedExperiment`.
+You might ask why we are using `[[1]]` at the end of the `getGEO()` function. The reason is that `getGEO()` returns a list of `GSE` objects. We are only interested in the first one (and in this case, the only one).
+We return a list of `GSE` objects because in the early days, it was not unusual to have a single GEO accession number represent multiple datasets. While uncommon now, we've kept the convention since lots of "older" data
+is still quite useful. 
+
+Again, a historically-derived detail, is to convert from the older Bioconductor data structure (GEOquery was written in 2007), the `ExpressionSet`, to the newer `SummarizedExperiment`. 
 
 ```{r message=FALSE}
 library(SummarizedExperiment)
 se = as(gse, "SummarizedExperiment")
 ```
+
+Use some code to determine the answers to the following:
 
 - What is the class of `se`?
 - What are the dimensions of `se`?
@@ -46,41 +52,53 @@ se = as(gse, "SummarizedExperiment")
 - What variables are in the `colData` slot of `se`?
 
 
-Examine two variables of interest, cancer type and tumor/normal status. The `with` function is a convenience to allow us to access variables in a data frame by name (rather than having to do `dataframe$variable_name`. 
+Examine two variables of interest, cancer type and tumor/normal status. The `with` function is a convenience to allow us to access variables in a data frame by name (rather than having to do `dataframe$variable_name`. Recalling that the `table` function is a convenient way to summarize the counts of unique values in a vector, we can use `with` to access the variables of interest and `table` to summarize the counts of unique values. 
 
 ```{r geoquery20,echo=TRUE,cache=TRUE}
 with(colData(se),table(`cancer.type.ch1`,`normal.ch1`))
 ```
 
-Filter gene expression by variance to find most informative genes. It is common practice to filter genes by standard deviation or some other measure of variability and keep the top X percent of them when performing dimensionality reduction. There is not a single right answer to what percentage to use, so try a few to see what happens. 
+- How many samples are there of each cancer type?
+- How many samples are there of each tumor/normal status?
 
-In the example code, I chose to use the top 500 genes by standard deviation.
+
+When performing unsupervised analysis, it is common to filter genes by variance to find the most informative genes. It is common practice to filter genes by standard deviation or some other measure of variability and keep the top X percent of them when performing dimensionality reduction. There is not a single right answer to what percentage to use, so try a few to see what happens. In the example code, I chose to use the top 500 genes by standard deviation, but you can play with the threshold to see what happens.
+
+Recall that the `assay` function is used to access the data matrix of the `SummarizedExperiment` object. 
+
+Think through the code below and then run it. 
 
 ```{r sds,cache=TRUE,echo=TRUE}
 sds = apply(assay(se, 'exprs'),1,sd)
 dat = assay(se, 'exprs')[order(sds,decreasing = TRUE)[1:500],]
 ```
 
-Perform [multidimensional scaling] and prepare for plotting. We will be using ggplot2, so
+If you don't recognize the function `apply`, it is a function that applies a function to each row or column of a matrix. In this case, we are applying the `sd` function to each row of the data matrix. The `order` function is used to sort the standard deviations in decreasing order (when `decreasing=TRUE`). And the `[1:500]` is used to subset the data matrix to the top 500 genes by standard deviation. 
+
+Perform PCA and prepare for plotting. We will be using ggplot2, so
 we need to make a data.frame before plotting.  
 
 ```{r mds,echo=TRUE,cache=TRUE}
-mdsvals = cmdscale(dist(t(dat)))
-mdsvals = as.data.frame(mdsvals)
-mdsvals$Type=factor(colData(se)[,'cancer.type.ch1'])
-mdsvals$Normal = factor(colData(se)[,'normal.ch1'])
+pca_results <- prcomp(t(dat))
+pca_df = as.data.frame(pca_results$x)
+pca_df$Type=factor(colData(se)[,'cancer.type.ch1'])
+pca_df$Normal = factor(colData(se)[,'normal.ch1'])
 ```
 
-And do the plot.
+Now, we are going to plot the results of the PCA, coloring the points by cancer type 
+and using different shapes for normal and tumor samples. 
 
 ```{r mdsplot,echo=TRUE,fig.align='center'}
 library(ggplot2)
-ggplot(mdsvals, aes(x=V1,y=V2,shape=Normal,color=Type)) + 
+ggplot(pca_df, aes(x=PC1,y=PC2,shape=Normal,color=Type)) + 
     geom_point( alpha=0.6) + theme(text=element_text(size = 18))
 ```
+In this case, the x-axis is the first principal component and the y-axis is the second principal component.
 
 - What do you see? 
-
+- What about additional principal components?
+- Bonus: Try using the `GGally` package to plot principal components (using the `ggpairs` function). 
+- Bonus: Calculate the variance explained by each principal component and plot the results. 
 
 [R]: https://cran.r-project.org/
 [GEOquery]: https://bioconductor.org/packages/GEOquery
