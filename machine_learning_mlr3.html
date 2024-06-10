@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.550">
+<meta name="generator" content="quarto-1.4.555">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
-<meta name="dcterms.date" content="2024-06-09">
+<meta name="dcterms.date" content="2024-06-10">
 <meta name="description" content="A collection of chapters more than a book, but….">
 <title>The RBioc Book - 17&nbsp; Machine Learning 2</title>
 <style>
@@ -506,7 +506,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 9, 2024</p>
+      <p class="date">June 10, 2024</p>
     </div>
   </div>
   
@@ -522,7 +522,7 @@ window.Quarto = {
 <div class="cell-output-display page-columns page-full">
 <div id="fig-mlr3-ecosystem" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-mlr3-ecosystem-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="images/mlr3_ecosystem.svg" class="img-fluid figure-img">
+<img src="images/mlr3_ecosystem.png" class="img-fluid figure-img" width="536">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-mlr3-ecosystem-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;17.1: The mlr3 ecosystem.
@@ -577,7 +577,7 @@ mlr3 facilitates benchmarking of multiple algorithms on multiple tasks, simplify
 </dl></li>
 </ul>
 <p>You can find more information, including tutorials and examples, on the official mlr3 GitHub repository<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and the mlr3 book<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
-<div class="no-row-height column-margin column-container"><p><sup>1</sup>&nbsp;<a href="https://github.com/mlr-org/mlr3" class="uri">https://github.com/mlr-org/mlr3</a></p><p><sup>2</sup>&nbsp;<a href="https://mlr3book.mlr-org.com/" class="uri">https://mlr3book.mlr-org.com/</a></p></div></section></section><section id="the-mlr3-workflow" class="level2 page-columns page-full" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="the-mlr3-workflow">
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;<a href="https://github.com/mlr-org/mlr3" class="uri">https://github.com/mlr-org/mlr3</a></p></div><div id="fn2"><p><sup>2</sup>&nbsp;<a href="https://mlr3book.mlr-org.com/" class="uri">https://mlr3book.mlr-org.com/</a></p></div></div></section></section><section id="the-mlr3-workflow" class="level2 page-columns page-full" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="the-mlr3-workflow">
 <span class="header-section-number">17.2</span> The mlr3 workflow</h2>
 <p>The mlr3 package is designed to simplify the process of creating and deploying complex machine learning pipelines. The package follows a modular design, which means that users can quickly swap out different components such as learners (algorithms), measures (performance metrics), and resampling strategies. The package also supports parallelization of model training and evaluation, making it suitable for large-scale machine learning tasks.</p>
 <p>The mlr3 workflow consists of the following steps:</p>
@@ -1782,6 +1782,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -1816,7 +1834,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
