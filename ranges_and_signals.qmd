@@ -544,60 +544,6 @@ res = distanceToNearest(g, gr)
 res
 ```
 
-## Plyranges
-
-Plyranges is a Bioconductor package that provides a grammar of genomic data manipulation. It's a toolset for performing operations on genomic intervals (or ranges) and associated annotations in the R programming language. The package extends the functionality of the GenomicRanges package, another Bioconductor package designed to manage and manipulate genomic interval data. The `plyranges` package provides a grammar for manipulating genomic ranges [@lee_plyranges_2019]. It is similar to the `dplyr` package for data frames. 
-
-The Plyranges package is designed to address several challenges that arise in the analysis of genomic data:
-
-* Manipulating Genomic Intervals
-  : Genomic intervals (e.g., gene locations, variant locations, etc.) are a fundamental data type in bioinformatics. Plyranges provides a simple and consistent set of operations for manipulating these intervals, such as finding overlaps, nearest neighbors, or shifting and resizing intervals.
-* Working with Genomic Annotations
-  : Genomic intervals often have associated annotations (e.g., gene names, variant alleles, etc.). Plyranges provides tools for manipulating these annotations along with their associated intervals.
-* Integration with the Tidyverse
-  : The Tidyverse is a collection of R packages designed for data science. Plyranges uses a similar syntax and integrates well with these packages, making it easier for users familiar with the Tidyverse to work with genomic data.
-* Performance
-  : Working with genomic data often involves large datasets. Plyranges is built on the Bioconductor ranges infrastructure and is designed to be efficient and performant, even when working with large genomic datasets.
-
-
-```{r, eval=FALSE}
-library(plyranges)
-```
-
-| Category        | Verb                     | Description                                                       |
-|-----------------|--------------------------|-------------------------------------------------------------------|
-| Aggregate       | summarize()              | Aggregate over column(s)                                          |
-|                 | disjoin_ranges()         | Aggregate column(s) over the union of end coordinates             |
-|                 | reduce_ranges()          | Aggregate column(s) by merging overlapping and neighboring ranges |
-| Modify (Unary)  | mutate()                 | Modifies any column                                               |
-|                 | select()                 | Select columns                                                    |
-|                 | arrange()                | Sort by columns                                                   |
-|                 | stretch()                | Extend range by fixed amount                                      |
-|                 | shift_(direction)        | Shift coordinates                                                 |
-|                 | flank_(direction)        | Generate flanking regions                                         |
-|                 | %intersection%           | Row-wise intersection                                             |
-|                 | %union%                  | Row-wise union                                                    |
-|                 | compute_coverage         | Coverage over all ranges                                          |
-| Modify (Binary) | %setdiff%                | Row-wise set difference                                           |
-|                 | between()                | Row-wise gap range                                                |
-|                 | span()                   | Row-wise spanning range                                           |
-| Merge           | join_overlap_*()         | Merge by overlapping ranges                                       |
-|                 | join_nearest             | Merge by nearest neighbor ranges                                  |
-|                 | join_follow              | Merge by following ranges                                         |
-|                 | join_precedes            | Merge by preceding ranges                                         |
-|                 | union_ranges             | Range-wise union                                                  |
-|                 | intersect_ranges         | Range-wise intersect                                              |
-|                 | setdiff_ranges           | Range-wise set difference                                         |
-|                 | complement_ranges        | Range-wise set complement                                         |
-| Operate         | anchor_direction()       | Fix coordinates at direction                                      |
-|                 | group_by()               | Partition by column(s)                                            |
-|                 | group_by_overlaps()      | Partition by overlaps                                             |
-| Restrict        | filter()                 | Subset rows                                                       |
-|                 | filter_by_overlaps()     | Subset by overlap                                                 |
-|                 | filter_by_non_overlaps() | Subset by no overlap                                              |
-
-: The verbs in the `plyranges` package. {#tbl-plyranges-verbs}
-
 
 ## Gene models
 
@@ -618,6 +564,18 @@ transcripts for all genes in the database.
 
 ```{r}
 tx <- transcripts(txdb)
+```
+
+The `exons` function returns a `GRanges` object with the exons.
+
+```{r}
+ex <- exons(txdb)
+```
+
+The `genes` function returns a `GRanges` object with the genes.
+
+```{r}
+gn <- genes(txdb)
 ```
 
 
