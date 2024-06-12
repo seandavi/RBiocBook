@@ -12,8 +12,6 @@ library(knitr)
 opts_chunk$set(cache=TRUE, message=FALSE, results='hide')
 ```
 
-# Exercises
-
 ## Exercise 1
 
 In this exercise, we will use DNAse hypersensitivity data to explore range operations.
@@ -128,7 +126,7 @@ width(dnase_wide)
 
 ## Exercise 3
 
-In this exercise, we are going to look at the overlap of DNAse sites relative to genes/transcripts.
+In this exercise, we are going to look at the overlap of DNAse sites relative to genes.
 To get started, install and load the `TxDb.Hsapiens.UCSC.hg19.knownGene` txdb object.
 
 ```
@@ -142,9 +140,9 @@ kg = TxDb.Hsapiens.UCSC.hg19.knownGene
 ```{r}
 library("TxDb.Hsapiens.UCSC.hg19.knownGene")
 kg = TxDb.Hsapiens.UCSC.hg19.knownGene
-tx = transcripts(kg)
-class(tx)
-length(tx)
+gx = genes(kg)
+class(gx)
+length(gx)
 ```
 
 - Read about the `flank` method for GRanges objects. How could you use that to 
@@ -152,7 +150,7 @@ get the "promoter" regions of the transcripts? Let's assume that the promoter re
 2kb upstream of the gene.
 
 ```{r}
-flank(tx,2000)
+flank(gx,2000)
 ```
 
 - Instead of using flank, could you do the same thing with the TxDb object? (See `?promoters`).
@@ -171,7 +169,11 @@ summary(countOverlaps(proms))
 just keep the contiguous regions by using `reduce`. 
 
 ```{r}
+# reduce takes all overlapping regions and collapses them
+# into a single region that spans all of the overlapping regions
 prom_regions = reduce(proms)
+
+# now we can check for overlaps
 summary(countOverlaps(prom_regions))
 ```
 
