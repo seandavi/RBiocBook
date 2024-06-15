@@ -5,7 +5,7 @@
 <meta name="generator" content="quarto-1.5.43">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
-<meta name="dcterms.date" content="2024-06-12">
+<meta name="dcterms.date" content="2024-06-15">
 <meta name="description" content="A collection of chapters more than a book, but….">
 <title>The RBioc Book – 17&nbsp; Machine Learning 2</title>
 <style>
@@ -120,6 +120,8 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script><style>html{ scroll-behavior: smooth; }</style>
+<meta name="mermaid-theme" content="neutral">
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script><script src="site_libs/quarto-diagram/mermaid-init.js"></script><link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
@@ -437,7 +439,7 @@ window.Quarto = {
    
   <ul>
 <li>
-<a href="#practical-machine-learning-with-r-and-mlr3" id="toc-practical-machine-learning-with-r-and-mlr3" class="nav-link active" data-scroll-target="#practical-machine-learning-with-r-and-mlr3"><span class="header-section-number">17.1</span> Practical Machine Learning with R and mlr3</a>
+<a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">17.1</span> Overview</a>
   <ul class="collapse">
 <li><a href="#key-features-of-mlr3" id="toc-key-features-of-mlr3" class="nav-link" data-scroll-target="#key-features-of-mlr3"><span class="header-section-number">17.1.1</span> Key features of mlr3</a></li>
   </ul>
@@ -445,29 +447,26 @@ window.Quarto = {
   <li>
 <a href="#the-mlr3-workflow" id="toc-the-mlr3-workflow" class="nav-link" data-scroll-target="#the-mlr3-workflow"><span class="header-section-number">17.2</span> The mlr3 workflow</a>
   <ul class="collapse">
-<li><a href="#tasks" id="toc-tasks" class="nav-link" data-scroll-target="#tasks"><span class="header-section-number">17.2.1</span> Tasks</a></li>
-  <li><a href="#learners" id="toc-learners" class="nav-link" data-scroll-target="#learners"><span class="header-section-number">17.2.2</span> Learners</a></li>
-  <li><a href="#mlr3-workflow" id="toc-mlr3-workflow" class="nav-link" data-scroll-target="#mlr3-workflow"><span class="header-section-number">17.2.3</span> mlr3 Workflow</a></li>
+<li><a href="#the-machine-learning-task" id="toc-the-machine-learning-task" class="nav-link" data-scroll-target="#the-machine-learning-task"><span class="header-section-number">17.2.1</span> The machine learning Task</a></li>
+  <li><a href="#the-learner-in-machine-learning" id="toc-the-learner-in-machine-learning" class="nav-link" data-scroll-target="#the-learner-in-machine-learning"><span class="header-section-number">17.2.2</span> The “Learner” in Machine Learning</a></li>
   </ul>
 </li>
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">17.3</span> Setup</a></li>
   <li>
 <a href="#example-1-cancer-types" id="toc-example-1-cancer-types" class="nav-link" data-scroll-target="#example-1-cancer-types"><span class="header-section-number">17.4</span> Example 1: cancer types</a>
   <ul class="collapse">
-<li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">17.4.1</span> Data Preparation</a></li>
-  <li><a href="#feature-selection-and-data-cleaning" id="toc-feature-selection-and-data-cleaning" class="nav-link" data-scroll-target="#feature-selection-and-data-cleaning"><span class="header-section-number">17.4.2</span> Feature selection and data cleaning</a></li>
-  <li><a href="#creating-the-task" id="toc-creating-the-task" class="nav-link" data-scroll-target="#creating-the-task"><span class="header-section-number">17.4.3</span> Creating the “task”</a></li>
-  <li><a href="#k-nearest-neighbor" id="toc-k-nearest-neighbor" class="nav-link" data-scroll-target="#k-nearest-neighbor"><span class="header-section-number">17.4.4</span> K-nearest-neighbor</a></li>
-  <li><a href="#classification-tree" id="toc-classification-tree" class="nav-link" data-scroll-target="#classification-tree"><span class="header-section-number">17.4.5</span> Classification tree</a></li>
-  <li><a href="#randomforest" id="toc-randomforest" class="nav-link" data-scroll-target="#randomforest"><span class="header-section-number">17.4.6</span> RandomForest</a></li>
+<li><a href="#understanding-the-problem" id="toc-understanding-the-problem" class="nav-link" data-scroll-target="#understanding-the-problem"><span class="header-section-number">17.4.1</span> Understanding the Problem</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">17.4.2</span> Data Preparation</a></li>
+  <li><a href="#feature-selection-and-data-cleaning" id="toc-feature-selection-and-data-cleaning" class="nav-link" data-scroll-target="#feature-selection-and-data-cleaning"><span class="header-section-number">17.4.3</span> Feature selection and data cleaning</a></li>
+  <li><a href="#creating-the-task" id="toc-creating-the-task" class="nav-link" data-scroll-target="#creating-the-task"><span class="header-section-number">17.4.4</span> Creating the “task”</a></li>
+  <li><a href="#splitting-the-data" id="toc-splitting-the-data" class="nav-link" data-scroll-target="#splitting-the-data"><span class="header-section-number">17.4.5</span> Splitting the data</a></li>
+  <li><a href="#example-learners" id="toc-example-learners" class="nav-link" data-scroll-target="#example-learners"><span class="header-section-number">17.4.6</span> Example learners</a></li>
   </ul>
 </li>
   <li>
 <a href="#exercise-predicting-age-from-dna-methylation" id="toc-exercise-predicting-age-from-dna-methylation" class="nav-link" data-scroll-target="#exercise-predicting-age-from-dna-methylation"><span class="header-section-number">17.5</span> Exercise: Predicting age from DNA methylation</a>
   <ul class="collapse">
-<li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression"><span class="header-section-number">17.5.1</span> Linear regression</a></li>
-  <li><a href="#regression-tree" id="toc-regression-tree" class="nav-link" data-scroll-target="#regression-tree"><span class="header-section-number">17.5.2</span> Regression tree</a></li>
-  <li><a href="#randomforest-1" id="toc-randomforest-1" class="nav-link" data-scroll-target="#randomforest-1"><span class="header-section-number">17.5.3</span> RandomForest</a></li>
+<li><a href="#example-learners-1" id="toc-example-learners-1" class="nav-link" data-scroll-target="#example-learners-1"><span class="header-section-number">17.5.1</span> Example learners</a></li>
   </ul>
 </li>
   <li>
@@ -475,11 +474,9 @@ window.Quarto = {
   <ul class="collapse">
 <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">17.6.1</span> The Data</a></li>
   <li><a href="#create-task" id="toc-create-task" class="nav-link" data-scroll-target="#create-task"><span class="header-section-number">17.6.2</span> Create task</a></li>
-  <li><a href="#linear-regression-1" id="toc-linear-regression-1" class="nav-link" data-scroll-target="#linear-regression-1"><span class="header-section-number">17.6.3</span> Linear regression</a></li>
-  <li><a href="#penalized-regression" id="toc-penalized-regression" class="nav-link" data-scroll-target="#penalized-regression"><span class="header-section-number">17.6.4</span> Penalized regression</a></li>
+  <li><a href="#example-learners-2" id="toc-example-learners-2" class="nav-link" data-scroll-target="#example-learners-2"><span class="header-section-number">17.6.3</span> Example learners</a></li>
   </ul>
 </li>
-  <li><a href="#cross-validation" id="toc-cross-validation" class="nav-link" data-scroll-target="#cross-validation"><span class="header-section-number">17.7</span> Cross-validation</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/machine_learning_mlr3.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -512,7 +509,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 12, 2024</p>
+      <p class="date">June 15, 2024</p>
     </div>
   </div>
   
@@ -521,9 +518,10 @@ window.Quarto = {
   
 
 
-</header><section id="practical-machine-learning-with-r-and-mlr3" class="level2 page-columns page-full" data-number="17.1"><h2 data-number="17.1" class="anchored" data-anchor-id="practical-machine-learning-with-r-and-mlr3">
-<span class="header-section-number">17.1</span> Practical Machine Learning with R and mlr3</h2>
-<p>The mlr3 R package is a modern, object-oriented machine learning framework in R that builds on the success of its predecessor, the mlr package. It provides a flexible and extensible platform for handling common machine learning tasks such as data preprocessing, model training, hyperparameter tuning, and model evaluation <a href="#fig-mlr3-ecosystem" class="quarto-xref">Figure&nbsp;<span>17.1</span></a>. The package is designed to simplify the process of creating and deploying complex machine learning pipelines.</p>
+</header><section id="overview" class="level2 page-columns page-full" data-number="17.1"><h2 data-number="17.1" class="anchored" data-anchor-id="overview">
+<span class="header-section-number">17.1</span> Overview</h2>
+<p>In this chapter, we focus on practical aspects of machine learning. The goal is to provide a hands-on introduction to the application of machine learning techniques to real-world data. While the theoretical foundations of machine learning are important, the ability to apply these techniques to solve practical problems is equally crucial. In this chapter, we will use the <code>mlr3</code> package in R to build and evaluate machine learning models for classification and regression tasks.</p>
+<p>The mlr3 R package is a modern, object-oriented machine learning framework in R that builds on the success of its predecessor, the mlr package. It provides a flexible and extensible platform for handling common machine learning tasks such as data preprocessing, model training, hyperparameter tuning, and model evaluation <a href="#fig-mlr3-ecosystem" class="quarto-xref">Figure&nbsp;<span>17.1</span></a>. The package is designed to guide and standardize the process of using complex machine learning pipelines.</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="fig-mlr3-ecosystem" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -542,13 +540,13 @@ Figure&nbsp;17.1: The mlr3 ecosystem.
 <li><dl>
 <dt>Task abstraction</dt>
 <dd>
-mlr3 encapsulates different types of learning problems like classification, regression, and survival analysis into “Task” objects, making it easier to handle various learning scenarios.
+mlr3 encapsulates different types of learning problems like classification, regression, and survival analysis into “Task” objects, making it easier to handle various learning scenarios. Examples of tasks include classification tasks, regression tasks, and survival tasks.
 </dd>
 </dl></li>
 <li><dl>
 <dt>Modular design</dt>
 <dd>
-The package follows a modular design, allowing users to quickly swap out different components such as learners (algorithms), measures (performance metrics), and resampling strategies.
+The package follows a modular design, allowing users to quickly swap out different components such as learners (algorithms), measures (performance metrics), and resampling strategies. Examples of learners include linear regression, logistic regression, and random forests. Examples of measures include accuracy, precision, recall, and F1 score. Examples of resampling strategies include cross-validation, bootstrapping, and holdout validation.
 </dd>
 </dl></li>
 <li><dl>
@@ -586,25 +584,76 @@ mlr3 facilitates benchmarking of multiple algorithms on multiple tasks, simplify
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;<a href="https://github.com/mlr-org/mlr3" class="uri">https://github.com/mlr-org/mlr3</a></p></div><div id="fn2"><p><sup>2</sup>&nbsp;<a href="https://mlr3book.mlr-org.com/" class="uri">https://mlr3book.mlr-org.com/</a></p></div></div></section></section><section id="the-mlr3-workflow" class="level2 page-columns page-full" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="the-mlr3-workflow">
 <span class="header-section-number">17.2</span> The mlr3 workflow</h2>
 <p>The mlr3 package is designed to simplify the process of creating and deploying complex machine learning pipelines. The package follows a modular design, which means that users can quickly swap out different components such as learners (algorithms), measures (performance metrics), and resampling strategies. The package also supports parallelization of model training and evaluation, making it suitable for large-scale machine learning tasks.</p>
-<p>The mlr3 workflow consists of the following steps:</p>
-<ol type="1">
-<li>Load data</li>
-<li>Create a task to define the learning problem.</li>
-<li>Split data into training and test sets.</li>
-<li>Choose a learner object to specify the learning algorithm.
-<ol type="a">
-<li>Train the model on the training set.</li>
-<li>Predict the target variable for the test set.</li>
-</ol>
-</li>
-<li>Assess the performance of the model.</li>
-<li>Interpret the model.</li>
-</ol>
+<div class="cell page-columns page-full" data-layout-align="default">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-mlr3-workflow" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-mlr3-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<pre class="mermaid mermaid-js" data-label="fig-mlr3-workflow">graph TD
+  A[Load data]
+  B[Create a task\nregression, classification, etc.]
+  B --&gt; learner[Choose learner]
+  A --&gt; C[Split data]
+  C --&gt; trainset(Training set)
+  C --&gt; testset[Test set]
+  trainset --&gt; train[Train model]
+  learner --&gt; train
+  testset --&gt; testing[Test model]
+  train --&gt; testing
+  testing --&gt; eval[Evaluate &amp;\nInterpret]
+</pre>
+</div>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-mlr3-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.2: The simplified workflow of a machine learning pipeline using mlr3.
+</figcaption></figure>
+</div>
+</div>
+</div>
 <p>The following sections describe each of these steps in detail.</p>
-<section id="tasks" class="level3" data-number="17.2.1"><h3 data-number="17.2.1" class="anchored" data-anchor-id="tasks">
-<span class="header-section-number">17.2.1</span> Tasks</h3>
-<p>Tasks are objects that contain the (usually tabular) data and additional metadata to define a machine learning problem. The meta-data is, for example, the name of the target variable for supervised machine learning problems, or the type of the dataset (e.g.&nbsp;a spatial or survival task). This information is used by specific operations that can be performed on a task.</p>
-<p>Tasks are objects that contain the (usually tabular) data and additional meta-data to define a machine learning problem. The meta-data is, for example, the name of the target variable for supervised machine learning problems, or the type of the dataset (e.g.&nbsp;a <em>spatial</em> or <em>survival</em> task). This information is used by specific operations that can be performed on a task.</p>
+<section id="the-machine-learning-task" class="level3" data-number="17.2.1"><h3 data-number="17.2.1" class="anchored" data-anchor-id="the-machine-learning-task">
+<span class="header-section-number">17.2.1</span> The machine learning Task</h3>
+<p>Imagine you want to teach a computer how to make predictions or decisions, similar to how you might teach a student. To do this, you need to clearly define what you want the computer to learn and work on. This is called defining a “task.” Let’s break down what this involves and why it’s important.</p>
+<section id="step-1-understand-the-problem" class="level4" data-number="17.2.1.1"><h4 data-number="17.2.1.1" class="anchored" data-anchor-id="step-1-understand-the-problem">
+<span class="header-section-number">17.2.1.1</span> Step 1: Understand the Problem</h4>
+<p>First, think about what problem you want to solve or what question you want the computer to answer. For example: - Do you want to predict the weather for tomorrow? - Are you trying to figure out if an email is spam or not? - Do you want to know how much a house might sell for?</p>
+<p>These questions define your <strong>task type</strong>. In machine learning, there are several common task types:</p>
+<ul>
+<li>
+<strong>Classification:</strong> Deciding which category something belongs to (e.g., spam or not spam).</li>
+<li>
+<strong>Regression:</strong> Predicting a number (e.g., the price of a house).</li>
+<li>
+<strong>Clustering:</strong> Grouping similar items together (e.g., customer segmentation).</li>
+</ul></section><section id="step-2-choose-your-data" class="level4" data-number="17.2.1.2"><h4 data-number="17.2.1.2" class="anchored" data-anchor-id="step-2-choose-your-data">
+<span class="header-section-number">17.2.1.2</span> Step 2: Choose Your Data</h4>
+<p>Next, you need data that is related to your problem. Think of data as the information or examples you’ll use to teach the computer. For instance, if your task is to predict house prices, your data might include:</p>
+<ul>
+<li>The size of the house</li>
+<li>The number of bedrooms</li>
+<li>The location of the house</li>
+<li>The age of the house</li>
+</ul>
+<p>These pieces of information are called <strong>features</strong>. Features are the input that the computer uses to make predictions.</p>
+</section><section id="step-3-define-the-target" class="level4" data-number="17.2.1.3"><h4 data-number="17.2.1.3" class="anchored" data-anchor-id="step-3-define-the-target">
+<span class="header-section-number">17.2.1.3</span> Step 3: Define the Target</h4>
+<p>Along with features, you need to define the <strong>target</strong>. The target is what you want to predict or decide. In the house price example, the target would be the actual price of the house.</p>
+</section><section id="step-4-create-the-task" class="level4" data-number="17.2.1.4"><h4 data-number="17.2.1.4" class="anchored" data-anchor-id="step-4-create-the-task">
+<span class="header-section-number">17.2.1.4</span> Step 4: Create the Task</h4>
+<p>Now that you have your problem, data, and target, you can create the task. In mlr3, a task brings together the type of problem (task type), the features (input data), and the target (what you want to predict).</p>
+<p>Here’s a simple summary:</p>
+<ol type="1">
+<li>
+<strong>Task Type:</strong> What kind of problem are you solving? (e.g., classification, regression)</li>
+<li>
+<strong>Features:</strong> What information do you have to make the prediction? (e.g., size, location)</li>
+<li>
+<strong>Target:</strong> What are you trying to predict? (e.g., house price)</li>
+</ol>
+<p>By clearly defining these elements, you set a solid foundation for the machine learning process. This helps ensure that the computer can learn effectively and make accurate predictions.</p>
+</section><section id="mlr3-and-tasks" class="level4" data-number="17.2.1.5"><h4 data-number="17.2.1.5" class="anchored" data-anchor-id="mlr3-and-tasks">
+<span class="header-section-number">17.2.1.5</span> mlr3 and Tasks</h4>
+<p>The mlr3 package uses the concept of “Tasks” to encapsulate different types of learning problems like classification, regression, and survival analysis. A Task contains the data (features and target variable) and additional metadata to define the machine learning problem. For example, in a classification task, the target variable is a label (stored as a character or factor), while in a regression task, the target variable is a numeric quantity (stored as an integer or numeric).</p>
 <p>There are a number of <a href="https://mlr3book.mlr-org.com/02-basics-tasks.html#tasks-types">Task Types</a> that are supported by mlr3. To create a task from a <a href="https://www.rdocumentation.org/packages/base/topics/data.frame"><code>data.frame()</code></a>, <a href="https://www.rdocumentation.org/packages/data.table/topics/data.table-package"><code>data.table()</code></a> or <a href="https://www.rdocumentation.org/packages/Matrix/topics/Matrix"><code>Matrix()</code></a>, you first need to select the right task type:</p>
 <ul>
 <li><p><strong>Classification Task</strong>: The target is a label (stored as <code>character</code> or <code>factor</code>) with only relatively few distinct values → <a href="https://mlr3.mlr-org.com/reference/TaskClassif.html"><code>TaskClassif</code></a>.</p></li>
@@ -614,8 +663,48 @@ mlr3 facilitates benchmarking of multiple algorithms on multiple tasks, simplify
 <li><p><strong>Cluster Task</strong>: An unsupervised task type; there is no target and the aim is to identify similar groups within the feature space → <a href="https://mlr3cluster.mlr-org.com/reference/TaskClust.html"><code>mlr3cluster::TaskClust</code></a> in add-on package <a href="https://mlr3cluster.mlr-org.com/">mlr3cluster</a>.</p></li>
 <li><p><strong>Spatial Task</strong>: Observations in the task have spatio-temporal information (e.g.&nbsp;coordinates) → <a href="https://mlr3spatiotempcv.mlr-org.com/reference/TaskRegrST.html"><code>mlr3spatiotempcv::TaskRegrST</code></a> or <a href="https://mlr3spatiotempcv.mlr-org.com/reference/TaskClassifST.html"><code>mlr3spatiotempcv::TaskClassifST</code></a> in add-on package <a href="https://mlr3spatiotempcv.mlr-org.com/">mlr3spatiotempcv</a>.</p></li>
 <li><p><strong>Ordinal Regression Task</strong>: The target is ordinal → <code>TaskOrdinal</code> in add-on package <a href="https://github.com/mlr-org/mlr3ordinal">mlr3ordinal</a> (still in development).</p></li>
-</ul></section><section id="learners" class="level3 page-columns page-full" data-number="17.2.2"><h3 data-number="17.2.2" class="anchored" data-anchor-id="learners">
-<span class="header-section-number">17.2.2</span> Learners</h3>
+</ul></section></section><section id="the-learner-in-machine-learning" class="level3 page-columns page-full" data-number="17.2.2"><h3 data-number="17.2.2" class="anchored" data-anchor-id="the-learner-in-machine-learning">
+<span class="header-section-number">17.2.2</span> The “Learner” in Machine Learning</h3>
+<p>After you’ve defined your task, the next step in teaching a computer to make predictions or decisions is to choose a “learner.” Let’s explore what a learner is and how it fits into the mlr3 package.</p>
+<section id="what-is-a-learner" class="level4" data-number="17.2.2.1"><h4 data-number="17.2.2.1" class="anchored" data-anchor-id="what-is-a-learner">
+<span class="header-section-number">17.2.2.1</span> What is a “Learner”?</h4>
+<p>Think of a learner as the method or tool that the computer uses to learn from the data. Another common name for a “learner” is a “model.” It’s similar to choosing a tutor or a teacher for a student. Different learners have different ways of understanding and processing information. For example:</p>
+<ul>
+<li>Some learners might be great at recognizing patterns in data, like a tutor who is excellent at spotting trends.</li>
+<li>Others might be good at making decisions based on rules, like a tutor who uses step-by-step logic.</li>
+</ul>
+<p>In machine learning, there are many types of learners, each with its own strengths and weaknesses. Here are a few examples:</p>
+<ul>
+<li>
+<strong>Decision Trees:</strong> These learners make decisions by asking a series of questions, like “Is the house larger than 1000 square feet?” and “Does it have more than 3 bedrooms?”</li>
+<li>
+<strong>k-Nearest Neighbors:</strong> These learners make predictions based on the similarity of new data points to existing data points.</li>
+<li>
+<strong>Linear Regression:</strong> This learner tries to fit a straight line through the data points to make predictions about numbers.</li>
+<li>
+<strong>Random Forests:</strong> These are like a group of decision trees working together to make more accurate predictions.</li>
+<li>
+<strong>Support Vector Machines:</strong> These learners find the best boundary that separates different categories in the data.</li>
+</ul></section><section id="choosing-the-right-learner" class="level4" data-number="17.2.2.2"><h4 data-number="17.2.2.2" class="anchored" data-anchor-id="choosing-the-right-learner">
+<span class="header-section-number">17.2.2.2</span> Choosing the Right Learner</h4>
+<p>Selecting the right learner is crucial because different learners work better for different types of tasks and data. For example:</p>
+<ul>
+<li>If your task is to classify emails as spam or not spam, a decision tree or a support vector machine might work well.</li>
+<li>If you’re predicting house prices, linear regression or random forests could be good choices.</li>
+</ul>
+<p>The goal is to find a learner that can understand the patterns in your data and make accurate predictions. This is where the mlr3 package comes in handy. It provides a wide range of learners that you can choose from, making it easier to experiment and find the best learner for your task.</p>
+</section><section id="learners-in-mlr3" class="level4" data-number="17.2.2.3"><h4 data-number="17.2.2.3" class="anchored" data-anchor-id="learners-in-mlr3">
+<span class="header-section-number">17.2.2.3</span> Learners in mlr3</h4>
+<p>In the mlr3 package, learners are pre-built tools that you can easily use for your tasks. Here’s how it works:</p>
+<ol type="1">
+<li>
+<strong>Select a Learner:</strong> mlr3 provides a variety of learners to choose from, like decision trees, linear regression, and more.</li>
+<li>
+<strong>Train the Learner:</strong> Once you’ve selected a learner, you provide it with your task (the problem, data, and target). The learner uses this information to learn and make predictions.</li>
+<li>
+<strong>Evaluate and Improve:</strong> After training, you can test how well the learner performs and make adjustments if needed, such as trying a different learner or fine-tuning the current one.</li>
+</ol></section><section id="mlr3-and-learners" class="level4 page-columns page-full" data-number="17.2.2.4"><h4 data-number="17.2.2.4" class="anchored" data-anchor-id="mlr3-and-learners">
+<span class="header-section-number">17.2.2.4</span> mlr3 and Learners</h4>
 <p>Objects of class <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> provide a unified interface to many popular machine learning algorithms in R. They consist of methods to train and predict a model for a <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> and provide meta-information about the learners, such as the hyperparameters (which control the behavior of the learner) you can set.</p>
 <p>The base class of each learner is <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>, specialized for regression as <a href="https://mlr3.mlr-org.com/reference/LearnerRegr.html"><code>LearnerRegr</code></a> and for classification as <a href="https://mlr3.mlr-org.com/reference/LearnerClassif.html"><code>LearnerClassif</code></a>. Other types of learners, provided by extension packages, also inherit from the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> base class, e.g.&nbsp;<a href="https://mlr3proba.mlr-org.com/reference/LearnerSurv.html"><code>mlr3proba::LearnerSurv</code></a> or <a href="https://mlr3cluster.mlr-org.com/reference/LearnerClust.html"><code>mlr3cluster::LearnerClust</code></a>.</p>
 <p>All Learners work in a two-stage procedure:</p>
@@ -624,7 +713,7 @@ mlr3 facilitates benchmarking of multiple algorithms on multiple tasks, simplify
 <img src="images/mlr3_learner_stages.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-mlr3-learner-stages-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.2: Two stages of a learner. Top: data (features and a target) are passed to an (untrained) learner. Bottom: new data are passed to the trained model which makes predictions for the ‘missing’ target column.
+Figure&nbsp;17.3: Two stages of a learner. Top: data (features and a target) are passed to an (untrained) learner. Bottom: new data are passed to the trained model which makes predictions for the ‘missing’ target column.
 </figcaption></figure>
 </div>
 <ul>
@@ -657,18 +746,7 @@ Figure&nbsp;17.2: Two stages of a learner. Top: data (features and a target) are
 <li>Random Forests for regression and classification (<a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_regr.ranger.html"><code>regr.ranger</code></a>, <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>classif.ranger</code></a>)</li>
 </ul>
 <p>More machine learning methods and alternative implementations are collected in the <a href="https://github.com/mlr-org/mlr3extralearners/">mlr3extralearners repository</a>.</p>
-</section><section id="mlr3-workflow" class="level3" data-number="17.2.3"><h3 data-number="17.2.3" class="anchored" data-anchor-id="mlr3-workflow">
-<span class="header-section-number">17.2.3</span> mlr3 Workflow</h3>
-<ol type="1">
-<li>Load data</li>
-<li>Split data into training and test sets</li>
-<li>Create a <a href="https://mlr3book.mlr-org.com/02-basics-tasks.html">task</a>.</li>
-<li>Choose a <a href="https://mlr3book.mlr-org.com/02-basics-learners.html">learner</a>. See <code>mlr_learners</code>.</li>
-<li>Train</li>
-<li>Predict</li>
-<li>Assess</li>
-<li>Interpret</li>
-</ol></section></section><section id="setup" class="level2" data-number="17.3"><h2 data-number="17.3" class="anchored" data-anchor-id="setup">
+</section></section></section><section id="setup" class="level2" data-number="17.3"><h2 data-number="17.3" class="anchored" data-anchor-id="setup">
 <span class="header-section-number">17.3</span> Setup</h2>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr3verse.mlr-org.com">mlr3verse</a></span><span class="op">)</span></span>
@@ -680,8 +758,17 @@ Figure&nbsp;17.2: Two stages of a learner. Top: data (features and a target) are
 </section><section id="example-1-cancer-types" class="level2" data-number="17.4"><h2 data-number="17.4" class="anchored" data-anchor-id="example-1-cancer-types">
 <span class="header-section-number">17.4</span> Example 1: cancer types</h2>
 <p>In this exercise, we will be classifying cancer types based on gene expression data. The data we are going to access are from <span class="citation" data-cites="brouwer-visser_regulatory_2018">Brouwer-Visser et al. (<a href="references.html#ref-brouwer-visser_regulatory_2018" role="doc-biblioref">2018</a>)</span>.</p>
-<section id="data-preparation" class="level3" data-number="17.4.1"><h3 data-number="17.4.1" class="anchored" data-anchor-id="data-preparation">
-<span class="header-section-number">17.4.1</span> Data Preparation</h3>
+<p>The data are from the Gene Expression Omnibus (GEO) database, a public repository of functional genomics data. The data are from a study that aimed to identify gene expression signatures that can distinguish between different types of cancer. The data include gene expression profiles from patients with different types of cancer. The goal is to build a machine learning model that can predict the cancer type based on the gene expression data.</p>
+<section id="understanding-the-problem" class="level3" data-number="17.4.1"><h3 data-number="17.4.1" class="anchored" data-anchor-id="understanding-the-problem">
+<span class="header-section-number">17.4.1</span> Understanding the Problem</h3>
+<p>Before we start building a machine learning model, it’s important to understand the problem we are trying to solve. Here are some key questions to consider:</p>
+<ul>
+<li>What are the features?</li>
+<li>What is the target variable?</li>
+<li>What type of machine learning task is this (classification, regression, clustering)?</li>
+<li>What is the goal of the analysis?</li>
+</ul></section><section id="data-preparation" class="level3" data-number="17.4.2"><h3 data-number="17.4.2" class="anchored" data-anchor-id="data-preparation">
+<span class="header-section-number">17.4.2</span> Data Preparation</h3>
 <p>Use the [GEOquery] package to fetch data about [GSE103512].</p>
 <div class="cell">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span></span>
@@ -706,8 +793,8 @@ cancer.type.ch1 no yes
 </div>
 <p>Before embarking on a machine learning analysis, we need to make sure that we understand the data. Things like missing values, outliers, and other problems can cause problems for machine learning algorithms.</p>
 <p>In R, plotting, summaries, and other exploratory data analysis tools are available. PCA analysis, clustering, and other methods can also be used to understand the data. It is worth spending time on this step, as it can save time later.</p>
-</section><section id="feature-selection-and-data-cleaning" class="level3" data-number="17.4.2"><h3 data-number="17.4.2" class="anchored" data-anchor-id="feature-selection-and-data-cleaning">
-<span class="header-section-number">17.4.2</span> Feature selection and data cleaning</h3>
+</section><section id="feature-selection-and-data-cleaning" class="level3" data-number="17.4.3"><h3 data-number="17.4.3" class="anchored" data-anchor-id="feature-selection-and-data-cleaning">
+<span class="header-section-number">17.4.3</span> Feature selection and data cleaning</h3>
 <p>While we could use all genes in the analysis, we will select the most informative genes using the variance of gene expression across samples. Other methods for feature selection are available, including those based on correlation with the outcome variable.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -719,7 +806,7 @@ Feature selection
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Feature selection should be done on the training data only, not the test data to avoid overfitting.</p>
+<p>Feature selection should be done on the training data only, not the test data to avoid overfitting. The test data should be used only for evaluation. In other words, the test data should be “unseen” by the model until the final evaluation.</p>
 </div>
 </div>
 <p>Remember that the <code>apply</code> function applies a function to each row or column of a matrix. Here, we apply the <code>sd</code> function to each row of the expression matrix to get a vector of stan</p>
@@ -743,14 +830,18 @@ Feature selection
 <span><span class="va">tumor</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>tumor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se_small</span><span class="op">)</span><span class="op">$</span><span class="va">cancer.type.ch1</span>, <span class="va">feat_dat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This is another good time to check the data. Make sure that the data is in the format that you expect. Check the dimensions, the column names, and the data types.</p>
-</section><section id="creating-the-task" class="level3" data-number="17.4.3"><h3 data-number="17.4.3" class="anchored" data-anchor-id="creating-the-task">
-<span class="header-section-number">17.4.3</span> Creating the “task”</h3>
+</section><section id="creating-the-task" class="level3" data-number="17.4.4"><h3 data-number="17.4.4" class="anchored" data-anchor-id="creating-the-task">
+<span class="header-section-number">17.4.4</span> Creating the “task”</h3>
 <p>The first step in using mlr3 is to create a <a href="https://mlr3book.mlr-org.com/02-basics-tasks.html">task</a>. A task is a data set with a target variable. In this case, the target variable is the cancer type. The mlr3 package provides a function to convert a data frame into a task. These tasks can be used with any machine learning algorithm in mlr3.</p>
+<p>This is a classification task, so we will use the <code>as_task_classif</code> function to create the task. The classification task requires a target variable that is categorical.</p>
 <div class="cell">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tumor</span><span class="op">$</span><span class="va">tumor_type</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">tumor</span><span class="op">$</span><span class="va">tumor_type</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr3.mlr-org.com">mlr3</a></span><span class="op">)</span></span>
+<span><span class="va">tumor</span><span class="op">$</span><span class="va">tumor_type</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">tumor</span><span class="op">$</span><span class="va">tumor_type</span><span class="op">)</span></span>
 <span><span class="va">task</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/as_task_classif.html">as_task_classif</a></span><span class="op">(</span><span class="va">tumor</span>,target<span class="op">=</span><span class="st">'tumor_type'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here, we randomly divide the data into 2/3 training data and 1/3 test data.</p>
+</section><section id="splitting-the-data" class="level3" data-number="17.4.5"><h3 data-number="17.4.5" class="anchored" data-anchor-id="splitting-the-data">
+<span class="header-section-number">17.4.5</span> Splitting the data</h3>
+<p>Here, we randomly divide the data into 2/3 training data and 1/3 test data. This is a common split, but other splits can be used. The training data is used to train the model, and the test data is used to evaluate the trained model.</p>
 <div class="cell">
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
 <span><span class="va">train_set</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="fl">0.67</span> <span class="op">*</span> <span class="va">task</span><span class="op">$</span><span class="va">nrow</span><span class="op">)</span></span>
@@ -766,17 +857,21 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Training and testing on the same data is a common mistake. We want to test the model on data that it has not seen before. This is the only way to know if the model is overfitting.</p>
+<p>Training and testing on the same data is a common mistake. We want to test the model on data that it has not seen before. This is the only way to know if the model is overfitting and to get an accurate estimate of the model’s performance.</p>
 </div>
 </div>
-</section><section id="k-nearest-neighbor" class="level3" data-number="17.4.4"><h3 data-number="17.4.4" class="anchored" data-anchor-id="k-nearest-neighbor">
-<span class="header-section-number">17.4.4</span> K-nearest-neighbor</h3>
+<p>In the next sections, we will train and evaluate three different models on the data: k-nearest-neighbor, classification tree, and random forest. Remember that the goal is to predict the cancer type based on the gene expression data. The mlr3 package uses the concept of “learners” to encapsulate different machine learning algorithms.</p>
+</section><section id="example-learners" class="level3" data-number="17.4.6"><h3 data-number="17.4.6" class="anchored" data-anchor-id="example-learners">
+<span class="header-section-number">17.4.6</span> Example learners</h3>
+<section id="k-nearest-neighbor" class="level4" data-number="17.4.6.1"><h4 data-number="17.4.6.1" class="anchored" data-anchor-id="k-nearest-neighbor">
+<span class="header-section-number">17.4.6.1</span> K-nearest-neighbor</h4>
 <p>The first model we will use is the k-nearest-neighbor model. This model is based on the idea that similar samples have similar outcomes. The number of neighbors to use is a parameter that can be tuned. We’ll use the default value of 7, but you can try other values to see how they affect the results. In fact, mlr3 provides the ability to tune parameters automatically, but we won’t cover that here.</p>
-<section id="create-the-learner" class="level4" data-number="17.4.4.1"><h4 data-number="17.4.4.1" class="anchored" data-anchor-id="create-the-learner">
-<span class="header-section-number">17.4.4.1</span> Create the learner</h4>
+<section id="create-the-learner" class="level5" data-number="17.4.6.1.1"><h5 data-number="17.4.6.1.1" class="anchored" data-anchor-id="create-the-learner">
+<span class="header-section-number">17.4.6.1.1</span> Create the learner</h5>
 <p>In mlr3, the machine learning algorithms are called learners. To create a learner, we use the <code>lrn</code> function. The <code>lrn</code> function takes the name of the learner as an argument. The <code>lrn</code> function also takes other arguments that are specific to the learner. In this case, we will use the default values for the arguments.</p>
 <div class="cell">
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.kknn"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr3learners.mlr-org.com">mlr3learners</a></span><span class="op">)</span></span>
+<span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.kknn"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You can get a list of all the learners available in mlr3 by using the <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn()</a></code> function without any arguments.</p>
 <div class="cell">
@@ -797,8 +892,8 @@ Keys: classif.cv_glmnet, classif.debug, classif.featureless,
   regr.rpart, regr.svm, regr.xgboost</code></pre>
 </div>
 </div>
-</section><section id="train" class="level4" data-number="17.4.4.2"><h4 data-number="17.4.4.2" class="anchored" data-anchor-id="train">
-<span class="header-section-number">17.4.4.2</span> Train</h4>
+</section><section id="train" class="level5" data-number="17.4.6.1.2"><h5 data-number="17.4.6.1.2" class="anchored" data-anchor-id="train">
+<span class="header-section-number">17.4.6.1.2</span> Train</h5>
 <p>To train the model, we use the <code>train</code> function. The <code>train</code> function takes the task and the row ids of the training data as arguments.</p>
 <div class="cell">
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -808,8 +903,8 @@ Keys: classif.cv_glmnet, classif.debug, classif.featureless,
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># output is large, so do this on your own</span></span>
 <span><span class="va">learner</span><span class="op">$</span><span class="va">model</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="predict" class="level4" data-number="17.4.4.3"><h4 data-number="17.4.4.3" class="anchored" data-anchor-id="predict">
-<span class="header-section-number">17.4.4.3</span> Predict</h4>
+</section><section id="predict" class="level5" data-number="17.4.6.1.3"><h5 data-number="17.4.6.1.3" class="anchored" data-anchor-id="predict">
+<span class="header-section-number">17.4.6.1.3</span> Predict</h5>
 <p>Lets use our trained model works to predict the classes of the <strong>training</strong> data. Of course, we already know the classes of the training data, but this is a good way to check that the model is working as expected. It also gives us a measure of performance on the training data that we can compare to the test data to look for overfitting.</p>
 <div class="cell">
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -818,8 +913,8 @@ Keys: classif.cv_glmnet, classif.debug, classif.featureless,
 <div class="cell">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">test_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess" class="level4" data-number="17.4.4.4"><h4 data-number="17.4.4.4" class="anchored" data-anchor-id="assess">
-<span class="header-section-number">17.4.4.4</span> Assess</h4>
+</section><section id="assess" class="level5" data-number="17.4.6.1.4"><h5 data-number="17.4.6.1.4" class="anchored" data-anchor-id="assess">
+<span class="header-section-number">17.4.6.1.4</span> Assess</h5>
 <p>In this section, we can look at the accuracy and performance of our model on the training data and the test data. We can also look at the confusion matrix to see which classes are being confused with each other.</p>
 <div class="cell">
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span><span class="op">$</span><span class="va">confusion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -859,11 +954,11 @@ response BC CRC NSCLC PCA
 </div>
 </div>
 <p>Compare the accuracy on the training data to the accuracy on the test data. Do you see any evidence of overfitting?</p>
-</section></section><section id="classification-tree" class="level3" data-number="17.4.5"><h3 data-number="17.4.5" class="anchored" data-anchor-id="classification-tree">
-<span class="header-section-number">17.4.5</span> Classification tree</h3>
+</section></section><section id="classification-tree" class="level4" data-number="17.4.6.2"><h4 data-number="17.4.6.2" class="anchored" data-anchor-id="classification-tree">
+<span class="header-section-number">17.4.6.2</span> Classification tree</h4>
 <p>We are going to use a classification tree to classify the data. A classification tree is a series of yes/no questions that are used to classify the data. The questions are based on the features in the data. The classification tree is built by finding the feature that best separates the data into the different classes. Then, the data is split based on the value of that feature. The process is repeated until the data is completely separated into the different classes.</p>
-<section id="train-1" class="level4" data-number="17.4.5.1"><h4 data-number="17.4.5.1" class="anchored" data-anchor-id="train-1">
-<span class="header-section-number">17.4.5.1</span> Train</h4>
+<section id="train-1" class="level5" data-number="17.4.6.2.1"><h5 data-number="17.4.6.2.1" class="anchored" data-anchor-id="train-1">
+<span class="header-section-number">17.4.6.2.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># in this case, we want to keep the model</span></span>
 <span><span class="co"># so we can look at it later</span></span>
@@ -894,8 +989,8 @@ node), split, n, loss, yval, (yprob)
 <div class="cell">
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">#autoplot(learner)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="predict-1" class="level4" data-number="17.4.5.2"><h4 data-number="17.4.5.2" class="anchored" data-anchor-id="predict-1">
-<span class="header-section-number">17.4.5.2</span> Predict</h4>
+</section><section id="predict-1" class="level5" data-number="17.4.6.2.2"><h5 data-number="17.4.6.2.2" class="anchored" data-anchor-id="predict-1">
+<span class="header-section-number">17.4.6.2.2</span> Predict</h5>
 <p>Now that we have trained the model on the <em>training</em> data, we can use it to predict the classes of the training data and the test data. The <code>$predict</code> method takes a <code>task</code> and produces a prediction based on the <em>trained</em> model, in this case, called <code>learner</code>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -904,8 +999,8 @@ node), split, n, loss, yval, (yprob)
 <div class="cell">
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">test_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess-1" class="level4" data-number="17.4.5.3"><h4 data-number="17.4.5.3" class="anchored" data-anchor-id="assess-1">
-<span class="header-section-number">17.4.5.3</span> Assess</h4>
+</section><section id="assess-1" class="level5" data-number="17.4.6.2.3"><h5 data-number="17.4.6.2.3" class="anchored" data-anchor-id="assess-1">
+<span class="header-section-number">17.4.6.2.3</span> Assess</h5>
 <p>For classification tasks, we often look at a confusion matrix of the <em>truth</em> vs the <em>predicted</em> classes for the samples.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -981,13 +1076,13 @@ Overfitting
 <p>When the assessment of the test set is worse than the evaluation of the training set, the model may be <em>overfit</em>. How to address overfitting varies by model type, but it is a sign that you should pay attention to model selection and parameters.</p>
 </div>
 </div>
-</section></section><section id="randomforest" class="level3" data-number="17.4.6"><h3 data-number="17.4.6" class="anchored" data-anchor-id="randomforest">
-<span class="header-section-number">17.4.6</span> RandomForest</h3>
+</section></section><section id="randomforest" class="level4" data-number="17.4.6.3"><h4 data-number="17.4.6.3" class="anchored" data-anchor-id="randomforest">
+<span class="header-section-number">17.4.6.3</span> RandomForest</h4>
 <div class="cell">
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.ranger"</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="train-2" class="level4" data-number="17.4.6.1"><h4 data-number="17.4.6.1" class="anchored" data-anchor-id="train-2">
-<span class="header-section-number">17.4.6.1</span> Train</h4>
+<section id="train-2" class="level5" data-number="17.4.6.3.1"><h5 data-number="17.4.6.3.1" class="anchored" data-anchor-id="train-2">
+<span class="header-section-number">17.4.6.3.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1027,8 +1122,8 @@ OOB prediction error:             0.62 % </code></pre>
 </div>
 <p>More “important” variables are those that are more often used in the trees. Are the most important variables the same as the ones that were important in the decision tree?</p>
 <p>If you are interested, look up a few of the important variables in the model to see if they make biological sense.</p>
-</section><section id="predict-2" class="level4" data-number="17.4.6.2"><h4 data-number="17.4.6.2" class="anchored" data-anchor-id="predict-2">
-<span class="header-section-number">17.4.6.2</span> Predict</h4>
+</section><section id="predict-2" class="level5" data-number="17.4.6.3.2"><h5 data-number="17.4.6.3.2" class="anchored" data-anchor-id="predict-2">
+<span class="header-section-number">17.4.6.3.2</span> Predict</h5>
 <p>Again, we can use the trained model to predict the classes of the training data and the test data.</p>
 <div class="cell">
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1036,8 +1131,8 @@ OOB prediction error:             0.62 % </code></pre>
 <div class="cell">
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">test_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess-2" class="level4" data-number="17.4.6.3"><h4 data-number="17.4.6.3" class="anchored" data-anchor-id="assess-2">
-<span class="header-section-number">17.4.6.3</span> Assess</h4>
+</section><section id="assess-2" class="level5" data-number="17.4.6.3.3"><h5 data-number="17.4.6.3.3" class="anchored" data-anchor-id="assess-2">
+<span class="header-section-number">17.4.6.3.3</span> Assess</h5>
 <div class="cell">
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span><span class="op">$</span><span class="va">confusion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1073,7 +1168,7 @@ response BC CRC NSCLC PCA
           1 </code></pre>
 </div>
 </div>
-</section></section></section><section id="exercise-predicting-age-from-dna-methylation" class="level2 page-columns page-full" data-number="17.5"><h2 data-number="17.5" class="anchored" data-anchor-id="exercise-predicting-age-from-dna-methylation">
+</section></section></section></section><section id="exercise-predicting-age-from-dna-methylation" class="level2 page-columns page-full" data-number="17.5"><h2 data-number="17.5" class="anchored" data-anchor-id="exercise-predicting-age-from-dna-methylation">
 <span class="header-section-number">17.5</span> Exercise: Predicting age from DNA methylation</h2>
 <p>We will be building a regression model for chronological age prediction, based on DNA methylation. This is based on the work of <a href="https://www.sciencedirect.com/science/article/pii/S1872497317301643?via%3Dihub">Jana Naue et al.&nbsp;2017</a>, in which biomarkers are examined to predict the chronological age of humans by analyzing the DNA methylation patterns. Different machine learning algorithms are used in this study to make an age prediction.</p>
 <p>It has been recognized that within each individual, the level of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174260/">DNA methylation</a> changes with age. This knowledge is used to select useful biomarkers from DNA methylation datasets. The <a href="https://en.wikipedia.org/wiki/CpG_site">CpG sites</a> with the highest correlation to age are selected as the biomarkers (and therefore features for building a regression model). In this tutorial, specific biomarkers are analyzed by machine learning algorithms to create an age prediction model.</p>
@@ -1119,18 +1214,20 @@ response BC CRC NSCLC PCA
 <span><span class="va">train_set</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="fl">0.67</span> <span class="op">*</span> <span class="va">task</span><span class="op">$</span><span class="va">nrow</span><span class="op">)</span></span>
 <span><span class="va">test_set</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sets.html">setdiff</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="linear-regression" class="level3 page-columns page-full" data-number="17.5.1"><h3 data-number="17.5.1" class="anchored" data-anchor-id="linear-regression">
-<span class="header-section-number">17.5.1</span> Linear regression</h3>
+<section id="example-learners-1" class="level3 page-columns page-full" data-number="17.5.1"><h3 data-number="17.5.1" class="anchored" data-anchor-id="example-learners-1">
+<span class="header-section-number">17.5.1</span> Example learners</h3>
+<section id="linear-regression" class="level4 page-columns page-full" data-number="17.5.1.1"><h4 data-number="17.5.1.1" class="anchored" data-anchor-id="linear-regression">
+<span class="header-section-number">17.5.1.1</span> Linear regression</h4>
 <p>We will start with a simple linear regression model.</p>
 <div class="cell">
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.lm"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="train-3" class="level4 page-columns page-full" data-number="17.5.1.1"><h4 data-number="17.5.1.1" class="anchored" data-anchor-id="train-3">
-<span class="header-section-number">17.5.1.1</span> Train</h4>
+<section id="train-3" class="level5 page-columns page-full" data-number="17.5.1.1.1"><h5 data-number="17.5.1.1.1" class="anchored" data-anchor-id="train-3">
+<span class="header-section-number">17.5.1.1.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>When you train a linear regression model, we can evaluate some of the diagnostic plots to see if the model is appropriate (<a href="#fig-regression-diagnostic" class="quarto-xref">Figure&nbsp;<span>17.3</span></a>).</p>
+<p>When you train a linear regression model, we can evaluate some of the diagnostic plots to see if the model is appropriate (<a href="#fig-regression-diagnostic" class="quarto-xref">Figure&nbsp;<span>17.4</span></a>).</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">learner</span><span class="op">$</span><span class="va">model</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1140,21 +1237,21 @@ response BC CRC NSCLC PCA
 <img src="machine_learning_mlr3_files/figure-html/fig-regression-diagnostic-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-regression-diagnostic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.3: Regression diagnostic plots. The top left plot shows the residuals vs.&nbsp;fitted values. The top right plot shows the normal Q-Q plot. The bottom left plot shows the scale-location plot. The bottom right plot shows the residuals vs.&nbsp;leverage.
+Figure&nbsp;17.4: Regression diagnostic plots. The top left plot shows the residuals vs.&nbsp;fitted values. The top right plot shows the normal Q-Q plot. The bottom left plot shows the scale-location plot. The bottom right plot shows the residuals vs.&nbsp;leverage.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="predict-3" class="level4" data-number="17.5.1.2"><h4 data-number="17.5.1.2" class="anchored" data-anchor-id="predict-3">
-<span class="header-section-number">17.5.1.2</span> Predict</h4>
+</section><section id="predict-3" class="level5" data-number="17.5.1.1.2"><h5 data-number="17.5.1.1.2" class="anchored" data-anchor-id="predict-3">
+<span class="header-section-number">17.5.1.1.2</span> Predict</h5>
 <div class="cell">
 <div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">test_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess-3" class="level4" data-number="17.5.1.3"><h4 data-number="17.5.1.3" class="anchored" data-anchor-id="assess-3">
-<span class="header-section-number">17.5.1.3</span> Assess</h4>
+</section><section id="assess-3" class="level5" data-number="17.5.1.1.3"><h5 data-number="17.5.1.1.3" class="anchored" data-anchor-id="assess-3">
+<span class="header-section-number">17.5.1.1.3</span> Assess</h5>
 <div class="cell">
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1180,7 +1277,7 @@ Figure&nbsp;17.3: Regression diagnostic plots. The top left plot shows the resid
 </div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="machine_learning_mlr3_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="machine_learning_mlr3_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1213,13 +1310,13 @@ Figure&nbsp;17.3: Regression diagnostic plots. The top left plot shows the resid
 0.9363526 </code></pre>
 </div>
 </div>
-</section></section><section id="regression-tree" class="level3" data-number="17.5.2"><h3 data-number="17.5.2" class="anchored" data-anchor-id="regression-tree">
-<span class="header-section-number">17.5.2</span> Regression tree</h3>
+</section></section><section id="regression-tree" class="level4" data-number="17.5.1.2"><h4 data-number="17.5.1.2" class="anchored" data-anchor-id="regression-tree">
+<span class="header-section-number">17.5.1.2</span> Regression tree</h4>
 <div class="cell">
 <div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.rpart"</span>, keep_model <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="train-4" class="level4" data-number="17.5.2.1"><h4 data-number="17.5.2.1" class="anchored" data-anchor-id="train-4">
-<span class="header-section-number">17.5.2.1</span> Train</h4>
+<section id="train-4" class="level5" data-number="17.5.1.2.1"><h5 data-number="17.5.1.2.1" class="anchored" data-anchor-id="train-4">
+<span class="header-section-number">17.5.1.2.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1247,16 +1344,16 @@ node), split, n, deviance, yval
 </div>
 </div>
 <p>What is odd about using a regression tree here is that we end up with only a few discrete estimates of age. Each “leaf” has a value.</p>
-</section><section id="predict-4" class="level4" data-number="17.5.2.2"><h4 data-number="17.5.2.2" class="anchored" data-anchor-id="predict-4">
-<span class="header-section-number">17.5.2.2</span> Predict</h4>
+</section><section id="predict-4" class="level5" data-number="17.5.1.2.2"><h5 data-number="17.5.1.2.2" class="anchored" data-anchor-id="predict-4">
+<span class="header-section-number">17.5.1.2.2</span> Predict</h5>
 <div class="cell">
 <div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">test_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess-4" class="level4" data-number="17.5.2.3"><h4 data-number="17.5.2.3" class="anchored" data-anchor-id="assess-4">
-<span class="header-section-number">17.5.2.3</span> Assess</h4>
+</section><section id="assess-4" class="level5" data-number="17.5.1.2.3"><h5 data-number="17.5.1.2.3" class="anchored" data-anchor-id="assess-4">
+<span class="header-section-number">17.5.1.2.3</span> Assess</h5>
 <div class="cell">
 <div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1282,7 +1379,7 @@ node), split, n, deviance, yval
 </div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="machine_learning_mlr3_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="machine_learning_mlr3_files/figure-html/unnamed-chunk-53-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1315,14 +1412,14 @@ node), split, n, deviance, yval
 0.8545402 </code></pre>
 </div>
 </div>
-</section></section><section id="randomforest-1" class="level3" data-number="17.5.3"><h3 data-number="17.5.3" class="anchored" data-anchor-id="randomforest-1">
-<span class="header-section-number">17.5.3</span> RandomForest</h3>
+</section></section><section id="randomforest-1" class="level4" data-number="17.5.1.3"><h4 data-number="17.5.1.3" class="anchored" data-anchor-id="randomforest-1">
+<span class="header-section-number">17.5.1.3</span> RandomForest</h4>
 <p>Randomforest is also tree-based, but unlike the single regression tree above, randomforest is a “forest” of trees which will eliminate the discrete nature of a single tree.</p>
 <div class="cell">
 <div class="sourceCode" id="cb93"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span>, mtry<span class="op">=</span><span class="fl">2</span>, min.node.size<span class="op">=</span><span class="fl">20</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="train-5" class="level4" data-number="17.5.3.1"><h4 data-number="17.5.3.1" class="anchored" data-anchor-id="train-5">
-<span class="header-section-number">17.5.3.1</span> Train</h4>
+<section id="train-5" class="level5" data-number="17.5.1.3.1"><h5 data-number="17.5.1.3.1" class="anchored" data-anchor-id="train-5">
+<span class="header-section-number">17.5.1.3.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb94"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1346,16 +1443,16 @@ OOB prediction error (MSE):       18.85364
 R squared (OOB):                  0.9137009 </code></pre>
 </div>
 </div>
-</section><section id="predict-5" class="level4" data-number="17.5.3.2"><h4 data-number="17.5.3.2" class="anchored" data-anchor-id="predict-5">
-<span class="header-section-number">17.5.3.2</span> Predict</h4>
+</section><section id="predict-5" class="level5" data-number="17.5.1.3.2"><h5 data-number="17.5.1.3.2" class="anchored" data-anchor-id="predict-5">
+<span class="header-section-number">17.5.1.3.2</span> Predict</h5>
 <div class="cell">
 <div class="sourceCode" id="cb97"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">train_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids<span class="op">=</span><span class="va">test_set</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess-5" class="level4" data-number="17.5.3.3"><h4 data-number="17.5.3.3" class="anchored" data-anchor-id="assess-5">
-<span class="header-section-number">17.5.3.3</span> Assess</h4>
+</section><section id="assess-5" class="level5" data-number="17.5.1.3.3"><h5 data-number="17.5.1.3.3" class="anchored" data-anchor-id="assess-5">
+<span class="header-section-number">17.5.1.3.3</span> Assess</h5>
 <div class="cell">
 <div class="sourceCode" id="cb99"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1379,7 +1476,7 @@ R squared (OOB):                  0.9137009 </code></pre>
 </div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="machine_learning_mlr3_files/figure-html/unnamed-chunk-61-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="machine_learning_mlr3_files/figure-html/unnamed-chunk-62-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1411,16 +1508,16 @@ R squared (OOB):                  0.9137009 </code></pre>
 0.9208394 </code></pre>
 </div>
 </div>
-</section></section></section><section id="expression-prediction-from-histone-modification-data" class="level2 page-columns page-full" data-number="17.6"><h2 data-number="17.6" class="anchored" data-anchor-id="expression-prediction-from-histone-modification-data">
+</section></section></section></section><section id="expression-prediction-from-histone-modification-data" class="level2 page-columns page-full" data-number="17.6"><h2 data-number="17.6" class="anchored" data-anchor-id="expression-prediction-from-histone-modification-data">
 <span class="header-section-number">17.6</span> Expression prediction from histone modification data</h2>
-<p>In this little set of exercises, you will be using histone marks near a gene to predict its expression (<a href="#fig-gene-expression" class="quarto-xref">Figure&nbsp;<span>17.4</span></a>).</p>
+<p>In this little set of exercises, you will be using histone marks near a gene to predict its expression (<a href="#fig-gene-expression" class="quarto-xref">Figure&nbsp;<span>17.5</span></a>).</p>
 <p><span id="eq-1"><span class="math display">\[y = h1 + h2 + h3 + ... \tag{17.1}\]</span></span></p>
 <div id="fig-gene-expression" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-gene-expression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/gene_expression_prediction_question.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-gene-expression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.4: What is the combined effect of histone marks on gene expression?
+Figure&nbsp;17.5: What is the combined effect of histone marks on gene expression?
 </figcaption></figure>
 </div>
 <p>We will try a couple of different approaches:</p>
@@ -1456,12 +1553,12 @@ Figure&nbsp;17.4: What is the combined effect of histone marks on gene expressio
 <img src="machine_learning_mlr3_files/figure-html/fig-scaled-data-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scaled-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.5: Boxplots of original and scaled data.
+Figure&nbsp;17.6: Boxplots of original and scaled data.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>There is a row for each gene and a column for each histone mark and we can see that the data are centered and scaled by column. We can also see some patterns in the data (see <a href="#fig-heatmap" class="quarto-xref">Figure&nbsp;<span>17.6</span></a>).</p>
+<p>There is a row for each gene and a column for each histone mark and we can see that the data are centered and scaled by column. We can also see some patterns in the data (see <a href="#fig-heatmap" class="quarto-xref">Figure&nbsp;<span>17.7</span></a>).</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb113"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sampled_features</span> <span class="op">&lt;-</span> <span class="va">fullFeatureSet</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">scaled_features</span><span class="op">)</span>, <span class="fl">500</span><span class="op">)</span>,<span class="op">]</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap">ComplexHeatmap</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1498,7 +1595,7 @@ This message can be suppressed by:
 <img src="machine_learning_mlr3_files/figure-html/fig-heatmap-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.6: Heatmap of 500 randomly sampled rows of the data. Columns are histone marks and there is a row for each gene.
+Figure&nbsp;17.7: Heatmap of 500 randomly sampled rows of the data. Columns are histone marks and there is a row for each gene.
 </figcaption></figure>
 </div>
 </div>
@@ -1540,24 +1637,26 @@ ENSG00000000938.7.27961645  0.6564520 -1.370871 -1.8773178</code></pre>
 <div class="cell">
 <div class="sourceCode" id="cb122"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">split</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/partition.html">partition</a></span><span class="op">(</span><span class="va">exp_pred_task</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="linear-regression-1" class="level3" data-number="17.6.3"><h3 data-number="17.6.3" class="anchored" data-anchor-id="linear-regression-1">
-<span class="header-section-number">17.6.3</span> Linear regression</h3>
+</section><section id="example-learners-2" class="level3" data-number="17.6.3"><h3 data-number="17.6.3" class="anchored" data-anchor-id="example-learners-2">
+<span class="header-section-number">17.6.3</span> Example learners</h3>
+<section id="linear-regression-1" class="level4" data-number="17.6.3.1"><h4 data-number="17.6.3.1" class="anchored" data-anchor-id="linear-regression-1">
+<span class="header-section-number">17.6.3.1</span> Linear regression</h4>
 <div class="cell">
 <div class="sourceCode" id="cb123"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.lm"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="train-6" class="level4" data-number="17.6.3.1"><h4 data-number="17.6.3.1" class="anchored" data-anchor-id="train-6">
-<span class="header-section-number">17.6.3.1</span> Train</h4>
+<section id="train-6" class="level5" data-number="17.6.3.1.1"><h5 data-number="17.6.3.1.1" class="anchored" data-anchor-id="train-6">
+<span class="header-section-number">17.6.3.1.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb124"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">exp_pred_task</span>, <span class="va">split</span><span class="op">$</span><span class="va">train</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="predict-6" class="level4" data-number="17.6.3.2"><h4 data-number="17.6.3.2" class="anchored" data-anchor-id="predict-6">
-<span class="header-section-number">17.6.3.2</span> Predict</h4>
+</section><section id="predict-6" class="level5" data-number="17.6.3.1.2"><h5 data-number="17.6.3.1.2" class="anchored" data-anchor-id="predict-6">
+<span class="header-section-number">17.6.3.1.2</span> Predict</h5>
 <div class="cell">
 <div class="sourceCode" id="cb125"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">exp_pred_task</span>, <span class="va">split</span><span class="op">$</span><span class="va">train</span><span class="op">)</span></span>
 <span><span class="va">pred_test</span> <span class="op">=</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">exp_pred_task</span>, <span class="va">split</span><span class="op">$</span><span class="va">test</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="assess-6" class="level4" data-number="17.6.3.3"><h4 data-number="17.6.3.3" class="anchored" data-anchor-id="assess-6">
-<span class="header-section-number">17.6.3.3</span> Assess</h4>
+</section><section id="assess-6" class="level5" data-number="17.6.3.1.3"><h5 data-number="17.6.3.1.3" class="anchored" data-anchor-id="assess-6">
+<span class="header-section-number">17.6.3.1.3</span> Assess</h5>
 <div class="cell">
 <div class="sourceCode" id="cb126"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1589,14 +1688,14 @@ ENSG00000000938.7.27961645  0.6564520 -1.370871 -1.8773178</code></pre>
 0.7526609 </code></pre>
 </div>
 </div>
-</section></section><section id="penalized-regression" class="level3" data-number="17.6.4"><h3 data-number="17.6.4" class="anchored" data-anchor-id="penalized-regression">
-<span class="header-section-number">17.6.4</span> Penalized regression</h3>
+</section></section><section id="penalized-regression" class="level4" data-number="17.6.3.2"><h4 data-number="17.6.3.2" class="anchored" data-anchor-id="penalized-regression">
+<span class="header-section-number">17.6.3.2</span> Penalized regression</h4>
 <p>Recall that we can use penalized regression to select the most important predictors from a large set of predictors. In this case, we will use the <code>glmnet</code> package to perform penalized regression, but we will use the <code>mlr</code> interface to <code>glmnet</code> to make it easier to use.</p>
 <div class="cell">
 <div class="sourceCode" id="cb132"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.cv_glmnet"</span>, nfolds<span class="op">=</span><span class="fl">10</span>, alpha<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="train-7" class="level4" data-number="17.6.4.1"><h4 data-number="17.6.4.1" class="anchored" data-anchor-id="train-7">
-<span class="header-section-number">17.6.4.1</span> Train</h4>
+<section id="train-7" class="level5" data-number="17.6.3.2.1"><h5 data-number="17.6.3.2.1" class="anchored" data-anchor-id="train-7">
+<span class="header-section-number">17.6.3.2.1</span> Train</h5>
 <div class="cell">
 <div class="sourceCode" id="cb133"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">exp_pred_task</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1632,25 +1731,6 @@ H4k20me1     .         </code></pre>
 </div>
 </div>
 <p>Note that the coefficients are all zero for the histone marks that were not selected by the model. In this case, we can use the model not to predict new data, but to help us understand the data.</p>
-</section></section></section><section id="cross-validation" class="level2" data-number="17.7"><h2 data-number="17.7" class="anchored" data-anchor-id="cross-validation">
-<span class="header-section-number">17.7</span> Cross-validation</h2>
-<div class="cell">
-<div class="sourceCode" id="cb138"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">mlr_resamplings</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Key: &lt;key&gt;
-           key                         label       params iters
-        &lt;char&gt;                        &lt;char&gt;       &lt;list&gt; &lt;int&gt;
-1:   bootstrap                     Bootstrap ratio, r....    30
-2:      custom                 Custom Splits                 NA
-3:   custom_cv Custom Split Cross-Validation                 NA
-4:          cv              Cross-Validation        folds    10
-5:     holdout                       Holdout        ratio     1
-6:    insample           Insample Resampling                  1
-7:         loo                 Leave-One-Out                 NA
-8: repeated_cv     Repeated Cross-Validation folds, r....   100
-9: subsampling                   Subsampling ratio, r....    30</code></pre>
-</div>
-</div>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -1658,7 +1738,7 @@ H4k20me1     .         </code></pre>
 Brouwer-Visser, Jurriaan, Wei-Yi Cheng, Anna Bauer-Mehren, Daniela Maisel, Katharina Lechner, Emilia Andersson, Joel T. Dudley, and Francesca Milletti. 2018. <span>“Regulatory <span>T</span>-Cell <span>Genes</span> <span>Drive</span> <span>Altered</span> <span>Immune</span> <span>Microenvironment</span> in <span>Adult</span> <span>Solid</span> <span>Cancers</span> and <span>Allow</span> for <span>Immune</span> <span>Contextual</span> <span>Patient</span> <span>Subtyping</span>.”</span> <em>Cancer Epidemiology, Biomarkers &amp; Prevention</em> 27 (1): 103–12. <a href="https://doi.org/10.1158/1055-9965.EPI-17-0461">https://doi.org/10.1158/1055-9965.EPI-17-0461</a>.
 </div>
 </div>
-</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></section></section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
