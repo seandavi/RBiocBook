@@ -2,14 +2,19 @@
 title: "Machine Learning 2"
 ---
 
-## Practical Machine Learning with R and mlr3
+## Overview
+
+In this chapter, we focus on practical aspects of machine learning. 
+The goal is to provide a hands-on introduction to the application of machine learning techniques to real-world data. 
+While the theoretical foundations of machine learning are important, the ability to apply these techniques to solve practical problems is equally crucial.
+In this chapter, we will use the `mlr3` package in R to build and evaluate machine learning models for classification and regression tasks. 
 
 The mlr3 R package is a modern, object-oriented machine learning framework in R
 that builds on the success of its predecessor, the mlr package. It provides a
 flexible and extensible platform for handling common machine learning tasks
 such as data preprocessing, model training, hyperparameter tuning, and model
-evaluation @fig-mlr3-ecosystem. The package is designed to simplify the process of creating and
-deploying complex machine learning pipelines.
+evaluation @fig-mlr3-ecosystem. The package is designed to guide and standardize 
+the process of using complex machine learning pipelines.
 
 ```{r fig-mlr3-ecosystem, echo=FALSE, fig.cap='The mlr3 ecosystem.', dpi=100}
 knitr::include_graphics("images/mlr3_ecosystem.png")
@@ -20,11 +25,15 @@ knitr::include_graphics("images/mlr3_ecosystem.png")
 * Task abstraction 
   : mlr3 encapsulates different types of learning problems
   like classification, regression, and survival analysis into "Task" objects,
-  making it easier to handle various learning scenarios.
+  making it easier to handle various learning scenarios. Examples of tasks 
+  include classification tasks, regression tasks, and survival tasks.
 * Modular design
   : The package follows a modular design, allowing users to quickly swap out
   different components such as learners (algorithms), measures (performance
-  metrics), and resampling strategies.
+  metrics), and resampling strategies. Examples of learners include linear
+  regression, logistic regression, and random forests. Examples of measures
+  include accuracy, precision, recall, and F1 score. Examples of resampling
+  strategies include cross-validation, bootstrapping, and holdout validation.
 * Extensibility
   : Users can extend the functionality of mlr3 by adding custom components like
   learners, measures, and preprocessing steps via the R6 object-oriented
@@ -56,33 +65,78 @@ means that users can quickly swap out different components such as learners
 package also supports parallelization of model training and evaluation, making
 it suitable for large-scale machine learning tasks.
 
-The mlr3 workflow consists of the following steps:
-
-
-1. Load data
-1. Create a task to define the learning problem.
-1. Split data into training and test sets.
-1. Choose a learner object to specify the learning algorithm.
-   a. Train the model on the training set.
-   b. Predict the target variable for the test set.
-1. Assess the performance of the model.
-1. Interpret the model.
+```{mermaid}
+%%| label: fig-mlr3-workflow
+%%| fig-cap: "The simplified workflow of a machine learning pipeline using mlr3."
+graph TD
+  A[Load data]
+  B[Create a task\nregression, classification, etc.]
+  B --> learner[Choose learner]
+  A --> C[Split data]
+  C --> trainset(Training set)
+  C --> testset[Test set]
+  trainset --> train[Train model]
+  learner --> train
+  testset --> testing[Test model]
+  train --> testing
+  testing --> eval[Evaluate &\nInterpret]
+```
 
 The following sections describe each of these steps in detail.
 
-### Tasks
+### The machine learning Task
 
-Tasks are objects that contain the (usually tabular) data and additional
-metadata to define a machine learning problem. The meta-data is, for example,
-the name of the target variable for supervised machine learning problems, or
-the type of the dataset (e.g. a spatial or survival task). This information is
-used by specific operations that can be performed on a task.
+Imagine you want to teach a computer how to make predictions or decisions, similar to how you might teach a student. To do this, you need to clearly define what you want the computer to learn and work on. This is called defining a "task." Let's break down what this involves and why it's important.
 
-Tasks are objects that contain the (usually tabular) data and additional
-meta-data to define a machine learning problem. The meta-data is, for example,
-the name of the target variable for supervised machine learning problems, or
-the type of the dataset (e.g. a _spatial_ or _survival_ task). This information
-is used by specific operations that can be performed on a task.
+#### Step 1: Understand the Problem
+
+First, think about what problem you want to solve or what question you want the computer to answer. For example:
+- Do you want to predict the weather for tomorrow?
+- Are you trying to figure out if an email is spam or not?
+- Do you want to know how much a house might sell for?
+
+These questions define your **task type**. In machine learning, there are several common task types:
+
+- **Classification:** Deciding which category something belongs to (e.g., spam or not spam).
+- **Regression:** Predicting a number (e.g., the price of a house).
+- **Clustering:** Grouping similar items together (e.g., customer segmentation).
+
+#### Step 2: Choose Your Data
+
+Next, you need data that is related to your problem. Think of data as the information or examples you'll use to teach the computer. For instance, if your task is to predict house prices, your data might include:
+
+- The size of the house
+- The number of bedrooms
+- The location of the house
+- The age of the house
+
+These pieces of information are called **features**. Features are the input that the computer uses to make predictions.
+
+#### Step 3: Define the Target
+
+Along with features, you need to define the **target**. The target is what you want to predict or decide. In the house price example, the target would be the actual price of the house.
+
+#### Step 4: Create the Task
+
+Now that you have your problem, data, and target, you can create the task. In mlr3, a task brings together the type of problem (task type), the features (input data), and the target (what you want to predict).
+
+Here's a simple summary:
+
+1. **Task Type:** What kind of problem are you solving? (e.g., classification, regression)
+2. **Features:** What information do you have to make the prediction? (e.g., size, location)
+3. **Target:** What are you trying to predict? (e.g., house price)
+
+By clearly defining these elements, you set a solid foundation for the machine learning process. This helps ensure that the computer can learn effectively and make accurate predictions.
+
+#### mlr3 and Tasks
+
+The mlr3 package uses the concept of "Tasks" to encapsulate different types of
+learning problems like classification, regression, and survival analysis. A Task
+contains the data (features and target variable) and additional metadata to
+define the machine learning problem. For example, in a classification task, the
+target variable is a label (stored as a character or factor), while in a
+regression task, the target variable is a numeric quantity (stored as an integer
+or numeric).
 
 There are a number of [Task Types](https://mlr3book.mlr-org.com/02-basics-tasks.html#tasks-types) that 
 are supported by mlr3. To create a task from a [`data.frame()`](https://www.rdocumentation.org/packages/base/topics/data.frame), [`data.table()`](https://www.rdocumentation.org/packages/data.table/topics/data.table-package) or [`Matrix()`](https://www.rdocumentation.org/packages/Matrix/topics/Matrix), you first need to select the right task type:
@@ -101,7 +155,44 @@ are supported by mlr3. To create a task from a [`data.frame()`](https://www.rdoc
     
 -   **Ordinal Regression Task**: The target is ordinal → `TaskOrdinal` in add-on package [mlr3ordinal](https://github.com/mlr-org/mlr3ordinal) (still in development).
 
-### Learners
+### The "Learner" in Machine Learning
+
+After you've defined your task, the next step in teaching a computer to make predictions or decisions is to choose a "learner." Let's explore what a learner is and how it fits into the mlr3 package.
+
+#### What is a "Learner"?
+
+Think of a learner as the method or tool that the computer uses to learn from the data. Another common name for a "learner" is a "model." It's similar to choosing a tutor or a teacher for a student. Different learners have different ways of understanding and processing information. For example:
+
+- Some learners might be great at recognizing patterns in data, like a tutor who is excellent at spotting trends.
+- Others might be good at making decisions based on rules, like a tutor who uses step-by-step logic.
+
+In machine learning, there are many types of learners, each with its own strengths and weaknesses. Here are a few examples:
+
+- **Decision Trees:** These learners make decisions by asking a series of questions, like "Is the house larger than 1000 square feet?" and "Does it have more than 3 bedrooms?"
+- **k-Nearest Neighbors:** These learners make predictions based on the similarity of new data points to existing data points.
+- **Linear Regression:** This learner tries to fit a straight line through the data points to make predictions about numbers.
+- **Random Forests:** These are like a group of decision trees working together to make more accurate predictions.
+- **Support Vector Machines:** These learners find the best boundary that separates different categories in the data.
+
+#### Choosing the Right Learner
+
+Selecting the right learner is crucial because different learners work better for different types of tasks and data. For example:
+
+- If your task is to classify emails as spam or not spam, a decision tree or a support vector machine might work well.
+- If you're predicting house prices, linear regression or random forests could be good choices.
+
+The goal is to find a learner that can understand the patterns in your data and make accurate predictions. This is where the mlr3 package comes in handy. It provides a wide range of learners that you can choose from, making it easier to experiment and find the best learner for your task.
+
+#### Learners in mlr3
+
+In the mlr3 package, learners are pre-built tools that you can easily use for your tasks. Here's how it works:
+
+1. **Select a Learner:** mlr3 provides a variety of learners to choose from, like decision trees, linear regression, and more.
+2. **Train the Learner:** Once you've selected a learner, you provide it with your task (the problem, data, and target). The learner uses this information to learn and make predictions.
+3. **Evaluate and Improve:** After training, you can test how well the learner performs and make adjustments if needed, such as trying a different learner or fine-tuning the current one.
+
+#### mlr3 and Learners
+
 
 Objects of class [`Learner`](https://mlr3.mlr-org.com/reference/Learner.html) provide a unified interface to many popular machine learning algorithms in R. They consist of methods to train and predict a model for a [`Task`](https://mlr3.mlr-org.com/reference/Task.html) and provide meta-information about the learners, such as the hyperparameters (which control the behavior of the learner) you can set.
 
@@ -135,17 +226,6 @@ This set of baseline learners is usually insufficient for a real data analysis. 
 
 More machine learning methods and alternative implementations are collected in the [mlr3extralearners repository](https://github.com/mlr-org/mlr3extralearners/).
 
-### mlr3 Workflow
-
-1. Load data
-2. Split data into training and test sets
-3. Create a [task](https://mlr3book.mlr-org.com/02-basics-tasks.html). 
-4. Choose a [learner](https://mlr3book.mlr-org.com/02-basics-learners.html). See `mlr_learners`.
-5. Train
-6. Predict
-7. Assess
-8. Interpret
-
 
 ## Setup
 
@@ -162,6 +242,16 @@ set.seed(789)
 In this exercise, we will be classifying cancer types based on gene 
 expression data. The data we are going to access are from @brouwer-visser_regulatory_2018.
 
+The data are from the Gene Expression Omnibus (GEO) database, a public repository of functional genomics data. The data are from a study that aimed to identify gene expression signatures that can distinguish between different types of cancer. The data include gene expression profiles from patients with different types of cancer. The goal is to build a machine learning model that can predict the cancer type based on the gene expression data.
+
+### Understanding the Problem
+
+Before we start building a machine learning model, it's important to understand the problem we are trying to solve. Here are some key questions to consider:
+
+- What are the features?
+- What is the target variable?
+- What type of machine learning task is this (classification, regression, clustering)?
+- What is the goal of the analysis?
 
 ### Data Preparation
 
@@ -206,7 +296,8 @@ are available, including those based on correlation with the outcome variable.
 ## Feature selection
 
 Feature selection should be done on the training data only, not the test data to avoid
-overfitting. 
+overfitting. The test data should be used only for evaluation. In other words, the test
+data should be "unseen" by the model until the final evaluation.
 :::
 
 Remember that the `apply` function applies a function to each row or column of
