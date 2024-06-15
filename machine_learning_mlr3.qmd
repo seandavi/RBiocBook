@@ -344,13 +344,21 @@ A task is a data set with a target variable. In this case, the target variable
 is the cancer type. The mlr3 package provides a function to convert a data frame
 into a task. These tasks can be used with any machine learning algorithm in mlr3.
 
+This is a classification task, so we will use the `as_task_classif` function to
+create the task. The classification task requires a target variable that is categorical.
+
+
 ```{r}
+library(mlr3)
 tumor$tumor_type = as.factor(tumor$tumor_type)
 task = as_task_classif(tumor,target='tumor_type')
 ```
 
-Here, we randomly divide the data into 2/3 training data and 1/3 test data.
+### Splitting the data
 
+Here, we randomly divide the data into 2/3 training data and 1/3 test data.
+This is a common split, but other splits can be used. The training data is used
+to train the model, and the test data is used to evaluate the trained model.
 
 ```{r}
 set.seed(7)
@@ -361,10 +369,19 @@ test_set = setdiff(task$row_ids, train_set)
 ::: {.callout-important}
 Training and testing on the same data is a common mistake. We want to test
 the model on data that it has not seen before. This is the only way to know
-if the model is overfitting.
+if the model is overfitting and to get an accurate estimate of the model's
+performance.
 :::
 
-### K-nearest-neighbor
+In the next sections, we will train and evaluate three different models on the
+data: k-nearest-neighbor, classification tree, and random forest. Remember that
+the goal is to predict the cancer type based on the gene expression data.
+The mlr3 package uses the concept of "learners" to encapsulate different machine
+learning algorithms. 
+
+### Example learners
+
+#### K-nearest-neighbor
 
 The first model we will use is the k-nearest-neighbor model. This model
 is based on the idea that similar samples have similar outcomes. The
@@ -373,7 +390,7 @@ the default value of 7, but you can try other values to see how they
 affect the results. In fact, mlr3 provides the ability to tune parameters
 automatically, but we won't cover that here.
 
-#### Create the learner
+##### Create the learner
 
 In mlr3, the machine learning algorithms are called learners. To create
 a learner, we use the `lrn` function. The `lrn` function takes the name
@@ -382,6 +399,7 @@ that are specific to the learner. In this case, we will use the default
 values for the arguments.
 
 ```{r}
+library(mlr3learners)
 learner = lrn("classif.kknn")
 ```
 
@@ -393,7 +411,7 @@ lrn()
 ```
 
 
-#### Train
+##### Train
 
 To train the model, we use the `train` function. The `train` function takes
 the task and the row ids of the training data as arguments.
@@ -409,7 +427,7 @@ Here, we can look at the trained model:
 learner$model
 ```
 
-#### Predict
+##### Predict
 
 Lets use our trained model works to predict the classes of the 
 **training** data. Of course, we already know the classes of the
@@ -428,7 +446,7 @@ And check on the test data:
 pred_test = learner$predict(task, row_ids=test_set)
 ```
 
-#### Assess
+##### Assess
 
 In this section, we can look at the accuracy and performance of our model 
 on the training data and the test data. We can also look at the confusion
@@ -460,7 +478,7 @@ pred_test$score(measures)
 Compare the accuracy on the training data to the accuracy on the test data. 
 Do you see any evidence of overfitting?
 
-### Classification tree
+#### Classification tree
 
 We are going to use a classification tree to classify the data. A classification
 tree is a series of yes/no questions that are used to classify the data. The
@@ -470,7 +488,7 @@ classes. Then, the data is split based on the value of that feature. The
 process is repeated until the data is completely separated into the different
 classes.
 
-#### Train
+##### Train
 
 ```{r}
 # in this case, we want to keep the model
@@ -495,7 +513,7 @@ is very simple, with only two splits.
 ```{r} 
 #autoplot(learner)
 ```
-#### Predict
+##### Predict
 
 Now that we have trained the model on the _training_ data, we can use it to predict the classes of the training data and the test data. The `$predict` method takes a `task` and
 produces a prediction based on the _trained_ model, in this case, called `learner`.
@@ -511,7 +529,7 @@ not "cheating" like what we just did where we did the prediction on the _trainin
 pred_test = learner$predict(task, row_ids=test_set)
 ```
 
-#### Assess
+##### Assess
 
 For classification tasks, we often look at a confusion matrix of the _truth_ vs the _predicted_
 classes for the samples. 
@@ -555,13 +573,13 @@ pay attention to model selection and parameters.
 :::
 
 
-### RandomForest
+#### RandomForest
 
 ```{r}
 learner = lrn("classif.ranger", importance = "impurity")
 ```
 
-#### Train
+##### Train
 
 ```{r}
 learner$train(task, row_ids = train_set)
@@ -591,7 +609,7 @@ in the decision tree?
 If you are interested, look up a few of the important variables in the 
 model to see if they make biological sense. 
 
-#### Predict
+##### Predict
 
 Again, we can use the trained model to predict the classes of the training data and the test data.
 
@@ -603,7 +621,7 @@ pred_train = learner$predict(task, row_ids=train_set)
 pred_test = learner$predict(task, row_ids=test_set)
 ```
 
-#### Assess
+##### Assess
 
 ```{r}
 pred_train$confusion
@@ -657,16 +675,16 @@ train_set = sample(task$row_ids, 0.67 * task$nrow)
 test_set = setdiff(task$row_ids, train_set)
 ```
 
+### Example learners
 
-
-### Linear regression
+#### Linear regression
 
 We will start with a simple linear regression model. 
 
 ```{r}
 learner = lrn("regr.lm")
 ```
-#### Train
+##### Train
 
 ```{r}
 learner$train(task, row_ids = train_set)
@@ -681,7 +699,7 @@ par(mfrow=c(2,2))
 plot(learner$model)
 ```
 
-#### Predict
+##### Predict
 
 ```{r}
 pred_train = learner$predict(task, row_ids=train_set)
@@ -691,7 +709,7 @@ pred_train = learner$predict(task, row_ids=train_set)
 pred_test = learner$predict(task, row_ids=test_set)
 ```
 
-#### Assess
+##### Assess
 
 ```{r}
 pred_train
@@ -719,13 +737,13 @@ pred_test
 pred_test$score(measures)
 ```
 
-### Regression tree
+#### Regression tree
 
 ```{r}
 learner = lrn("regr.rpart", keep_model = TRUE)
 ```
 
-#### Train
+##### Train
 
 ```{r}
 learner$train(task, row_ids = train_set)
@@ -738,7 +756,7 @@ learner$model
 What is odd about using a regression tree here is that we end up with only a few
 discrete estimates of age. Each "leaf" has a value. 
 
-#### Predict
+##### Predict
 
 ```{r}
 pred_train = learner$predict(task, row_ids=train_set)
@@ -748,7 +766,7 @@ pred_train = learner$predict(task, row_ids=train_set)
 pred_test = learner$predict(task, row_ids=test_set)
 ```
 
-#### Assess
+##### Assess
 
 ```{r}
 pred_train
@@ -776,7 +794,7 @@ pred_test
 pred_test$score(measures)
 ```
 
-### RandomForest
+#### RandomForest
 
 Randomforest is also tree-based, but unlike the single regression tree above,
 randomforest is a "forest" of trees which will eliminate the discrete nature
@@ -786,7 +804,7 @@ of a single tree.
 learner = lrn("regr.ranger", mtry=2, min.node.size=20)
 ```
 
-#### Train
+##### Train
 
 ```{r}
 learner$train(task, row_ids = train_set)
@@ -796,7 +814,7 @@ learner$train(task, row_ids = train_set)
 learner$model
 ```
 
-#### Predict
+##### Predict
 
 ```{r}
 pred_train = learner$predict(task, row_ids=train_set)
@@ -806,7 +824,7 @@ pred_train = learner$predict(task, row_ids=train_set)
 pred_test = learner$predict(task, row_ids=test_set)
 ```
 
-#### Assess
+##### Assess
 
 ```{r}
 pred_train
@@ -904,26 +922,28 @@ Partition the data into test and training sets. We will use $\frac{1}{3}$ and $\
 split = partition(exp_pred_task)
 ```
 
-### Linear regression
+### Example learners
+
+#### Linear regression
 
 ```{r}
 learner = lrn("regr.lm")
 ```
 
-#### Train
+##### Train
 
 ```{r}
 learner$train(exp_pred_task, split$train)
 ```
 
-#### Predict
+##### Predict
 
 ```{r}
 pred_train = learner$predict(exp_pred_task, split$train)
 pred_test = learner$predict(exp_pred_task, split$test)
 ```
 
-#### Assess
+##### Assess
 
 ```{r}
 pred_train
@@ -943,7 +963,7 @@ pred_test$score(measures)
 ```
 
 
-### Penalized regression
+#### Penalized regression
 
 Recall that we can use penalized regression to select the most important
 predictors from a large set of predictors. In this case, we will use the
@@ -954,7 +974,7 @@ predictors from a large set of predictors. In this case, we will use the
 learner = lrn("regr.cv_glmnet", nfolds=10, alpha=1)
 ```
 
-#### Train
+##### Train
 
 ```{r}
 learner$train(exp_pred_task)
@@ -976,13 +996,6 @@ Note that the coefficients are all zero for the histone marks that were not
 selected by the model. In this case, we can use the model not to predict new
 data, but to help us understand the data. 
 
-
-## Cross-validation
-
-
-```{r}
-as.data.table(mlr_resamplings)
-```
 
 
 
