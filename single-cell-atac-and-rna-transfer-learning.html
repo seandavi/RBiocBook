@@ -7,7 +7,7 @@
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-19">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>The RBioc Book – 21&nbsp; Transfer Learning in scATAC-seq and scRNA-seq</title>
+<title>The RBioc Book – 22&nbsp; Transfer Learning in scATAC-seq and scRNA-seq</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./references.html" rel="next">
-<link href="./ranges_exercises.html" rel="prev">
+<link href="./atac-seq/atac-seq.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -134,7 +134,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./single-cell-atac-and-rna-transfer-learning.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./single-cell-atac-and-rna-transfer-learning.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -373,8 +373,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./atac-seq/atac-seq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./single-cell-atac-and-rna-transfer-learning.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></span></a>
   </div>
 </li>
       </ul>
@@ -417,39 +423,39 @@ window.Quarto = {
    
   <ul>
 <li>
-<a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">21.1</span> Background</a>
+<a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">22.1</span> Background</a>
   <ul class="collapse">
-<li><a href="#protocol" id="toc-protocol" class="nav-link" data-scroll-target="#protocol"><span class="header-section-number">21.1.1</span> Protocol</a></li>
-  <li><a href="#primary-data-processing" id="toc-primary-data-processing" class="nav-link" data-scroll-target="#primary-data-processing"><span class="header-section-number">21.1.2</span> Primary data processing</a></li>
-  <li><a href="#quality-control-metrics" id="toc-quality-control-metrics" class="nav-link" data-scroll-target="#quality-control-metrics"><span class="header-section-number">21.1.3</span> Quality control metrics</a></li>
+<li><a href="#protocol" id="toc-protocol" class="nav-link" data-scroll-target="#protocol"><span class="header-section-number">22.1.1</span> Protocol</a></li>
+  <li><a href="#primary-data-processing" id="toc-primary-data-processing" class="nav-link" data-scroll-target="#primary-data-processing"><span class="header-section-number">22.1.2</span> Primary data processing</a></li>
+  <li><a href="#quality-control-metrics" id="toc-quality-control-metrics" class="nav-link" data-scroll-target="#quality-control-metrics"><span class="header-section-number">22.1.3</span> Quality control metrics</a></li>
   </ul>
 </li>
   <li>
-<a href="#atac-seq-and-rna-seq-integration" id="toc-atac-seq-and-rna-seq-integration" class="nav-link" data-scroll-target="#atac-seq-and-rna-seq-integration"><span class="header-section-number">21.2</span> ATAC-seq and RNA-seq integration</a>
+<a href="#atac-seq-and-rna-seq-integration" id="toc-atac-seq-and-rna-seq-integration" class="nav-link" data-scroll-target="#atac-seq-and-rna-seq-integration"><span class="header-section-number">22.2</span> ATAC-seq and RNA-seq integration</a>
   <ul class="collapse">
-<li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">21.2.1</span> Setup</a></li>
-  <li><a href="#rna-seq-processing" id="toc-rna-seq-processing" class="nav-link" data-scroll-target="#rna-seq-processing"><span class="header-section-number">21.2.2</span> RNA-seq processing</a></li>
-  <li><a href="#annotate-atac-seq-regions" id="toc-annotate-atac-seq-regions" class="nav-link" data-scroll-target="#annotate-atac-seq-regions"><span class="header-section-number">21.2.3</span> Annotate ATAC-seq regions</a></li>
-  <li><a href="#atac-seq-processing" id="toc-atac-seq-processing" class="nav-link" data-scroll-target="#atac-seq-processing"><span class="header-section-number">21.2.4</span> ATAC-seq processing</a></li>
+<li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">22.2.1</span> Setup</a></li>
+  <li><a href="#rna-seq-processing" id="toc-rna-seq-processing" class="nav-link" data-scroll-target="#rna-seq-processing"><span class="header-section-number">22.2.2</span> RNA-seq processing</a></li>
+  <li><a href="#annotate-atac-seq-regions" id="toc-annotate-atac-seq-regions" class="nav-link" data-scroll-target="#annotate-atac-seq-regions"><span class="header-section-number">22.2.3</span> Annotate ATAC-seq regions</a></li>
+  <li><a href="#atac-seq-processing" id="toc-atac-seq-processing" class="nav-link" data-scroll-target="#atac-seq-processing"><span class="header-section-number">22.2.4</span> ATAC-seq processing</a></li>
   </ul>
 </li>
   <li>
-<a href="#transfer-learning" id="toc-transfer-learning" class="nav-link" data-scroll-target="#transfer-learning"><span class="header-section-number">21.3</span> Transfer learning</a>
+<a href="#transfer-learning" id="toc-transfer-learning" class="nav-link" data-scroll-target="#transfer-learning"><span class="header-section-number">22.3</span> Transfer learning</a>
   <ul class="collapse">
-<li><a href="#loading-the-data" id="toc-loading-the-data" class="nav-link" data-scroll-target="#loading-the-data"><span class="header-section-number">21.3.1</span> Loading the Data</a></li>
-  <li><a href="#selecting-the-most-variable-genes" id="toc-selecting-the-most-variable-genes" class="nav-link" data-scroll-target="#selecting-the-most-variable-genes"><span class="header-section-number">21.3.2</span> Selecting the Most Variable Genes</a></li>
-  <li><a href="#splitting-the-dataset" id="toc-splitting-the-dataset" class="nav-link" data-scroll-target="#splitting-the-dataset"><span class="header-section-number">21.3.3</span> Splitting the Dataset</a></li>
-  <li><a href="#performing-pca-on-the-first-subset" id="toc-performing-pca-on-the-first-subset" class="nav-link" data-scroll-target="#performing-pca-on-the-first-subset"><span class="header-section-number">21.3.4</span> Performing PCA on the First Subset</a></li>
-  <li><a href="#projecting-the-second-subset" id="toc-projecting-the-second-subset" class="nav-link" data-scroll-target="#projecting-the-second-subset"><span class="header-section-number">21.3.5</span> Projecting the Second Subset</a></li>
-  <li><a href="#comparing-the-subsets-in-the-principal-component-space" id="toc-comparing-the-subsets-in-the-principal-component-space" class="nav-link" data-scroll-target="#comparing-the-subsets-in-the-principal-component-space"><span class="header-section-number">21.3.6</span> Comparing the Subsets in the Principal Component Space</a></li>
+<li><a href="#loading-the-data" id="toc-loading-the-data" class="nav-link" data-scroll-target="#loading-the-data"><span class="header-section-number">22.3.1</span> Loading the Data</a></li>
+  <li><a href="#selecting-the-most-variable-genes" id="toc-selecting-the-most-variable-genes" class="nav-link" data-scroll-target="#selecting-the-most-variable-genes"><span class="header-section-number">22.3.2</span> Selecting the Most Variable Genes</a></li>
+  <li><a href="#splitting-the-dataset" id="toc-splitting-the-dataset" class="nav-link" data-scroll-target="#splitting-the-dataset"><span class="header-section-number">22.3.3</span> Splitting the Dataset</a></li>
+  <li><a href="#performing-pca-on-the-first-subset" id="toc-performing-pca-on-the-first-subset" class="nav-link" data-scroll-target="#performing-pca-on-the-first-subset"><span class="header-section-number">22.3.4</span> Performing PCA on the First Subset</a></li>
+  <li><a href="#projecting-the-second-subset" id="toc-projecting-the-second-subset" class="nav-link" data-scroll-target="#projecting-the-second-subset"><span class="header-section-number">22.3.5</span> Projecting the Second Subset</a></li>
+  <li><a href="#comparing-the-subsets-in-the-principal-component-space" id="toc-comparing-the-subsets-in-the-principal-component-space" class="nav-link" data-scroll-target="#comparing-the-subsets-in-the-principal-component-space"><span class="header-section-number">22.3.6</span> Comparing the Subsets in the Principal Component Space</a></li>
   </ul>
 </li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/single-cell-atac-and-rna-transfer-learning.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./single-cell-atac-and-rna-transfer-learning.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></a></li></ol></nav><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./single-cell-atac-and-rna-transfer-learning.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span>
+<span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/single-cell-atac-and-rna-transfer-learning.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
@@ -476,36 +482,36 @@ window.Quarto = {
   
 
 
-</header><section id="background" class="level2 page-columns page-full" data-number="21.1"><h2 data-number="21.1" class="anchored" data-anchor-id="background">
-<span class="header-section-number">21.1</span> Background</h2>
+</header><section id="background" class="level2 page-columns page-full" data-number="22.1"><h2 data-number="22.1" class="anchored" data-anchor-id="background">
+<span class="header-section-number">22.1</span> Background</h2>
 <p>Analyzing open chromatin regions has been a crucial aspect of understanding gene regulation and cellular identity. Over the years, several techniques have been developed to identify and study these accessible regions of the genome. One of the earliest methods was DNase-seq, which uses the DNase I enzyme to digest exposed DNA, followed by sequencing of the resulting fragments. This method, introduced in the late 1970s and adapted for high-throughput sequencing in 2006, provided valuable insights into the locations of regulatory elements and transcription factor binding sites. Another technique, called FAIRE-seq (Formaldehyde-Assisted Isolation of Regulatory Elements), was developed in 2007. This method relies on the differential crosslinking of proteins to DNA in open and closed chromatin regions, followed by sequencing of the isolated DNA fragments. FAIRE-seq offered a complementary approach to DNase-seq for identifying open chromatin regions. In 2013, a groundbreaking method called ATAC-seq (Assay for Transposase-Accessible Chromatin using sequencing) was introduced by Buenrostro et al.&nbsp;This technique revolutionized the study of open chromatin by providing a simple, fast, and sensitive approach. ATAC-seq employs a hyperactive Tn5 transposase that simultaneously cuts and inserts adapters into accessible DNA regions. The resulting fragments are then sequenced, revealing the locations of open chromatin. ATAC-seq offers several advantages over previous methods. It requires a small number of cells (as few as 500), making it suitable for studying rare cell types or precious samples. Additionally, the protocol is relatively simple and can be completed in a few hours, compared to the multiple days required for DNase-seq or FAIRE-seq. The high resolution and sensitivity of ATAC-seq have made it a widely adopted technique in the field of epigenomics. The introduction of single-cell ATAC-seq (scATAC-seq) in 2015 further expanded the capabilities of this method. By combining ATAC-seq with microfluidic technologies or combinatorial indexing, researchers can now profile open chromatin landscapes at the single-cell level. This advancement allows for the exploration of cellular heterogeneity, the identification of rare cell types, and the study of dynamic changes in chromatin accessibility during processes like differentiation or disease progression.</p>
-<section id="protocol" class="level3 page-columns page-full" data-number="21.1.1"><h3 data-number="21.1.1" class="anchored" data-anchor-id="protocol">
-<span class="header-section-number">21.1.1</span> Protocol</h3>
+<section id="protocol" class="level3 page-columns page-full" data-number="22.1.1"><h3 data-number="22.1.1" class="anchored" data-anchor-id="protocol">
+<span class="header-section-number">22.1.1</span> Protocol</h3>
 <div id="fig-atac-workflow" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-atac-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41596-022-00692-9/MediaObjects/41596_2022_692_Fig1_HTML.png" id="fig-atac-workflow" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig quarto-uncaptioned margin-caption" id="fig-atac-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca"></figcaption></figure>
 </div>
-<p><strong>1. Nuclei Isolation and Tn5 Transposition (<a href="#fig-atac-workflow" class="quarto-xref">Figure&nbsp;<span>21.1</span></a> (a))</strong></p>
+<p><strong>1. Nuclei Isolation and Tn5 Transposition (<a href="#fig-atac-workflow" class="quarto-xref">Figure&nbsp;<span>22.1</span></a> (a))</strong></p>
 <ul>
 <li><p><strong>Nuclei Isolation</strong>: The first step involves isolating nuclei from cells while keeping the chromatin intact. This ensures that the native chromatin structure is preserved.</p></li>
 <li><p><strong>Exposure to Tn5 Transposase</strong>: The isolated nuclei are then exposed to Tn5 transposase. The Tn5 enzyme is a hyperactive transposase that simultaneously cuts DNA and inserts sequencing adapters into accessible chromatin regions. This step is crucial as it tags open chromatin areas with sequencing adapters, making them ready for subsequent amplification and sequencing.</p></li>
 <li><p><strong>Fragment Isolation and Amplification</strong>: After transposition, the resulting DNA fragments are isolated. These fragments are then amplified to create a library of transposed sequences. This library represents the accessible regions of the genome and is ready for sequencing.</p></li>
 <li><p><strong>Sequencing and Identification</strong>: The amplified DNA fragments are sequenced using high-throughput sequencing technologies. The resulting sequences are mapped to the reference genome to identify accessible chromatin regions, known as ATAC-seq peaks. These peaks indicate regions where the chromatin is open and potentially active in gene regulation.</p></li>
 </ul>
-<p><strong>2. Detailed Mechanism of Tn5 Transposition (<a href="#fig-atac-workflow" class="quarto-xref">Figure&nbsp;<span>21.1</span></a> (b))</strong></p>
+<p><strong>2. Detailed Mechanism of Tn5 Transposition (<a href="#fig-atac-workflow" class="quarto-xref">Figure&nbsp;<span>22.1</span></a> (b))</strong></p>
 <ul>
 <li><p><strong>Transposition into Native Chromatin</strong>: The Tn5 transposase inserts sequencing adapters into accessible regions of the chromatin. This insertion creates post-transposition DNA fragments, which include the Tn5-induced nick.</p></li>
 <li><p><strong>Initial Extension and Amplification</strong>: Following transposition, the DNA fragments undergo an initial extension at 72°C. This is followed by amplification, during which barcodes and additional adapter components are added. These steps are essential for the preparation of the final ATAC-seq library.</p></li>
 <li><p><strong>Purification and Library Construction</strong>: The amplified fragments are purified to construct the final ATAC-seq library. The sites of chromatin accessibility are defined by the Tn5 insertion, which is marked by specific adapter sequences.</p></li>
 </ul>
-<p><strong>3. Data Analysis and Interpretation (<a href="#fig-atac-workflow" class="quarto-xref">Figure&nbsp;<span>21.1</span></a> (c))</strong></p>
+<p><strong>3. Data Analysis and Interpretation (<a href="#fig-atac-workflow" class="quarto-xref">Figure&nbsp;<span>22.1</span></a> (c))</strong></p>
 <ul>
 <li><p><strong>ATAC-seq Signal and Peaks</strong>: The sequenced data is analyzed to generate an ATAC-seq signal, which shows the read density across the genome. Peaks in the ATAC-seq signal correspond to regions of open chromatin. The example in the figure shows differential chromatin accessibility between two cell types (Cell type X and Cell type Y). Each cell type exhibits unique peaks, indicating distinct regulatory regions.</p></li>
 <li><p><strong>Transcription Factor Binding and Gene Expression</strong>: The open chromatin regions often contain binding sites for transcription factors (TFs). For instance, the motif for a specific TF (TF B) can be identified within a peak. Binding of TF B to its motif within an enhancer or promoter region can regulate the expression of a nearby gene (Gene A). The figure illustrates how the binding of TF B to its motif leads to gene A expression in one cell type but not in another, highlighting the functional impact of chromatin accessibility on gene regulation.</p></li>
-</ul></section><section id="primary-data-processing" class="level3 page-columns page-full" data-number="21.1.2"><h3 data-number="21.1.2" class="anchored" data-anchor-id="primary-data-processing">
-<span class="header-section-number">21.1.2</span> Primary data processing</h3>
+</ul></section><section id="primary-data-processing" class="level3 page-columns page-full" data-number="22.1.2"><h3 data-number="22.1.2" class="anchored" data-anchor-id="primary-data-processing">
+<span class="header-section-number">22.1.2</span> Primary data processing</h3>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="fig-pipeline-tools" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -513,14 +519,14 @@ window.Quarto = {
 <img src="images/tools-for-atac-analysis.png" class="img-fluid figure-img" width="674">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-pipeline-tools-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.2: ATAC-seq pipelines universally require several common bioinformatic tools. This figure/table shows tools used in various published ATAC-seq pipelines. The figure also displays the typical steps in an ATAC-seq analysis.
+Figure&nbsp;22.2: ATAC-seq pipelines universally require several common bioinformatic tools. This figure/table shows tools used in various published ATAC-seq pipelines. The figure also displays the typical steps in an ATAC-seq analysis.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="quality-control-metrics" class="level3 page-columns page-full" data-number="21.1.3"><h3 data-number="21.1.3" class="anchored" data-anchor-id="quality-control-metrics">
-<span class="header-section-number">21.1.3</span> Quality control metrics</h3>
-<p>In addition to basic read counts and variant quality scores, there are a number of metrics that are valuable for ATAC-seq (or other regional enrichment experiemnts, like ChIP-seq). Figure <a href="#fig-atac-qc" class="quarto-xref">Figure&nbsp;<span>21.3</span></a> shows example plots from the <a href="https://doi.org/10.1093/nargab/lqab101">pepatac</a> workflow.</p>
+</section><section id="quality-control-metrics" class="level3 page-columns page-full" data-number="22.1.3"><h3 data-number="22.1.3" class="anchored" data-anchor-id="quality-control-metrics">
+<span class="header-section-number">22.1.3</span> Quality control metrics</h3>
+<p>In addition to basic read counts and variant quality scores, there are a number of metrics that are valuable for ATAC-seq (or other regional enrichment experiemnts, like ChIP-seq). Figure <a href="#fig-atac-qc" class="quarto-xref">Figure&nbsp;<span>22.3</span></a> shows example plots from the <a href="https://doi.org/10.1093/nargab/lqab101">pepatac</a> workflow.</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="fig-atac-qc" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -528,20 +534,20 @@ Figure&nbsp;21.2: ATAC-seq pipelines universally require several common bioinfor
 <img src="abc.jpg" class="img-fluid figure-img" width="793">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-atac-qc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.3: (A) Library complexity plots the read count versus externally calculated deduplicated read counts. Red line is library complexity curve for SRR5427743. Dashed line represents a completely unique library. Red diamond is the externally calculated duplicate read count. (B) TSS enrichment quality control plot. (C) Fragment length distribution showing characteristic peaks at mono-, di-, and tri-nucleosomes. (D) Cumulative fraction of reads in annotated genomic features (cFRiF). Inset: Fraction of reads in those features (FRiF). (E) Signal tracks including: nucleotide-resolution and smoothed signal tracks. PEPATAC default peaks are called using the default pipeline settings for MACS2 (32). (F) Distribution of peaks over the genome. (G) Distribution of peaks relative to TSS. (H) Distribution of peaks in annotated genomic partitions. Data from SRR5427743.
+Figure&nbsp;22.3: (A) Library complexity plots the read count versus externally calculated deduplicated read counts. Red line is library complexity curve for SRR5427743. Dashed line represents a completely unique library. Red diamond is the externally calculated duplicate read count. (B) TSS enrichment quality control plot. (C) Fragment length distribution showing characteristic peaks at mono-, di-, and tri-nucleosomes. (D) Cumulative fraction of reads in annotated genomic features (cFRiF). Inset: Fraction of reads in those features (FRiF). (E) Signal tracks including: nucleotide-resolution and smoothed signal tracks. PEPATAC default peaks are called using the default pipeline settings for MACS2 (32). (F) Distribution of peaks over the genome. (G) Distribution of peaks relative to TSS. (H) Distribution of peaks in annotated genomic partitions. Data from SRR5427743.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section></section><section id="atac-seq-and-rna-seq-integration" class="level2 page-columns page-full" data-number="21.2"><h2 data-number="21.2" class="anchored" data-anchor-id="atac-seq-and-rna-seq-integration">
-<span class="header-section-number">21.2</span> ATAC-seq and RNA-seq integration</h2>
+</section></section><section id="atac-seq-and-rna-seq-integration" class="level2 page-columns page-full" data-number="22.2"><h2 data-number="22.2" class="anchored" data-anchor-id="atac-seq-and-rna-seq-integration">
+<span class="header-section-number">22.2</span> ATAC-seq and RNA-seq integration</h2>
 <p>Single-cell transcriptomics has revolutionized our ability to characterize cell states, but a deeper biological understanding requires more than just clustering cells. As new methods emerge to measure different cellular modalities, integrating these datasets becomes a key challenge in better understanding cellular identity and function. For instance, when performing scRNA-seq and scATAC-seq experiments on the same biological system, consistently annotating both datasets with the same cell type labels can be difficult due to the sparsity of scATAC-seq data and the lack of interpretable gene markers in scRNA-seq data.</p>
 <p>In a <a href="https://www.cell.com/cell/fulltext/S0092-8674(19)30559-8">2019 paper by Stuart, Butler, and colleagues</a>, methods were introduced to integrate scRNA-seq and scATAC-seq datasets from the same biological system. This vignette demonstrates these methods, including:</p>
 <p>Using an annotated scRNA-seq dataset to label cells from an scATAC-seq experiment Co-visualizing and co-embedding cells from scRNA-seq and scATAC-seq Projecting scATAC-seq cells onto a UMAP derived from an scRNA-seq experiment</p>
 <p>The <a href="https://stuartlab.org/signac/">Signac package</a>, recently developed for analyzing single-cell resolution chromatin datasets like scATAC-seq, is extensively used in this vignette.</p>
 <p>The methods are demonstrated using a publicly available ~12,000 human PBMC ‘multiome’ dataset from 10x Genomics, where scRNA-seq and scATAC-seq profiles were simultaneously collected from the same cells. For the purpose of this vignette, the datasets are treated as if they originated from two different experiments and are integrated together. Since they were originally measured in the same cells, this provides a ground truth for assessing the accuracy of the integration. It is emphasized that the use of the multiome dataset here is for demonstration and evaluation purposes, and users should apply these methods to separately collected scRNA-seq and scATAC-seq datasets.</p>
-<section id="setup" class="level3" data-number="21.2.1"><h3 data-number="21.2.1" class="anchored" data-anchor-id="setup">
-<span class="header-section-number">21.2.1</span> Setup</h3>
+<section id="setup" class="level3" data-number="22.2.1"><h3 data-number="22.2.1" class="anchored" data-anchor-id="setup">
+<span class="header-section-number">22.2.1</span> Setup</h3>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">'satijalab/seurat-data'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -572,8 +578,8 @@ Figure&nbsp;21.3: (A) Library complexity plots the read count versus externally 
 <span><span class="va">pbmc.rna</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">pbmc.rna</span>, <span class="va">seurat_annotations</span> <span class="op">!=</span> <span class="st">"filtered"</span><span class="op">)</span></span>
 <span><span class="va">pbmc.atac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">pbmc.atac</span>, <span class="va">seurat_annotations</span> <span class="op">!=</span> <span class="st">"filtered"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="rna-seq-processing" class="level3" data-number="21.2.2"><h3 data-number="21.2.2" class="anchored" data-anchor-id="rna-seq-processing">
-<span class="header-section-number">21.2.2</span> RNA-seq processing</h3>
+</section><section id="rna-seq-processing" class="level3" data-number="22.2.2"><h3 data-number="22.2.2" class="anchored" data-anchor-id="rna-seq-processing">
+<span class="header-section-number">22.2.2</span> RNA-seq processing</h3>
 <p>This section just follows the Seurat RNA-seq pipeline. At a high level, the steps include:</p>
 <ol type="1">
 <li><p><strong>Normalization</strong>: This line normalizes the RNA data. Normalization typically adjusts the expression measurements to account for differences in sequencing depth or other technical variations across cells. In Seurat, the <code>NormalizeData</code> function scales the gene expression measurements for each cell by the total expression, multiplies by a scaling factor (default is 10,000), and log-transforms the result.</p></li>
@@ -590,8 +596,8 @@ Figure&nbsp;21.3: (A) Library complexity plots the read count versus externally 
 <span><span class="va">pbmc.rna</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html">RunPCA</a></span><span class="op">(</span><span class="va">pbmc.rna</span><span class="op">)</span></span>
 <span><span class="va">pbmc.rna</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html">RunUMAP</a></span><span class="op">(</span><span class="va">pbmc.rna</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="annotate-atac-seq-regions" class="level3" data-number="21.2.3"><h3 data-number="21.2.3" class="anchored" data-anchor-id="annotate-atac-seq-regions">
-<span class="header-section-number">21.2.3</span> Annotate ATAC-seq regions</h3>
+</section><section id="annotate-atac-seq-regions" class="level3" data-number="22.2.3"><h3 data-number="22.2.3" class="anchored" data-anchor-id="annotate-atac-seq-regions">
+<span class="header-section-number">22.2.3</span> Annotate ATAC-seq regions</h3>
 <div class="cell">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># ATAC analysis add gene annotation information</span></span>
 <span><span class="va">annotations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://stuartlab.org/signac/reference/GetGRangesFromEnsDb.html">GetGRangesFromEnsDb</a></span><span class="op">(</span>ensdb <span class="op">=</span> <span class="va">EnsDb.Hsapiens.v86</span><span class="op">)</span></span>
@@ -624,8 +630,8 @@ Figure&nbsp;21.3: (A) Library complexity plots the read count versus externally 
   seqinfo: 25 sequences (1 circular) from hg38 genome</code></pre>
 </div>
 </div>
-</section><section id="atac-seq-processing" class="level3 page-columns page-full" data-number="21.2.4"><h3 data-number="21.2.4" class="anchored" data-anchor-id="atac-seq-processing">
-<span class="header-section-number">21.2.4</span> ATAC-seq processing</h3>
+</section><section id="atac-seq-processing" class="level3 page-columns page-full" data-number="22.2.4"><h3 data-number="22.2.4" class="anchored" data-anchor-id="atac-seq-processing">
+<span class="header-section-number">22.2.4</span> ATAC-seq processing</h3>
 <ul>
 <li><dl>
 <dt>Normalization</dt>
@@ -689,7 +695,7 @@ We next run singular value decomposition (SVD) on the TD-IDF matrix, using the f
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig quarto-uncaptioned margin-caption" id="fig-anchors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca"></figcaption></figure>
 </div>
 <p>To map cell identities from RNA-seq to ATAC-seq, we follow the steps outlined in the paper by <a href="https://doi.org/10.1016/j.cell.2019.05.031">Stuart et al</a>.</p>
-<p>In <a href="#fig-anchors" class="quarto-xref">Figure&nbsp;<span>21.4</span></a>, (A) Representation of two datasets, reference and query, each of which originates from a separate single-cell experiment. The two datasets share cells from similar biological states, but the query dataset contains a unique population (in black). (B) We perform canonical correlation analysis, followed by L2 normalization of the canonical correlation vectors, to project the datasets into a subspace defined by shared correlation structure across datasets. (C) In the shared space, we identify pairs of MNNs across reference and query cells. These should represent cells in a shared biological state across datasets (gray lines) and serve as anchors to guide dataset integration. In principle, cells in unique populations should not participate in anchors, but in practice, we observe “incorrect” anchors at low frequency (red lines). (D) For each anchor pair, we assign a score based on the consistency of anchors across the neighborhood structure of each dataset. (E) We utilize anchors and their scores to compute “correction” vectors for each query cell, transforming its expression so it can be jointly analyzed as part of an integrated reference.</p>
+<p>In <a href="#fig-anchors" class="quarto-xref">Figure&nbsp;<span>22.4</span></a>, (A) Representation of two datasets, reference and query, each of which originates from a separate single-cell experiment. The two datasets share cells from similar biological states, but the query dataset contains a unique population (in black). (B) We perform canonical correlation analysis, followed by L2 normalization of the canonical correlation vectors, to project the datasets into a subspace defined by shared correlation structure across datasets. (C) In the shared space, we identify pairs of MNNs across reference and query cells. These should represent cells in a shared biological state across datasets (gray lines) and serve as anchors to guide dataset integration. In principle, cells in unique populations should not participate in anchors, but in practice, we observe “incorrect” anchors at low frequency (red lines). (D) For each anchor pair, we assign a score based on the consistency of anchors across the neighborhood structure of each dataset. (E) We utilize anchors and their scores to compute “correction” vectors for each query cell, transforming its expression so it can be jointly analyzed as part of an integrated reference.</p>
 <div class="cell">
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Identify anchors</span></span>
 <span><span class="va">transfer.anchors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindTransferAnchors.html">FindTransferAnchors</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">pbmc.rna</span>, query <span class="op">=</span> <span class="va">pbmc.atac</span>, features <span class="op">=</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">pbmc.rna</span><span class="op">)</span>,</span>
@@ -738,11 +744,11 @@ We next run singular value decomposition (SVD) on the TD-IDF matrix, using the f
 </div>
 </div>
 </div>
-</section></section><section id="transfer-learning" class="level2 page-columns page-full" data-number="21.3"><h2 data-number="21.3" class="anchored" data-anchor-id="transfer-learning">
-<span class="header-section-number">21.3</span> Transfer learning</h2>
+</section></section><section id="transfer-learning" class="level2 page-columns page-full" data-number="22.3"><h2 data-number="22.3" class="anchored" data-anchor-id="transfer-learning">
+<span class="header-section-number">22.3</span> Transfer learning</h2>
 <p>In this demonstration, we will explore the concept of transfer learning using Principal Component Analysis (PCA). Transfer learning allows us to leverage knowledge gained from one dataset and apply it to another related dataset. We will showcase this by dividing a dataset into two pieces and projecting the second dataset into the principal components derived from the first dataset.</p>
-<section id="loading-the-data" class="level3" data-number="21.3.1"><h3 data-number="21.3.1" class="anchored" data-anchor-id="loading-the-data">
-<span class="header-section-number">21.3.1</span> Loading the Data</h3>
+<section id="loading-the-data" class="level3" data-number="22.3.1"><h3 data-number="22.3.1" class="anchored" data-anchor-id="loading-the-data">
+<span class="header-section-number">22.3.1</span> Loading the Data</h3>
 <p>First, let’s load the required libraries:</p>
 <div class="cell">
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span></span>
@@ -752,8 +758,8 @@ We next run singular value decomposition (SVD) on the TD-IDF matrix, using the f
 <div class="cell">
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">se</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE103512"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"SummarizedExperiment"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="selecting-the-most-variable-genes" class="level3" data-number="21.3.2"><h3 data-number="21.3.2" class="anchored" data-anchor-id="selecting-the-most-variable-genes">
-<span class="header-section-number">21.3.2</span> Selecting the Most Variable Genes</h3>
+</section><section id="selecting-the-most-variable-genes" class="level3" data-number="22.3.2"><h3 data-number="22.3.2" class="anchored" data-anchor-id="selecting-the-most-variable-genes">
+<span class="header-section-number">22.3.2</span> Selecting the Most Variable Genes</h3>
 <p>To focus on the most informative genes, we will select the top 250 most variable genes based on their standard deviation. Let’s denote the expression matrix as <span class="math inline">\(X\)</span>, where rows represent genes and columns represent samples.</p>
 <div class="cell">
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get the top 250 most variable genes</span></span>
@@ -763,16 +769,16 @@ We next run singular value decomposition (SVD) on the TD-IDF matrix, using the f
 <div class="cell">
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">se_subset</span> <span class="op">&lt;-</span> <span class="va">se</span><span class="op">[</span><span class="va">variable_rows</span>,<span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="splitting-the-dataset" class="level3" data-number="21.3.3"><h3 data-number="21.3.3" class="anchored" data-anchor-id="splitting-the-dataset">
-<span class="header-section-number">21.3.3</span> Splitting the Dataset</h3>
+</section><section id="splitting-the-dataset" class="level3" data-number="22.3.3"><h3 data-number="22.3.3" class="anchored" data-anchor-id="splitting-the-dataset">
+<span class="header-section-number">22.3.3</span> Splitting the Dataset</h3>
 <p>Now, we will split the dataset into two pieces, simulating the collection of two <strong>separate</strong> datasets with the same genes. This will allow us to demonstrate transfer learning. Let’s denote the subsets as <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">split_vector</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="cn">TRUE</span>,<span class="cn">FALSE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">se_subset</span><span class="op">)</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">se_subset_1</span> <span class="op">=</span> <span class="va">se_subset</span><span class="op">[</span>,<span class="va">split_vector</span><span class="op">]</span></span>
 <span><span class="va">se_subset_2</span> <span class="op">=</span> <span class="va">se_subset</span><span class="op">[</span>,<span class="op">!</span><span class="va">split_vector</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="performing-pca-on-the-first-subset" class="level3" data-number="21.3.4"><h3 data-number="21.3.4" class="anchored" data-anchor-id="performing-pca-on-the-first-subset">
-<span class="header-section-number">21.3.4</span> Performing PCA on the First Subset</h3>
+</section><section id="performing-pca-on-the-first-subset" class="level3" data-number="22.3.4"><h3 data-number="22.3.4" class="anchored" data-anchor-id="performing-pca-on-the-first-subset">
+<span class="header-section-number">22.3.4</span> Performing PCA on the First Subset</h3>
 <p>We perform PCA on the first subset (<span class="math inline">\(X_1\)</span>) to obtain the principal components. PCA seeks to find a set of orthogonal vectors (principal components) that capture the maximum variance in the data. The principal components are the eigenvectors of the covariance matrix of <span class="math inline">\(X_1\)</span>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pc_subset1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se_subset_1</span><span class="op">)</span><span class="op">$</span><span class="va">exprs</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -787,8 +793,8 @@ We next run singular value decomposition (SVD) on the TD-IDF matrix, using the f
 </div>
 </div>
 </div>
-</section><section id="projecting-the-second-subset" class="level3" data-number="21.3.5"><h3 data-number="21.3.5" class="anchored" data-anchor-id="projecting-the-second-subset">
-<span class="header-section-number">21.3.5</span> Projecting the Second Subset</h3>
+</section><section id="projecting-the-second-subset" class="level3" data-number="22.3.5"><h3 data-number="22.3.5" class="anchored" data-anchor-id="projecting-the-second-subset">
+<span class="header-section-number">22.3.5</span> Projecting the Second Subset</h3>
 <p>Now, let’s use the PCA model trained on <span class="math inline">\(X_1\)</span> to project the samples from <span class="math inline">\(X_2\)</span> into the same principal component space. This is where transfer learning comes into play. We can represent the projection matrix as <span class="math inline">\(P\)</span>, which consists of the top principal components from <span class="math inline">\(X_1\)</span>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_subset2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">pc_subset1</span>,<span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se_subset_2</span>,<span class="st">'exprs'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -802,8 +808,8 @@ We next run singular value decomposition (SVD) on the TD-IDF matrix, using the f
 <p>Each sample from <span class="math inline">\(X_2\)</span> is represented as a point in the original high-dimensional feature space. The rotation matrix <span class="math inline">\(P\)</span> defines the new PCA coordinate system, where the axes are the principal components. The “predict” process maps each sample from <span class="math inline">\(X_2\)</span> onto the new PCA coordinate system by applying the rotation defined by <span class="math inline">\(P\)</span>. The projected samples <span class="math inline">\(X_2^{(p)}\)</span> represent the coordinates of the samples from <span class="math inline">\(X_2\)</span> in the PCA coordinate system.</p>
 <p>By projecting the samples from <span class="math inline">\(X_2\)</span> into the PCA space derived from <span class="math inline">\(X_1\)</span>, we can analyze how well the structure and variability of <span class="math inline">\(X_2\)</span> align with the principal components learned from <span class="math inline">\(X_1\)</span>. If the projected samples from <span class="math inline">\(X_2\)</span> exhibit similar patterns or groupings as the samples from <span class="math inline">\(X_1\)</span> in the PCA space, it indicates that the knowledge learned from <span class="math inline">\(X_1\)</span> effectively captures the underlying structure of <span class="math inline">\(X_2\)</span>.</p>
 <p>The “predict” process in PCA can be understood as a rotation of the original coordinate system to align with the directions of maximum variance, followed by a projection of new samples onto the rotated coordinate system defined by the principal components.</p>
-</section><section id="comparing-the-subsets-in-the-principal-component-space" class="level3 page-columns page-full" data-number="21.3.6"><h3 data-number="21.3.6" class="anchored" data-anchor-id="comparing-the-subsets-in-the-principal-component-space">
-<span class="header-section-number">21.3.6</span> Comparing the Subsets in the Principal Component Space</h3>
+</section><section id="comparing-the-subsets-in-the-principal-component-space" class="level3 page-columns page-full" data-number="22.3.6"><h3 data-number="22.3.6" class="anchored" data-anchor-id="comparing-the-subsets-in-the-principal-component-space">
+<span class="header-section-number">22.3.6</span> Comparing the Subsets in the Principal Component Space</h3>
 <p>Finally, we can compare the distribution of samples from both subsets in the principal component space:</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
@@ -1297,8 +1303,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./ranges_exercises.html" class="pagination-link" aria-label="Ranges Exercises">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span>
+      <a href="./atac-seq/atac-seq.html" class="pagination-link" aria-label="ATAC-Seq with Bioconductor">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
