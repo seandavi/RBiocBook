@@ -403,14 +403,113 @@
     ]
   },
   {
-    "objectID": "dataviz.html",
-    "href": "dataviz.html",
-    "title": "6  Data Visualization with ggplot2",
+    "objectID": "ggplot.html",
+    "href": "ggplot.html",
+    "title": "\n6  Plotting with ggplot2\n",
     "section": "",
-    "text": "Start with this worked example to get a feel for the ggplot2 package.\n\nhttps://rkabacoff.github.io/datavis/IntroGGPLOT.html\n\nThen, for more detail, I refer you to this excellent ggplot2 tutorial.\nFinally, for more R graphics inspiration, see the R Graph Gallery.",
+    "text": "6.1 Data\nThe first step in creating a ggplot2 plot is to specify the data to be visualized. The data should be in a tidy format (Wickham (2014)), with each row representing an observation and each column representing a variable. The insurance dataset is described in the book Machine Learning with R by Brett Lantz. The dataset describes medical information and costs billed by health insurance companies for 1338 individuals in 2013, as compiled by the United States Census Bureau.\nVariables include:\nWe will load the data directly from the web, but you can also download the data from the link at github1.\ninsurance_url &lt;- \"https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv\"\ninsurance &lt;- read.csv(insurance_url)\nExplore the dataset a bit to understand its structure and contents. For example, you can use the head() function to view the first few rows of the dataset.\nhead(insurance)\n\n  age    sex    bmi children smoker    region   charges\n1  19 female 27.900        0    yes southwest 16884.924\n2  18   male 33.770        1     no southeast  1725.552\n3  28   male 33.000        3     no southeast  4449.462\n4  33   male 22.705        0     no northwest 21984.471\n5  32   male 28.880        0     no northwest  3866.855\n6  31 female 25.740        0     no southeast  3756.622\nAnd you can examine the dimensions of the dataset using the dim(), which returns the number of rows and columns in the dataset, the ncol() function, which returns the number of columns, and the nrow() function, which returns the number of rows.\ndim(insurance)\n\n[1] 1338    7\n\nncol(insurance)\n\n[1] 7\n\nnrow(insurance)\n\n[1] 1338\nNote that with the dim() function, the number of rows is given first, followed by the number of columns.\nNotice that, while the BMI variable represents a measure of a person’s weight relative to their height, there is no discrete variable for whether a person is obese or not. The World Health Organization (WHO) defines obesity as a BMI greater than or equal to 30. We can create a new variable, obese, that indicates whether a person is obese based on their BMI.\ninsurance$obese &lt;- ifelse(insurance$bmi &gt;= 30, \"obese\", \"not obese\")\nIf we examine the dataset again, we can see that the new variable obese has been added to the dataset.\nhead(insurance)\n\n  age    sex    bmi children smoker    region   charges     obese\n1  19 female 27.900        0    yes southwest 16884.924 not obese\n2  18   male 33.770        1     no southeast  1725.552     obese\n3  28   male 33.000        3     no southeast  4449.462     obese\n4  33   male 22.705        0     no northwest 21984.471 not obese\n5  32   male 28.880        0     no northwest  3866.855 not obese\n6  31 female 25.740        0     no southeast  3756.622 not obese",
     "crumbs": [
       "Introduction",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Data Visualization with ggplot2</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#data",
+    "href": "ggplot.html#data",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "",
+    "text": "age\n\nage of primary beneficiary\n\n\n\nsex\n\ninsurance contractor gender, female, male\n\n\n\nbmi\n\nBody mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight (kg / m ^ 2) using the ratio of height to weight, ideally 18.5 to 24.9\n\n\n\nchildren\n\nNumber of children covered by health insurance / Number of dependents\n\n\n\nsmoker\n\nSmoking status\n\n\n\nregion\n\nthe beneficiary’s residential area in the US, northeast, southeast, southwest, northwest.\n\n\n\ncharges\n\nIndividual medical costs billed by health insurance\n\n\n\n\n1 Insurance data csv file, https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#aesthetics",
+    "href": "ggplot.html#aesthetics",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.2 Aesthetics",
+    "text": "6.2 Aesthetics\nThe next step in creating a ggplot2 plot is to specify the aesthetics of the plot. Aesthetics are visual properties of the plot that map data to visual elements.\n\n# specify dataset and mapping\nlibrary(ggplot2)\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges)\n)\n\n\n\n\n\n\nFigure 6.2: A plot with age on the x-axis and charges on the y-axis.\n\n\n\n\nIn the code above, the data are the data to be visualized, and the mapping specifies how the data should be mapped to the plot. In this case, the x aesthetic is mapped to the age variable, and the y aesthetic is mapped to the charges variable. Note that there are no data displayed in Figure 6.2 yet; we have only specified the data and aesthetics. However, you can see the structure of the plot in the output, which shows the data and aesthetics that have been specified with age on the x-axis and charges on the y-axis.",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#geometries",
+    "href": "ggplot.html#geometries",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.3 Geometries",
+    "text": "6.3 Geometries\nThe next step is to add a geometry to the plot. Geometries are the visual representations of the data, such as points, lines, or bars. Since this is a scatter plot, we will use the geom_point() function to add points to the plot.\n\n# add points to the plot\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges)\n) +\n    geom_point()\n\n\n\n\n\n\nFigure 6.3: A scatter plot with age on the x-axis and charges on the y-axis results from adding geom_point() to the plot.\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nWhen using ggplot2, the + operator is used to add layers to the plot. The ggplot() function specifies the data and aesthetics, and the geom_point() function adds points to the plot. Using the + operator is a common practice in ggplot2 to add layers to a plot, but the + operator does not work for other types of plots in R.\n\n\nUsing other geometries, you can create different types of plots. For example, you can use geom_line() to create a line plot, geom_bar() to create a bar plot, or geom_boxplot() to create a box plot. Before doing so here, ask yourself if those geometries would be appropriate for the data you are working with.\nA number of parameters (options) can be specified in a geom_ function. Options for the geom_point() function include color, size, and alpha. These control the point color, size, and transparency, respectively. Transparency ranges from 0 (completely transparent) to 1 (completely opaque). Adding a degree of transparency can help visualize overlapping points such as in Figure 6.4.\n\n# add points to the plot\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges)\n) +\n    geom_point(\n        color = \"blue\",\n        size = 3,\n        alpha = 0.3\n    )\n\n\n\n\n\n\nFigure 6.4: A scatter plot with age on the x-axis and charges on the y-axis with colored points, larger size, and transparency.\n\n\n\n\nWe can add a best fit line to the scatter plot using the geom_smooth() function. The method parameter specifies the method used to fit the line. In this case, we will use the default method, which is linear regression, specified by method = \"lm\". The lm method fits a linear model to the data, which in this case is simple linear regression 2 of the dependent variable charges as a function of the independent variable age. The result is shown in Figure 6.5.\n2 The linear regression model is of the form \\(charges = \\alpha +  \\beta * age + \\epsilon\\) where \\(\\alpha\\) is the intercept, \\(\\beta\\) is the slope, and \\(\\epsilon\\) is the “error”.\n# add points and a best fit line to the plot\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges)\n) +\n    geom_point(\n        color = \"blue\",\n        alpha = 0.3\n    ) +\n    geom_smooth(method = \"lm\")\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\nFigure 6.5: A scatter plot with age on the x-axis and charges on the y-axis with a best fit line.\n\n\n\n\nWhat do you observe in Figure 6.5 with the best fit line? How well does the line fit the data? Do you think a linear model is appropriate for this data?",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#grouping",
+    "href": "ggplot.html#grouping",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.4 Grouping",
+    "text": "6.4 Grouping\nIn addition to mapping variables to the x and y axes [i.e., aes(x = ..., y=...)], variables can be mapped to the color, shape, size, transparency, and other visual characteristics of geometric objects. This allows groups of observations to be superimposed in a single graph.\nFor example, we can map the smoker variable to the color of the points in the scatter plot. The result is shown in Figure 6.6.\n\n# add points to the plot, colored by the smoker variable\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges, color = smoker)\n) +\n    geom_point()\n\n\n\n\n\n\nFigure 6.6: A scatter plot with age on the x-axis and charges on the y-axis with points colored by the smoker variable.\n\n\n\n\nIn Figure 6.6, the points are colored based on the smoker variable, with smokers in orange and non-smokers in blue. This allows us to visually compare the charges of smokers and non-smokers as a function of age.\nIf we add back in the best fit line, we can see how the relationship between age and charges differs between smokers and non-smokers. The result is shown in Figure 6.7.\n\n# add points to the plot, colored by the smoker variable, and a best fit line\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges, color = smoker)\n) +\n    geom_point() +\n    geom_smooth(method = \"lm\")\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\nFigure 6.7: A scatter plot with age on the x-axis and charges on the y-axis with points colored by the smoker variable and a best fit line.\n\n\n\n\nHow well does the best fit line fit the data for smokers and non-smokers? Do you see any differences in the relationship between age and charges for smokers and non-smokers?",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#facets",
+    "href": "ggplot.html#facets",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.5 Facets",
+    "text": "6.5 Facets\nFacets are a way to create multiple plots based on the levels of a categorical variable. In other words, facets allow you to create a grid of plots, with each plot showing a different subset of the data based on the levels of a categorical variable.\nIn Figure 6.7, we noticed that there are still two groups of points, even when looking at just smokers. We can further separate the data by the obese variable, creating a grid of plots with one plot for each combination of smoker and obese status.\n\n# add points to the plot, colored by the smoker variable, and faceted by the obese variable\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges, color = smoker)\n) +\n    geom_point() +\n    geom_smooth(method = \"lm\") +\n    facet_wrap(~obese)\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\nFigure 6.8: A grid of scatter plots with age on the x-axis and charges on the y-axis, colored by the smoker variable, and faceted by the obese variable.\n\n\n\n\nThe way that we interpret the facet_wrap(~ obese) command is that we want to create a grid of plots, with each plot showing a different subset of the data based on the levels of the obese variable. In this case, we have two levels of the obese variable: obese and not obese, so we get two plots in the grid.",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#labels",
+    "href": "ggplot.html#labels",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.6 Labels",
+    "text": "6.6 Labels\nLabels are an important part of any plot. They help the viewer understand what the plot is showing and what the axes represent. While our plot already has labels for the x and y axes, we can add a title to the plot and change the labels for the x and y axes to make them more descriptive.\n\n# add points to the plot, colored by the smoker variable, faceted by the obese variable, and add labels\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges, color = smoker)\n) +\n    geom_point() +\n    geom_smooth(method = \"lm\") +\n    facet_wrap(~obese) +\n    labs(\n        title = \"Medical Charges as a function of patient characteristics\",\n        subtitle = \"US Census Bureau 2013 data\",\n        caption = \"Source: https://github.com/stedy/Machine-Learning-with-R-datasets\",\n        x = \"Age\",\n        y = \"Annual Medical Charges\",\n        color = \"Smoker?\"\n    )\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\nFigure 6.9: A scatter plot with age on the x-axis and charges on the y-axis, colored by the smoker variable, and faceted by the obese variable, with labels.",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#themes",
+    "href": "ggplot.html#themes",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.7 Themes",
+    "text": "6.7 Themes\nThemes are a way to control the non-data ink in a plot, such as the background color, grid lines, and text size. Rather than specifying each element individually, you can use a pre-defined theme to quickly style your plot. For a nice overview of themes in ggplot2, see the the ggplot2 themes gallery.\nTo create a more visually appealing plot, we can apply the theme_minimal() theme to our plot. This theme removes the background grid lines and adds a light gray background to the plot.\n\n# add points to the plot, colored by the smoker variable, faceted by the obese variable, add labels, and apply a minimal theme\nggplot(\n    data = insurance,\n    mapping = aes(x = age, y = charges, color = smoker)\n) +\n    geom_point() +\n    geom_smooth(method = \"lm\") +\n    facet_wrap(~obese) +\n    labs(\n        title = \"Medical Charges as a function of patient characteristics\",\n        subtitle = \"US Census Bureau 2013 data\",\n        caption = \"Source: https://github.com/stedy/Machine-Learning-with-R-datasets\",\n        x = \"Age\",\n        y = \"Annual Medical Charges\",\n        color = \"Smoker?\"\n    ) +\n    theme_minimal()\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\nFigure 6.10: A scatter plot with age on the x-axis and charges on the y-axis, colored by the smoker variable, faceted by the obese variable, with labels and a minimal theme.",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#saving-a-plot",
+    "href": "ggplot.html#saving-a-plot",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "\n6.8 Saving a Plot",
+    "text": "6.8 Saving a Plot\nOnce you have created a plot that you are happy with, you may want to save it to a file for use in a report or presentation. The ggsave() function in ggplot2 allows you to save a plot to a file in a variety of formats, including PNG, PDF, and SVG. Take a look at the help for ggsave() to see the available options. In particular, you can specify the file name, width, height, and resolution of the saved plot.\n\n# save the plot to a file\nggsave(\"insurance_plot.png\")\n\nSaving 7 x 5 in image\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe ggsave() function saves the last plot that you created with ggplot2. ggsave() will save the plot to the working directory by default, but you can specify a different directory by providing the full path to the file name.",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
+    ]
+  },
+  {
+    "objectID": "ggplot.html#references",
+    "href": "ggplot.html#references",
+    "title": "\n6  Plotting with ggplot2\n",
+    "section": "References",
+    "text": "References\n\n\nBourgon, Richard, Robert Gentleman, and Wolfgang Huber. 2010.\n“Independent Filtering Increases Detection Power for\nHigh-Throughput Experiments.” Proceedings of the National\nAcademy of Sciences 107 (21): 9546–51. https://doi.org/10.1073/pnas.0914005107.\n\n\nBrouwer-Visser, Jurriaan, Wei-Yi Cheng, Anna Bauer-Mehren, Daniela\nMaisel, Katharina Lechner, Emilia Andersson, Joel T. Dudley, and\nFrancesca Milletti. 2018. “Regulatory T-Cell\nGenes Drive Altered\nImmune Microenvironment in Adult\nSolid Cancers and Allow for\nImmune Contextual Patient\nSubtyping.” Cancer Epidemiology, Biomarkers\n& Prevention 27 (1): 103–12. https://doi.org/10.1158/1055-9965.EPI-17-0461.\n\n\nBuenrostro, Jason D, Paul G Giresi, Lisa C Zaba, Howard Y Chang, and\nWilliam J Greenleaf. 2013. “Transposition of Native Chromatin for\nFast and Sensitive Epigenomic Profiling of Open Chromatin, DNA-binding Proteins and Nucleosome\nPosition.” Nature Methods 10 (12): 1213–18. https://doi.org/10.1038/nmeth.2688.\n\n\nBuenrostro, Jason D, Beijing Wu, Howard Y Chang, and William J\nGreenleaf. 2015. “ATAC-seq: A Method\nfor Assaying Chromatin Accessibility Genome-Wide.”\nCurrent Protocols in Molecular Biology / Edited by Frederick M.\nAusubel ... [Et Al.] 109 (January): 21.29.1–9. https://doi.org/10.1002/0471142727.mb2129s109.\n\n\nCaron, Stéphane. 2018. “The Grammar of Graphics.” https://dotlayer.org/en/grammar-of-graphics/.\n\n\nCenter, Pew Research. 2016. “Lifelong Learning and\nTechnology.” Pew Research Center: Internet,\nScience & Tech. https://www.pewresearch.org/internet/2016/03/22/lifelong-learning-and-technology/.\n\n\nCrawford, Gregory E, Sean Davis, Peter C Scacheri, Gabriel Renaud,\nMohamad J Halawi, Michael R Erdos, Roland Green, Paul S Meltzer, Tyra G\nWolfsberg, and Francis S Collins. 2006. “DNase-chip: A High-Resolution Method to Identify\nDNase I Hypersensitive Sites Using Tiled\nMicroarrays.” Nature Methods 3 (7): 503–9. http://www.ncbi.nlm.nih.gov/pubmed/16791207?dopt=AbstractPlus.\n\n\nCrawford, Gregory E, Ingeborg E Holt, James Whittle, Bryn D Webb, Denise\nTai, Sean Davis, Elliott H Margulies, et al. 2006. “Genome-Wide\nMapping of DNase Hypersensitive Sites Using Massively\nParallel Signature Sequencing (MPSS).” Genome\nResearch 16 (1): 123–31. http://www.ncbi.nlm.nih.gov/pubmed/16344561?dopt=AbstractPlus.\n\n\nDeRisi, J. L., V. R. Iyer, and P. O. Brown. 1997. “Exploring the\nMetabolic and Genetic Control of Gene Expression on a Genomic\nScale.” Science (New York, N.Y.) 278 (5338): 680–86. https://doi.org/10.1126/science.278.5338.680.\n\n\nGreener, Joe G., Shaun M. Kandathil, Lewis Moffat, and David T. Jones.\n2022. “A Guide to Machine Learning for Biologists.”\nNature Reviews Molecular Cell Biology 23 (1): 40–55. https://doi.org/10.1038/s41580-021-00407-0.\n\n\nKnowles, Malcolm S., Elwood F. Holton, and Richard A. Swanson. 2005.\nThe Adult Learner: The Definitive Classic in Adult Education and\nHuman Resource Development. 6th ed. Amsterdam ; Boston: Elsevier.\n\n\nLawrence, Michael, Wolfgang Huber, Hervé Pagès, Patrick Aboyoun, Marc\nCarlson, Robert Gentleman, Martin T Morgan, and Vincent J Carey. 2013.\n“Software for Computing and Annotating Genomic Ranges.”\nPLoS Computational Biology 9 (8): e1003118. https://doi.org/10.1371/journal.pcbi.1003118.\n\n\nLibbrecht, Maxwell W., and William Stafford Noble. 2015. “Machine\nLearning Applications in Genetics and Genomics.” Nature\nReviews Genetics 16 (6): 321–32. https://doi.org/10.1038/nrg3920.\n\n\nMorgan, Martin, Herve Pages, V Obenchain, and N Hayden. 2016.\n“Rsamtools: Binary Alignment (BAM), FASTA, Variant Call (BCF), and\nTabix File Import.” R Package Version 1 (0): 677–89.\n\n\nStudent. 1908. “The Probable Error of a\nMean.” Biometrika 6 (1): 1–25. https://doi.org/10.2307/2331554.\n\n\nTsompana, Maria, and Michael J Buck. 2014. “Chromatin\nAccessibility: A Window into the Genome.” Epigenetics &\nChromatin 7 (1): 33. https://doi.org/10.1186/1756-8935-7-33.\n\n\nWickham, Hadley. 2014. “Tidy Data.” Journal of\nStatistical Software, Articles 59 (10): 1–23. https://doi.org/10.18637/jss.v059.i10.",
+    "crumbs": [
+      "Introduction",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Plotting with ggplot2</span>"
     ]
   },
   {
@@ -1621,16 +1720,6 @@
     "crumbs": [
       "Bioconductor",
       "<span class='chapter-number'>22</span>  <span class='chapter-title'>Transfer Learning in scATAC-seq and scRNA-seq</span>"
-    ]
-  },
-  {
-    "objectID": "references.html",
-    "href": "references.html",
-    "title": "References",
-    "section": "",
-    "text": "Bourgon, Richard, Robert Gentleman, and Wolfgang Huber. 2010.\n“Independent Filtering Increases Detection Power for\nHigh-Throughput Experiments.” Proceedings of the National\nAcademy of Sciences 107 (21): 9546–51. https://doi.org/10.1073/pnas.0914005107.\n\n\nBrouwer-Visser, Jurriaan, Wei-Yi Cheng, Anna Bauer-Mehren, Daniela\nMaisel, Katharina Lechner, Emilia Andersson, Joel T. Dudley, and\nFrancesca Milletti. 2018. “Regulatory T-Cell\nGenes Drive Altered\nImmune Microenvironment in Adult\nSolid Cancers and Allow for\nImmune Contextual Patient\nSubtyping.” Cancer Epidemiology, Biomarkers\n& Prevention 27 (1): 103–12. https://doi.org/10.1158/1055-9965.EPI-17-0461.\n\n\nBuenrostro, Jason D, Paul G Giresi, Lisa C Zaba, Howard Y Chang, and\nWilliam J Greenleaf. 2013. “Transposition of Native Chromatin for\nFast and Sensitive Epigenomic Profiling of Open Chromatin, DNA-binding Proteins and Nucleosome\nPosition.” Nature Methods 10 (12): 1213–18. https://doi.org/10.1038/nmeth.2688.\n\n\nBuenrostro, Jason D, Beijing Wu, Howard Y Chang, and William J\nGreenleaf. 2015. “ATAC-seq: A Method\nfor Assaying Chromatin Accessibility Genome-Wide.”\nCurrent Protocols in Molecular Biology / Edited by Frederick M.\nAusubel ... [Et Al.] 109 (January): 21.29.1–9. https://doi.org/10.1002/0471142727.mb2129s109.\n\n\nCenter, Pew Research. 2016. “Lifelong Learning and\nTechnology.” Pew Research Center: Internet,\nScience & Tech. https://www.pewresearch.org/internet/2016/03/22/lifelong-learning-and-technology/.\n\n\nCrawford, Gregory E, Sean Davis, Peter C Scacheri, Gabriel Renaud,\nMohamad J Halawi, Michael R Erdos, Roland Green, Paul S Meltzer, Tyra G\nWolfsberg, and Francis S Collins. 2006. “DNase-chip: A High-Resolution Method to Identify\nDNase I Hypersensitive Sites Using Tiled\nMicroarrays.” Nature Methods 3 (7): 503–9. http://www.ncbi.nlm.nih.gov/pubmed/16791207?dopt=AbstractPlus.\n\n\nCrawford, Gregory E, Ingeborg E Holt, James Whittle, Bryn D Webb, Denise\nTai, Sean Davis, Elliott H Margulies, et al. 2006. “Genome-Wide\nMapping of DNase Hypersensitive Sites Using Massively\nParallel Signature Sequencing (MPSS).” Genome\nResearch 16 (1): 123–31. http://www.ncbi.nlm.nih.gov/pubmed/16344561?dopt=AbstractPlus.\n\n\nDeRisi, J. L., V. R. Iyer, and P. O. Brown. 1997. “Exploring the\nMetabolic and Genetic Control of Gene Expression on a Genomic\nScale.” Science (New York, N.Y.) 278 (5338): 680–86. https://doi.org/10.1126/science.278.5338.680.\n\n\nGreener, Joe G., Shaun M. Kandathil, Lewis Moffat, and David T. Jones.\n2022. “A Guide to Machine Learning for Biologists.”\nNature Reviews Molecular Cell Biology 23 (1): 40–55. https://doi.org/10.1038/s41580-021-00407-0.\n\n\nKnowles, Malcolm S., Elwood F. Holton, and Richard A. Swanson. 2005.\nThe Adult Learner: The Definitive Classic in Adult Education and\nHuman Resource Development. 6th ed. Amsterdam ; Boston: Elsevier.\n\n\nLawrence, Michael, Wolfgang Huber, Hervé Pagès, Patrick Aboyoun, Marc\nCarlson, Robert Gentleman, Martin T Morgan, and Vincent J Carey. 2013.\n“Software for Computing and Annotating Genomic Ranges.”\nPLoS Computational Biology 9 (8): e1003118. https://doi.org/10.1371/journal.pcbi.1003118.\n\n\nLibbrecht, Maxwell W., and William Stafford Noble. 2015. “Machine\nLearning Applications in Genetics and Genomics.” Nature\nReviews Genetics 16 (6): 321–32. https://doi.org/10.1038/nrg3920.\n\n\nMorgan, Martin, Herve Pages, V Obenchain, and N Hayden. 2016.\n“Rsamtools: Binary Alignment (BAM), FASTA, Variant Call (BCF), and\nTabix File Import.” R Package Version 1 (0): 677–89.\n\n\nStudent. 1908. “The Probable Error of a\nMean.” Biometrika 6 (1): 1–25. https://doi.org/10.2307/2331554.\n\n\nTsompana, Maria, and Michael J Buck. 2014. “Chromatin\nAccessibility: A Window into the Genome.” Epigenetics &\nChromatin 7 (1): 33. https://doi.org/10.1186/1756-8935-7-33.",
-    "crumbs": [
-      "References"
     ]
   },
   {
