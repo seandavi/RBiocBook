@@ -9,6 +9,14 @@ The goal is to provide a hands-on introduction to the application of machine lea
 While the theoretical foundations of machine learning are important, the ability to apply these techniques to solve practical problems is equally crucial.
 In this chapter, we will use the `mlr3` package in R to build and evaluate machine learning models for classification and regression tasks. 
 
+We will use three examples to illustrate the machine learning workflow:
+
+1. **Cancer types classification**: We will classify different types of cancer based on gene expression data.
+2. **Age prediction from DNA methylation**: We will predict the chronological age of individuals based on DNA methylation patterns.
+3. **Gene expression prediction**: We will predict gene expression levels based on histone modification data.
+
+We'll be applying knn, decision trees, and random forests, linear regression, and penalized regression models to these datasets.
+
 The mlr3 R package is a modern, object-oriented machine learning framework in R
 that builds on the success of its predecessor, the mlr package. It provides a
 flexible and extensible platform for handling common machine learning tasks
@@ -237,7 +245,7 @@ library(ranger) # for randomforest
 set.seed(789)
 ```
 
-## Example 1: cancer types
+## Example: Cancer types
 
 In this exercise, we will be classifying cancer types based on gene 
 expression data. The data we are going to access are from @brouwer-visser_regulatory_2018.
@@ -639,7 +647,7 @@ pred_test$confusion
 pred_test$score(measures)
 ```
 
-## Exercise: Predicting age from DNA methylation
+## Example Predicting age from DNA methylation
 
 We will be building a regression model for chronological age prediction, based on DNA methylation. This is based on the work of [Jana Naue et al. 2017](https://www.sciencedirect.com/science/article/pii/S1872497317301643?via%3Dihub), in which biomarkers are examined to predict the chronological age of humans by analyzing the DNA methylation patterns. Different machine learning algorithms are used in this study to make an age prediction.
 
@@ -848,15 +856,17 @@ pred_test
 pred_test$score(measures)
 ```
 
-## Expression prediction from histone modification data
+## Example: Expression prediction from histone modification data
 
 In this little set of exercises, you will be using histone marks near a gene to predict its expression (@fig-gene-expression).
 
-$$y = h1 + h2 + h3 + ...$$ {#eq-1}
+$$
+y ~ h1 + h2 + h3 + ...
+$$ {#eq-1}
 
 ![What is the combined effect of histone marks on gene expression?](images/gene_expression_prediction_question.png){#fig-gene-expression}
 
-
+The data are from a study that aimed to predict gene expression from histone modification data. The data include gene expression levels and histone modification data for a set of genes. The goal is to build a machine learning model that can predict gene expression levels based on the histone modification data. The histone modification data are simply summaries of the histone marks within the promoter, defined as the region 2kb upstream of the transcription start site for this exercise.
 
 We will try a couple of different approaches:
 
@@ -865,7 +875,7 @@ We will try a couple of different approaches:
 
 ### The Data
 
-The data in this 
+The data in this exercise were developed by Anshul Kundaje. We are not going to focus on the details of the data collection, etc. Instead, this is 
 
 ```{r}
 fullFeatureSet <- read.table("http://seandavi.github.io/ITR/expression-prediction/features.txt");
@@ -949,6 +959,7 @@ pred_test = learner$predict(exp_pred_task, split$test)
 
 ```{r}
 pred_train
+plot(pred_train)
 ```
 
 For the training data:
@@ -964,16 +975,116 @@ And the test data:
 pred_test$score(measures)
 ```
 
+And the plot of the test data predictions:
+
+```{r}
+plot(pred_test)
+```
+
 
 #### Penalized regression
+
+
+Imagine you want to teach a computer to predict house prices based on various features like size, number of bedrooms, and location. You decide to use **regression**, which finds a relationship between these features and the house prices. But what if your model becomes too complicated? This is where **penalized regression** comes in.
+
+
+##### The Problem with Overfitting
+
+Sometimes, the model tries too hard to fit every single data point perfectly. This can make the model very complex, like trying to draw a perfect line through a very bumpy path. This problem is called **overfitting**. An overfitted model works well on the data it has seen (training data) but performs poorly on new, unseen data (testing data).
+
+##### Introducing Penalized Regression
+
+Penalized regression helps prevent overfitting by adding a "penalty" to the model for being too complex. Think of it as a way to encourage the model to be simpler and more general. There are three common types of penalized regression:
+
+1. **Ridge Regression (L2 Penalty):**
+   - Adds a penalty based on the size of the coefficients. It tries to keep all coefficients small.
+   - If the model’s equation looks too complicated, Ridge Regression will push it towards a simpler form by shrinking the coefficients.
+   - Imagine you have a rubber band that pulls the coefficients towards zero, making the model less likely to overfit.
+
+2. **Lasso Regression (L1 Penalty):**
+   - Adds a penalty that can shrink some coefficients all the way to zero.
+   - This means Lasso Regression can completely remove some features from the model, making it simpler.
+   - Imagine you have a pair of scissors that can cut off the least important features, leaving only the most important ones.
+
+3. **Elastic Net:**
+   - Combines both Ridge and Lasso penalties. It adds penalties for both the size and the number of coefficients.
+   - This method balances between shrinking coefficients and eliminating some altogether, offering the benefits of both Ridge and Lasso.
+   - Think of Elastic Net as using both the rubber band (Ridge) and scissors (Lasso) to simplify the model.
+
+With our data, the number of predictors is not huge, but we might be interested in 1) reducing overfitting, 2) improving interpretability, or 3) both by minimizing the number of predictors in our model without drastically affecting our prediction accuracy. Without penalized regression, the model might come up with a very complex equation. With Ridge, Lasso, or Elastic Net, the model simplifies this equation by either shrinking the coefficients (Ridge), removing some of them (Lasso), or balancing both (Elastic Net).
+
+Here’s a simple summary:
+
+- **Ridge Regression:** Reduces the impact of less important features by shrinking their coefficients.
+- **Lasso Regression:** Can eliminate some features entirely by setting their coefficients to zero.
+- **Elastic Net:** Combines the effects of Ridge and Lasso, shrinking some coefficients and eliminating others.
+
+Using penalized regression in machine learning ensures that your model:
+
+1. **Performs Better on New Data:** By avoiding overfitting, the model can make more accurate predictions on new, unseen data.
+2. **Is Easier to Interpret:** A simpler model with fewer features is easier to understand and explain.
+
+#### Penalized Regression with mlr3
+
+In the mlr3 package, you can easily apply penalized regression methods to your tasks. Here’s how:
+
+1. **Select Penalized Regression Learners:** mlr3 provides learners for Ridge, Lasso, and Elastic Net Regression.
+2. **Train the Learner:** Use your data to train the chosen penalized regression model.
+3. **Evaluate and Adjust:** Check how well the model performs and make adjustments if needed.
+
+
+This description explains penalized regression, including Ridge, Lasso, and Elastic Net, in an intuitive way, highlighting their benefits and how they work, while relating them to familiar concepts and the mlr3 package.
 
 Recall that we can use penalized regression to select the most important
 predictors from a large set of predictors. In this case, we will use the
 `glmnet` package to perform penalized regression, but we will use the
 `mlr` interface to `glmnet` to make it easier to use.
 
+
+
+The `nfolds` parameter is the number of folds to use in the cross-validation
+procedure. 
+
+What is Cross-Validation? Cross-validation is a technique used to assess how well a model will perform on unseen data. It involves splitting the data into multiple parts, training the model on some of these parts, and validating it on the remaining parts. This process is repeated several times to ensure the model’s performance is consistent.
+
+Why Use Cross-Validation?
+Cross-validation helps to:
+
+* Avoid Overfitting: By testing the model on different subsets of the data, cross-validation helps ensure that the model does not memorize the training data but learns to generalize from it.
+* Select the Best Model Parameters: Penalized regression models, such as those trained with glmnet, have parameters that control the strength of the penalty (e.g., lambda). Cross-validation helps find the best values for these parameters.
+
+When using the glmnet package, cross-validation can be performed using the cv.glmnet function. Here’s how the process works:
+
+1. Split the Data:
+  The data is divided into 
+  𝑘
+  k folds (common choices are 5 or 10 folds). Each fold is a subset of the data.
+
+2. Train and Validate:
+  The model is trained 
+  𝑘
+  k times. In each iteration, 
+  𝑘
+  −
+  1
+  k−1 folds are used for training, and the remaining fold is used for validation.
+  This process is repeated until each fold has been used as the validation set exactly once.
+
+3. Calculate Performance:
+  The performance of the model (e.g., mean squared error for regression) is calculated for each fold.
+  The average performance across all folds is computed to get an overall measure of how well the model is expected to perform on unseen data.
+
+4. Select the Best Parameters:
+  The cv.glmnet function evaluates different values of the penalty parameter (lambda).
+  It selects the lambda value that results in the best average performance across the folds.
+
+In this case, we will use the `cv_glmnet` learner, which will automatically
+select the best value of the penalization parameters. When the `alpha` parameter
+is set to 0, the model is a Ridge regression model. When the `alpha` parameter
+is set to 1, the model is a Lasso regression model.
+
 ```{r}
-learner = lrn("regr.cv_glmnet", nfolds=10, alpha=1)
+learner = lrn("regr.cv_glmnet", nfolds=10, alpha=0)
 ```
 
 ##### Train
@@ -983,7 +1094,7 @@ learner$train(exp_pred_task)
 ```
 
 ```{r}
-measures = msrs(c('regr.rsq'))
+measures = msrs(c('regr.rsq', 'regr.mse', 'regr.rmse'))
 pred_train$score(measures)
 ```
 
@@ -1000,5 +1111,45 @@ data, but to help us understand the data.
 
 
 
+```{r}
+pred_train = learner$predict(exp_pred_task, split$train)
+pred_test = learner$predict(exp_pred_task, split$test)
+```
+
+##### Assess
+
+```{r}
+pred_train
+plot(pred_train)
+```
+
+For the training data:
+
+```{r}
+measures = msrs(c('regr.rsq'))
+pred_train$score(measures)
+```
+
+And the test data:
+
+```{r}
+pred_test$score(measures)
+```
+
+And the plot of the test data predictions:
+
+```{r}
+plot(pred_test)
+```
+
+
+```{r}
+# Calculate the R-squared value
+truth <- pred_test$truth
+predicted <- pred_test$response
+rss <- sum((truth - predicted)^2)  # Residual sum of squares
+tss <- sum((truth - mean(truth))^2)  # Total sum of squares
+r_squared <- 1 - (rss / tss)
+```
 
 

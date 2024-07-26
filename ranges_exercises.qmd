@@ -12,9 +12,16 @@ library(knitr)
 opts_chunk$set(cache=TRUE, message=FALSE, results='hide')
 ```
 
+In the following exercises, we will use the `GenomicRanges` package to explore range operations.
+We will use the `AnnotationHub` package to load DNAse hypersensitivity data
+from the ENCODE project. 
+In practice, the ENCODE project published datasets like these as bed files. 
+AnnotationHub has packaged these into GRanges objects that we can load and use directly.
+However, if you have a bed file of your own (peak calls, enhancer regions, etc.), you can load them into GRanges objects using `rtracklayer::import`.
+
 ## Exercise 1
 
-In this exercise, we will use DNAse hypersensitivity data to explore range operations.
+In this exercise, we will use DNAse hypersensitivity data to practice working with a GRanges object.
 
 - Use the `AnnotationHub` package to find the `goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz` `GRanges` object. Load
 that into R as the variable dnase.
@@ -79,7 +86,7 @@ sum(width(dnase))/sum(seqlengths(dnase))
 In this exercise, we are going to load the second DNAse hypersensitivity replicate to investigate overlaps with
 the first replicate.
 
-- Use the AnnotationHub to find the second replicate, `goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz`. Load that as `dnase2`.
+- Use the AnnotationHub to find the second replicate, `goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz`. Load that as `dnase2`.
 
 ```{r}
 query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz")
@@ -198,3 +205,86 @@ prop_dnase = sum(width(dnase))/sum(seqlengths(prom_regions))
 # of DNAse overlaps with promoters.
 prop_proms * prop_dnase * length(dnase) 
 ```
+
+## Exercise 4
+
+We'll be using data from histone modification ChIP-seq experiments in human cells to illustrate the concepts of genomic ranges and features. The data consists of genomic intervals representing regions of the genome where specific histone modifications are enriched. These intervals are typically identified using ChIP-seq, a technique that maps protein-DNA interactions across the genome.
+
+The ChIP-seq data is stored in a BED file format, which is a tab-delimited text file format commonly used to represent genomic intervals. Each line in the BED file corresponds to a genomic interval and contains information about the chromosome, start and end positions, and strand orientation of the interval. Additional columns may include metadata such as the signal strength or significance of the interval.
+
+The AnnotationHub package in Bioconductor provides access to a wide range of genomic datasets, including ChIP-seq data. We can use this package to retrieve the ChIP-seq data for histone modifications in human cells and convert it into a GenomicRanges object for further analysis.
+
+<https://www.encodeproject.org/chip-seq/histone/>
+
+Let's start by loading the AnnotationHub package and retrieving the ChIP-seq data for histone modifications in human cells. You can read more about the AnnotationHub package and how to use it in the Bioconductor documentation.
+
+```{r}
+library(AnnotationHub)
+ah <- AnnotationHub()
+```
+
+There are multiple ways to search the AnnotationHub database. 
+We've done that for you and here are the `GRanges` objects for each of four histone marks, and one histone mark replicate. 
+
+```{r}
+h3k4me1 <- ah[['AH25832']]
+h3k4me3 <- ah[['AH25833']]
+h3k9ac <- ah[['AH25834']]
+h3k27me3 <- ah[['AH25835']]
+h3k4me3_2 <- ah[['AH27284']]
+```
+
+
+Each of these variables now represents the peak calls after a chip-seq experiment pulling down the histone mark of interest. 
+In the encode project these records were `bed` files. 
+The bed files have been converted to `GRanges` objects to allow computation within R. 
+
+```{r}
+# Grab cpg islands as well
+cpg = query(ah, c('cpg','UCSC','hg19'))[[1]]
+```
+
+Let's say that we don't know the behavior of the histone methylation marks with respect to CpG islands. 
+We could ask the question, "What is the overlap of the histone peaks with CpG islands?"
+
+```{r}
+sum(h3k4me1 %over% cpg)
+```
+
+We might want to actually count the number of bases of overlap between the methyl mark and CpG islands.
+
+```{r}
+# The intersection of two peak sets results in the 
+# overlapping regions as a new set of regions
+# The width of each peak is the number of overlapping bases
+# And the sum of the widths is the total bases overlapping
+sum(width(intersect(h3k4me1, cpg)))
+```
+
+But some methyl marks are known to have very broad signals, meaning that there is a higher chance of overlapping CpG islands just because there are more methylated bases.
+We can adjust for this by "normalizing" for all possible bases covered by either set of peaks, using `union`.
+We might think of this as a sort of "enrichment score" of one set in another set.
+
+```{r}
+sum(width(union(h3k4me1, cpg)))
+# and now "normalize" 
+sum(width(intersect(h3k4me1, cpg)))/sum(width(union(h3k4me1, cpg)))
+```
+
+Let's write a small function to calculate our little enrichment score.
+
+```{r}
+range_enrichment_score <- function(r1, r2) {
+  i = sum(width(intersect(r1, r2)))
+  u = sum(width(union(r1,r2)))
+  return(i/u)
+}
+```
+
+And give it a try:
+
+```{r}
+range_enrichment_score(h3k4me1, cpg)
+```
+
+
