@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.55">
+<meta name="generator" content="quarto-1.7.30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
-<meta name="dcterms.date" content="2024-07-26">
+<meta name="dcterms.date" content="2025-06-05">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>21&nbsp; ATAC-Seq with Bioconductor – The RBioc Book</title>
+<title>22&nbsp; ATAC-Seq with Bioconductor – The RBioc Book</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,8 +21,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -83,22 +84,23 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../single-cell-atac-and-rna-transfer-learning.html" rel="next">
+<link href="../references.html" rel="next">
 <link href="../ranges_exercises.html" rel="prev">
-<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-180dc90b24616f542b21b8b54fc3f545.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
-  "location": "sidebar",
+<link href="../site_libs/bootstrap/bootstrap-5a15bea12966ac2249ff2e96cb8142e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
-  "panel-placement": "start",
-  "type": "textbox",
+  "panel-placement": "end",
+  "type": "overlay",
   "limit": 50,
   "keyboard-shortcut": [
     "f",
@@ -147,38 +149,55 @@ window.Quarto = {
 };
 </script>
 </head>
-<body class="nav-sidebar floating slimcontent">
+<body class="nav-sidebar floating nav-fixed slimcontent quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
-<!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
-    <div class="sidebar-title mb-0 py-0">
-      <a href="../">The RBioc Book</a> 
-        <div class="sidebar-tools-main tools-wide">
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">The RBioc Book</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../intro.html"> 
+<span class="menu-text">Introduction</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../data_structures_overview.html"> 
+<span class="menu-text">Data Structures</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/seandavi/RBiocBook"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
     <a href="https://github.com/seandavi/RBiocBook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
     <div class="dropdown">
       <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Download"><i class="bi bi-download"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
 <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../The-RBioc-Book.pdf">
+            <a class="dropdown-item quarto-navbar-tools-item" href="../The-RBioc-Book.pdf">
               <i class="bi bi-file-pdf pe-1"></i>
             Download PDF
             </a>
           </li>
           <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../The-RBioc-Book.epub">
+            <a class="dropdown-item quarto-navbar-tools-item" href="../The-RBioc-Book.epub">
               <i class="bi bi-journal pe-1"></i>
             Download ePub
             </a>
@@ -189,13 +208,13 @@ window.Quarto = {
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-1">
 <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
               <i class="bi bi-twitter pe-1"></i>
             Twitter
             </a>
           </li>
           <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
               <i class="bi bi-facebook pe-1"></i>
             Facebook
             </a>
@@ -203,14 +222,18 @@ window.Quarto = {
       </ul>
 </div>
 </div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
     </div>
-      </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
@@ -235,32 +258,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../simulation_basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Simulation Basics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../r_intro_mechanics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">R mechanics</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R mechanics</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../r_basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Up and Running with R</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Up and Running with R</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../packages_and_dice.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Packages and more dice</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Packages and more dice</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reading_and_writing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../ggplot.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Plotting with ggplot2</span></span></a>
+  <a href="../dataviz.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
   </div>
 </li>
       </ul>
@@ -277,25 +306,25 @@ window.Quarto = {
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../vectors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Vectors</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Vectors</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../matrices.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Matrices</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Matrices</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../dataframes_intro.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Data Frames</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Data Frames</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../factors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Factors</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Factors</span></span></a>
   </div>
 </li>
       </ul>
@@ -312,13 +341,13 @@ window.Quarto = {
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../eda_and_univariate_brfss.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Case Study: Behavioral Risk Factor Surveillance System</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Case Study: Behavioral Risk Factor Surveillance System</span></span></a>
   </div>
 </li>
       </ul>
@@ -335,31 +364,31 @@ window.Quarto = {
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../norm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Working with distribution functions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Working with distribution functions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../t-stats-and-tests.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The t-statistic and t-distribution</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The t-statistic and t-distribution</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../kmeans.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">K-means clustering</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">K-means clustering</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ml_practical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Machine Learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Machine Learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../machine_learning_mlr3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Machine Learning 2</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Machine Learning 2</span></span></a>
   </div>
 </li>
       </ul>
@@ -376,31 +405,25 @@ window.Quarto = {
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../geoquery.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ranges_exercises.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../atac-seq/atac-seq.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../single-cell-atac-and-rna-transfer-learning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></span></a>
   </div>
 </li>
       </ul>
@@ -454,21 +477,21 @@ window.Quarto = {
   </ul>
 </li>
   <li>
-<a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">22</span> Background</a>
+<a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">23</span> Background</a>
   <ul class="collapse">
-<li><a href="#informatics-overview" id="toc-informatics-overview" class="nav-link" data-scroll-target="#informatics-overview"><span class="header-section-number">22.1</span> Informatics overview</a></li>
-  <li><a href="#working-with-sequencing-data-in-bioconductor" id="toc-working-with-sequencing-data-in-bioconductor" class="nav-link" data-scroll-target="#working-with-sequencing-data-in-bioconductor"><span class="header-section-number">22.2</span> Working with sequencing data in Bioconductor</a></li>
+<li><a href="#informatics-overview" id="toc-informatics-overview" class="nav-link" data-scroll-target="#informatics-overview"><span class="header-section-number">23.1</span> Informatics overview</a></li>
+  <li><a href="#working-with-sequencing-data-in-bioconductor" id="toc-working-with-sequencing-data-in-bioconductor" class="nav-link" data-scroll-target="#working-with-sequencing-data-in-bioconductor"><span class="header-section-number">23.2</span> Working with sequencing data in Bioconductor</a></li>
   </ul>
 </li>
   <li>
-<a href="#data-import-and-quality-control" id="toc-data-import-and-quality-control" class="nav-link" data-scroll-target="#data-import-and-quality-control"><span class="header-section-number">23</span> Data import and quality control</a>
+<a href="#data-import-and-quality-control" id="toc-data-import-and-quality-control" class="nav-link" data-scroll-target="#data-import-and-quality-control"><span class="header-section-number">24</span> Data import and quality control</a>
   <ul class="collapse">
-<li><a href="#coverage" id="toc-coverage" class="nav-link" data-scroll-target="#coverage"><span class="header-section-number">23.1</span> Coverage</a></li>
-  <li><a href="#fragment-lengths" id="toc-fragment-lengths" class="nav-link" data-scroll-target="#fragment-lengths"><span class="header-section-number">23.2</span> Fragment Lengths</a></li>
+<li><a href="#coverage" id="toc-coverage" class="nav-link" data-scroll-target="#coverage"><span class="header-section-number">24.1</span> Coverage</a></li>
+  <li><a href="#fragment-lengths" id="toc-fragment-lengths" class="nav-link" data-scroll-target="#fragment-lengths"><span class="header-section-number">24.2</span> Fragment Lengths</a></li>
   </ul>
 </li>
-  <li><a href="#viewing-data-in-igv" id="toc-viewing-data-in-igv" class="nav-link" data-scroll-target="#viewing-data-in-igv"><span class="header-section-number">24</span> Viewing data in IGV</a></li>
-  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">25</span> Additional work</a></li>
+  <li><a href="#viewing-data-in-igv" id="toc-viewing-data-in-igv" class="nav-link" data-scroll-target="#viewing-data-in-igv"><span class="header-section-number">25</span> Viewing data in IGV</a></li>
+  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">26</span> Additional work</a></li>
   <li>
 <a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
   <ul class="collapse">
@@ -476,13 +499,13 @@ window.Quarto = {
   <li><a href="#macs2" id="toc-macs2" class="nav-link" data-scroll-target="#macs2">MACS2</a></li>
   </ul>
 </li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">26</span> References</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">27</span> References</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/atac-seq/atac-seq.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></a></li></ol></nav><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">21</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span>
+<span class="chapter-number">22</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/atac-seq/atac-seq.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
@@ -509,10 +532,16 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 26, 2024</p>
+      <p class="date">June 5, 2025</p>
     </div>
   </div>
   
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">June 5, 2025</p>
+    </div>
+  </div>
     
   </div>
   
@@ -524,7 +553,7 @@ window.Quarto = {
 <ul>
 <li>A working and up-to-date version of R</li>
 <li>Basic knowledge of R syntax</li>
-<li>Familiarity with the <em><a href="https://bioconductor.org/packages/3.19/GenomicRanges">GenomicRanges</a></em> package and range manipulations</li>
+<li>Familiarity with the <em><a href="https://bioconductor.org/packages/3.20/GenomicRanges">GenomicRanges</a></em> package and range manipulations</li>
 <li>Familiarity with BAM files and their contents</li>
 </ul></section><section id="participation" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="participation">Participation</h2>
 <p>After a very brief review of ATAC-Seq and chromatin accessibility, students will work independently to follow this workflow. Additional materials are provided as links at the end of the workshop for those wanting deeper exposure. Additional materials include alignment from FASTQ files and peak calling.</p>
@@ -532,17 +561,17 @@ window.Quarto = {
 <em>R</em> / <em>Bioconductor</em> packages used</h2>
 <ul>
 <li>
-<em><a href="https://bioconductor.org/packages/3.19/Rsamtools">Rsamtools</a></em><br>
+<em><a href="https://bioconductor.org/packages/3.20/Rsamtools">Rsamtools</a></em><br>
 </li>
 <li>
-<em><a href="https://bioconductor.org/packages/3.19/GenomicRanges">GenomicRanges</a></em><br>
+<em><a href="https://bioconductor.org/packages/3.20/GenomicRanges">GenomicRanges</a></em><br>
 </li>
 <li>
-<em><a href="https://bioconductor.org/packages/3.19/GenomicFeatures">GenomicFeatures</a></em><br>
+<em><a href="https://bioconductor.org/packages/3.20/GenomicFeatures">GenomicFeatures</a></em><br>
 </li>
-<li><em><a href="https://bioconductor.org/packages/3.19/GenomicAlignments">GenomicAlignments</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.19/rtracklayer">rtracklayer</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.19/heatmaps">heatmaps</a></em></li>
+<li><em><a href="https://bioconductor.org/packages/3.20/GenomicAlignments">GenomicAlignments</a></em></li>
+<li><em><a href="https://bioconductor.org/packages/3.20/rtracklayer">rtracklayer</a></em></li>
+<li><em><a href="https://bioconductor.org/packages/3.20/heatmaps">heatmaps</a></em></li>
 </ul></section><section id="time-outline" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="time-outline">Time outline</h2>
 <p>An example for a 45-minute workshop:</p>
 <table class="table">
@@ -578,11 +607,11 @@ window.Quarto = {
 <li>Isolate nucleosome-free and mononucleosome regions from ATAC-seq data.</li>
 <li>Install and use IGV to visualize data in genomic context.</li>
 <li>Create profile plots using the heatmaps package.</li>
-</ul></section></section><section id="background" class="level1 page-columns page-full" data-number="22"><h1 data-number="22">
-<span class="header-section-number">22</span> Background</h1>
-<p>Chromatin accessibility assays measure the extent to which DNA is open and accessible. Such assays now use high throughput sequencing as a quantitative readout. DNAse assays, first using microarrays<span class="citation" data-cites="Crawford2006-nt">(<a href="../ggplot.html#ref-Crawford2006-nt" role="doc-biblioref">Crawford, Davis, et al. 2006</a>)</span> and then DNAse-Seq <span class="citation" data-cites="Crawford2006-bk">(<a href="../ggplot.html#ref-Crawford2006-bk" role="doc-biblioref">Crawford, Holt, et al. 2006</a>)</span>, requires a larger amount of DNA and is labor-indensive and has been largely supplanted by ATAC-Seq <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../ggplot.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>.</p>
+</ul></section></section><section id="background" class="level1 page-columns page-full" data-number="23"><h1 data-number="23">
+<span class="header-section-number">23</span> Background</h1>
+<p>Chromatin accessibility assays measure the extent to which DNA is open and accessible. Such assays now use high throughput sequencing as a quantitative readout. DNAse assays, first using microarrays<span class="citation" data-cites="Crawford2006-nt">(<a href="../references.html#ref-Crawford2006-nt" role="doc-biblioref">Crawford, Davis, et al. 2006</a>)</span> and then DNAse-Seq <span class="citation" data-cites="Crawford2006-bk">(<a href="../references.html#ref-Crawford2006-bk" role="doc-biblioref">Crawford, Holt, et al. 2006</a>)</span>, requires a larger amount of DNA and is labor-indensive and has been largely supplanted by ATAC-Seq <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>.</p>
 <p>The Assay for Transposase Accessible Chromatin with high-throughput sequencing (ATAC-seq) method maps chromatin accessibility genome-wide. This method quantifies DNA accessibility with a hyperactive Tn5 transposase that cuts and inserts sequencing adapters into regions of chromatin that are accessible. High throughput sequencing of fragments produced by the process map to regions of increased accessibility, transcription factor binding sites, and nucleosome positioning. The method is both fast and sensitive and can be used as a replacement for DNAse <em>and</em> MNase.</p>
-<p>An early review of chromatin accessibility assays <span class="citation" data-cites="Tsompana2014-yh">(<a href="../ggplot.html#ref-Tsompana2014-yh" role="doc-biblioref">Tsompana and Buck 2014</a>)</span> compares the use cases, pros and cons, and expected signals from each of the most common approaches (Figure @ref(fig:chromatinAssays)).</p>
+<p>An early review of chromatin accessibility assays <span class="citation" data-cites="Tsompana2014-yh">(<a href="../references.html#ref-Tsompana2014-yh" role="doc-biblioref">Tsompana and Buck 2014</a>)</span> compares the use cases, pros and cons, and expected signals from each of the most common approaches (Figure @ref(fig:chromatinAssays)).</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
@@ -591,18 +620,18 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The first manuscript describing ATAC-Seq protocol and findings outlined how ATAC-Seq data “line up” with other datatypes such as ChIP-seq and DNAse-seq (Figure @ref(fig:greenleaf)). They also highlight how fragment length correlates with specific genomic regions and characteristics <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../ggplot.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013, fig. 3</a>)</span>.</p>
+<p>The first manuscript describing ATAC-Seq protocol and findings outlined how ATAC-Seq data “line up” with other datatypes such as ChIP-seq and DNAse-seq (Figure @ref(fig:greenleaf)). They also highlight how fragment length correlates with specific genomic regions and characteristics <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013, fig. 3</a>)</span>.</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full"><p><img src="imgs/greenleaf_chip_dnase_atac.png" class="img-fluid figure-img" width="836"></p>
-<figcaption class="margin-caption">Multimodal chromatin comparisons. From <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../ggplot.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>, Figure 4. (a) CTCF footprints observed in ATAC-seq and DNase-seq data, at a specific locus on chr1. (b) Aggregate ATAC-seq footprint for CTCF (motif shown) generated over binding sites within the genome (c) CTCF predicted binding probability inferred from ATAC-seq data, position weight matrix (PWM) scores for the CTCF motif, and evolutionary conservation (PhyloP). Right-most column is the CTCF ChIP-seq data (ENCODE) for this GM12878 cell line, demonstrating high concordance with predicted binding probability.</figcaption></figure>
+<figcaption class="margin-caption">Multimodal chromatin comparisons. From <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>, Figure 4. (a) CTCF footprints observed in ATAC-seq and DNase-seq data, at a specific locus on chr1. (b) Aggregate ATAC-seq footprint for CTCF (motif shown) generated over binding sites within the genome (c) CTCF predicted binding probability inferred from ATAC-seq data, position weight matrix (PWM) scores for the CTCF motif, and evolutionary conservation (PhyloP). Right-most column is the CTCF ChIP-seq data (ENCODE) for this GM12878 cell line, demonstrating high concordance with predicted binding probability.</figcaption></figure>
 </div>
 </div>
 </div>
-<p>Buenrostro et al.&nbsp;provide a detailed protocol for performing ATAC-Seq and quality control of results <span class="citation" data-cites="Buenrostro2015-dz">(<a href="../ggplot.html#ref-Buenrostro2015-dz" role="doc-biblioref">Buenrostro et al. 2015</a>)</span>. Updated and modified protocols that improve on signal-to-noise and reduce input DNA requirements have been described.</p>
-<section id="informatics-overview" class="level2 page-columns page-full" data-number="22.1"><h2 data-number="22.1" class="anchored" data-anchor-id="informatics-overview">
-<span class="header-section-number">22.1</span> Informatics overview</h2>
+<p>Buenrostro et al.&nbsp;provide a detailed protocol for performing ATAC-Seq and quality control of results <span class="citation" data-cites="Buenrostro2015-dz">(<a href="../references.html#ref-Buenrostro2015-dz" role="doc-biblioref">Buenrostro et al. 2015</a>)</span>. Updated and modified protocols that improve on signal-to-noise and reduce input DNA requirements have been described.</p>
+<section id="informatics-overview" class="level2 page-columns page-full" data-number="23.1"><h2 data-number="23.1" class="anchored" data-anchor-id="informatics-overview">
+<span class="header-section-number">23.1</span> Informatics overview</h2>
 <p>ATAC-Seq protocols typically utilize paired-end sequencing protocols. The reads are aligned to the respective <em>genome</em> using <code>bowtie2</code>, <code>BWA</code>, or other short-read aligner. The result, after appropriate manipulation, often using <code>samtools</code>, results in a BAM file. Among other details, the BAM format includes columns for:</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">'imgs/bam_shot.png'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -625,9 +654,9 @@ window.Quarto = {
 </ul>
 <p>Duplicate fragments (those with the <em>same</em> start and end position of other reads) are marked and likely discarded. Reads that fail to align “properly” are also often excluded from analysis. It is worth noting that most software packages allow simple “marking” of such reads and that there is usually no need to create a special BAM file before proceeding with downstream work.</p>
 <p>After alignment and BAM processing, the workflow can switch to <em>Bioconductor</em>.</p>
-</section><section id="working-with-sequencing-data-in-bioconductor" class="level2" data-number="22.2"><h2 data-number="22.2" class="anchored" data-anchor-id="working-with-sequencing-data-in-bioconductor">
-<span class="header-section-number">22.2</span> Working with sequencing data in Bioconductor</h2>
-<p>The <em>Bioconductor</em> project includes several infrastructure packages for dealing with ranges (sequence name, start, end, +/- strand) on sequences <span class="citation" data-cites="Lawrence2013-he">(<a href="../ggplot.html#ref-Lawrence2013-he" role="doc-biblioref">Lawrence et al. 2013</a>)</span> as well as capabilities with working with Fastq files directly <span class="citation" data-cites="morgan2016rsamtools">(<a href="../ggplot.html#ref-morgan2016rsamtools" role="doc-biblioref">Morgan et al. 2016</a>)</span>.</p>
+</section><section id="working-with-sequencing-data-in-bioconductor" class="level2" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="working-with-sequencing-data-in-bioconductor">
+<span class="header-section-number">23.2</span> Working with sequencing data in Bioconductor</h2>
+<p>The <em>Bioconductor</em> project includes several infrastructure packages for dealing with ranges (sequence name, start, end, +/- strand) on sequences <span class="citation" data-cites="Lawrence2013-he">(<a href="../references.html#ref-Lawrence2013-he" role="doc-biblioref">Lawrence et al. 2013</a>)</span> as well as capabilities with working with Fastq files directly <span class="citation" data-cites="morgan2016rsamtools">(<a href="../references.html#ref-morgan2016rsamtools" role="doc-biblioref">Morgan et al. 2016</a>)</span>.</p>
 <table class="table">
 <caption>Commonly used Bioconductor and their high-level use cases.</caption>
 <thead><tr class="header">
@@ -636,30 +665,30 @@ window.Quarto = {
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><em><a href="https://bioconductor.org/packages/3.19/Rsamtools">Rsamtools</a></em></td>
+<td><em><a href="https://bioconductor.org/packages/3.20/Rsamtools">Rsamtools</a></em></td>
 <td>low level access to FASTQ, VCF, SAM, BAM, BCF formats</td>
 </tr>
 <tr class="even">
-<td><em><a href="https://bioconductor.org/packages/3.19/GenomicRanges">GenomicRanges</a></em></td>
+<td><em><a href="https://bioconductor.org/packages/3.20/GenomicRanges">GenomicRanges</a></em></td>
 <td>Container and methods for handling genomic reagions</td>
 </tr>
 <tr class="odd">
-<td><em><a href="https://bioconductor.org/packages/3.19/GenomicFeatures">GenomicFeatures</a></em></td>
+<td><em><a href="https://bioconductor.org/packages/3.20/GenomicFeatures">GenomicFeatures</a></em></td>
 <td>Work with transcript databases, gff, gtf and BED formats</td>
 </tr>
 <tr class="even">
-<td><em><a href="https://bioconductor.org/packages/3.19/GenomicAlignments">GenomicAlignments</a></em></td>
+<td><em><a href="https://bioconductor.org/packages/3.20/GenomicAlignments">GenomicAlignments</a></em></td>
 <td>Reader for BAM format</td>
 </tr>
 <tr class="odd">
-<td><em><a href="https://bioconductor.org/packages/3.19/rtracklayer">rtracklayer</a></em></td>
+<td><em><a href="https://bioconductor.org/packages/3.20/rtracklayer">rtracklayer</a></em></td>
 <td>import and export multiple UCSC file formats including BigWig and Bed</td>
 </tr>
 </tbody>
 </table>
 <p>As noted in the previous section, the output of an ATAC-Seq experiment is a BAM file. As paired-end sequencing is a commonly-applied approach for ATAC-Seq, the <code>readGAlignmentPairs</code> function is the appropriate method to use.</p>
-</section></section><section id="data-import-and-quality-control" class="level1 page-columns page-full" data-number="23"><h1 data-number="23">
-<span class="header-section-number">23</span> Data import and quality control</h1>
+</section></section><section id="data-import-and-quality-control" class="level1 page-columns page-full" data-number="24"><h1 data-number="24">
+<span class="header-section-number">24</span> Data import and quality control</h1>
 <div class="cell">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicAlignments">GenomicAlignments</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -723,8 +752,8 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="coverage" class="level2" data-number="23.1"><h2 data-number="23.1" class="anchored" data-anchor-id="coverage">
-<span class="header-section-number">23.1</span> Coverage</h2>
+<section id="coverage" class="level2" data-number="24.1"><h2 data-number="24.1" class="anchored" data-anchor-id="coverage">
+<span class="header-section-number">24.1</span> Coverage</h2>
 <p>The <code>coverage</code> method for genomic ranges calculates, for each base, the number of overlapping features. In the case of a BAM file from ATAC-Seq converted to a GAlignmentPairs object, the coverage gives us an idea of the extent to which reads pile up to form peaks.</p>
 <div class="cell">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cvg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span></span>
@@ -784,14 +813,14 @@ attr(,"package")
 </div>
 </div>
 </div>
-</section><section id="fragment-lengths" class="level2 page-columns page-full" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="fragment-lengths">
-<span class="header-section-number">23.2</span> Fragment Lengths</h2>
-<p>The first ATAC-Seq manuscript <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../ggplot.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span> highlighted the relationship between fragment length and nucleosomes (see Figure @ref{fig:flgreenleaf}).</p>
+</section><section id="fragment-lengths" class="level2 page-columns page-full" data-number="24.2"><h2 data-number="24.2" class="anchored" data-anchor-id="fragment-lengths">
+<span class="header-section-number">24.2</span> Fragment Lengths</h2>
+<p>The first ATAC-Seq manuscript <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span> highlighted the relationship between fragment length and nucleosomes (see Figure @ref{fig:flgreenleaf}).</p>
 <div class="cell page-columns page-full">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3959825/bin/nihms554473f2.jpg"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">"https://cdn.ncbi.nlm.nih.gov/pmc/blobs/0ad9/3959825/fde39a9fb288/nihms554473f2.jpg"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
-<figure class="figure page-columns page-full"><p><img src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3959825/bin/nihms554473f2.jpg" class="img-fluid figure-img"></p>
+<figure class="figure page-columns page-full"><p><img src="https://cdn.ncbi.nlm.nih.gov/pmc/blobs/0ad9/3959825/fde39a9fb288/nihms554473f2.jpg" class="img-fluid figure-img"></p>
 <figcaption class="margin-caption">Relationship between fragment length and nucleosome number.</figcaption></figure>
 </div>
 </div>
@@ -848,14 +877,14 @@ attr(,"package")
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_mn</span> <span class="op">&lt;-</span> <span class="va">greenleaf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">isize</span> <span class="op">&gt;</span> <span class="fl">187</span> <span class="op">&amp;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">isize</span> <span class="op">&lt;</span> <span class="fl">250</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Finally, we expect nucleosome-free reads to be enriched near the TSS while mononucleosome reads should not be. We will use the <em><a href="https://bioconductor.org/packages/3.19/heatmaps">heatmaps</a></em> package to take a look at these two sets of reads with respect to the tss of the human genome.</p>
+<p>Finally, we expect nucleosome-free reads to be enriched near the TSS while mononucleosome reads should not be. We will use the <em><a href="https://bioconductor.org/packages/3.20/heatmaps">heatmaps</a></em> package to take a look at these two sets of reads with respect to the tss of the human genome.</p>
 <div class="cell">
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span><span class="op">)</span></span>
 <span><span class="va">proms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span>, <span class="fl">250</span>, <span class="fl">250</span><span class="op">)</span></span>
 <span><span class="va">seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"chr21"</span>, <span class="st">"chr22"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html">seqlevels</a></span><span class="op">(</span><span class="va">proms</span>, pruning.mode <span class="op">=</span> <span class="st">"coarse"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">seqs</span> <span class="co"># only chromosome 21 and 22</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Take a look at the <em><a href="https://bioconductor.org/packages/3.19/heatmaps">heatmaps</a></em> package vignette to learn more about the heatmaps package capabilities.</p>
+<p>Take a look at the <em><a href="https://bioconductor.org/packages/3.20/heatmaps">heatmaps</a></em> package vignette to learn more about the heatmaps package capabilities.</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">heatmaps</span><span class="op">)</span></span>
 <span><span class="va">gl_nf_hm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/heatmaps/man/CoverageHeatmap.html">CoverageHeatmap</a></span><span class="op">(</span><span class="va">proms</span>, <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">gl_nf</span><span class="op">)</span>, coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">250</span>, <span class="fl">250</span><span class="op">)</span><span class="op">)</span></span>
@@ -890,8 +919,8 @@ attr(,"package")
 </div>
 </div>
 </div>
-</section></section><section id="viewing-data-in-igv" class="level1" data-number="24"><h1 data-number="24">
-<span class="header-section-number">24</span> Viewing data in IGV</h1>
+</section></section><section id="viewing-data-in-igv" class="level1" data-number="25"><h1 data-number="25">
+<span class="header-section-number">25</span> Viewing data in IGV</h1>
 <p>Install IGV from <a href="https://software.broadinstitute.org/software/igv/download">here</a>.</p>
 <p>We export the greenleaf data as a BigWig file.</p>
 <div class="cell">
@@ -899,18 +928,18 @@ attr(,"package")
 <span><span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">export.bw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span>, <span class="st">"greenleaf.bw"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><em>Exercise</em>: In IGV, choose <code>hg19</code>. Then, load the <code>greenleaf.bw</code> file and explore chromosomes 21 and 22. <em>Exercise</em>: Export the nucleosome-free portion of the data as a BigWig file and examine that in IGV. Where do you expect to see the strongest signals?</p>
-</section><section id="additional-work" class="level1" data-number="25"><h1 data-number="25">
-<span class="header-section-number">25</span> Additional work</h1>
+</section><section id="additional-work" class="level1" data-number="26"><h1 data-number="26">
+<span class="header-section-number">26</span> Additional work</h1>
 <p>For those working extensively on ATAC-Seq, there is a great workflow/tutorial available from Thomas Carrol:</p>
 <p>https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html</p>
-<p>Feel free to work through it. In addition to the work above, there is also the <em><a href="https://bioconductor.org/packages/3.19/ATACseqQC">ATACseqQC</a></em> package vignette that offers more than just QC. At least a couple more packages are available in <em>Bioconductor</em>.</p>
+<p>Feel free to work through it. In addition to the work above, there is also the <em><a href="https://bioconductor.org/packages/3.20/ATACseqQC">ATACseqQC</a></em> package vignette that offers more than just QC. At least a couple more packages are available in <em>Bioconductor</em>.</p>
 </section><section id="appendix" class="level1 unnumbered page-columns page-full"><h1 class="unnumbered">Appendix</h1>
 <section id="session-info" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="session-info">Session info</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>R version 4.4.0 (2024-04-24)
+<pre><code>R version 4.4.3 (2025-02-28)
 Platform: aarch64-apple-darwin20
-Running under: macOS Sonoma 14.2.1
+Running under: macOS Sequoia 15.3.1
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
@@ -927,61 +956,60 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] rtracklayer_1.64.0                     
- [2] heatmaps_1.28.0                        
+ [1] rtracklayer_1.66.0                     
+ [2] heatmaps_1.30.0                        
  [3] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2
- [4] GenomicFeatures_1.56.0                 
- [5] AnnotationDbi_1.66.0                   
+ [4] GenomicFeatures_1.58.0                 
+ [5] AnnotationDbi_1.68.0                   
  [6] dplyr_1.1.4                            
- [7] ggplot2_3.5.1                          
- [8] GenomicAlignments_1.40.0               
- [9] Rsamtools_2.20.0                       
-[10] Biostrings_2.72.1                      
-[11] XVector_0.44.0                         
-[12] SummarizedExperiment_1.34.0            
-[13] Biobase_2.64.0                         
-[14] MatrixGenerics_1.16.0                  
-[15] matrixStats_1.3.0                      
-[16] GenomicRanges_1.56.0                   
-[17] GenomeInfoDb_1.40.1                    
-[18] IRanges_2.38.0                         
-[19] S4Vectors_0.42.0                       
-[20] BiocGenerics_0.50.0                    
-[21] BiocStyle_2.32.0                       
-[22] knitr_1.47                             
+ [7] ggplot2_3.5.2                          
+ [8] GenomicAlignments_1.42.0               
+ [9] Rsamtools_2.22.0                       
+[10] Biostrings_2.74.1                      
+[11] XVector_0.46.0                         
+[12] SummarizedExperiment_1.36.0            
+[13] Biobase_2.66.0                         
+[14] MatrixGenerics_1.18.1                  
+[15] matrixStats_1.5.0                      
+[16] GenomicRanges_1.58.0                   
+[17] GenomeInfoDb_1.42.3                    
+[18] IRanges_2.40.1                         
+[19] S4Vectors_0.44.0                       
+[20] BiocGenerics_0.52.0                    
+[21] BiocStyle_2.34.0                       
+[22] knitr_1.50                             
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.2.1        EBImage_4.46.0          blob_1.2.4             
- [4] bitops_1.0-7            fastmap_1.2.0           RCurl_1.98-1.14        
- [7] XML_3.99-0.16.1         digest_0.6.35           lifecycle_1.0.4        
-[10] KEGGREST_1.44.0         RSQLite_2.3.7           magrittr_2.0.3         
-[13] compiler_4.4.0          rlang_1.1.4             tools_4.4.0            
-[16] plotrix_3.8-4           utf8_1.2.4              yaml_2.3.8             
-[19] S4Arrays_1.4.1          htmlwidgets_1.6.4       bit_4.0.5              
-[22] curl_5.2.1              DelayedArray_0.30.1     RColorBrewer_1.1-3     
-[25] KernSmooth_2.23-24      abind_1.4-5             BiocParallel_1.38.0    
-[28] withr_3.0.0             grid_4.4.0              fansi_1.0.6            
-[31] colorspace_2.1-0        scales_1.3.0            cli_3.6.2              
-[34] rmarkdown_2.27          crayon_1.5.2            generics_0.1.3         
-[37] httr_1.4.7              rjson_0.2.21            DBI_1.2.3              
-[40] cachem_1.1.0            zlibbioc_1.50.0         parallel_4.4.0         
-[43] tiff_0.1-12             BiocManager_1.30.23     restfulr_0.0.15        
-[46] vctrs_0.6.5             Matrix_1.7-0            jsonlite_1.8.8         
-[49] fftwtools_0.9-11        bit64_4.0.5             jpeg_0.1-10            
-[52] locfit_1.5-9.9          glue_1.7.0              codetools_0.2-20       
-[55] gtable_0.3.5            BiocIO_1.14.0           UCSC.utils_1.0.0       
-[58] munsell_0.5.1           tibble_3.2.1            pillar_1.9.0           
-[61] htmltools_0.5.8.1       GenomeInfoDbData_1.2.12 R6_2.5.1               
-[64] evaluate_0.23           lattice_0.22-6          png_0.1-8              
-[67] memoise_2.0.1           SparseArray_1.4.8       xfun_0.44              
-[70] pkgconfig_2.0.3        </code></pre>
+ [1] tidyselect_1.2.1        EBImage_4.48.0          farver_2.1.2           
+ [4] blob_1.2.4              bitops_1.0-9            fastmap_1.2.0          
+ [7] RCurl_1.98-1.17         XML_3.99-0.18           digest_0.6.37          
+[10] lifecycle_1.0.4         KEGGREST_1.46.0         RSQLite_2.4.0          
+[13] magrittr_2.0.3          compiler_4.4.3          rlang_1.1.6            
+[16] tools_4.4.3             plotrix_3.8-4           yaml_2.3.10            
+[19] S4Arrays_1.6.0          htmlwidgets_1.6.4       bit_4.6.0              
+[22] curl_6.2.3              DelayedArray_0.32.0     RColorBrewer_1.1-3     
+[25] KernSmooth_2.23-26      abind_1.4-8             BiocParallel_1.40.2    
+[28] withr_3.0.2             grid_4.4.3              scales_1.4.0           
+[31] cli_3.6.5               rmarkdown_2.29          crayon_1.5.3           
+[34] generics_0.1.4          httr_1.4.7              rjson_0.2.23           
+[37] DBI_1.2.3               cachem_1.1.0            zlibbioc_1.52.0        
+[40] parallel_4.4.3          BiocManager_1.30.25     restfulr_0.0.15        
+[43] tiff_0.1-12             vctrs_0.6.5             Matrix_1.7-3           
+[46] jsonlite_2.0.0          fftwtools_0.9-11        bit64_4.6.0-1          
+[49] jpeg_0.1-11             locfit_1.5-9.12         glue_1.8.0             
+[52] codetools_0.2-20        gtable_0.3.6            BiocIO_1.16.0          
+[55] UCSC.utils_1.2.0        tibble_3.2.1            pillar_1.10.2          
+[58] htmltools_0.5.8.1       GenomeInfoDbData_1.2.13 R6_2.6.1               
+[61] evaluate_1.0.3          lattice_0.22-7          png_0.1-8              
+[64] memoise_2.0.1           SparseArray_1.6.2       xfun_0.52              
+[67] pkgconfig_2.0.3        </code></pre>
 </div>
 </div>
 </section><section id="macs2" class="level2 unnumbered page-columns page-full"><h2 class="unnumbered anchored" data-anchor-id="macs2">MACS2</h2>
 <p>The MACS2 package is a commonly-used package for calling peaks. Installation and other details are available<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;https://github.com/taoliu/MACS</p></div></div><pre><code>pip install macs2</code></pre>
-</section></section><section id="references" class="level1" data-number="26"><h1 data-number="26">
-<span class="header-section-number">26</span> References</h1>
+</section></section><section id="references" class="level1" data-number="27"><h1 data-number="27">
+<span class="header-section-number">27</span> References</h1>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -1008,290 +1036,293 @@ Tsompana, Maria, and Michael J Buck. 2014. <span>“Chromatin Accessibility: A W
 </div>
 </div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
-    });
-    clipboardModal.on('success', onCopySuccess);
-  }
-  const viewSource = window.document.getElementById('quarto-view-source') ||
-                     window.document.getElementById('quarto-code-tools-source');
-  if (viewSource) {
-    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-    viewSource.addEventListener("click", function(e) {
-      if (sourceUrl) {
-        // rstudio viewer pane
-        if (/\bcapabilities=\b/.test(window.location)) {
-          window.open(sourceUrl);
-        } else {
-          window.location.href = sourceUrl;
-        }
-      } else {
-        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-        modal.show();
-      }
-      return false;
-    });
-  }
-  function toggleCodeHandler(show) {
-    return function(e) {
-      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-      for (let i=0; i<detailsSrc.length; i++) {
-        const details = detailsSrc[i].parentElement;
-        if (show) {
-          details.open = true;
-        } else {
-          details.removeAttribute("open");
-        }
-      }
-      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-      const fromCls = show ? "hidden" : "unhidden";
-      const toCls = show ? "unhidden" : "hidden";
-      for (let i=0; i<cellCodeDivs.length; i++) {
-        const codeDiv = cellCodeDivs[i];
-        if (codeDiv.classList.contains(fromCls)) {
-          codeDiv.classList.remove(fromCls);
-          codeDiv.classList.add(toCls);
-        } 
-      }
-      return false;
-    }
-  }
-  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-  if (hideAllCode) {
-    hideAllCode.addEventListener("click", toggleCodeHandler(false));
-  }
-  const showAllCode = window.document.getElementById("quarto-show-all-code");
-  if (showAllCode) {
-    showAllCode.addEventListener("click", toggleCodeHandler(true));
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
     };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
       }
+      return false;
     }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
         }
-        return container.innerHTML
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1299,192 +1330,168 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
       <a href="../ranges_exercises.html" class="pagination-link" aria-label="Ranges Exercises">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../single-cell-atac-and-rna-transfer-learning.html" class="pagination-link" aria-label="Transfer Learning in scATAC-seq and scRNA-seq">
-        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Transfer Learning in scATAC-seq and scRNA-seq</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
