@@ -40,7 +40,7 @@ interface.
 
 ## What is R?
 
-[R](https://en.wikipedia.org/wiki/R_(programming_language) is a programming
+[R](https://en.wikipedia.org/wiki/R_(programming_language)) is a programming
 language and software environment designed for statistical computing and
 graphics. It is widely used by statisticians, data scientists, and researchers
 for data analysis and visualization. R is an open-source language, which means
@@ -56,10 +56,18 @@ Ihaka's take on R's history). Since then, R has been continuously developed by
 the R Core Team, a group of statisticians and computer scientists. The R Core
 Team releases a new version of R every year.
 
+
 ```{r echo=FALSE}
-#| fig-cap: "Google trends showing the popularity of R over time based on Google searches"
+#| fig-cap: "Google trends showing the popularity of R over time based on [Google Trends](https://trends.google.com/trends/explore?cat=5&date=all&geo=US&q=r,python&hl=en). Note that google does not capture the context here; bioinformatics applications are still quite heavily reliant on R."
 #| label: fig-r-google-trends
-knitr::include_graphics("images/r_google_trends.png")
+#| message: FALSE
+library(ggplot2)
+readr::read_csv('data/r_python_google_trends.csv',skip=3, col_names=c('month', 'R', 'Python')) |> 
+   tidyr::pivot_longer(!month, names_to='language', values_to = 'interest') |>
+   dplyr::mutate(month=lubridate::ym(month)) |>
+   ggplot(aes(x=month, y=interest, group=language, color=language)) +
+   geom_line() +
+   theme_minimal()
 ```
 
 
