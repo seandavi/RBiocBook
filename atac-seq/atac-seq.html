@@ -7,7 +7,7 @@
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>23&nbsp; ATAC-Seq with Bioconductor – The RBioc Book</title>
+<title>23&nbsp; Genomic ranges and ATAC-Seq – The RBioc Book</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../references.html" rel="next">
-<link href="../ranges_exercises.html" rel="prev">
+<link href="../ranges_and_signals.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -220,7 +220,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-Seq</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -415,14 +415,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../ranges_exercises.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span></a>
+  <a href="../ranges_and_signals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Genomic ranges and features</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../atac-seq/atac-seq.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-Seq</span></span></a>
   </div>
 </li>
       </ul>
@@ -482,47 +482,26 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li>
-<a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
-  <ul class="collapse">
-<li><a href="#pre-requisites" id="toc-pre-requisites" class="nav-link" data-scroll-target="#pre-requisites">Pre-requisites</a></li>
-  <li><a href="#participation" id="toc-participation" class="nav-link" data-scroll-target="#participation">Participation</a></li>
-  <li><a href="#r-bioconductor-packages-used" id="toc-r-bioconductor-packages-used" class="nav-link" data-scroll-target="#r-bioconductor-packages-used"><em>R</em> / <em>Bioconductor</em> packages used</a></li>
-  <li><a href="#time-outline" id="toc-time-outline" class="nav-link" data-scroll-target="#time-outline">Time outline</a></li>
-  <li><a href="#learning-goals" id="toc-learning-goals" class="nav-link" data-scroll-target="#learning-goals">Learning goals</a></li>
-  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives">Learning objectives</a></li>
-  </ul>
-</li>
+<li><a href="#r-bioconductor-packages-used" id="toc-r-bioconductor-packages-used" class="nav-link active" data-scroll-target="#r-bioconductor-packages-used"><em>R</em> / <em>Bioconductor</em> packages used</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">23.1</span> Background</a></li>
+  <li><a href="#informatics-overview" id="toc-informatics-overview" class="nav-link" data-scroll-target="#informatics-overview"><span class="header-section-number">23.2</span> Informatics overview</a></li>
+  <li><a href="#working-with-sequencing-data-in-bioconductor" id="toc-working-with-sequencing-data-in-bioconductor" class="nav-link" data-scroll-target="#working-with-sequencing-data-in-bioconductor"><span class="header-section-number">23.3</span> Working with sequencing data in Bioconductor</a></li>
   <li>
-<a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">24</span> Background</a>
+<a href="#data-import-and-quality-control" id="toc-data-import-and-quality-control" class="nav-link" data-scroll-target="#data-import-and-quality-control"><span class="header-section-number">24</span> Data import and quality control</a>
   <ul class="collapse">
-<li><a href="#informatics-overview" id="toc-informatics-overview" class="nav-link" data-scroll-target="#informatics-overview"><span class="header-section-number">24.1</span> Informatics overview</a></li>
-  <li><a href="#working-with-sequencing-data-in-bioconductor" id="toc-working-with-sequencing-data-in-bioconductor" class="nav-link" data-scroll-target="#working-with-sequencing-data-in-bioconductor"><span class="header-section-number">24.2</span> Working with sequencing data in Bioconductor</a></li>
-  </ul>
-</li>
-  <li>
-<a href="#data-import-and-quality-control" id="toc-data-import-and-quality-control" class="nav-link" data-scroll-target="#data-import-and-quality-control"><span class="header-section-number">25</span> Data import and quality control</a>
-  <ul class="collapse">
-<li><a href="#coverage" id="toc-coverage" class="nav-link" data-scroll-target="#coverage"><span class="header-section-number">25.1</span> Coverage</a></li>
-  <li><a href="#fragment-lengths" id="toc-fragment-lengths" class="nav-link" data-scroll-target="#fragment-lengths"><span class="header-section-number">25.2</span> Fragment Lengths</a></li>
-  </ul>
-</li>
-  <li><a href="#viewing-data-in-igv" id="toc-viewing-data-in-igv" class="nav-link" data-scroll-target="#viewing-data-in-igv"><span class="header-section-number">26</span> Viewing data in IGV</a></li>
-  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">27</span> Additional work</a></li>
-  <li>
-<a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
-  <ul class="collapse">
-<li><a href="#session-info" id="toc-session-info" class="nav-link" data-scroll-target="#session-info">Session info</a></li>
+<li><a href="#coverage" id="toc-coverage" class="nav-link" data-scroll-target="#coverage"><span class="header-section-number">24.1</span> Coverage</a></li>
+  <li><a href="#fragment-lengths" id="toc-fragment-lengths" class="nav-link" data-scroll-target="#fragment-lengths"><span class="header-section-number">24.2</span> Fragment Lengths</a></li>
+  <li><a href="#viewing-data-in-igv" id="toc-viewing-data-in-igv" class="nav-link" data-scroll-target="#viewing-data-in-igv"><span class="header-section-number">24.3</span> Viewing data in IGV</a></li>
+  <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">24.4</span> Additional work</a></li>
   <li><a href="#macs2" id="toc-macs2" class="nav-link" data-scroll-target="#macs2">MACS2</a></li>
   </ul>
 </li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">28</span> References</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/atac-seq/atac-seq.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span></a></li></ol></nav><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../atac-seq/atac-seq.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-Seq</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">23</span>&nbsp; <span class="chapter-title">ATAC-Seq with Bioconductor</span>
+<span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-Seq</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/atac-seq/atac-seq.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
@@ -556,7 +535,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 5, 2025</p>
+      <p class="date-modified">June 7, 2025</p>
     </div>
   </div>
     
@@ -564,17 +543,7 @@ window.Quarto = {
   
 
 
-</header><section id="overview" class="level1 unnumbered"><h1 class="unnumbered">Overview</h1>
-<section id="pre-requisites" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="pre-requisites">Pre-requisites</h2>
-<p>This workshop assumes:</p>
-<ul>
-<li>A working and up-to-date version of R</li>
-<li>Basic knowledge of R syntax</li>
-<li>Familiarity with the <em><a href="https://bioconductor.org/packages/3.20/GenomicRanges">GenomicRanges</a></em> package and range manipulations</li>
-<li>Familiarity with BAM files and their contents</li>
-</ul></section><section id="participation" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="participation">Participation</h2>
-<p>After a very brief review of ATAC-Seq and chromatin accessibility, students will work independently to follow this workflow. Additional materials are provided as links at the end of the workshop for those wanting deeper exposure. Additional materials include alignment from FASTQ files and peak calling.</p>
-</section><section id="r-bioconductor-packages-used" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="r-bioconductor-packages-used">
+</header><section id="r-bioconductor-packages-used" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="r-bioconductor-packages-used">
 <em>R</em> / <em>Bioconductor</em> packages used</h2>
 <ul>
 <li>
@@ -589,43 +558,8 @@ window.Quarto = {
 <li><em><a href="https://bioconductor.org/packages/3.20/GenomicAlignments">GenomicAlignments</a></em></li>
 <li><em><a href="https://bioconductor.org/packages/3.20/rtracklayer">rtracklayer</a></em></li>
 <li><em><a href="https://bioconductor.org/packages/3.20/heatmaps">heatmaps</a></em></li>
-</ul></section><section id="time-outline" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="time-outline">Time outline</h2>
-<p>An example for a 45-minute workshop:</p>
-<table class="table">
-<thead><tr class="header">
-<th>Activity</th>
-<th>Time</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Introduction</td>
-<td>15m</td>
-</tr>
-<tr class="even">
-<td>Independent work</td>
-<td>2-3hr</td>
-</tr>
-<tr class="odd">
-<td>Additional exercises (optional, external)</td>
-<td>up to 12 hours</td>
-</tr>
-</tbody>
-</table></section><section id="learning-goals" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="learning-goals">Learning goals</h2>
-<ul>
-<li>Describe how to import sequence alignments in BAM format into R</li>
-<li>Relate fragment size to genomic characteristics such as nucleosome occupancy and open chromatin.</li>
-<li>Perform basic alignment manipulations in R to enrich ATAC-seq data for chromatin characteristics.</li>
-<li>Gain familiarity with the IGV genome browser and examining data in genomic context.</li>
-<li>Visualize summaries of genomic signal using profile plots and heatmaps.</li>
-</ul></section><section id="learning-objectives" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="learning-objectives">Learning objectives</h2>
-<ul>
-<li>Load and save genomic data in BAM and BigWig formats [GenomicAlignments and rtracklayer].</li>
-<li>Perform basic QC plots from ATAC-Seq data.</li>
-<li>Isolate nucleosome-free and mononucleosome regions from ATAC-seq data.</li>
-<li>Install and use IGV to visualize data in genomic context.</li>
-<li>Create profile plots using the heatmaps package.</li>
-</ul></section></section><section id="background" class="level1 page-columns page-full" data-number="24"><h1 data-number="24">
-<span class="header-section-number">24</span> Background</h1>
+</ul></section><section id="background" class="level2 page-columns page-full" data-number="23.1"><h2 data-number="23.1" class="anchored" data-anchor-id="background">
+<span class="header-section-number">23.1</span> Background</h2>
 <p>Chromatin accessibility assays measure the extent to which DNA is open and accessible. Such assays now use high throughput sequencing as a quantitative readout. DNAse assays, first using microarrays<span class="citation" data-cites="Crawford2006-nt">(<a href="../references.html#ref-Crawford2006-nt" role="doc-biblioref">Crawford, Davis, et al. 2006</a>)</span> and then DNAse-Seq <span class="citation" data-cites="Crawford2006-bk">(<a href="../references.html#ref-Crawford2006-bk" role="doc-biblioref">Crawford, Holt, et al. 2006</a>)</span>, requires a larger amount of DNA and is labor-indensive and has been largely supplanted by ATAC-Seq <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>.</p>
 <p>The Assay for Transposase Accessible Chromatin with high-throughput sequencing (ATAC-seq) method maps chromatin accessibility genome-wide. This method quantifies DNA accessibility with a hyperactive Tn5 transposase that cuts and inserts sequencing adapters into regions of chromatin that are accessible. High throughput sequencing of fragments produced by the process map to regions of increased accessibility, transcription factor binding sites, and nucleosome positioning. The method is both fast and sensitive and can be used as a replacement for DNAse <em>and</em> MNase.</p>
 <p>An early review of chromatin accessibility assays <span class="citation" data-cites="Tsompana2014-yh">(<a href="../references.html#ref-Tsompana2014-yh" role="doc-biblioref">Tsompana and Buck 2014</a>)</span> compares the use cases, pros and cons, and expected signals from each of the most common approaches (Figure @ref(fig:chromatinAssays)).</p>
@@ -647,8 +581,8 @@ window.Quarto = {
 </div>
 </div>
 <p>Buenrostro et al.&nbsp;provide a detailed protocol for performing ATAC-Seq and quality control of results <span class="citation" data-cites="Buenrostro2015-dz">(<a href="../references.html#ref-Buenrostro2015-dz" role="doc-biblioref">Buenrostro et al. 2015</a>)</span>. Updated and modified protocols that improve on signal-to-noise and reduce input DNA requirements have been described.</p>
-<section id="informatics-overview" class="level2 page-columns page-full" data-number="24.1"><h2 data-number="24.1" class="anchored" data-anchor-id="informatics-overview">
-<span class="header-section-number">24.1</span> Informatics overview</h2>
+</section><section id="informatics-overview" class="level2 page-columns page-full" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="informatics-overview">
+<span class="header-section-number">23.2</span> Informatics overview</h2>
 <p>ATAC-Seq protocols typically utilize paired-end sequencing protocols. The reads are aligned to the respective <em>genome</em> using <code>bowtie2</code>, <code>BWA</code>, or other short-read aligner. The result, after appropriate manipulation, often using <code>samtools</code>, results in a BAM file. Among other details, the BAM format includes columns for:</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">'imgs/bam_shot.png'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -671,8 +605,8 @@ window.Quarto = {
 </ul>
 <p>Duplicate fragments (those with the <em>same</em> start and end position of other reads) are marked and likely discarded. Reads that fail to align “properly” are also often excluded from analysis. It is worth noting that most software packages allow simple “marking” of such reads and that there is usually no need to create a special BAM file before proceeding with downstream work.</p>
 <p>After alignment and BAM processing, the workflow can switch to <em>Bioconductor</em>.</p>
-</section><section id="working-with-sequencing-data-in-bioconductor" class="level2" data-number="24.2"><h2 data-number="24.2" class="anchored" data-anchor-id="working-with-sequencing-data-in-bioconductor">
-<span class="header-section-number">24.2</span> Working with sequencing data in Bioconductor</h2>
+</section><section id="working-with-sequencing-data-in-bioconductor" class="level2" data-number="23.3"><h2 data-number="23.3" class="anchored" data-anchor-id="working-with-sequencing-data-in-bioconductor">
+<span class="header-section-number">23.3</span> Working with sequencing data in Bioconductor</h2>
 <p>The <em>Bioconductor</em> project includes several infrastructure packages for dealing with ranges (sequence name, start, end, +/- strand) on sequences <span class="citation" data-cites="Lawrence2013-he">(<a href="../references.html#ref-Lawrence2013-he" role="doc-biblioref">Lawrence et al. 2013</a>)</span> as well as capabilities with working with Fastq files directly <span class="citation" data-cites="morgan2016rsamtools">(<a href="../references.html#ref-morgan2016rsamtools" role="doc-biblioref">Morgan et al. 2016</a>)</span>.</p>
 <table class="table">
 <caption>Commonly used Bioconductor and their high-level use cases.</caption>
@@ -704,8 +638,8 @@ window.Quarto = {
 </tbody>
 </table>
 <p>As noted in the previous section, the output of an ATAC-Seq experiment is a BAM file. As paired-end sequencing is a commonly-applied approach for ATAC-Seq, the <code>readGAlignmentPairs</code> function is the appropriate method to use.</p>
-</section></section><section id="data-import-and-quality-control" class="level1 page-columns page-full" data-number="25"><h1 data-number="25">
-<span class="header-section-number">25</span> Data import and quality control</h1>
+</section><section id="data-import-and-quality-control" class="level1 page-columns page-full" data-number="24"><h1 data-number="24">
+<span class="header-section-number">24</span> Data import and quality control</h1>
 <div class="cell">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicAlignments">GenomicAlignments</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -769,8 +703,8 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="coverage" class="level2" data-number="25.1"><h2 data-number="25.1" class="anchored" data-anchor-id="coverage">
-<span class="header-section-number">25.1</span> Coverage</h2>
+<section id="coverage" class="level2" data-number="24.1"><h2 data-number="24.1" class="anchored" data-anchor-id="coverage">
+<span class="header-section-number">24.1</span> Coverage</h2>
 <p>The <code>coverage</code> method for genomic ranges calculates, for each base, the number of overlapping features. In the case of a BAM file from ATAC-Seq converted to a GAlignmentPairs object, the coverage gives us an idea of the extent to which reads pile up to form peaks.</p>
 <div class="cell">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cvg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span></span>
@@ -830,8 +764,8 @@ attr(,"package")
 </div>
 </div>
 </div>
-</section><section id="fragment-lengths" class="level2 page-columns page-full" data-number="25.2"><h2 data-number="25.2" class="anchored" data-anchor-id="fragment-lengths">
-<span class="header-section-number">25.2</span> Fragment Lengths</h2>
+</section><section id="fragment-lengths" class="level2 page-columns page-full" data-number="24.2"><h2 data-number="24.2" class="anchored" data-anchor-id="fragment-lengths">
+<span class="header-section-number">24.2</span> Fragment Lengths</h2>
 <p>The first ATAC-Seq manuscript <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span> highlighted the relationship between fragment length and nucleosomes (see Figure @ref{fig:flgreenleaf}).</p>
 <div class="cell page-columns page-full">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">"https://cdn.ncbi.nlm.nih.gov/pmc/blobs/0ad9/3959825/fde39a9fb288/nihms554473f2.jpg"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -936,97 +870,29 @@ attr(,"package")
 </div>
 </div>
 </div>
-</section></section><section id="viewing-data-in-igv" class="level1" data-number="26"><h1 data-number="26">
-<span class="header-section-number">26</span> Viewing data in IGV</h1>
+</section><section id="viewing-data-in-igv" class="level2" data-number="24.3"><h2 data-number="24.3" class="anchored" data-anchor-id="viewing-data-in-igv">
+<span class="header-section-number">24.3</span> Viewing data in IGV</h2>
 <p>Install IGV from <a href="https://software.broadinstitute.org/software/igv/download">here</a>.</p>
 <p>We export the greenleaf data as a BigWig file.</p>
 <div class="cell">
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">export.bw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span>, <span class="st">"greenleaf.bw"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><em>Exercise</em>: In IGV, choose <code>hg19</code>. Then, load the <code>greenleaf.bw</code> file and explore chromosomes 21 and 22. <em>Exercise</em>: Export the nucleosome-free portion of the data as a BigWig file and examine that in IGV. Where do you expect to see the strongest signals?</p>
-</section><section id="additional-work" class="level1" data-number="27"><h1 data-number="27">
-<span class="header-section-number">27</span> Additional work</h1>
+<ul>
+<li>
+<em>Exercise</em>: In IGV, choose <code>hg19</code>. Then, load the <code>greenleaf.bw</code> file and explore chromosomes 21 and 22.</li>
+<li>
+<em>Exercise</em>: Export the nucleosome-free portion of the data as a BigWig file and examine that in IGV. Where do you expect to see the strongest signals?</li>
+</ul></section><section id="additional-work" class="level2" data-number="24.4"><h2 data-number="24.4" class="anchored" data-anchor-id="additional-work">
+<span class="header-section-number">24.4</span> Additional work</h2>
 <p>For those working extensively on ATAC-Seq, there is a great workflow/tutorial available from Thomas Carrol:</p>
-<p>https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html</p>
+<ul>
+<li><a href="https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html" class="uri">https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html</a></li>
+</ul>
 <p>Feel free to work through it. In addition to the work above, there is also the <em><a href="https://bioconductor.org/packages/3.20/ATACseqQC">ATACseqQC</a></em> package vignette that offers more than just QC. At least a couple more packages are available in <em>Bioconductor</em>.</p>
-</section><section id="appendix" class="level1 unnumbered page-columns page-full"><h1 class="unnumbered">Appendix</h1>
-<section id="session-info" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="session-info">Session info</h2>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>R version 4.4.3 (2025-02-28)
-Platform: aarch64-apple-darwin20
-Running under: macOS Sequoia 15.3.1
-
-Matrix products: default
-BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
-LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-time zone: America/New_York
-tzcode source: internal
-
-attached base packages:
-[1] stats4    stats     graphics  grDevices utils     datasets  methods  
-[8] base     
-
-other attached packages:
- [1] rtracklayer_1.66.0                     
- [2] heatmaps_1.30.0                        
- [3] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2
- [4] GenomicFeatures_1.58.0                 
- [5] AnnotationDbi_1.68.0                   
- [6] dplyr_1.1.4                            
- [7] ggplot2_3.5.2                          
- [8] GenomicAlignments_1.42.0               
- [9] Rsamtools_2.22.0                       
-[10] Biostrings_2.74.1                      
-[11] XVector_0.46.0                         
-[12] SummarizedExperiment_1.36.0            
-[13] Biobase_2.66.0                         
-[14] MatrixGenerics_1.18.1                  
-[15] matrixStats_1.5.0                      
-[16] GenomicRanges_1.58.0                   
-[17] GenomeInfoDb_1.42.3                    
-[18] IRanges_2.40.1                         
-[19] S4Vectors_0.44.0                       
-[20] BiocGenerics_0.52.0                    
-[21] BiocStyle_2.34.0                       
-[22] knitr_1.50                             
-
-loaded via a namespace (and not attached):
- [1] tidyselect_1.2.1        EBImage_4.48.0          farver_2.1.2           
- [4] blob_1.2.4              bitops_1.0-9            fastmap_1.2.0          
- [7] RCurl_1.98-1.17         XML_3.99-0.18           digest_0.6.37          
-[10] lifecycle_1.0.4         KEGGREST_1.46.0         RSQLite_2.4.0          
-[13] magrittr_2.0.3          compiler_4.4.3          rlang_1.1.6            
-[16] tools_4.4.3             plotrix_3.8-4           yaml_2.3.10            
-[19] S4Arrays_1.6.0          htmlwidgets_1.6.4       bit_4.6.0              
-[22] curl_6.2.3              DelayedArray_0.32.0     RColorBrewer_1.1-3     
-[25] KernSmooth_2.23-26      abind_1.4-8             BiocParallel_1.40.2    
-[28] withr_3.0.2             grid_4.4.3              scales_1.4.0           
-[31] cli_3.6.5               rmarkdown_2.29          crayon_1.5.3           
-[34] generics_0.1.4          httr_1.4.7              rjson_0.2.23           
-[37] DBI_1.2.3               cachem_1.1.0            zlibbioc_1.52.0        
-[40] parallel_4.4.3          BiocManager_1.30.25     restfulr_0.0.15        
-[43] tiff_0.1-12             vctrs_0.6.5             Matrix_1.7-3           
-[46] jsonlite_2.0.0          fftwtools_0.9-11        bit64_4.6.0-1          
-[49] jpeg_0.1-11             locfit_1.5-9.12         glue_1.8.0             
-[52] codetools_0.2-20        gtable_0.3.6            BiocIO_1.16.0          
-[55] UCSC.utils_1.2.0        tibble_3.2.1            pillar_1.10.2          
-[58] htmltools_0.5.8.1       GenomeInfoDbData_1.2.13 R6_2.6.1               
-[61] evaluate_1.0.3          lattice_0.22-7          png_0.1-8              
-[64] memoise_2.0.1           SparseArray_1.6.2       xfun_0.52              
-[67] pkgconfig_2.0.3        </code></pre>
-</div>
-</div>
 </section><section id="macs2" class="level2 unnumbered page-columns page-full"><h2 class="unnumbered anchored" data-anchor-id="macs2">MACS2</h2>
 <p>The MACS2 package is a commonly-used package for calling peaks. Installation and other details are available<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;https://github.com/taoliu/MACS</p></div></div><pre><code>pip install macs2</code></pre>
-</section></section><section id="references" class="level1" data-number="28"><h1 data-number="28">
-<span class="header-section-number">28</span> References</h1>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -1052,7 +918,7 @@ Morgan, Martin, Herve Pages, V Obenchain, and N Hayden. 2016. <span>“Rsamtools
 Tsompana, Maria, and Michael J Buck. 2014. <span>“Chromatin Accessibility: A Window into the Genome.”</span> <em>Epigenetics &amp; Chromatin</em> 7 (1): 33. <a href="https://doi.org/10.1186/1756-8935-7-33">https://doi.org/10.1186/1756-8935-7-33</a>.
 </div>
 </div>
-</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -1502,8 +1368,8 @@ Tsompana, Maria, and Michael J Buck. 2014. <span>“Chromatin Accessibility: A W
     }
   });
   </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="../ranges_exercises.html" class="pagination-link" aria-label="Ranges Exercises">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span>
+      <a href="../ranges_and_signals.html" class="pagination-link" aria-label="Genomic ranges and features">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Genomic ranges and features</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
