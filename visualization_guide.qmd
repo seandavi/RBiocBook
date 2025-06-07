@@ -1,0 +1,207 @@
+# Introduction to Data Visualization in R
+
+Data visualization is a critical skill in the data scientist's toolkit. It's the bridge between raw data and human understanding. Effective visualizations can reveal patterns, trends, and outliers that might be missed in a table of numbers. In the R programming language, the `ggplot2` package stands as the gold standard for creating beautiful, flexible, and powerful graphics.
+
+This document will guide you through the principles of effective data visualization and show you how to apply them using `ggplot2`. We'll cover best practices, common plot types, and the "grammar of graphics" methodology that makes `ggplot2` so intuitive.
+
+Before diving in, though, there are a some truly amazing online resources that showcase
+what can be done with R graphics and also stimulate your imagination. Two of the best are:
+
+- [The R Graph Gallery](https://r-graph-gallery.com/): A comprehensive collection of R graphics examples, covering a wide range of plot types and customization options.
+- [From Data to Viz](https://data-to-viz.com/): A guide that helps you choose the right type of visualization for your data and provides examples in R.
+
+After walking through this document, go back to these resources and explore the examples. You'll see how the principles we discuss here are applied in real-world scenarios, and you'll gain inspiration for your own visualizations.
+
+## Getting Started with ggplot2
+
+To get started, we need to load the `ggplot2` package, which is part of the `tidyverse`.
+
+```{r}
+#| label: load-packages
+#| message: false
+#| warning: false
+
+# Load the necessary R packages for data visualization
+library(ggplot2)
+library(dplyr)
+```
+ 
+
+## Core Principles of Effective Data Visualization
+
+Before we start plotting, it's essential to understand what makes a visualization effective. Two key principles are maximizing the data-ink ratio and using clear labels.
+
+### The "Least Ink" Principle
+
+Coined by the statistician Edward Tufte, the **data-ink ratio** is the proportion of a graphic's ink devoted to the non-redundant display of data information. The goal is to maximize this ratio. In simpler terms, **every single pixel should have a reason to be there.**
+
+![Edward Tufte's landmark book, "The Visual Display of Quantitative Information," emphasizes the importance of maximizing the data-ink ratio.](https://www.edwardtufte.com/wp-content/uploads/2023/09/edward-tufte-visual-display-of-quantitative-information.jpg){#fig-tufte-book}
+
+Avoid chart junk like:
+
+* Redundant grid lines
+* Unnecessary backgrounds or colors
+* 3D effects on 2D plots
+* Shadows and other decorative elements
+
+Let's look at an example. The first plot has a lot of "chart junk," while the second one is cleaner and focuses on the data.
+
+```{r}
+#| label: fig-bad-plot
+#| fig-cap: "A cluttered plot with low data-ink ratio. The gray background, heavy gridlines, and legend title are all unnecessary."
+
+# Using the built-in 'mpg' dataset
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point() +
+  theme_gray() + # A theme with a lot of non-data ink
+  labs(title = "Fuel Efficiency vs. Engine Displacement",
+       subtitle = "This is a very busy plot",
+       x = "Engine Displacement (Liters)",
+       y = "Highway Miles per Gallon",
+       color = "Vehicle Class")
+```
+
+Here's a cleaner version of the same plot that follows the "least ink" principle. Notice how it removes unnecessary elements while still conveying the same information.
+
+```{r}
+#| label: fig-good-plot
+#| fig-cap: "A clean, minimalist plot that follows the 'least ink' principle. The focus is entirely on the relationship between the data points."
+
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point() +
+  theme_minimal() + # A cleaner theme
+  labs(title = "Fuel Efficiency vs. Engine Displacement",
+       x = "Engine Displacement (Liters)",
+       y = "Highway Miles per Gallon",
+       color = "Class") # Simpler legend title
+```
+
+While this is a subjective topic, the goal is to make your plots as clear and informative as possible. The "least ink" principle is a guideline, not a rule, but it can help you create more effective visualizations.
+
+### The Importance of Clear Labeling
+
+A plot without labels is just a picture. To be a useful piece of analysis, it needs to communicate context. Always ensure your plots have:
+
+* A clear and descriptive title.
+* Labeled axes with units ($e.g.$, "Temperature (°C)").
+* An informative legend if you're using color, shape, or size to encode data.
+
+### Color and Contrast
+
+Color is a powerful tool in data visualization, but it can also be misused. R provides several built-in color palettes, and you can also use packages like `RColorBrewer` for more options. Think in terms of colorblind-friendly palettes, and avoid using too many colors in a single plot. 
+
+Color palettes can be roughly categorized into:
+
+* Sequential palettes (first list of colors), which are suited to ordered data that progress from low to high (gradient). 
+* Qualitative palettes (second list of colors), which are best suited to represent nominal or categorical data. They not imply magnitude differences between groups. 
+* Diverging palettes (third list of colors), which put equal emphasis on mid-range critical values and extremes at both ends of the data range. 
+
+```{r}
+#| label: fig-color-palettes
+#| fig-cap: "Examples of color palettes in R. The first row shows sequential palettes, the second row shows qualitative palettes, and the third row shows diverging palettes."
+#| fig-height: 6
+library(RColorBrewer)
+
+display.brewer.all()
+```
+
+It is also important to consider colorblindness when choosing colors for your plots. The most common types of color blindness are red-green and blue-yellow. You can use tools like the `colorspace` package to check how your plots will look to people with different types of color vision deficiencies.
+
+```{r}
+#| label: fig-colorblind-friendly
+#| fig-cap: "A colorblind-friendly palette from the 'colorspace' package. This palette is designed to be distinguishable for people with various types of color vision deficiencies."
+#| fig-height: 6
+display.brewer.all(colorblindFriendly=TRUE)
+```
+
+
+
+
+## Introduction to ggplot2: The Grammar of Graphics
+
+Rather than reproducing excellent online resources, for this section, pick any or all of the following resources to learn about the grammar of graphics and how to use `ggplot2`:
+
+- [R for Data Science: Data Visualization](https://r4ds.had.co.nz/data-visualisation.html)
+- [ggplot2 documentation](https://ggplot2.tidyverse.org/)
+- [Modern Data Visualization with R](https://rkabacoff.github.io/datavis/)
+
+## Sets and Intersections: UpSet Plots
+
+When dealing with multiple sets, visualizing their intersections can be challenging. Traditional Venn diagrams become cluttered and hard to read with more than three sets.
+An **UpSet plot** is a powerful alternative for visualizing the intersections of multiple sets. It consists of two main parts: a matrix that shows which sets are part of an intersection, and a bar chart that shows the size of each intersection. This makes it far more scalable and easier to interpret than a complex Venn diagram.
+
+To create an UpSet plot, we use the `UpSetR` package. It takes a specific input format where 0s and 1s indicate the absence or presence of an element in a set.
+
+```{r}
+#| label: fig-upset-plot
+#| fig-cap: "An UpSet plot visualizing movie genres. The main bar chart shows the size of intersections (e.g., how many movies are both 'Comedy' and 'Romance'). The bottom-left matrix indicates which genres are part of each intersection. This is much clearer than a 5-set Venn diagram."
+#| warning: false
+#| message: false
+
+# install.packages("UpSetR")
+library(UpSetR)
+movies <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"), 
+    header = T, sep = ";")
+
+# Use the 'movies' dataset that comes with UpSetR
+# This dataset is already in the correct binary format
+upset(movies, 
+      nsets = 5, # Show the 5 most frequent genres
+      order.by = "freq",
+      mainbar.y.label = "Intersection Size",
+      sets.x.label = "Total Movies in Genre")
+```
+
+The UpSet plot clearly shows us, for instance, the number of movies that are exclusively "Drama" versus those that are a combination of "Drama," "Comedy," and "Romance." This level of detail is difficult to achieve with a Venn diagram.
+
+## Complex Heatmaps
+
+Heatmaps are a powerful way to visualize complex data matrices, especially when dealing with large datasets. They allow you to see patterns and relationships in the data at a glance. 
+
+What is a heatmap? It's a graphical representation of data where individual values are represented as colors. The color intensity indicates the magnitude of the value, making it easy to spot trends and outliers. The underlying data is typically a matrix of numbers.
+
+::: {.callout-note}
+A matrix is a two-dimensional array of numbers, where each element is identified by its row and column indices. Matrices can include only ONE data type.
+:::
+
+There are many ways to create heatmaps in R including the base R `heatmap()` function, the `ggplot2` package, and specialized packages like `ComplexHeatmap`.
+
+Feel free to explore the following resources for some of the most popular heatmap packages in R:
+
+- [ggplot2 Heatmaps](https://ggplot2.tidyverse.org/reference/geom_tile.html) allows you to create basic heatmaps using the `geom_tile()` function. This is a good starting point for simple heatmaps.
+- [The heatmap() function](https://www.rdocumentation.org/packages/stats/topics/heatmap) in base R is a simple way to create heatmaps. It automatically scales the data and provides options for clustering rows and columns.
+- [The pheatmamp package](https://biostatsquid.com/step-by-step-heatmap-tutorial-with-pheatmap/) is a popular package for creating heatmaps with more customization options. It allows you to add annotations, customize colors, and control clustering.
+- [Complex Heatmaps](https://jokergoo.github.io/ComplexHeatmap-reference/book/) is a powerful R package for creating complex heatmaps. It allows you to visualize data matrices with multiple annotations, making it ideal for genomic data analysis.
+- [Interactive Complex Heatmaps](https://bioconductor.org/packages/release/bioc/html/InteractiveComplexHeatmap.html) is an extension of the Complex Heatmaps package that allows you to create interactive heatmaps. This can be useful for exploring large datasets and identifying patterns.
+
+## Things to Avoid: Common Visualization Pitfalls
+
+Creating a bad visualization is easier than you think. Here are some common mistakes to avoid.
+
+### Misleading Axes
+
+Always start your bar chart's y-axis at 0. Starting it at a higher value can visually exaggerate differences between groups.
+
+### Unnecessary 3D Effects
+
+Avoid using 3D effects for 2D data. They add no new information and can make it harder to read the plot by distorting the data's proportions.
+
+### Challenging Visualizations and Their Alternatives
+
+
+
+## Conclusion
+
+This document has provided a comprehensive foundation for creating effective data visualizations in R with `ggplot2`. We've covered the core principles of good design, explored a wide range of common plot types including heatmaps, and seen how `ggplot2`'s layered grammar allows for the creation of complex, insightful graphics by mapping multiple data dimensions to aesthetics. We also discussed why certain plots like Venn diagrams can be problematic and introduced powerful alternatives like UpSet plots.
+
+The key to mastering data visualization is practice. Experiment with different datasets, try new `geoms`, and always think critically about the story your plot is telling and the best way to tell it.
+
+## Further Resources
+
+Start with this worked example to get a feel for the ggplot2 package.
+
+- <https://rkabacoff.github.io/datavis/IntroGGPLOT.html>
+- <https://r4ds.had.co.nz/data-visualisation.html>
+Then, for more detail, I refer you to this excellent ggplot2 tutorial.
+
+Finally, for more R graphics inspiration, see the R Graph Gallery.
