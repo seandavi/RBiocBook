@@ -1,0 +1,21 @@
+{
+  "hash": "bae391ab6a49e48e6ae29998a3db9dc3",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Matrix Exercises\"\noutput: \n  html_document:\n    code_folding: \"hide\"\n---\n\n\n\n## Data preparation\n\nFor this set of exercises, we are going to rely on a dataset that comes with R.\nIt gives the number of sunspots per month from 1749-1983. The dataset comes as \na `ts` or time series data type which I convert to a matrix using the following\ncode. \n\nJust run the code as is and focus on the rest of the exercises. \n\n\n::: {.cell}\n\n```{.r .cell-code}\ndata(sunspots)\nsunspot_mat <- matrix(as.vector(sunspots),ncol=12,byrow = TRUE)\ncolnames(sunspot_mat) <- as.character(1:12)\nrownames(sunspot_mat) <- as.character(1749:1983)\n```\n:::\n\n\n## Exercises\n\n- After the conversion above, what does `sunspot_mat` look like? Use functions\nto find the number of rows, the number of columns, the class, and some basic\nsummary statistics.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nncol(sunspot_mat)\nnrow(sunspot_mat)\ndim(sunspot_mat)\nsummary(sunspot_mat)\nhead(sunspot_mat)\ntail(sunspot_mat)\n```\n:::\n\n\n\n- Practice subsetting the matrix a bit by selecting:\n  - The first 10 years (rows)\n  - The month of July (7th column)\n  - The value for July, 1979 using the rowname to do the selection.\n  \n\n::: {.cell}\n\n```{.r .cell-code}\nsunspot_mat[1:10,]\nsunspot_mat[,7]\nsunspot_mat['1979',7]\n```\n:::\n\n\n\nThese next few exercises take advantage of the fact that calling a univariate\nstatistical function (one that expects a vector) works for matrices by just making\na vector of all the values in the matrix. \n\n- What is the highest (max) number of sunspots recorded in these data?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmax(sunspot_mat)\n```\n:::\n\n\n- And the minimum?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmin(sunspot_mat)\n```\n:::\n\n\n- And the overall mean and median?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmean(sunspot_mat)\nmedian(sunspot_mat)\n```\n:::\n\n\n- Use the `hist()` function to look at the distribution of all the monthly \nsunspot data. \n\n\n::: {.cell}\n\n```{.r .cell-code}\nhist(sunspot_mat)\n```\n:::\n\n- Read about the `breaks` argument to `hist()` to try to increase the number of\nbreaks in the histogram to increase the resolution slightly. Adjust your `hist()`\nand breaks to your liking.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nhist(sunspot_mat, breaks=40)\n```\n:::\n\n\nNow, let's move on to summarizing the data a bit to learn about the pattern of \nsunspots varies by month or by year. \n\n- Examine the dataset again. What do the columns represent? And the rows?\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# just a quick glimpse of the data will give us a sense\nhead(sunspot_mat)\n```\n:::\n\n\n- We'd like to look at the distribution of sunspots by month. How can we do that?\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# the mean of the columns is the mean number of sunspots per month.\ncolMeans(sunspot_mat)\n\n# Another way to write the same thing:\napply(sunspot_mat, 2, mean)\n```\n:::\n\n\n- Assign the month summary above to a variable and summarize it to get a sense\nof the spread over months.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmonthmeans = colMeans(sunspot_mat)\nsummary(monthmeans)\n```\n:::\n\n\n- Play the same game for years to get the per-year mean?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nymeans = rowMeans(sunspot_mat)\nsummary(ymeans)\n```\n:::\n\n\n- Make a plot of the yearly means. Do you see a pattern?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nplot(ymeans)\n# or make it clearer\nplot(ymeans, type='l')\n```\n:::\n\n\n\n\n\n",
+    "supporting": [
+      "matrix_exercises_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}
