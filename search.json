@@ -1111,97 +1111,85 @@
   {
     "objectID": "visualization_guide.html",
     "href": "visualization_guide.html",
-    "title": "\n14  Introduction to Data Visualization in R\n",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
     "section": "",
     "text": "14.1 Getting Started with ggplot2\nData visualization is a critical skill in the data scientist’s toolkit. It’s the bridge between raw data and human understanding. Effective visualizations can reveal patterns, trends, and outliers that might be missed in a table of numbers. In the R programming language, the ggplot2 package stands as the gold standard for creating beautiful, flexible, and powerful graphics.\nThis document will guide you through the principles of effective data visualization and show you how to apply them using ggplot2. We’ll cover best practices, common plot types, and the “grammar of graphics” methodology that makes ggplot2 so intuitive.\nBefore diving in, though, there are a some truly amazing online resources that showcase what can be done with R graphics and also stimulate your imagination. Two of the best are:\nAfter walking through this document, go back to these resources and explore the examples. You’ll see how the principles we discuss here are applied in real-world scenarios, and you’ll gain inspiration for your own visualizations.\nTo get started, we need to load the ggplot2 package, which is part of the tidyverse.\n# Load the necessary R packages for data visualization\nlibrary(ggplot2)\nlibrary(dplyr)",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
     "objectID": "visualization_guide.html#core-principles-of-effective-data-visualization",
     "href": "visualization_guide.html#core-principles-of-effective-data-visualization",
-    "title": "\n14  Introduction to Data Visualization in R\n",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
     "section": "\n14.2 Core Principles of Effective Data Visualization",
     "text": "14.2 Core Principles of Effective Data Visualization\nBefore we start plotting, it’s essential to understand what makes a visualization effective. Two key principles are maximizing the data-ink ratio and using clear labels.\n\n14.2.1 The “Least Ink” Principle\nCoined by the statistician Edward Tufte, the data-ink ratio is the proportion of a graphic’s ink devoted to the non-redundant display of data information. The goal is to maximize this ratio. In simpler terms, every single pixel should have a reason to be there.\n\n\n\n\n\nFigure 14.1: Edward Tufte’s landmark book, “The Visual Display of Quantitative Information,” emphasizes the importance of maximizing the data-ink ratio.\n\n\nAvoid chart junk like:\n\nRedundant grid lines\nUnnecessary backgrounds or colors\n3D effects on 2D plots\nShadows and other decorative elements\n\nLet’s look at an example. The first plot has a lot of “chart junk,” while the second one is cleaner and focuses on the data.\n\n# Using the built-in 'mpg' dataset\nggplot(mpg, aes(x = displ, y = hwy, color = class)) +\n  geom_point() +\n  theme_gray() + # A theme with a lot of non-data ink\n  labs(title = \"Fuel Efficiency vs. Engine Displacement\",\n       subtitle = \"This is a very busy plot\",\n       x = \"Engine Displacement (Liters)\",\n       y = \"Highway Miles per Gallon\",\n       color = \"Vehicle Class\")\n\n\n\n\n\n\nFigure 14.2: A cluttered plot with low data-ink ratio. The gray background, heavy gridlines, and legend title are all unnecessary.\n\n\n\n\nHere’s a cleaner version of the same plot that follows the “least ink” principle. Notice how it removes unnecessary elements while still conveying the same information.\n\nggplot(mpg, aes(x = displ, y = hwy, color = class)) +\n  geom_point() +\n  theme_minimal() + # A cleaner theme\n  labs(title = \"Fuel Efficiency vs. Engine Displacement\",\n       x = \"Engine Displacement (Liters)\",\n       y = \"Highway Miles per Gallon\",\n       color = \"Class\") # Simpler legend title\n\n\n\n\n\n\nFigure 14.3: A clean, minimalist plot that follows the ‘least ink’ principle. The focus is entirely on the relationship between the data points.\n\n\n\n\nWhile this is a subjective topic, the goal is to make your plots as clear and informative as possible. The “least ink” principle is a guideline, not a rule, but it can help you create more effective visualizations.\n\n14.2.2 The Importance of Clear Labeling\nA plot without labels is just a picture. To be a useful piece of analysis, it needs to communicate context. Always ensure your plots have:\n\nA clear and descriptive title.\nLabeled axes with units (\\(e.g.\\), “Temperature (°C)”).\nAn informative legend if you’re using color, shape, or size to encode data.\n\n14.2.3 Color and Contrast\nColor is a powerful tool in data visualization, but it can also be misused. R provides several built-in color palettes, and you can also use packages like RColorBrewer for more options. Think in terms of colorblind-friendly palettes, and avoid using too many colors in a single plot.\nColor palettes can be roughly categorized into:\n\nSequential palettes (first list of colors), which are suited to ordered data that progress from low to high (gradient).\nQualitative palettes (second list of colors), which are best suited to represent nominal or categorical data. They not imply magnitude differences between groups.\nDiverging palettes (third list of colors), which put equal emphasis on mid-range critical values and extremes at both ends of the data range.\n\n\nlibrary(RColorBrewer)\n\ndisplay.brewer.all()\n\n\n\n\n\n\nFigure 14.4: Examples of color palettes in R. The first row shows sequential palettes, the second row shows qualitative palettes, and the third row shows diverging palettes.\n\n\n\n\nIt is also important to consider colorblindness when choosing colors for your plots. The most common types of color blindness are red-green and blue-yellow. You can use tools like the colorspace package to check how your plots will look to people with different types of color vision deficiencies.\n\ndisplay.brewer.all(colorblindFriendly=TRUE)\n\n\n\n\n\n\nFigure 14.5: A colorblind-friendly palette from the ‘colorspace’ package. This palette is designed to be distinguishable for people with various types of color vision deficiencies.",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
     "objectID": "visualization_guide.html#introduction-to-ggplot2-the-grammar-of-graphics",
     "href": "visualization_guide.html#introduction-to-ggplot2-the-grammar-of-graphics",
-    "title": "\n14  Introduction to Data Visualization in R\n",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
     "section": "\n14.3 Introduction to ggplot2: The Grammar of Graphics",
     "text": "14.3 Introduction to ggplot2: The Grammar of Graphics\nRather than reproducing excellent online resources, for this section, pick any or all of the following resources to learn about the grammar of graphics and how to use ggplot2:\n\nR for Data Science: Data Visualization\nggplot2 documentation\nModern Data Visualization with R",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
     "objectID": "visualization_guide.html#sets-and-intersections-upset-plots",
     "href": "visualization_guide.html#sets-and-intersections-upset-plots",
-    "title": "\n14  Introduction to Data Visualization in R\n",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
     "section": "\n14.4 Sets and Intersections: UpSet Plots",
     "text": "14.4 Sets and Intersections: UpSet Plots\nWhen dealing with multiple sets, visualizing their intersections can be challenging. Traditional Venn diagrams become cluttered and hard to read with more than three sets. An UpSet plot is a powerful alternative for visualizing the intersections of multiple sets. It consists of two main parts: a matrix that shows which sets are part of an intersection, and a bar chart that shows the size of each intersection. This makes it far more scalable and easier to interpret than a complex Venn diagram.\nTo create an UpSet plot, we use the UpSetR package. It takes a specific input format where 0s and 1s indicate the absence or presence of an element in a set.\n\n# install.packages(\"UpSetR\")\nlibrary(UpSetR)\nmovies &lt;- read.csv(system.file(\"extdata\", \"movies.csv\", package = \"UpSetR\"), \n    header = T, sep = \";\")\n\n# Use the 'movies' dataset that comes with UpSetR\n# This dataset is already in the correct binary format\nupset(movies, \n      nsets = 5, # Show the 5 most frequent genres\n      order.by = \"freq\",\n      mainbar.y.label = \"Intersection Size\",\n      sets.x.label = \"Total Movies in Genre\")\n\n\n\n\n\n\nFigure 14.6: An UpSet plot visualizing movie genres. The main bar chart shows the size of intersections (e.g., how many movies are both ‘Comedy’ and ‘Romance’). The bottom-left matrix indicates which genres are part of each intersection. This is much clearer than a 5-set Venn diagram.\n\n\n\n\nThe UpSet plot clearly shows us, for instance, the number of movies that are exclusively “Drama” versus those that are a combination of “Drama,” “Comedy,” and “Romance.” This level of detail is difficult to achieve with a Venn diagram.",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
     "objectID": "visualization_guide.html#complex-heatmaps",
     "href": "visualization_guide.html#complex-heatmaps",
-    "title": "\n14  Introduction to Data Visualization in R\n",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
     "section": "\n14.5 Complex Heatmaps",
     "text": "14.5 Complex Heatmaps\nHeatmaps are a powerful way to visualize complex data matrices, especially when dealing with large datasets. They allow you to see patterns and relationships in the data at a glance.\nWhat is a heatmap? It’s a graphical representation of data where individual values are represented as colors. The color intensity indicates the magnitude of the value, making it easy to spot trends and outliers. The underlying data is typically a matrix of numbers.\n\n\n\n\n\n\nNote\n\n\n\nA matrix is a two-dimensional array of numbers, where each element is identified by its row and column indices. Matrices can include only ONE data type.\n\n\nThere are many ways to create heatmaps in R including the base R heatmap() function, the ggplot2 package, and specialized packages like ComplexHeatmap.\nFeel free to explore the following resources for some of the most popular heatmap packages in R:\n\n\nggplot2 Heatmaps allows you to create basic heatmaps using the geom_tile() function. This is a good starting point for simple heatmaps.\n\nThe heatmap() function in base R is a simple way to create heatmaps. It automatically scales the data and provides options for clustering rows and columns.\n\nThe pheatmamp package is a popular package for creating heatmaps with more customization options. It allows you to add annotations, customize colors, and control clustering.\n\nComplex Heatmaps is a powerful R package for creating complex heatmaps. It allows you to visualize data matrices with multiple annotations, making it ideal for genomic data analysis.\n\nInteractive Complex Heatmaps is an extension of the Complex Heatmaps package that allows you to create interactive heatmaps. This can be useful for exploring large datasets and identifying patterns.",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
-    "objectID": "visualization_guide.html#things-to-avoid-common-visualization-pitfalls",
-    "href": "visualization_guide.html#things-to-avoid-common-visualization-pitfalls",
-    "title": "\n14  Introduction to Data Visualization in R\n",
-    "section": "\n14.6 Things to Avoid: Common Visualization Pitfalls",
-    "text": "14.6 Things to Avoid: Common Visualization Pitfalls\nCreating a bad visualization is easier than you think. Here are some common mistakes to avoid.\n\n14.6.1 Misleading Axes\nAlways start your bar chart’s y-axis at 0. Starting it at a higher value can visually exaggerate differences between groups.\n\n14.6.2 Unnecessary 3D Effects\nAvoid using 3D effects for 2D data. They add no new information and can make it harder to read the plot by distorting the data’s proportions.\n\n14.6.3 Challenging Visualizations and Their Alternatives",
+    "objectID": "visualization_guide.html#genome-and-genomic-data-visualization",
+    "href": "visualization_guide.html#genome-and-genomic-data-visualization",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
+    "section": "\n14.6 Genome and Genomic Data Visualization",
+    "text": "14.6 Genome and Genomic Data Visualization\nThe Gviz package is a powerful tool for visualizing genomic data in R. It allows you to create publication-quality plots of genomic features, such as gene annotations, sequence alignments, and expression data.\nThe GenomicDistributions package is another useful package for visualizing genomic data. It provides functions for creating distribution plots of genomic features, such as coverage, chip-seq or atac-seq distributions relative to genomic features, etc.",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
     "objectID": "visualization_guide.html#conclusion",
     "href": "visualization_guide.html#conclusion",
-    "title": "\n14  Introduction to Data Visualization in R\n",
+    "title": "\n14  Self-Guided Data Visualization in R\n",
     "section": "\n14.7 Conclusion",
     "text": "14.7 Conclusion\nThis document has provided a comprehensive foundation for creating effective data visualizations in R with ggplot2. We’ve covered the core principles of good design, explored a wide range of common plot types including heatmaps, and seen how ggplot2’s layered grammar allows for the creation of complex, insightful graphics by mapping multiple data dimensions to aesthetics. We also discussed why certain plots like Venn diagrams can be problematic and introduced powerful alternatives like UpSet plots.\nThe key to mastering data visualization is practice. Experiment with different datasets, try new geoms, and always think critically about the story your plot is telling and the best way to tell it.",
     "crumbs": [
       "Home",
       "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
-    ]
-  },
-  {
-    "objectID": "visualization_guide.html#further-resources",
-    "href": "visualization_guide.html#further-resources",
-    "title": "\n14  Introduction to Data Visualization in R\n",
-    "section": "\n14.8 Further Resources",
-    "text": "14.8 Further Resources\nStart with this worked example to get a feel for the ggplot2 package.\n\nhttps://rkabacoff.github.io/datavis/IntroGGPLOT.html\n\nhttps://r4ds.had.co.nz/data-visualisation.html Then, for more detail, I refer you to this excellent ggplot2 tutorial.\n\nFinally, for more R graphics inspiration, see the R Graph Gallery.",
-    "crumbs": [
-      "Home",
-      "Exploratory data analysis",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction to Data Visualization in R</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Self-Guided Data Visualization in R</span>"
     ]
   },
   {
@@ -1209,7 +1197,7 @@
     "href": "norm.html",
     "title": "\n15  Working with distribution functions\n",
     "section": "",
-    "text": "15.1 pnorm\nWhich values do pnorm, dnorm, qnorm, and rnorm return? How do I remember the difference between these?\nI find it helpful to have visual representations of distributions as pictures. It is difficult for me to think of distributions, or differences between probability, density, and quantiles without visualizing the shape of the distribution. So I figured it would be helpful to have a visual guide to pnorm, dnorm, qnorm, and rnorm.\nThis function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal. Figure 15.1\npnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\nThe R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.\nWarning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.\nℹ Please use `linewidth` instead.\nThis function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal.\npnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) The R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.\nThe option lower.tail = TRUE tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to lower.tail = FALSE, or simply calculate 1-pnorm() instead. This is demonstrated below.\nFigure 15.1: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\n\n\n\n\n\n\n\n\n\nFigure 15.2: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\n\n\n\n\n\n\n\n\n\nFigure 15.3: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\n\n\n\n\n\n\n\n\n\nFigure 15.4: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\nThe option lower.tail = TRUE tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to lower.tail = FALSE, or simply calculate 1-pnorm() instead.",
+    "text": "15.1 pnorm\nWhich values do pnorm, dnorm, qnorm, and rnorm return? How do I remember the difference between these?\nI find it helpful to have visual representations of distributions as pictures. It is difficult for me to think of distributions, or differences between probability, density, and quantiles without visualizing the shape of the distribution. So I figured it would be helpful to have a visual guide to pnorm, dnorm, qnorm, and rnorm.\nWhat is the relationship between these functions? The pnorm function gives the area under the curve to the left of a given point, while dnorm gives the height of the curve at that point. The qnorm function is the inverse of pnorm, returning the x value for a given probability. Finally, rnorm generates random samples from the normal distribution.\nThis function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal. Figure 15.1\npnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)\nThe R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.\nWarning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.\nℹ Please use `linewidth` instead.\nThis function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal.\npnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) The R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.\nThe option lower.tail = TRUE tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to lower.tail = FALSE, or simply calculate 1-pnorm() instead. This is demonstrated below.\nFigure 15.1: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\n\n\n\n\n\n\n\n\n\nFigure 15.2: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\n\n\n\n\n\n\n\n\n\nFigure 15.3: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\n\n\n\n\n\n\n\n\n\nFigure 15.4: The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value.\nThe option lower.tail = TRUE tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to lower.tail = FALSE, or simply calculate 1-pnorm() instead.",
     "crumbs": [
       "Home",
       "statististics",
@@ -1233,7 +1221,7 @@
     "href": "norm.html#qnorm",
     "title": "\n15  Working with distribution functions\n",
     "section": "\n15.3 qnorm",
-    "text": "15.3 qnorm\nThis function calculates the quantiles of the normal distribution. It returns the value (x) corresponding to a specified probability (p). It is the inverse of thepnorm function.\n\n\n\n\n\n\n\n\nFigure 15.8: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\nFigure 15.9: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\n\n\nFigure 15.10: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\nFigure 15.11: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\n\n\nFigure 15.12: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.",
+    "text": "15.3 qnorm\nThis function calculates the quantiles of the normal distribution. It returns the value (x) corresponding to a specified probability (p). It is the inverse of thepnorm function.\n\n\n\n\n\n\n\nFigure 15.8: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\nFigure 15.9: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\nFigure 15.10: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\nFigure 15.11: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.\n\n\n\n\n\n\n\n\n\nFigure 15.12: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.",
     "crumbs": [
       "Home",
       "statististics",
@@ -1900,171 +1888,231 @@
     ]
   },
   {
-    "objectID": "additional_resources.html",
-    "href": "additional_resources.html",
-    "title": "Appendix B — Additional resources",
+    "objectID": "git_and_github.html",
+    "href": "git_and_github.html",
+    "title": "Appendix B — Git and GitHub",
     "section": "",
-    "text": "B.1 AI",
+    "text": "B.1 install Git and GitHub CLI\nGit is a version control system that allows you to track changes in your code and collaborate with others. GitHub is a web-based platform that hosts Git repositories, making it easy to share and collaborate on projects. Github is NOT the only place to host Git repositories, but it is the most popular and has a large community of users.\nYou can use git by itself locally for version control. However, if you want to collaborate with others, you will need to use a remote repository, such as GitHub. This allows you to share your code with others, track changes, and collaborate on projects.\nTo use Git and GitHub, you need to have Git installed on your computer. You can download it from git-scm.com. After installation, you can check if Git is installed correctly by running the following command in your terminal:\nWe also need the gh command line tool to interact with GitHub. You can install it from cli.github.com. To install, go to the releases page and download the appropriate version for your operating system. For the Mac, it is the file named something like “Macos Universal” and the file will have a .pkg extension. You can install it by double-clicking the file after downloading it.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Additional resources</span>"
+      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Git and GitHub</span>"
+    ]
+  },
+  {
+    "objectID": "git_and_github.html#install-git-and-github-cli",
+    "href": "git_and_github.html#install-git-and-github-cli",
+    "title": "Appendix B — Git and GitHub",
+    "section": "",
+    "text": "git --version\n\n\n\n\n\n\n\nUsing the RStudio Terminal\n\n\n\nIf you are using RStudio, you can use the built-in terminal to run Git commands. To open the terminal, go to the “Terminal” tab in the bottom pane of RStudio. This allows you to run Git commands directly from RStudio without needing to switch to a separate terminal application.\n\nFor more details, see the RStudio terminal documentation.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Git and GitHub</span>"
+    ]
+  },
+  {
+    "objectID": "git_and_github.html#configure-git",
+    "href": "git_and_github.html#configure-git",
+    "title": "Appendix B — Git and GitHub",
+    "section": "B.2 Configure Git",
+    "text": "B.2 Configure Git\nAfter installing Git, you need to configure it with your name and email address. This information will be used to identify you as the author of the commits you make. Run the following commands in your terminal, replacing “Your Name” and “you@example.com” with your actual name and email address:\ngit config --global user.name \"Your Name\"\ngit config --global user.email \"you@example.com\"",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Git and GitHub</span>"
+    ]
+  },
+  {
+    "objectID": "git_and_github.html#create-a-github-account",
+    "href": "git_and_github.html#create-a-github-account",
+    "title": "Appendix B — Git and GitHub",
+    "section": "B.3 Create a GitHub account",
+    "text": "B.3 Create a GitHub account\nIf you don’t already have a GitHub account, you can create one for free at github.com.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Git and GitHub</span>"
+    ]
+  },
+  {
+    "objectID": "git_and_github.html#login-to-github-cli",
+    "href": "git_and_github.html#login-to-github-cli",
+    "title": "Appendix B — Git and GitHub",
+    "section": "B.4 Login to GitHub CLI",
+    "text": "B.4 Login to GitHub CLI\nAfter installing the GitHub CLI, you need to log in to your GitHub account. Run the following command in your terminal:\ngh auth login\nThis command will prompt you to choose a method for authentication and guide you through the login process. You can choose to authenticate via a web browser or by pasting a personal access token.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Git and GitHub</span>"
+    ]
+  },
+  {
+    "objectID": "additional_resources.html",
+    "href": "additional_resources.html",
+    "title": "Appendix C — Additional resources",
+    "section": "",
+    "text": "C.1 AI",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "<span class='chapter-number'>C</span>  <span class='chapter-title'>Additional resources</span>"
     ]
   },
   {
     "objectID": "additional_resources.html#ai",
     "href": "additional_resources.html#ai",
-    "title": "Appendix B — Additional resources",
+    "title": "Appendix C — Additional resources",
     "section": "",
     "text": "chatGPT\nGemini\nClaude\nDeepSeek\nPerplexity",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>Additional resources</span>"
+      "<span class='chapter-number'>C</span>  <span class='chapter-title'>Additional resources</span>"
     ]
   },
   {
     "objectID": "ai_tools.html",
     "href": "ai_tools.html",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
     "section": "",
-    "text": "C.1 Introduction: AI as Your Bioinformatics Learning Companion\nThe rise of sophisticated Artificial Intelligence (AI) tools, particularly Large Language Models (LLMs), has drastically altered day-to-day tasks for many. This chapter aims to guide you, as biologists venturing into these computational fields, on how to effectively and responsibly harness these AI tools. The focus will be on using them as powerful assistants to deepen your understanding of statistical concepts, enhance your ability to explore complex biological data with R, and ultimately boost your overall productivity and learning experience. Think of these tools not as a shortcut around learning, but as a versatile companion on your journey.\nYou’ve likely heard of tools like ChatGPT, Gemini, Claude, or GitHub Copilot. These are examples of LLMs and other AI-driven assistants that can process and generate human-like text, code, and even help with complex reasoning tasks. Their capabilities are particularly relevant when grappling with new programming languages like R, intricate statistical methods, or the challenge of deriving meaning from large biological datasets.\nWhy should you consider integrating these AI tools into your learning workflow? The benefits are manifold. They can help demystify complex topics by offering alternative explanations, assist in drafting R code for specific analyses, aid in the often-frustrating process of debugging, summarize lengthy documents, and even help you brainstorm approaches for data exploration.\nHowever, it’s also important to approach these tools with realistic expectations. LLMs can sometimes provide inaccurate information—a phenomenon often called “hallucination”—or exhibit biases present in their training data.1 Therefore, your domain knowledge and developing statistical intuition are your best guides in sifting the digital wheat from the chaff.",
+    "text": "D.1 Introduction: AI as Your Bioinformatics Learning Companion\nThe rise of sophisticated Artificial Intelligence (AI) tools, particularly Large Language Models (LLMs), has drastically altered day-to-day tasks for many. This chapter aims to guide you, as biologists venturing into these computational fields, on how to effectively and responsibly harness these AI tools. The focus will be on using them as powerful assistants to deepen your understanding of statistical concepts, enhance your ability to explore complex biological data with R, and ultimately boost your overall productivity and learning experience. Think of these tools not as a shortcut around learning, but as a versatile companion on your journey.\nYou’ve likely heard of tools like ChatGPT, Gemini, Claude, or GitHub Copilot. These are examples of LLMs and other AI-driven assistants that can process and generate human-like text, code, and even help with complex reasoning tasks. Their capabilities are particularly relevant when grappling with new programming languages like R, intricate statistical methods, or the challenge of deriving meaning from large biological datasets.\nWhy should you consider integrating these AI tools into your learning workflow? The benefits are manifold. They can help demystify complex topics by offering alternative explanations, assist in drafting R code for specific analyses, aid in the often-frustrating process of debugging, summarize lengthy documents, and even help you brainstorm approaches for data exploration.\nHowever, it’s also important to approach these tools with realistic expectations. LLMs can sometimes provide inaccurate information—a phenomenon often called “hallucination”—or exhibit biases present in their training data.1 Therefore, your domain knowledge and developing statistical intuition are your best guides in sifting the digital wheat from the chaff.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#introduction-ai-as-your-bioinformatics-learning-companion",
     "href": "ai_tools.html#introduction-ai-as-your-bioinformatics-learning-companion",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
     "section": "",
     "text": "Table AI Tools for Bioinformatics Learning\n\n\nAI Tool\nDescription\n\n\n\n\nChatGPT\nA conversational AI that can answer questions, explain concepts, and generate code snippets.\n\n\nGemini\nGoogle’s AI that can assist with coding, data analysis, and more.\n\n\nClaude\nAn AI assistant that can help with writing, coding, and problem-solving.\n\n\nGitHub Copilot\nAn AI-powered code completion tool that suggests code as you type, based on the context of your project.\n\n\nPerplexity\nAn AI that can answer questions and provide explanations across various domains, including programming and data science.\n\n\n\n\n\n\n\n\n\n\nA Supplement, Not a Replacement\n\n\n\nIt’s crucial to remember that AI is here to supplement your learning and critical thinking, not replace it. Your growing expertise in biology, combined with a solid understanding of statistical principles, remains paramount. AI can help you get there faster and overcome hurdles, but the destination is your own deep understanding.\n\n\n\n1 Always be prepared to critically evaluate and verify information from AI tools against trusted sources.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#ai-for-understanding-statistical-concepts-and-r-functions",
     "href": "ai_tools.html#ai-for-understanding-statistical-concepts-and-r-functions",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.2 AI for Understanding Statistical Concepts and R Functions",
-    "text": "C.2 AI for Understanding Statistical Concepts and R Functions\nOne of the most immediate benefits of LLMs is their ability to act as a patient, tireless tutor for statistical concepts. If you find a particular statistical idea challenging, you can ask an LLM to explain it in various ways. For instance, you might prompt: “Explain the concept of a p-value as if you were talking to a biologist who is new to statistics,” or “Describe the key differences between Principal Component Analysis (PCA) and t-Distributed Stochastic Neighbor Embedding (t-SNE) when analyzing gene expression data.” The ability to request analogies or examples directly relevant to biological datasets can be incredibly helpful.\nSimilarly, when you’re wrestling with the R language, AI tools can be invaluable. Perhaps you’re unsure about the syntax for a dplyr verb or the arguments for a ggplot2 function. You could ask, “How do I use the dplyr::filter() function in R to select rows from my dataframe where the ‘gene_expression’ column is greater than 100 and the ‘treatment_group’ column is ‘Condition_A’?” or “Can you explain the main arguments of the stats::t.test() function in R and what its output signifies?” These tools can also help you discover R packages specifically designed for statistical tasks you have in mind.\nWhen it comes to applying these concepts, AI can generate example R code. For common statistical tests like t-tests, ANOVAs, or chi-squared tests, you can request simple, reproducible examples, perhaps even with dummy data that you can then adapt.\n\n\n\n\n\n\nUnderstand Before You Use\n\n\n\nA word of caution is essential here: while AI can generate code, you are the scientist. Always strive to understand the code provided. Ensure it aligns with your research question, your data structure, and the assumptions of the statistical test you’re performing. Blindly copying and pasting code without comprehension can lead to erroneous conclusions.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.2 AI for Understanding Statistical Concepts and R Functions",
+    "text": "D.2 AI for Understanding Statistical Concepts and R Functions\nOne of the most immediate benefits of LLMs is their ability to act as a patient, tireless tutor for statistical concepts. If you find a particular statistical idea challenging, you can ask an LLM to explain it in various ways. For instance, you might prompt: “Explain the concept of a p-value as if you were talking to a biologist who is new to statistics,” or “Describe the key differences between Principal Component Analysis (PCA) and t-Distributed Stochastic Neighbor Embedding (t-SNE) when analyzing gene expression data.” The ability to request analogies or examples directly relevant to biological datasets can be incredibly helpful.\nSimilarly, when you’re wrestling with the R language, AI tools can be invaluable. Perhaps you’re unsure about the syntax for a dplyr verb or the arguments for a ggplot2 function. You could ask, “How do I use the dplyr::filter() function in R to select rows from my dataframe where the ‘gene_expression’ column is greater than 100 and the ‘treatment_group’ column is ‘Condition_A’?” or “Can you explain the main arguments of the stats::t.test() function in R and what its output signifies?” These tools can also help you discover R packages specifically designed for statistical tasks you have in mind.\nWhen it comes to applying these concepts, AI can generate example R code. For common statistical tests like t-tests, ANOVAs, or chi-squared tests, you can request simple, reproducible examples, perhaps even with dummy data that you can then adapt.\n\n\n\n\n\n\nUnderstand Before You Use\n\n\n\nA word of caution is essential here: while AI can generate code, you are the scientist. Always strive to understand the code provided. Ensure it aligns with your research question, your data structure, and the assumptions of the statistical test you’re performing. Blindly copying and pasting code without comprehension can lead to erroneous conclusions.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#ai-for-data-exploration-and-visualization-strategies",
     "href": "ai_tools.html#ai-for-data-exploration-and-visualization-strategies",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.3 AI for Data Exploration and Visualization Strategies",
-    "text": "C.3 AI for Data Exploration and Visualization Strategies\nExploring a new biological dataset can sometimes feel like navigating uncharted territory. AI can act as a brainstorming partner in this process. You could describe your dataset—its variables, the type of data (e.g., RNA-seq counts, proteomics measurements, microbial abundances), and the underlying biological context—and then ask for suggestions on initial exploratory analyses. For example: “I have a dataset with normalized protein abundance levels for samples from cancerous and healthy tissues, along with patient metadata like age and disease stage. What are some initial plots I could make in R with ggplot2 to explore potential patterns or differences?”\nSpeaking of ggplot2 and other R visualization libraries, LLMs can be particularly adept at helping you craft the precise code for the plots you envision. You can request code for specific plot types, ask for help customizing aesthetics like colors, labels, and themes, or even troubleshoot why your plot isn’t rendering as expected. “How can I add a title to my ggplot, change the x-axis label to ‘Gene Length (bp)’, and use a different color palette for my groups?” is a typical query an LLM can handle.\nAI can also offer tentative interpretations of statistical outputs or visual patterns. However, this is where your scientific judgment is most critical.\n\n\n\n\n\n\nAI Suggestions are Starting Points\n\n\n\nWhile an LLM might suggest that a particular cluster in your PCA plot could represent a distinct biological condition, this is merely a hypothesis generated by the model. It is your responsibility to correlate this with your biological knowledge, experimental design, and further statistical validation. AI interpretations are starting points for your own deeper investigation, not final conclusions.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.3 AI for Data Exploration and Visualization Strategies",
+    "text": "D.3 AI for Data Exploration and Visualization Strategies\nExploring a new biological dataset can sometimes feel like navigating uncharted territory. AI can act as a brainstorming partner in this process. You could describe your dataset—its variables, the type of data (e.g., RNA-seq counts, proteomics measurements, microbial abundances), and the underlying biological context—and then ask for suggestions on initial exploratory analyses. For example: “I have a dataset with normalized protein abundance levels for samples from cancerous and healthy tissues, along with patient metadata like age and disease stage. What are some initial plots I could make in R with ggplot2 to explore potential patterns or differences?”\nSpeaking of ggplot2 and other R visualization libraries, LLMs can be particularly adept at helping you craft the precise code for the plots you envision. You can request code for specific plot types, ask for help customizing aesthetics like colors, labels, and themes, or even troubleshoot why your plot isn’t rendering as expected. “How can I add a title to my ggplot, change the x-axis label to ‘Gene Length (bp)’, and use a different color palette for my groups?” is a typical query an LLM can handle.\nAI can also offer tentative interpretations of statistical outputs or visual patterns. However, this is where your scientific judgment is most critical.\n\n\n\n\n\n\nAI Suggestions are Starting Points\n\n\n\nWhile an LLM might suggest that a particular cluster in your PCA plot could represent a distinct biological condition, this is merely a hypothesis generated by the model. It is your responsibility to correlate this with your biological knowledge, experimental design, and further statistical validation. AI interpretations are starting points for your own deeper investigation, not final conclusions.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#ai-for-boosting-productivity-and-troubleshooting",
     "href": "ai_tools.html#ai-for-boosting-productivity-and-troubleshooting",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.4 AI for Boosting Productivity and Troubleshooting",
-    "text": "C.4 AI for Boosting Productivity and Troubleshooting\nBeyond conceptual understanding and data exploration, AI tools can significantly enhance your day-to-day productivity. For instance, code generation and autocompletion features, whether in standalone LLMs or integrated into development environments (like GitHub Copilot, if available to you), can speed up the writing of boilerplate R code or complete lines of code you’ve started. This is especially useful for repetitive tasks, freeing you up to focus on the more analytical aspects of your work. Remember, the goal is to accelerate your coding, not to have entire complex analyses generated without your deep involvement and understanding.\nOne of the most common frustrations in programming is debugging. AI can be a powerful ally here. You can paste R error messages directly into an LLM and ask for explanations and potential fixes. If your code isn’t behaving as expected, describe its intended function and the problematic output, and the AI may be able to pinpoint the issue.2\n2 Providing a minimal reproducible example (a small piece of code with sample data that replicates the error) greatly improves the chances of getting useful debugging help from an AI.Other productivity boosts include asking AI to summarize lengthy R package documentation or even sections of research articles (always being mindful of access permissions and copyright). Furthermore, if you have a piece of R code that works but feels clunky or inefficient, you can ask an AI for suggestions on how to refactor it to make it more readable, efficient, or aligned with common R programming idioms.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.4 AI for Boosting Productivity and Troubleshooting",
+    "text": "D.4 AI for Boosting Productivity and Troubleshooting\nBeyond conceptual understanding and data exploration, AI tools can significantly enhance your day-to-day productivity. For instance, code generation and autocompletion features, whether in standalone LLMs or integrated into development environments (like GitHub Copilot, if available to you), can speed up the writing of boilerplate R code or complete lines of code you’ve started. This is especially useful for repetitive tasks, freeing you up to focus on the more analytical aspects of your work. Remember, the goal is to accelerate your coding, not to have entire complex analyses generated without your deep involvement and understanding.\nOne of the most common frustrations in programming is debugging. AI can be a powerful ally here. You can paste R error messages directly into an LLM and ask for explanations and potential fixes. If your code isn’t behaving as expected, describe its intended function and the problematic output, and the AI may be able to pinpoint the issue.2\n2 Providing a minimal reproducible example (a small piece of code with sample data that replicates the error) greatly improves the chances of getting useful debugging help from an AI.Other productivity boosts include asking AI to summarize lengthy R package documentation or even sections of research articles (always being mindful of access permissions and copyright). Furthermore, if you have a piece of R code that works but feels clunky or inefficient, you can ask an AI for suggestions on how to refactor it to make it more readable, efficient, or aligned with common R programming idioms.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#best-practices-for-prompt-engineering",
     "href": "ai_tools.html#best-practices-for-prompt-engineering",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.5 Best Practices for Prompt Engineering",
-    "text": "C.5 Best Practices for Prompt Engineering\nThe quality of the output you receive from an LLM is heavily dependent on the quality of your input—your “prompt.” Effective prompt engineering is a skill that improves with practice.\nThe cornerstone of a good prompt is specificity and context. The more information you provide about your goal, your data, the biological question at hand, the specific R package you’re using, or the exact error message you’re encountering, the more tailored and useful the AI’s response will be. Consider the difference:\n\n\n\n\n\n\n\nVague Prompt\nSpecific & Contextualized Prompt\n\n\n\n\n“How to plot data in R?”\n“How can I create a scatter plot in R using ggplot2 to show the relationship between ‘gene_expression_log2fc’ and ‘mirna_expression_log2fc’ from my results_df dataframe, with points colored by ‘cancer_subtype’?”\n\n\n“My R code isn’t working.”\n“I’m getting the error ‘Error: object ’x’ not found’ in R when I run this code: plot(x, y). I defined x in a previous chunk. Why might this be happening and how can I fix it?”\n\n\n\nDon’t expect the perfect answer on your first attempt. Iterate and refine your prompts. If the initial response isn’t quite what you need, try rephrasing your question, adding more details, or breaking down a complex request into smaller parts. You can also specify the desired output format, such as “Provide the R code for this,” “Explain this concept in three simple bullet points,” or “List three potential statistical approaches for this problem.” Sometimes, asking for multiple perspectives or alternative solutions can also be enlightening. Finally, don’t hesitate to experiment with different LLMs if you have access to more than one, as their strengths can vary.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.5 Best Practices for Prompt Engineering",
+    "text": "D.5 Best Practices for Prompt Engineering\nThe quality of the output you receive from an LLM is heavily dependent on the quality of your input—your “prompt.” Effective prompt engineering is a skill that improves with practice.\nThe cornerstone of a good prompt is specificity and context. The more information you provide about your goal, your data, the biological question at hand, the specific R package you’re using, or the exact error message you’re encountering, the more tailored and useful the AI’s response will be. Consider the difference:\n\n\n\n\n\n\n\nVague Prompt\nSpecific & Contextualized Prompt\n\n\n\n\n“How to plot data in R?”\n“How can I create a scatter plot in R using ggplot2 to show the relationship between ‘gene_expression_log2fc’ and ‘mirna_expression_log2fc’ from my results_df dataframe, with points colored by ‘cancer_subtype’?”\n\n\n“My R code isn’t working.”\n“I’m getting the error ‘Error: object ’x’ not found’ in R when I run this code: plot(x, y). I defined x in a previous chunk. Why might this be happening and how can I fix it?”\n\n\n\nDon’t expect the perfect answer on your first attempt. Iterate and refine your prompts. If the initial response isn’t quite what you need, try rephrasing your question, adding more details, or breaking down a complex request into smaller parts. You can also specify the desired output format, such as “Provide the R code for this,” “Explain this concept in three simple bullet points,” or “List three potential statistical approaches for this problem.” Sometimes, asking for multiple perspectives or alternative solutions can also be enlightening. Finally, don’t hesitate to experiment with different LLMs if you have access to more than one, as their strengths can vary.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#ethical-considerations-and-limitations",
     "href": "ai_tools.html#ethical-considerations-and-limitations",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.6 Ethical Considerations and Limitations",
-    "text": "C.6 Ethical Considerations and Limitations\nWhile AI tools offer tremendous potential, it’s imperative to use them responsibly and be acutely aware of their limitations.\nAccuracy and “Hallucinations”: This is perhaps the most critical point. LLMs are designed to generate plausible text, but this text is not always factually correct or logically sound. They can “hallucinate” answers, code, or citations that seem convincing but are entirely fabricated.\n\nYou must critically evaluate all information and code generated by AI. Cross-reference with trusted sources like official R documentation, textbooks, peer-reviewed literature, and your own developing expertise. Never blindly trust AI-generated content, especially for scientific analysis.\n\nBias in AI Models: AI models learn from the vast corpus of text and code they are trained on. This training data can contain societal biases, which may then be reflected in the AI’s responses. Be mindful of how this could subtly influence suggestions, interpretations, or even the tone of explanations.\nData Privacy and Confidentiality: This is a paramount concern in research.\n\n\n\n\n\n\nProtect Your Sensitive Data\n\n\n\nUnder no circumstances should you input sensitive, unpublished, or personally identifiable data into public LLM interfaces. Always assume that any data you input could be stored or used by the AI provider. Familiarize yourself with the data usage policies of any AI tool you employ. For your coursework and research, focus on using AI for conceptual understanding, code related to non-sensitive example datasets, or publicly available data.\n\n\nOver-Reliance and Skill Atrophy: The convenience of AI can be seductive. However, relying on it too heavily can hinder the development of your own foundational R programming and statistical reasoning skills. Use AI as a tool to aid and accelerate your learning, not to replace the hard work of understanding. The ultimate goal is for you to become proficient, not for the AI to perform tasks for you.\nReproducibility: If you incorporate AI-generated code or insights into your analyses, ensure you thoroughly understand them, can justify their use, and document them meticulously for reproducibility. It can be good practice to note the prompts you used if the interaction significantly shaped your approach, treating it almost like a consultation.\nThe table below summarizes some key limitations and suggested mitigations:\n\n\n\n\n\n\n\n\nLimitation\nDescription\nMitigation Strategies\n\n\n\n\nAccuracy Issues (Hallucinations)\nGenerates plausible but incorrect/fabricated information or code.\nVerify with trusted sources; test code thoroughly; use critical thinking.\n\n\nBias\nReflects biases present in training data.\nBe aware of potential biases; seek diverse perspectives; critically evaluate fairness of suggestions.\n\n\nData Privacy\nRisk of exposing sensitive data if input into public tools.\nAvoid inputting sensitive/unpublished data; use institutional/private instances if available and vetted; understand terms of service.\n\n\nLack of True Understanding\nManipulates patterns in data, doesn’t “understand” concepts like humans do.\nDon’t attribute human-like reasoning; use it for specific tasks, not overarching scientific judgment.\n\n\nOver-Reliance\nCan hinder development of personal skills if used as a crutch.\nFocus on learning principles; use AI to assist, not replace, your own effort; regularly practice without AI.\n\n\nReproducibility Challenges\nAI responses can vary; difficult to document exact “reasoning” of the AI.\nDocument prompts used for significant code/ideas; thoroughly understand and vet any AI-generated code you use.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.6 Ethical Considerations and Limitations",
+    "text": "D.6 Ethical Considerations and Limitations\nWhile AI tools offer tremendous potential, it’s imperative to use them responsibly and be acutely aware of their limitations.\nAccuracy and “Hallucinations”: This is perhaps the most critical point. LLMs are designed to generate plausible text, but this text is not always factually correct or logically sound. They can “hallucinate” answers, code, or citations that seem convincing but are entirely fabricated.\n\nYou must critically evaluate all information and code generated by AI. Cross-reference with trusted sources like official R documentation, textbooks, peer-reviewed literature, and your own developing expertise. Never blindly trust AI-generated content, especially for scientific analysis.\n\nBias in AI Models: AI models learn from the vast corpus of text and code they are trained on. This training data can contain societal biases, which may then be reflected in the AI’s responses. Be mindful of how this could subtly influence suggestions, interpretations, or even the tone of explanations.\nData Privacy and Confidentiality: This is a paramount concern in research.\n\n\n\n\n\n\nProtect Your Sensitive Data\n\n\n\nUnder no circumstances should you input sensitive, unpublished, or personally identifiable data into public LLM interfaces. Always assume that any data you input could be stored or used by the AI provider. Familiarize yourself with the data usage policies of any AI tool you employ. For your coursework and research, focus on using AI for conceptual understanding, code related to non-sensitive example datasets, or publicly available data.\n\n\nOver-Reliance and Skill Atrophy: The convenience of AI can be seductive. However, relying on it too heavily can hinder the development of your own foundational R programming and statistical reasoning skills. Use AI as a tool to aid and accelerate your learning, not to replace the hard work of understanding. The ultimate goal is for you to become proficient, not for the AI to perform tasks for you.\nReproducibility: If you incorporate AI-generated code or insights into your analyses, ensure you thoroughly understand them, can justify their use, and document them meticulously for reproducibility. It can be good practice to note the prompts you used if the interaction significantly shaped your approach, treating it almost like a consultation.\nThe table below summarizes some key limitations and suggested mitigations:\n\n\n\n\n\n\n\n\nLimitation\nDescription\nMitigation Strategies\n\n\n\n\nAccuracy Issues (Hallucinations)\nGenerates plausible but incorrect/fabricated information or code.\nVerify with trusted sources; test code thoroughly; use critical thinking.\n\n\nBias\nReflects biases present in training data.\nBe aware of potential biases; seek diverse perspectives; critically evaluate fairness of suggestions.\n\n\nData Privacy\nRisk of exposing sensitive data if input into public tools.\nAvoid inputting sensitive/unpublished data; use institutional/private instances if available and vetted; understand terms of service.\n\n\nLack of True Understanding\nManipulates patterns in data, doesn’t “understand” concepts like humans do.\nDon’t attribute human-like reasoning; use it for specific tasks, not overarching scientific judgment.\n\n\nOver-Reliance\nCan hinder development of personal skills if used as a crutch.\nFocus on learning principles; use AI to assist, not replace, your own effort; regularly practice without AI.\n\n\nReproducibility Challenges\nAI responses can vary; difficult to document exact “reasoning” of the AI.\nDocument prompts used for significant code/ideas; thoroughly understand and vet any AI-generated code you use.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#the-future-ai-in-bioinformatics-and-data-science",
     "href": "ai_tools.html#the-future-ai-in-bioinformatics-and-data-science",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.7 The Future: AI in Bioinformatics and Data Science",
-    "text": "C.7 The Future: AI in Bioinformatics and Data Science\nThe field of AI is evolving at a breathtaking pace, and its integration into bioinformatics and data science is only set to deepen. We may see more sophisticated AI-powered tools for hypothesis generation, experimental design, drug discovery, and personalized medicine. As future biologists and data scientists, cultivating an adaptable mindset and committing to continuous learning will be key to navigating and leveraging these advancements effectively. Staying curious about new tools, while maintaining a strong foundation in scientific principles and ethics, will serve you well.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.7 The Future: AI in Bioinformatics and Data Science",
+    "text": "D.7 The Future: AI in Bioinformatics and Data Science\nThe field of AI is evolving at a breathtaking pace, and its integration into bioinformatics and data science is only set to deepen. We may see more sophisticated AI-powered tools for hypothesis generation, experimental design, drug discovery, and personalized medicine. As future biologists and data scientists, cultivating an adaptable mindset and committing to continuous learning will be key to navigating and leveraging these advancements effectively. Staying curious about new tools, while maintaining a strong foundation in scientific principles and ethics, will serve you well.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "ai_tools.html#practical-exercises-and-activities",
     "href": "ai_tools.html#practical-exercises-and-activities",
-    "title": "Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
-    "section": "C.8 Practical Exercises and Activities",
-    "text": "C.8 Practical Exercises and Activities\nTo help you get comfortable and skilled in using AI tools, we encourage you to try the following:\n\nConceptual Clarification: Choose a statistical concept from this course that you find somewhat challenging (e.g., “false discovery rate,” “cross-validation,” or “the assumptions of linear regression”). Use an LLM to ask for an explanation tailored to a biologist. Note down your prompt and the AI’s response. Then, try to re-explain the concept in your own words to a classmate, drawing from (but not merely repeating) the AI’s explanation.\nR Code Generation & Adaptation: Imagine you have a data frame in R named rna_seq_data with columns gene_id, sample_name, normalized_count, and treatment_group (with levels “control” and “treated”). Ask an LLM to generate R code using dplyr and tidyr to calculate the average normalized_count for each gene_id within each treatment_group, and then spread the data so that ‘control’ and ‘treated’ averages are in separate columns for each gene. Once you have the code, test it with some sample data (you can ask the AI to generate that too!) and ensure you understand each step.\nDebugging Practice: Take a piece of R code. First, try to understand and debug it yourself. Then, paste the code and the error message into an LLM and ask for help. Compare the AI’s suggestions to your own troubleshooting. Did it help you find the solution faster? Did it explain the error well?\nVisualization Brainstorming: Provide a clear description of a biological dataset, ideally one of your own (e.g., “A dataset containing measurements of 5 different cytokine levels in blood samples taken from patients at 3 time points post-vaccination, with patients also categorized by age group (young, middle, old).”). Use an LLM to brainstorm 3-4 different types of visualizations you could create using ggplot2 to explore this data. For each visualization, describe what insights it might provide.\n\nAs you work through these exercises, make it a habit to document the prompts you use and critically assess the AI’s responses. Reflect on when the AI was most helpful, when its advice was off-base, and how you can refine your prompting strategy for better results in the future. This reflective practice is key to becoming a discerning and effective user of AI in your scientific endeavors.",
+    "title": "Appendix D — AI Tools for Enhanced Learning and Productivity in Bioinformatics",
+    "section": "D.8 Practical Exercises and Activities",
+    "text": "D.8 Practical Exercises and Activities\nTo help you get comfortable and skilled in using AI tools, we encourage you to try the following:\n\nConceptual Clarification: Choose a statistical concept from this course that you find somewhat challenging (e.g., “false discovery rate,” “cross-validation,” or “the assumptions of linear regression”). Use an LLM to ask for an explanation tailored to a biologist. Note down your prompt and the AI’s response. Then, try to re-explain the concept in your own words to a classmate, drawing from (but not merely repeating) the AI’s explanation.\nR Code Generation & Adaptation: Imagine you have a data frame in R named rna_seq_data with columns gene_id, sample_name, normalized_count, and treatment_group (with levels “control” and “treated”). Ask an LLM to generate R code using dplyr and tidyr to calculate the average normalized_count for each gene_id within each treatment_group, and then spread the data so that ‘control’ and ‘treated’ averages are in separate columns for each gene. Once you have the code, test it with some sample data (you can ask the AI to generate that too!) and ensure you understand each step.\nDebugging Practice: Take a piece of R code. First, try to understand and debug it yourself. Then, paste the code and the error message into an LLM and ask for help. Compare the AI’s suggestions to your own troubleshooting. Did it help you find the solution faster? Did it explain the error well?\nVisualization Brainstorming: Provide a clear description of a biological dataset, ideally one of your own (e.g., “A dataset containing measurements of 5 different cytokine levels in blood samples taken from patients at 3 time points post-vaccination, with patients also categorized by age group (young, middle, old).”). Use an LLM to brainstorm 3-4 different types of visualizations you could create using ggplot2 to explore this data. For each visualization, describe what insights it might provide.\n\nAs you work through these exercises, make it a habit to document the prompts you use and critically assess the AI’s responses. Reflect on when the AI was most helpful, when its advice was off-base, and how you can refine your prompting strategy for better results in the future. This reflective practice is key to becoming a discerning and effective user of AI in your scientific endeavors.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>C</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
+      "<span class='chapter-number'>D</span>  <span class='chapter-title'>AI Tools for Enhanced Learning and Productivity in Bioinformatics</span>"
     ]
   },
   {
     "objectID": "dataviz.html",
     "href": "dataviz.html",
-    "title": "Appendix D — Data Visualization with ggplot2",
+    "title": "Appendix E — Data Visualization with ggplot2",
     "section": "",
     "text": "Start with this worked example to get a feel for the ggplot2 package.\n\nhttps://rkabacoff.github.io/datavis/IntroGGPLOT.html\n\nThen, for more detail, I refer you to this excellent ggplot2 tutorial.\nFinally, for more R graphics inspiration, see the R Graph Gallery.",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>D</span>  <span class='chapter-title'>Data Visualization with ggplot2</span>"
+      "<span class='chapter-number'>E</span>  <span class='chapter-title'>Data Visualization with ggplot2</span>"
     ]
   },
   {
     "objectID": "matrix_exercises.html",
     "href": "matrix_exercises.html",
-    "title": "Appendix E — Matrix Exercises",
+    "title": "Appendix F — Matrix Exercises",
     "section": "",
-    "text": "E.1 Data preparation\nFor this set of exercises, we are going to rely on a dataset that comes with R. It gives the number of sunspots per month from 1749-1983. The dataset comes as a ts or time series data type which I convert to a matrix using the following code.\nJust run the code as is and focus on the rest of the exercises.\ndata(sunspots)\nsunspot_mat &lt;- matrix(as.vector(sunspots),ncol=12,byrow = TRUE)\ncolnames(sunspot_mat) &lt;- as.character(1:12)\nrownames(sunspot_mat) &lt;- as.character(1749:1983)",
+    "text": "F.1 Data preparation\nFor this set of exercises, we are going to rely on a dataset that comes with R. It gives the number of sunspots per month from 1749-1983. The dataset comes as a ts or time series data type which I convert to a matrix using the following code.\nJust run the code as is and focus on the rest of the exercises.\ndata(sunspots)\nsunspot_mat &lt;- matrix(as.vector(sunspots),ncol=12,byrow = TRUE)\ncolnames(sunspot_mat) &lt;- as.character(1:12)\nrownames(sunspot_mat) &lt;- as.character(1749:1983)",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>E</span>  <span class='chapter-title'>Matrix Exercises</span>"
+      "<span class='chapter-number'>F</span>  <span class='chapter-title'>Matrix Exercises</span>"
     ]
   },
   {
     "objectID": "matrix_exercises.html#exercises",
     "href": "matrix_exercises.html#exercises",
-    "title": "Appendix E — Matrix Exercises",
-    "section": "\nE.2 Exercises",
-    "text": "E.2 Exercises\n\nAfter the conversion above, what does sunspot_mat look like? Use functions to find the number of rows, the number of columns, the class, and some basic summary statistics.\n\n\nncol(sunspot_mat)\nnrow(sunspot_mat)\ndim(sunspot_mat)\nsummary(sunspot_mat)\nhead(sunspot_mat)\ntail(sunspot_mat)\n\n\nPractice subsetting the matrix a bit by selecting:\n\nThe first 10 years (rows)\nThe month of July (7th column)\nThe value for July, 1979 using the rowname to do the selection.\n\n\n\n\nsunspot_mat[1:10,]\nsunspot_mat[,7]\nsunspot_mat['1979',7]\n\nThese next few exercises take advantage of the fact that calling a univariate statistical function (one that expects a vector) works for matrices by just making a vector of all the values in the matrix.\n\nWhat is the highest (max) number of sunspots recorded in these data?\n\n\nmax(sunspot_mat)\n\n\nAnd the minimum?\n\n\nmin(sunspot_mat)\n\n\nAnd the overall mean and median?\n\n\nmean(sunspot_mat)\nmedian(sunspot_mat)\n\n\nUse the hist() function to look at the distribution of all the monthly sunspot data.\n\n\nhist(sunspot_mat)\n\n\nRead about the breaks argument to hist() to try to increase the number of breaks in the histogram to increase the resolution slightly. Adjust your hist() and breaks to your liking.\n\n\nhist(sunspot_mat, breaks=40)\n\nNow, let’s move on to summarizing the data a bit to learn about the pattern of sunspots varies by month or by year.\n\nExamine the dataset again. What do the columns represent? And the rows?\n\n\n# just a quick glimpse of the data will give us a sense\nhead(sunspot_mat)\n\n\nWe’d like to look at the distribution of sunspots by month. How can we do that?\n\n\n# the mean of the columns is the mean number of sunspots per month.\ncolMeans(sunspot_mat)\n\n# Another way to write the same thing:\napply(sunspot_mat, 2, mean)\n\n\nAssign the month summary above to a variable and summarize it to get a sense of the spread over months.\n\n\nmonthmeans = colMeans(sunspot_mat)\nsummary(monthmeans)\n\n\nPlay the same game for years to get the per-year mean?\n\n\nymeans = rowMeans(sunspot_mat)\nsummary(ymeans)\n\n\nMake a plot of the yearly means. Do you see a pattern?\n\n\nplot(ymeans)\n# or make it clearer\nplot(ymeans, type='l')",
+    "title": "Appendix F — Matrix Exercises",
+    "section": "\nF.2 Exercises",
+    "text": "F.2 Exercises\n\nAfter the conversion above, what does sunspot_mat look like? Use functions to find the number of rows, the number of columns, the class, and some basic summary statistics.\n\n\nncol(sunspot_mat)\nnrow(sunspot_mat)\ndim(sunspot_mat)\nsummary(sunspot_mat)\nhead(sunspot_mat)\ntail(sunspot_mat)\n\n\nPractice subsetting the matrix a bit by selecting:\n\nThe first 10 years (rows)\nThe month of July (7th column)\nThe value for July, 1979 using the rowname to do the selection.\n\n\n\n\nsunspot_mat[1:10,]\nsunspot_mat[,7]\nsunspot_mat['1979',7]\n\nThese next few exercises take advantage of the fact that calling a univariate statistical function (one that expects a vector) works for matrices by just making a vector of all the values in the matrix.\n\nWhat is the highest (max) number of sunspots recorded in these data?\n\n\nmax(sunspot_mat)\n\n\nAnd the minimum?\n\n\nmin(sunspot_mat)\n\n\nAnd the overall mean and median?\n\n\nmean(sunspot_mat)\nmedian(sunspot_mat)\n\n\nUse the hist() function to look at the distribution of all the monthly sunspot data.\n\n\nhist(sunspot_mat)\n\n\nRead about the breaks argument to hist() to try to increase the number of breaks in the histogram to increase the resolution slightly. Adjust your hist() and breaks to your liking.\n\n\nhist(sunspot_mat, breaks=40)\n\nNow, let’s move on to summarizing the data a bit to learn about the pattern of sunspots varies by month or by year.\n\nExamine the dataset again. What do the columns represent? And the rows?\n\n\n# just a quick glimpse of the data will give us a sense\nhead(sunspot_mat)\n\n\nWe’d like to look at the distribution of sunspots by month. How can we do that?\n\n\n# the mean of the columns is the mean number of sunspots per month.\ncolMeans(sunspot_mat)\n\n# Another way to write the same thing:\napply(sunspot_mat, 2, mean)\n\n\nAssign the month summary above to a variable and summarize it to get a sense of the spread over months.\n\n\nmonthmeans = colMeans(sunspot_mat)\nsummary(monthmeans)\n\n\nPlay the same game for years to get the per-year mean?\n\n\nymeans = rowMeans(sunspot_mat)\nsummary(ymeans)\n\n\nMake a plot of the yearly means. Do you see a pattern?\n\n\nplot(ymeans)\n# or make it clearer\nplot(ymeans, type='l')",
     "crumbs": [
       "Home",
       "Appendices",
-      "<span class='chapter-number'>E</span>  <span class='chapter-title'>Matrix Exercises</span>"
+      "<span class='chapter-number'>F</span>  <span class='chapter-title'>Matrix Exercises</span>"
     ]
   },
   {
