@@ -214,36 +214,128 @@ dim(sub_se)
 
 ## Constructing a `SummarizedExperiment` 
 
-Often, `SummarizedExperiment` or `RangedSummarizedExperiment` objects are 
-returned by functions written by other packages. However it is possible to 
-create them by hand with a call to the `SummarizedExperiment()` constructor. 
-The code below is simply to illustrate the mechanics of creating an object
-from scratch. In practice, you will probably have the pieces of the 
-object from other sources such as Excel files or csv files. 
+To construct a `SummarizedExperiment` object, you need to provide the following
+components:
+- `assays`: A list of matrices or matrix-like objects containing the data.
+- `rowData`: A `DataFrame` containing information about the features (rows).
+- `colData`: A `DataFrame` containing information about the samples (columns).
+- +/- `metadata`: A list containing additional metadata about the experiment.
 
-Constructing a `RangedSummarizedExperiment` with a `GRanges` as the
-_rowRanges_ argument:
+For a nearly real example, we will use the DeRisi dataset. We'll start with the
+original data, which is a `data.frame` with the first couple of columns containing
+the gene information and the rest of the columns containing the data.
 
-```{r constructRSE}
-nrows <- 200
-ncols <- 6
-counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-                     IRanges(floor(runif(200, 1e5, 1e6)), width=100),
-                     strand=sample(c("+", "-"), 200, TRUE),
-                     feature_id=sprintf("ID%03d", 1:200))
-colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 3),
-                     row.names=LETTERS[1:6])
-
-SummarizedExperiment(assays=list(counts=counts),
-                     rowRanges=rowRanges, colData=colData)
+```{r}
+# Load the DeRisi dataset
+deRisi <- read.csv("https://raw.githubusercontent.com/seandavi/RBiocBook/refs/heads/main/data/derisi.csv")
+head(deRisi)
 ```
 
-A `SummarizedExperiment` can be constructed with or without supplying
-a `DataFrame` for the _rowData_ argument:
+To convert this to a `SummarizedExperiment`, we need to extract the assay data, row data, and column data. The assay data will be the numeric values in the data frame, the row data will be the gene information, and the column data will be the sample information.
 
-```{r constructSE}
-SummarizedExperiment(assays=list(counts=counts), colData=colData)
+### rowData, or feature information
+
+Let's start with the rowData, which will be a `DataFrame` containing the gene information. We can use the first two columns of the data frame for this purpose.
+
+```{r}
+rdata <- deRisi[, 1:2]
+head(rdata)
+```
+
+### colData, or sample information
+
+Next, we will create the colData, which will be a `DataFrame` containing the sample information. Since the sample information really isn't in the dataset, we will create a simple `DataFrame` with sample names.
+
+```{r}
+cdata <- DataFrame(sample=paste("Sample", 0:6), timepoint = 0:6,
+    hours = c(0, 9.5,11.5,13.5,15.5,18.5,20.5))
+head(cdata)
+```
+
+### assays, or the data
+
+Remember that the DeRisi dataset has four _different_ assays, 
+
+| assay | description |
+|-------|-------------|
+| R | Red fluorescence |
+| G | Green luorescence |
+| Rb | Red background fluorescence |
+| Gb | Green background fluorescence |
+
+We will create a list of matrices, one for each assay. The matrices will be the numeric values in the data frame, excluding the first two columns.
+
+```{r}
+R <- as.matrix(deRisi[, 3:9])
+G <- as.matrix(deRisi[, 10:16])
+Rb <- as.matrix(deRisi[, 17:23])
+Gb <- as.matrix(deRisi[, 24:30])
+```
+
+When we create a SummarizedExperiment object, the "constructor" will check to see
+that the colnames of the matrices in the list are the same as the _rownames_ of the 
+`colData` `DataFrame`, and that the rownames of the matrices in the list are the same as the _rownames_ of the `rowData` `DataFrame`.
+
+So, we need to fix that all up. Let's start wit the rownames of the `rowData` `DataFrame`:
+
+```{r}
+rownames(rdata) <- rdata$ORF
+```
+
+Now, let's set the rownames of the coldata `DataFrame` to the sample names:
+
+```{r}
+rownames(cdata) <- cdata$sample
+```
+
+Now, we can fix the rownames and colnames of the matrices for our R, G, Rb, and Gb assays:
+
+```{r}
+rownames(R) <- rdata$ORF
+rownames(G) <- rdata$ORF
+rownames(Rb) <- rdata$ORF
+rownames(Gb) <- rdata$ORF
+colnames(R) <- cdata$sample
+colnames(G) <- cdata$sample
+colnames(Rb) <- cdata$sample
+colnames(Gb) <- cdata$sample
+```
+
+Take a look at the matrices to make sure they look right.
+
+### Putting it all together
+
+
+```{r}
+se <- SummarizedExperiment(assays=list(R=R, G=G, Rb=Rb, Gb=Gb), rowData=rdata, colData=cdata)
+```
+
+### Getting logRatios
+
+Now that we have a `SummarizedExperiment` object, we can easily compute the log ratios of the Red and Green foreground fluorescence. This is a common operation in microarray data analysis. 
+
+```{r}
+logRatios <- log2(
+    (assay(se, "R") - assay(se, "Rb")) / (assay(se, "G") - assay(se, "Gb"))
+)
+assays(se)$logRatios <- logRatios
+```
+
+Now, we've added a new assay to the `SummarizedExperiment` object called `logRatios`. This assay contains the log ratios of the Red and Green foreground fluorescence. 
+
+```{r}
+assays(se)
+```
+
+And if we want to access the log ratios, we can do so using the `assay()` method:
+
+```{r}
+head(assay(se, "logRatios"))
+## OR
+head(assays(se)$logRatios)
 ```
 
 
+```{r}
+hist(assays(se)$logRatios, breaks=50, main="Log Ratios of Red and Green Foreground Fluorescence", xlab="Log Ratio")
+```

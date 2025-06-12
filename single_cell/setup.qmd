@@ -1,0 +1,72 @@
+# Setup
+
+```{r}
+library(scRNAseq)
+library(scran)
+library(scater)
+```
+
+```{r}
+datasets <- scRNAseq::surveyDatasets()
+```
+
+```{r echo=FALSE}
+DT::datatable(as.data.frame(datasets) |> dplyr::select(name, description, version, path, column_annotations, rows, columns),
+   options = list(pageLength = 15, scrollX = TRUE),
+   rownames = FALSE) 
+```
+
+```{r}
+#| label: fig-scRNAseq-datasets
+sce <- scRNAseq::ZeiselBrainData()
+sce <- logNormCounts(sce)
+```
+
+## Dimensionality reduction
+
+```{r}
+library(scran)
+top_var_genes <- getTopHVGs(sce, n=2000)
+
+set.seed(100) # See below.
+sce <- fixedPCA(sce, subset.row=top_var_genes)
+
+reducedDimNames(sce)
+```
+
+
+```{r}
+library(scater)
+sce <- runTSNE(sce, dimred="PCA")
+nn.clusters <- clusterCells(sce, use.dimred = "TSNE")
+table(nn.clusters)
+```
+
+
+```{r}
+library(scran)
+dec <- modelGeneVar(sce)
+
+# Visualizing the fit:
+fit.mv <- metadata(dec)
+plot(fit.mv$mean, fit.mv$var, xlab="Mean of log-expression",
+    ylab="Variance of log-expression", ylim=c(0, 4))
+curve(fit.mv$trend(x), col="dodgerblue", add=TRUE, lwd=2)
+```
+
+
+```{r}
+library(scater)
+colLabels(sce) <- nn.clusters
+plotReducedDim(sce, "TSNE", colour_by="level1class")
+```
+
+```{r}
+plotReducedDim(sce, "TSNE", colour_by="level2class")
+```
+
+```{r}
+plotReducedDim(sce, "TSNE", colour_by="level1class", shape_by="tissue", ) |> plotly::ggplotly()
+```
+
+

@@ -1,0 +1,289 @@
+---
+author: "Garrett Grolemund"
+---
+
+# Simulation Basics: Understanding Protein Folding Through Repetition
+
+One of the most powerful techniques in computational biology is **simulation** - running many trials to understand complex biological processes. Today we'll explore this concept using protein folding, a fundamental process that determines whether your experiments succeed or fail.
+
+## The Protein Folding Challenge
+
+### What is protein folding?
+
+When a cell manufactures a protein, it initially produces a linear chain of amino acids called a **polypeptide**. However, this linear chain is not functional. To become active, the protein must fold into a specific three-dimensional shape, much like origami paper must be folded into a crane to become recognizable.
+
+This folding process happens spontaneously in cells, guided by:
+
+- **Hydrophobic interactions**: Water-hating amino acids cluster together
+- **Hydrogen bonds**: Weak attractions between certain amino acids  
+- **Disulfide bridges**: Strong covalent bonds between cysteine residues
+- **Electrostatic interactions**: Attractions between charged amino acids
+
+### Why does folding sometimes fail?
+
+Protein folding is a delicate process that can go wrong. Think of it like assembling a complex piece of furniture - even with perfect instructions, sometimes pieces don't align correctly. In cells, several factors can cause **misfolding**:
+
+- **Temperature stress**: Heat can disrupt weak bonds
+- **pH changes**: Altered acidity affects charged interactions
+- **Crowding**: Too many proteins in a small space interfere with each other
+- **Chemical stress**: Oxidation can form incorrect disulfide bonds
+- **Mutations**: Changed amino acids alter folding patterns
+
+When proteins misfold, they often:
+
+- Lose their biological function
+- Form toxic aggregates (like in Alzheimer's disease)
+- Get degraded by cellular quality control systems
+
+### The biotechnology challenge
+
+In biotechnology, we often express human proteins in bacterial systems like *E. coli*. This is like asking a Toyota factory to build a Ferrari - the basic machinery is there, but the environment is quite different. Bacterial cells:
+- Lack many human folding helpers (chaperones)
+- Have different chemical environments
+- May produce proteins too quickly for proper folding
+
+This means that even under ideal conditions, only a fraction of expressed proteins fold correctly. Understanding and optimizing this process is crucial for producing functional proteins for research and medicine.
+
+## Simulating Protein Folding
+
+Let's create a simple model of protein folding that captures the key idea: each protein has some probability of folding correctly based on the conditions.
+
+```{r}
+# Simulate whether a single protein folds correctly
+fold_protein <- function(temp = 37, ph = 7.4) {
+  # Base success rate under ideal conditions
+  base_success <- 0.85
+  
+  # Temperature affects folding (37°C is optimal)
+  temp_penalty <- (temp - 37)^2 / 1000
+  
+  # pH affects folding (7.4 is optimal) 
+  ph_penalty <- (ph - 7.4)^2 / 10
+  
+  # Calculate final success probability
+  success_prob <- base_success - temp_penalty - ph_penalty
+  success_prob <- max(0.05, min(0.95, success_prob))  # Keep between 5% and 95%
+  
+  # Return folding outcome
+  sample(c("folded", "misfolded"), size = 1, 
+         prob = c(success_prob, 1 - success_prob))
+}
+```
+
+Let's test our function with a single protein:
+
+```{r}
+# Try folding one protein at standard conditions
+fold_protein(temp = 37, ph = 7.4)
+```
+
+Each time you run this, you might get a different result! That's the stochastic (random) nature of biological processes.
+
+## The Power of Repetition with `replicate()`
+
+One protein doesn't tell us much about the overall process. In a real experiment, you're expressing millions of protein molecules. Let's use R's `replicate()` function to simulate many folding events:
+
+```{r}
+# Simulate folding 100 proteins under standard conditions
+batch_100 <- replicate(n = 100, fold_protein(temp = 37, ph = 7.4))
+
+# Look at the first few results
+head(batch_100, 10)
+
+# Count successes and failures
+table(batch_100)
+```
+
+This gives us a much better picture! We can calculate the **folding efficiency**:
+
+```{r}
+# Calculate what percentage folded correctly
+folding_efficiency <- sum(batch_100 == "folded") / length(batch_100)
+cat("Folding efficiency:", round(folding_efficiency * 100, 1), "%")
+```
+
+## Sample Size Matters: The Law of Large Numbers
+
+Just like in real experiments, larger sample sizes give more reliable estimates. Let's see how our estimated folding efficiency changes with sample size:
+
+```{r}
+# Test different sample sizes
+sample_sizes <- c(10, 100, 1000, 10000)
+
+for(n in sample_sizes) {
+  batch <- replicate(n, fold_protein(temp = 37, ph = 7.4))
+  efficiency <- sum(batch == "folded") / n
+  cat("Sample size:", sprintf("%5d", n), 
+      "- Folding efficiency:", sprintf("%5.1f%%", efficiency * 100), "\n")
+}
+```
+
+Notice how the efficiency estimate becomes more stable (less variable) as we increase the sample size? This demonstrates the **Law of Large Numbers** - a fundamental principle that larger samples give more reliable estimates.
+
+```{r fig-sample-size, fig.cap="Folding efficiency estimates become more stable with larger sample sizes", echo=FALSE}
+# Generate data for visualization
+set.seed(123)  # For reproducible results
+sample_sizes <- seq(10, 1000, by = 10)
+efficiencies <- numeric(length(sample_sizes))
+
+for(i in seq_along(sample_sizes)) {
+  batch <- replicate(sample_sizes[i], fold_protein(temp = 37, ph = 7.4))
+  efficiencies[i] <- sum(batch == "folded") / sample_sizes[i]
+}
+
+# Create a simple plot
+plot(sample_sizes, efficiencies * 100, 
+     type = "l", 
+     xlab = "Sample Size (number of proteins)", 
+     ylab = "Estimated Folding Efficiency (%)",
+     main = "Folding Efficiency vs Sample Size",
+     ylim = c(70, 90))
+abline(h = 85, col = "red", lty = 2)
+text(500, 87, "True efficiency (85%)", col = "red")
+```
+
+## Optimizing Expression Conditions
+
+Now let's use simulation to understand how different conditions affect protein folding. This is exactly what you'd do in a real lab when optimizing expression conditions.
+
+### Temperature effects
+
+```{r}
+# Test different temperatures
+temperatures <- seq(20, 50, by = 5)
+temp_efficiencies <- numeric(length(temperatures))
+
+for(i in seq_along(temperatures)) {
+  batch <- replicate(1000, fold_protein(temp = temperatures[i], ph = 7.4))
+  temp_efficiencies[i] <- sum(batch == "folded") / 1000
+}
+
+# Display results
+temp_results <- data.frame(
+  Temperature = temperatures,
+  Efficiency = round(temp_efficiencies * 100, 1)
+)
+print(temp_results)
+```
+
+```{r fig-temperature, fig.cap="Temperature dramatically affects protein folding efficiency", echo=FALSE}
+plot(temperatures, temp_efficiencies * 100,
+     type = "b", pch = 16,
+     xlab = "Temperature (°C)",
+     ylab = "Folding Efficiency (%)",
+     main = "Effect of Temperature on Protein Folding")
+abline(v = 37, col = "red", lty = 2)
+text(39, 70, "Physiological\ntemperature", col = "red")
+```
+
+The graph clearly shows that protein folding is optimal around physiological temperature (37°C) and drops off dramatically at higher temperatures - exactly what we see in real experiments!
+
+### pH effects
+
+```{r}
+# Test different pH values
+ph_values <- seq(6, 9, by = 0.5)
+ph_efficiencies <- numeric(length(ph_values))
+
+for(i in seq_along(ph_values)) {
+  batch <- replicate(1000, fold_protein(temp = 37, ph = ph_values[i]))
+  ph_efficiencies[i] <- sum(batch == "folded") / 1000
+}
+
+# Display results
+ph_results <- data.frame(
+  pH = ph_values,
+  Efficiency = round(ph_efficiencies * 100, 1)
+)
+print(ph_results)
+```
+
+```{r fig-ph, fig.cap="pH optimization shows clear optimal range around physiological pH", echo=FALSE}
+plot(ph_values, ph_efficiencies * 100,
+     type = "b", pch = 16,
+     xlab = "pH",
+     ylab = "Folding Efficiency (%)",
+     main = "Effect of pH on Protein Folding")
+abline(v = 7.4, col = "red", lty = 2)
+text(7.6, 70, "Physiological\npH", col = "red")
+```
+
+Again, we see optimal folding near physiological conditions, with efficiency dropping off at extreme pH values.
+
+## Saving and Loading Simulation Data
+
+Large-scale simulations can take time to run, so it's smart to save your results:
+
+```{r eval=FALSE}
+# Generate a large dataset
+large_simulation <- replicate(10000, fold_protein(temp = 37, ph = 7.4))
+
+# Save the results
+write.csv(
+  data.frame(
+    protein_id = 1:10000,
+    folding_outcome = large_simulation,
+    temperature = 37,
+    ph = 7.4
+  ),
+  file = "protein_folding_simulation.csv",
+  row.names = FALSE
+)
+```
+
+You can then read this data back for further analysis:
+
+```{r eval=FALSE}
+# Read back the simulation data
+folding_data <- read.csv("protein_folding_simulation.csv")
+head(folding_data)
+
+# Analyze the saved results
+table(folding_data$folding_outcome)
+mean(folding_data$folding_outcome == "folded")
+```
+
+## Real-World Applications
+
+This simulation approach isn't just academic - it reflects real experimental design:
+
+1. **Expression optimization**: Testing different temperatures, pH, and media compositions
+2. **Protein engineering**: Predicting how mutations affect folding stability
+3. **Scale-up predictions**: Estimating yields before expensive large-scale production
+4. **Quality control**: Understanding batch-to-batch variation in protein expression
+
+## Understanding Biological Variation
+
+One key insight from simulation is understanding **biological variation**. Even under identical conditions, not every protein molecule behaves the same way. This variation is:
+
+- **Normal and expected**: Biology is inherently stochastic
+- **Manageable**: We can optimize conditions to improve average outcomes
+- **Predictable**: Large samples allow reliable estimates despite individual variation
+
+## Key Takeaways
+
+1. **Protein folding is probabilistic**: Each molecule has some chance of success
+2. **Conditions matter**: Temperature, pH, and other factors dramatically affect outcomes
+3. **Sample size is crucial**: Larger experiments give more reliable results
+4. **Simulation helps optimization**: Test many conditions computationally before lab work
+5. **Biological variation is normal**: Perfect efficiency is impossible, optimization is about improving averages
+
+## Exercise: Design Your Own Experiment
+
+Modify the `fold_protein()` function to include the effect of a molecular chaperone - a helper protein that increases folding success by 20%. Then simulate an experiment comparing expression with and without the chaperone.
+
+```{r eval=FALSE}
+# Your enhanced folding function here
+fold_protein_with_chaperone <- function(temp = 37, ph = 7.4, chaperone = FALSE) {
+  # Add chaperone logic to the original function
+  # Hint: if chaperone is TRUE, increase success probability
+}
+
+# Compare conditions
+no_chaperone <- replicate(1000, fold_protein_with_chaperone(chaperone = FALSE))
+with_chaperone <- replicate(1000, fold_protein_with_chaperone(chaperone = TRUE))
+
+# Calculate and compare efficiencies
+```
+
+In our next chapter, we'll learn how to create beautiful visualizations of these simulation results to make the patterns even clearer and more compelling for presentations and publications!

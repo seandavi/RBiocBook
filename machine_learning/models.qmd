@@ -1,135 +1,26 @@
-# Machine Learning
+---
+title: "Supervised Learning"
+---
 
-## What is Machine Learning?
+In the previous chapter, we introduced the three main paradigms of machine learning: supervised, unsupervised, and reinforcement learning. We also highlighted the importance of a structured workflow, particularly the critical step of data splitting to prevent overfitting. Now, we'll dive deeper into the world of **supervised learning**, the most common and widely applied category of machine learning.
 
-Machine learning is a subfield of artificial intelligence that focuses on the
-development of algorithms and models that enable computers to learn and make
-decisions or predictions without explicit programming. It has emerged as a
-powerful tool for solving complex problems across various industries, including
-healthcare, finance, marketing, and natural language processing. This chapter
-provides an overview of machine learning, its types, key concepts,
-applications, and challenges.
+This chapter provides a practical framework for understanding how different supervised learning algorithms work. Instead of viewing each algorithm as a completely separate entity, we'll see that they all share a common conceptual structure. By grasping this structure, you can more easily understand, compare, and select the right algorithm for your problem. We will then use this framework to explore some of the most fundamental and popular algorithms for both regression and classification tasks.
 
-Machine learning in biology is a really broad topic. @greener_guide_2022 present
-a nice overview of the different types of machine learning methods that are
-used in biology. @libbrecht_machine_2015 also present an early review of machine
-learning in genetics and genomics.
+## A Framework for Understanding Supervised Algorithms
 
-## Classes of Machine Learning
+At a high level, every supervised learning algorithm can be understood as having three core components: the **hypothesis space**, the **objective function**, and the **learning algorithm**. Thinking about new algorithms in terms of these three parts can demystify how they operate and highlight their key differences.
 
-### Supervised learning 
+::: {.callout-note}
+### The Three Pillars of a Supervised Algorithm
 
-Supervised learning is a type of machine learning where the model learns from
-labeled data, i.e., input-output pairs, to make predictions. It includes tasks
-like regression (predicting continuous values) and classification (predicting
-discrete classes or categories).
+1.  **Hypothesis Space (The Model Family):** This is the set of all possible models the algorithm is allowed to consider. For example, in linear regression, the hypothesis space is the set of all possible straight lines. For a decision tree, it's the set of all possible branching rules. The choice of hypothesis space imposes a certain structure or *bias* on the solution.
 
-### Unsupervised learning 
+2.  **Objective Function (The Goal):** This function defines what a "good" model looks like. It measures how well a particular model from the hypothesis space fits the training data. For instance, in regression, a common objective function is the *Mean Squared Error (MSE)*, which penalizes models for making large prediction errors. The goal of learning is to find the model that minimizes this objective function.
 
-Unsupervised learning involves learning from unlabeled data, where the model
-discovers patterns or structures within the data. Common unsupervised learning
-tasks include clustering (grouping similar data points), dimensionality
-reduction (reducing the number of features or variables), and anomaly detection
-(identifying unusual data points).
+3.  **Learning Algorithm (The Optimizer):** This is the computational procedure used to search through the hypothesis space and find the model that best minimizes the objective function. This could be a straightforward mathematical formula (as in simple linear regression) or a complex iterative process (as in training neural networks).
+:::
 
-
-::: {.callout-note} 
-# Terminology and Concepts
-
-*  Data 
-  : Data is the foundation of machine learning and can be structured
-  (tabular) or unstructured (text, images, audio). It is usually divided into
-  training, validation, and testing sets for model development and evaluation.
-
-*  Features 
-  : Features are the variables or attributes used to describe the data
-  points. Feature engineering and selection are crucial steps in machine
-  learning to improve model performance and interpretability.
-
-*  Models and Algorithms 
-  : Models are mathematical representations of the
-  relationship between features and the target variable(s). Algorithms are the
-  methods used to train models, such as linear regression, decision trees, and
-  neaural networks.
-
-*  Hyperparameters and Tuning 
-  : Hyperparameters are adjustable parameters that
-  control the learning process of an algorithm. Tuning involves finding the
-  optimal set of hyperparameters to improve model performance.
-
-*  Evaluation Metrics 
-  : Evaluation metrics quantify the performance of a model,
-  such as accuracy, precision, recall, F1-score (for classification), and mean
-  squared error, R-squared (for regression).
-::: 
-
-## Machine Learning Steps
-
-```{mermaid}
-%%| column: margin
-flowchart TD
-    A[Problem Definition] --> B[Data Collection]
-    B --> C[Data Preparation]
-    C --> D[**Train/Test Split**]
-    D --> E[Model Selection]
-    E --> F[Model Training]
-    F --> G[Model Evaluation]
-    G --> H{Good Performance?}
-    H -->|No| E
-    H -->|Yes| I[Final Test Evaluation]
-    I --> J[Deployment]
-    
-    style D fill:#ff6b6b
-    style I fill:#ff6b6b
-```
-
-
-
-
-
-
-```{r fig-fitting, fig.cap="Data simulated according to the function $f(x) = sin(2 \\pi x) + N(0,0.25)$ fitted with four different models. A) A simple linear model demonstrates _underfitting_. B) A linear model with a sin function ($y = sin(2 \\pi x)$) and C) a loess model with a wide span (0.5) demonstrate _good fits_. D) A loess model with a narrow span (0.1) is a good example of _overfitting_. "}
-#| code-fold: true
-set.seed(123)
-sinsim <- function(n,sd=0.1) {
-  x <- seq(0,1,length.out=n)
-  y <- sin(2*pi*x) + rnorm(n,0,sd)
-  return(data.frame(x=x,y=y))
-}
-dat <- sinsim(100,0.25)
-library(ggplot2)
-library(patchwork)
-p_base <- ggplot(dat,aes(x=x,y=y)) +
- geom_point(alpha=0.7) +
- theme_bw()
-p_lm <- p_base + 
- geom_smooth(method="lm", se=FALSE, alpha=0.6, formula = y ~ x) 
-p_lmsin <- p_base +
- geom_smooth(method="lm",formula=y~sin(2*pi*x), se=FALSE, alpha=0.6) 
-p_loess_wide <- p_base +
-  geom_smooth(method="loess",span=0.5, se=FALSE, alpha=0.6, formula = y ~ x) 
-p_loess_narrow <- p_base + 
- geom_smooth(method="loess",span=0.1, se=FALSE, alpha=0.6, formula = y ~ x) 
-p_lm + p_lmsin + p_loess_wide + p_loess_narrow + plot_layout(ncol=2) +
-  plot_annotation(tag_levels = 'A') & 
-  theme(plot.tag = element_text(size = 8))
-```
-
-In @fig-fitting, we simulate data according to the function $f(x) = sin(2 \pi x) + N(0,0.25)$ and fit four different models. 
-Choosing a model that is too simple (A) will result in _underfitting_ the data, while choosing a model that is too complex (D) will result in _overfitting_ the data. 
-
-When thinking about machine learning, it can help to have a simple framework in mind. In @fig-sklearn, we present a simple view of machine learning according to the [scikit-learn](https://scikit-learn.org/stable/) package. 
-
-![A simple view of machine learning according the sklearn. ](https://1.bp.blogspot.com/-ME24ePzpzIM/UQLWTwurfXI/AAAAAAAAANw/W3EETIroA80/s1600/drop_shadows_background.png){#fig-sklearn}
-
-We're going to focus on supervised learning here. Here is a rough schematic (see @fig-mlr3-supervised) of the supervised learning process from 
-the mlr3 book.
-
-![A schematic of the supervised learning process. ](images/mlr3_process.png){#fig-mlr3-supervised}
-
-In nearly all cases, we will have a training set and a test set. The training set is used to train the model, and the test set is used to evaluate the model (see @fig-train-test-split). Even when we don't have a separate test set, we will usually create one by splitting the data.
-
-![Training and testing sets. ](images/mlr3_train_test.png){#fig-train-test-split}
+By framing algorithms in this way, we can see, for example, that Ridge and Lasso regression share the same hypothesis space and learning algorithm as linear regression but differ in their objective function, which includes a penalty for complexity. This small change in the objective function has profound effects on the final model, helping to prevent overfitting.
 
 ## Supervised Learning
 
@@ -328,10 +219,9 @@ and L2-norm. The consequence of this is to effectively shrink coefficients
 
 [Decision Tree Learning](https://en.wikipedia.org/wiki/Decision_tree_learning) is supervised learning approach used in statistics, data mining and machine learning. In this formalism, a classification or regression decision tree is used as a predictive model to draw conclusions about a set of observations. Decision trees are a popular machine learning method used for both classification and regression tasks. They are hierarchical, tree-like structures that model the relationship between features and the target variable by recursively splitting the data into subsets based on the feature values. Each internal node in the tree represents a decision or test on a feature, and each branch represents the outcome of that test. The leaf nodes contain the final prediction, which is the majority class for classification tasks or the mean/median of the target values for regression tasks.
 
-```{r fig-decision-tree, echo=FALSE,fig.cap='An example of a decision tree that performs classification, also sometimes called a classification tree. '}
-download.file('https://upload.wikimedia.org/wikipedia/commons/e/eb/Decision_Tree.jpg', 'images/Decision_Tree.jpg')
-knitr::include_graphics('images/Decision_Tree.jpg')
-```
+![Graphical representation of a decision tree.](https://upload.wikimedia.org/wikipedia/commons/e/eb/Decision_Tree.jpg){#fig-decision-tree fig-align="center"}
+
+
 
 
 
@@ -373,7 +263,6 @@ An extension of the algorithm was developed by [Leo Breiman](https://en.wikipedi
 Random forests are frequently used as "blackbox" models in businesses, as they generate reasonable predictions across a wide range of data while requiring little configuration.
 
 
-```{r fig-randomforest-diagram, echo=FALSE, fig.cap="Random forests or random decision forests is an ensemble learning method for classification, regression and other tasks that operates by constructing a multitude of decision trees at training time.", fig.width=6}
-download.file("https://miro.medium.com/v2/resize:fit:592/1*i0o8mjFfCn-uD79-F1Cqkw.png", "images/RandomForest.png", mode = "auto")
-knitr::include_graphics('images/RandomForest.png')
-```
+![Graphical representation of random forests. ](https://miro.medium.com/v2/resize:fit:592/1*i0o8mjFfCn-uD79-F1Cqkw.png){#fig-random-forest fig-align="center"}
+
+

@@ -1,0 +1,165 @@
+---
+author: "Garrett Grolemund"
+---
+
+# Simulation Basics
+
+Now that we can roll dice and have our tools loaded, let's explore one of the most powerful techniques in data science: **simulation**. Simulation allows us to understand complex systems by running many trials and observing the patterns that emerge.
+
+Our dice rolling function gives us a perfect starting point to learn simulation concepts. We'll use it to answer questions like "Are our dice really fair?" and "What happens when we roll dice thousands of times?"
+
+## The Power of Repetition
+
+Let's start with our dice rolling function from earlier:
+
+```{r}
+roll2 <- function(bones = 1:6) {
+  dice = sample(bones, size = 2, replace = TRUE)
+  sum(dice)
+}
+```
+
+Rolling once gives us a single result, but that doesn't tell us much about the overall behavior of our dice. What we really want to know is: **What pattern emerges when we roll many times?**
+
+## Meet `replicate()`
+
+R provides a built-in function called `replicate()` that makes it easy to repeat any operation many times. Let's look at its help page to understand how it works:
+
+```{r eval=FALSE}
+help("replicate")
+```
+
+The `replicate()` function takes two main arguments:
+- `n`: the number of times to repeat the operation
+- `expr`: the expression (code) to repeat
+
+Let's try it with our dice:
+
+```{r}
+# Roll our dice 10 times
+rolls_10 <- replicate(n = 10, roll2())
+rolls_10
+```
+
+Each time you run this code, you'll get different results because we're sampling randomly. That's exactly what we want!
+
+## Understanding Our Results
+
+The `replicate()` function returns a **vector** containing all the results. Let's explore what our 10 rolls tell us:
+
+```{r}
+# Basic information about our rolls
+length(rolls_10)  # How many rolls?
+mean(rolls_10)    # Average result
+min(rolls_10)     # Lowest sum
+max(rolls_10)     # Highest sum
+```
+
+But 10 rolls isn't very many. What happens if we increase the number of trials?
+
+```{r}
+# Roll 100 times
+rolls_100 <- replicate(n = 100, roll2())
+
+# Look at the first few results
+head(rolls_100)
+
+# Summary statistics
+summary(rolls_100)
+```
+
+## The Magic of Large Numbers
+
+As we increase our sample size, something interesting happens. The average starts to converge toward the theoretical expectation. Let's see this in action:
+
+```{r}
+# Compare different sample sizes
+sample_sizes <- c(10, 100, 1000, 10000)
+
+for(n in sample_sizes) {
+  rolls <- replicate(n, roll2())
+  avg <- mean(rolls)
+  cat("Sample size:", n, "- Average:", round(avg, 2), "\n")
+}
+```
+
+Notice how the average gets closer to 7 (the theoretical expected value for two fair dice) as we increase the sample size? This demonstrates the **Law of Large Numbers**, one of the fundamental principles in statistics.
+
+## Checking if Our Dice Are Fair
+
+If our dice are truly fair, we should see each possible sum with its expected frequency. For two six-sided dice, the possible sums range from 2 to 12, but they're not equally likely:
+
+- Sum of 7: Can occur 6 ways (1+6, 2+5, 3+4, 4+3, 5+2, 6+1)
+- Sum of 2: Can occur 1 way (1+1)
+- Sum of 12: Can occur 1 way (6+6)
+
+Let's generate a large sample and examine the distribution:
+
+```{r}
+# Generate a large sample
+large_sample <- replicate(n = 10000, roll2())
+
+# Count how often each sum appears
+table(large_sample)
+```
+
+We can also calculate proportions to see the relative frequencies:
+
+```{r}
+# Convert counts to proportions
+prop.table(table(large_sample))
+```
+
+## Saving Our Results
+
+Since generating large samples can take time, it's often useful to save our results for later analysis:
+
+```{r eval=FALSE}
+# Save our simulation results
+write.csv(
+  data.frame(roll_result = large_sample), 
+  file = "dice_simulation_10k.csv", 
+  row.names = FALSE
+)
+```
+
+We can then read these results back later:
+
+```{r eval=FALSE}
+# Read back our saved results
+saved_rolls <- read.csv("dice_simulation_10k.csv")
+head(saved_rolls)
+```
+
+## Practical Applications
+
+This simulation approach isn't just for dice games. You can use the same principles to:
+
+- Test statistical models
+- Estimate probabilities for complex scenarios  
+- Validate theoretical calculations
+- Generate synthetic data for testing
+
+## Key Takeaways
+
+1. **Simulation reveals patterns**: Single trials are unpredictable, but many trials show clear patterns
+2. **Sample size matters**: Larger samples give more reliable estimates  
+3. **`replicate()` is your friend**: It makes running many trials easy
+4. **Save your work**: Large simulations take time, so save results for later analysis
+
+## Exercise
+
+Try modifying the `roll2()` function to create weighted dice (hint: look at the `prob` argument in the `sample()` function). Then use simulation to verify that your weighting works as expected.
+
+```{r eval=FALSE}
+# Your weighted dice function here
+roll2_weighted <- function(bones = 1:6) {
+  # Add weighting logic
+}
+
+# Test with simulation
+weighted_results <- replicate(n = 1000, roll2_weighted())
+table(weighted_results)
+```
+
+In our next chapter, we'll learn how to visualize these simulation results to make the patterns even clearer!

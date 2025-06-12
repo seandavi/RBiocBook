@@ -1,8 +1,9 @@
 ---
-title: "ATAC-Seq with Bioconductor"
 bibliography: atac.bib
 link-citations: true
 ---
+
+# Genomic ranges and ATAC-Seq
 
 ```{r include=FALSE}
 library(knitr)
@@ -222,26 +223,24 @@ We can plot the fragment length density (histogram) using the `density` function
 plot(density(fraglengths, bw = 0.05), xlim = c(0, 1000))
 ```
 
-*Exercise*: Adjust the `xlim`, `bw`, and try `log="y"` in the plot to highlight features present in figure \ref{fig:flgreenleaf}.
-
 And for fun, the ggplot2 version:
 
 ```{r}
 library(dplyr)
 library(ggplot2)
 fragLenPlot <- table(fraglengths) %>%
-    data.frame() %>%
+    data.frame() |>
     rename(
         InsertSize = fraglengths,
         Count = Freq
-    ) %>%
+    ) |>
     mutate(
         InsertSize = as.numeric(as.vector(InsertSize)),
         Count = as.numeric(as.vector(Count))
-    ) %>%
+    ) |>
     ggplot(aes(x = InsertSize, y = Count)) +
     geom_line()
-print(fragLenPlot + theme_bw() + lims(x = c(-1, 250)))
+print(fragLenPlot + theme_bw() + lims(x = c(-1, 500)))
 ```
 
 Knowing that the nucleosome-free regions will have insert sizes shorter than one nucleosome, we can isolate the read pairs that have that characteristic.
