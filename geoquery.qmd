@@ -85,6 +85,15 @@ pca_df$Type=factor(colData(se)[,'cancer.type.ch1'])
 pca_df$Normal = factor(colData(se)[,'normal.ch1'])
 ```
 
+We can take a look at the variance explained by each principal component as a plot.
+
+```{r pca_variance,echo=TRUE}
+library(ggplot2)
+pca_var <- pca_results$sdev^2 / sum(pca_results $sdev^2)
+plot(pca_var, xlab = "Principal Component", ylab = "Variance Explained", 
+     main = "Variance Explained by Principal Components", type = "b")
+```
+
 Now, we are going to plot the results of the PCA, coloring the points by cancer type 
 and using different shapes for normal and tumor samples. 
 
