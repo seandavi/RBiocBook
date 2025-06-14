@@ -513,11 +513,12 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   <li><a href="#creating-flanking-regions" id="toc-creating-flanking-regions" class="nav-link" data-scroll-target="#creating-flanking-regions"><span class="header-section-number">24.9.3</span> Creating Flanking Regions</a></li>
   </ul>
 </li>
+  <li><a href="#coverage" id="toc-coverage" class="nav-link" data-scroll-target="#coverage"><span class="header-section-number">24.10</span> Coverage</a></li>
   <li>
-<a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways"><span class="header-section-number">24.10</span> Key Takeaways</a>
+<a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways"><span class="header-section-number">24.11</span> Key Takeaways</a>
   <ul class="collapse">
-<li><a href="#common-use-cases" id="toc-common-use-cases" class="nav-link" data-scroll-target="#common-use-cases"><span class="header-section-number">24.10.1</span> Common Use Cases</a></li>
-  <li><a href="#best-practices" id="toc-best-practices" class="nav-link" data-scroll-target="#best-practices"><span class="header-section-number">24.10.2</span> Best Practices</a></li>
+<li><a href="#common-use-cases" id="toc-common-use-cases" class="nav-link" data-scroll-target="#common-use-cases"><span class="header-section-number">24.11.1</span> Common Use Cases</a></li>
+  <li><a href="#best-practices" id="toc-best-practices" class="nav-link" data-scroll-target="#best-practices"><span class="header-section-number">24.11.2</span> Best Practices</a></li>
   </ul>
 </li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/genomic_ranges_tutorial.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/genomic_ranges_tutorial.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
@@ -1049,8 +1050,80 @@ Width verification:</code></pre>
 <pre><code>Extended ±1kb: chr2:238304324-238306539 </code></pre>
 </div>
 </div>
-</section></section><section id="key-takeaways" class="level2" data-number="24.10"><h2 data-number="24.10" class="anchored" data-anchor-id="key-takeaways">
-<span class="header-section-number">24.10</span> Key Takeaways</h2>
+</section></section><section id="coverage" class="level2" data-number="24.10"><h2 data-number="24.10" class="anchored" data-anchor-id="coverage">
+<span class="header-section-number">24.10</span> Coverage</h2>
+<p>Coverage refers to the number of times a genomic region is covered by ranges on a chromosome. A common use case is calculating coverage from ChIP-seq data, where we want to know how many reads overlap with each peak or for doing “peak calling” analysis.</p>
+<p>We can make a toy example by simulating random reads of length 50 bp across a chromosome and then calculating coverage.</p>
+<div class="cell">
+<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Simulate random reads on chromosome 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>  <span class="co"># For reproducibility</span></span>
+<span><span class="va">chrom_length</span> <span class="op">&lt;-</span> <span class="fl">1000000</span>  <span class="co"># Length of chromosome 1</span></span>
+<span><span class="va">num_reads</span> <span class="op">&lt;-</span> <span class="fl">100000</span></span>
+<span><span class="va">random_starts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">chrom_length</span>, <span class="va">num_reads</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">random_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span>seqnames <span class="op">=</span> <span class="st">"chr1"</span>,</span>
+<span>                         ranges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span>start <span class="op">=</span> <span class="va">random_starts</span>, end <span class="op">=</span> <span class="va">random_starts</span> <span class="op">+</span> <span class="fl">49</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">random_reads</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 100000 ranges and 0 metadata columns:
+           seqnames        ranges strand
+              &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt;
+       [1]     chr1   61413-61462      *
+       [2]     chr1   54425-54474      *
+       [3]     chr1 623844-623893      *
+       [4]     chr1   74362-74411      *
+       [5]     chr1   46208-46257      *
+       ...      ...           ...    ...
+   [99996]     chr1 259506-259555      *
+   [99997]     chr1 207170-207219      *
+   [99998]     chr1 663489-663538      *
+   [99999]     chr1 886082-886131      *
+  [100000]     chr1 933222-933271      *
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
+</div>
+</div>
+<p>We are now ready to calculate the coverage of these random reads across the chromosome. The <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> function from the <code>GenomicRanges</code> package computes the coverage of ranges in a <code>GRanges</code> object.</p>
+<div class="cell">
+<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">random_coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">random_reads</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RleList of length 1
+$chr1
+integer-Rle of length 1000031 with 173049 runs
+  Lengths:  7  1  6  3  8  8  1  1 22  1  4 ...  8 12 17  6  2  3  2  8 29  8
+  Values :  0  1  3  4  5  6  7  8  9  8  6 ...  4  5  4  5  4  5  4  3  2  1</code></pre>
+</div>
+</div>
+<p>To look at the data in a more interpretable way, we can convert the coverage object to a data frame and visualize it.</p>
+<div class="cell">
+<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">coverage_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coverage_df</span>,<span class="fl">20</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   group group_name value
+1      1       chr1     0
+2      1       chr1     0
+3      1       chr1     0
+4      1       chr1     0
+5      1       chr1     0
+6      1       chr1     0
+7      1       chr1     0
+8      1       chr1     1
+9      1       chr1     3
+10     1       chr1     3
+11     1       chr1     3
+12     1       chr1     3
+13     1       chr1     3
+14     1       chr1     3
+15     1       chr1     4
+16     1       chr1     4
+17     1       chr1     4
+18     1       chr1     5
+19     1       chr1     5
+20     1       chr1     5</code></pre>
+</div>
+</div>
+</section><section id="key-takeaways" class="level2" data-number="24.11"><h2 data-number="24.11" class="anchored" data-anchor-id="key-takeaways">
+<span class="header-section-number">24.11</span> Key Takeaways</h2>
 <p>This tutorial demonstrated several important concepts:</p>
 <ol type="1">
 <li>
@@ -1066,8 +1139,8 @@ Width verification:</code></pre>
 <li>
 <strong>Advanced analysis</strong>: Finding overlaps and performing grouped operations</li>
 </ol>
-<section id="common-use-cases" class="level3" data-number="24.10.1"><h3 data-number="24.10.1" class="anchored" data-anchor-id="common-use-cases">
-<span class="header-section-number">24.10.1</span> Common Use Cases</h3>
+<section id="common-use-cases" class="level3" data-number="24.11.1"><h3 data-number="24.11.1" class="anchored" data-anchor-id="common-use-cases">
+<span class="header-section-number">24.11.1</span> Common Use Cases</h3>
 <ul>
 <li>
 <strong>Peak calling analysis</strong>: Examining ChIP-seq peaks, ATAC-seq peaks, etc.</li>
@@ -1079,8 +1152,8 @@ Width verification:</code></pre>
 <strong>Motif analysis</strong>: Creating sequences around peak centers for motif discovery</li>
 <li>
 <strong>Visualization</strong>: Preparing data for genome browser tracks or custom plots</li>
-</ul></section><section id="best-practices" class="level3" data-number="24.10.2"><h3 data-number="24.10.2" class="anchored" data-anchor-id="best-practices">
-<span class="header-section-number">24.10.2</span> Best Practices</h3>
+</ul></section><section id="best-practices" class="level3" data-number="24.11.2"><h3 data-number="24.11.2" class="anchored" data-anchor-id="best-practices">
+<span class="header-section-number">24.11.2</span> Best Practices</h3>
 <ol type="1">
 <li>Always check coordinate systems (0-based vs 1-based)</li>
 <li>Verify chromosome naming conventions match your reference genome</li>
