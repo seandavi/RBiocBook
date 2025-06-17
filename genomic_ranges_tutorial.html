@@ -419,8 +419,14 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./ranges_exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./atac-seq/atac-seq.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-Seq</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-Seq</span></span></a>
   </div>
 </li>
       </ul>
@@ -560,7 +566,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 14, 2025</p>
+      <p class="date-modified">June 16, 2025</p>
     </div>
   </div>
     
@@ -1059,9 +1065,10 @@ Width verification:</code></pre>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>  <span class="co"># For reproducibility</span></span>
 <span><span class="va">chrom_length</span> <span class="op">&lt;-</span> <span class="fl">1000000</span>  <span class="co"># Length of chromosome 1</span></span>
 <span><span class="va">num_reads</span> <span class="op">&lt;-</span> <span class="fl">100000</span></span>
-<span><span class="va">random_starts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">chrom_length</span>, <span class="va">num_reads</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">read_length</span> <span class="op">&lt;-</span> <span class="fl">50</span>  <span class="co"># Length of each read</span></span>
+<span><span class="va">random_starts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="va">chrom_length</span> <span class="op">-</span> <span class="va">read_length</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">num_reads</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">random_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span>seqnames <span class="op">=</span> <span class="st">"chr1"</span>,</span>
-<span>                         ranges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span>start <span class="op">=</span> <span class="va">random_starts</span>, end <span class="op">=</span> <span class="va">random_starts</span> <span class="op">+</span> <span class="fl">49</span><span class="op">)</span><span class="op">)</span></span>
+<span>                         ranges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span>start <span class="op">=</span> <span class="va">random_starts</span>, end <span class="op">=</span> <span class="va">random_starts</span> <span class="op">+</span> <span class="va">read_length</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">random_reads</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 100000 ranges and 0 metadata columns:
@@ -1073,30 +1080,30 @@ Width verification:</code></pre>
        [4]     chr1   74362-74411      *
        [5]     chr1   46208-46257      *
        ...      ...           ...    ...
-   [99996]     chr1 259506-259555      *
-   [99997]     chr1 207170-207219      *
-   [99998]     chr1 663489-663538      *
-   [99999]     chr1 886082-886131      *
-  [100000]     chr1 933222-933271      *
+   [99996]     chr1 663489-663538      *
+   [99997]     chr1 886082-886131      *
+   [99998]     chr1 933222-933271      *
+   [99999]     chr1 486340-486389      *
+  [100000]     chr1 177556-177605      *
   -------
   seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
 <p>We are now ready to calculate the coverage of these random reads across the chromosome. The <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> function from the <code>GenomicRanges</code> package computes the coverage of ranges in a <code>GRanges</code> object.</p>
 <div class="cell">
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">random_coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">random_reads</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">random_coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">random_reads</span>, width <span class="op">=</span> <span class="va">chrom_length</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>RleList of length 1
 $chr1
-integer-Rle of length 1000031 with 173049 runs
-  Lengths:  7  1  6  3  8  8  1  1 22  1  4 ...  8 12 17  6  2  3  2  8 29  8
-  Values :  0  1  3  4  5  6  7  8  9  8  6 ...  4  5  4  5  4  5  4  3  2  1</code></pre>
+integer-Rle of length 1000000 with 173047 runs
+  Lengths:  7  1  6  3  8  8  1  1 22  1  4 ...  3  1  2  8 12 23  5  2  8  6
+  Values :  0  1  3  4  5  6  7  8  9  8  6 ...  3  2  3  4  5  4  3  2  1  0</code></pre>
 </div>
 </div>
 <p>We can visualize the coverage of the random reads on chromosome 1. The <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> function returns a <code>Rle</code> object, which is a run-length encoding of the coverage values.</p>
 <div class="cell">
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10000</span><span class="op">]</span>, main<span class="op">=</span><span class="st">"Coverage of Random Reads on Chromosome 1"</span>, xlab<span class="op">=</span><span class="st">"Position"</span>, ylab<span class="op">=</span><span class="st">"Coverage"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10000</span><span class="op">]</span>, main<span class="op">=</span><span class="st">"Coverage of Random Reads on Chromosome 1"</span>, xlab<span class="op">=</span><span class="st">"Position"</span>, ylab<span class="op">=</span><span class="st">"Coverage"</span>, type<span class="op">=</span><span class="st">"h"</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="genomic_ranges_tutorial_files/figure-html/coverage-plot-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1104,32 +1111,15 @@ integer-Rle of length 1000031 with 173049 runs
 </div>
 </div>
 </div>
-<p>To look at the data in a more interpretable way, we can convert the coverage object to a data frame and visualize it.</p>
+<p>This plot shows the coverage of random reads across the first 10,000 bases of chromosome 1. The y-axis represents the number of reads covering each position, while the x-axis represents the genomic positions.</p>
 <div class="cell">
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">coverage_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coverage_df</span>,<span class="fl">20</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   group group_name value
-1      1       chr1     0
-2      1       chr1     0
-3      1       chr1     0
-4      1       chr1     0
-5      1       chr1     0
-6      1       chr1     0
-7      1       chr1     0
-8      1       chr1     1
-9      1       chr1     3
-10     1       chr1     3
-11     1       chr1     3
-12     1       chr1     3
-13     1       chr1     3
-14     1       chr1     3
-15     1       chr1     4
-16     1       chr1     4
-17     1       chr1     4
-18     1       chr1     5
-19     1       chr1     5
-20     1       chr1     5</code></pre>
+<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate coverage density</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main<span class="op">=</span><span class="st">"Coverage Density"</span>, xlab<span class="op">=</span><span class="st">"Coverage"</span>, ylab<span class="op">=</span><span class="st">"Frequency"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="genomic_ranges_tutorial_files/figure-html/coverage-density-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section><section id="key-takeaways" class="level2" data-number="24.11"><h2 data-number="24.11" class="anchored" data-anchor-id="key-takeaways">
