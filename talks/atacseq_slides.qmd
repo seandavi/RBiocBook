@@ -1,0 +1,353 @@
+---
+title: "Chromatin Accessibility and ATAC-seq"
+subtitle: "A Primer for C-DATA-2025"
+author: 
+  name: "Sean Davis, MD, PhD"
+  affiliation: "University of Colorado Anschutz Medical Campus"
+date: 2025-06-17
+date-format: "MMMM D, YYYY"
+venue: "C-DATA-2025, Cold Spring Harbor Laboratory"
+format: 
+  revealjs:
+    theme: [default, styles.scss]
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    width: 1200
+    height: 800
+    margin: 0.05
+    scss: styles.scss
+execute:
+  echo: true
+  warning: false
+  message: false
+bibliography: references.bib
+title-slide-attributes:
+  data-background-image: "images/atacseq_title_bg.png"
+  data-background-size: cover
+  data-background-opacity: "1"
+---
+
+# Measuring Chromatin Accessibility
+
+## Early Chromatin Accessibility
+
+![The first DNase-seq experiment identified open chromatin regions in a genome-wide manner. [@boyleHighresolutionMappingCharacterization2008]](boyle_dnase_title_page.png){#fig-boyle-dnase-seq}
+
+## DNAse-seq Signal
+
+![Successive zoom-in of original DNAse-seq experiment. ](2025-06-17-00-17-36.png){#fig-dnase-seq-signal}
+
+## DNAse-seq Peaks
+
+![Positions of DNase-seq peaks across the genome.](2025-06-17-00-23-20.png){#fig-dnase-seq-peaks}
+
+## DNAse-seq Peaks and Signal
+
+![Relationship of DNAse-seq peaks and gene expression.](2025-06-17-00-25-12.png){#fig-dnase-seq-peaks-and-expression}
+
+## Chromatin Accessibility Profiling
+
+| Method | Cell Number | Time | Nucleosome Info | Reference |
+|--------|-------------|------|-----------------|-----------|
+| **ATAC-seq** | 50,000 | ~3 hours | ✓ | [@buenrostroTranspositionNativeChromatin2013] |
+| DNase-seq | 50 million | ~3 days | ✗ | [@boyleHighresolutionMappingCharacterization2008] |
+| FAIRE-seq | 25 million | ~5 days | ✗ | [@giresiIsolationActiveRegulatory2009] |
+
+# Introduction to ATAC-Seq
+
+
+## 
+
+![ATAC-seq first described in @buenrostroTranspositionNativeChromatin2013.](buenrostro_cover_page.png)
+
+## What is ATAC-seq?
+
+::: {.incremental}
+- **A**ssay for **T**ransposase-**A**ccessible **C**hromatin using **seq**uencing
+- Maps genome-wide chromatin accessibility
+- Identifies open chromatin regions where regulatory proteins can bind
+- Developed by Buenrostro et al. (2013) [@buenrostroTranspositionNativeChromatin2013]
+:::
+
+## ATAC-Seq Overview
+
+![Assay for transposase-accessible chromatin sequencing (ATAC-Seq) employs a hyperactive form of Tn5 transposase to identify regions of open chromatin, which are important for global epigenetic control of gene expression. Tn5 simultaneously cleaves and adds adapters to nucleosome-free regions of DNA, priming them for sequencing.](https://www.genewiz.com/wp-content/uploads/2024/07/ATAC-Seq_Overview.png){#fig-atac-seq-sequencing}
+
+
+## Key Applications
+
+::: {.incremental}
+- **Regulatory element identification**: Promoters, enhancers, silencers
+- **Transcription factor binding**: Footprinting analysis
+- **Chromatin state mapping**: Active vs inactive regions
+- **Developmental studies**: Differentiation and cell fate decisions
+- **Disease research**: Cancer epigenomics, genetic variants
+:::
+
+
+
+# Data Analysis Pipeline
+
+## Raw Data Processing
+
+::: {.incremental}
+1. **Quality Assessment**: FastQC, MultiQC
+2. **Adapter Trimming**: Trimmomatic, cutadapt
+3. **Alignment**: BWA-MEM, Bowtie2 [@langmead2012fast]
+4. **Post-alignment filtering**: Remove duplicates, mitochondrial reads
+5. **File format conversion**: SAM → BAM → BED
+:::
+
+```bash
+# Example alignment command
+bwa mem -t 8 genome.fa sample_R1.fastq.gz sample_R2.fastq.gz | \
+samtools sort -@ 8 -o sample.bam
+```
+
+
+# Quality Control Metrics
+
+
+## Quality Control Metrics {.smaller}
+
+* Experiments should have two or more biological replicates. Assays performed using EN-TEx samples may be exempted due to limited availability of experimental material, but at least two technical replicates are required. 
+* Each replicate should have 25 million non-duplicate, non-mitochondrial aligned reads for single-end sequencing and 50 million for paired-ended sequencing (i.e. 25 million fragments, regardless of sequencing run type). 
+* The alignment rate, or percentage of mapped reads, should be greater than 95%, though values >80% may be acceptable. 
+* The percentage of reads mapping to the mitochondrial genome should be less than 10%.
+* [Transcription Start Site (TSS) enrichment](https://www.encodeproject.org/data-standards/terms/#enrichment)
+
+## Library Complexity {.smaller}
+
+### PCR Bottlenecking Coefficient 1 (PBC1)
+
+PBC1=${M_1/M_{DISTINCT}}$
+
+$M_1$: number of genomic locations where exactly one read maps uniquely
+
+$M_{DISTINCT}$: number of distinct genomic locations to which some read maps uniquely
+
+### PCR Bottlenecking Coefficient 2 (PBC2)
+
+PBC2=$M_1/M_2$
+
+$M_1$: number of genomic locations where only one read maps uniquely
+
+$M_2$: number of genomic locations where two reads map uniquely
+
+### Non-Redundant Fraction (NRF)
+
+NRF = ${R_{distinct}}/{R_{total}}$
+
+$R_{distinct}$: number of distinct genomic locations to which some read maps uniquely
+
+$R_{total}$: total number of reads
+
+## Common Pitfalls and Solutions
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| Low library complexity | Over-amplification | Optimize PCR cycles |
+| High mitochondrial reads | Poor nuclei isolation | Improve protocol |
+| Poor TSS enrichment | Degraded chromatin | Fresh samples, cold buffers |
+| Batch effects | Processing variation | Randomization, ComBat-seq |
+| Low reproducibility | Technical noise | Increase replicates |
+
+# Core Analysis Approaches
+
+## MACS2 Parameters for ATAC-seq
+
+MACS2 is a widely used peak calling tool for ATAC-seq data. The following parameters are commonly used:
+
+```bash
+# Standard ATAC-seq peak calling
+macs2 callpeak -t sample.bam \
+               -f BAMPE \
+               -n sample \
+               -q 0.01 \
+               ...
+```
+
+## Read shifting
+
+![The positive strand reads are shifted by 4 bp and the negative strand by 5 bp due to the 9 base offset introduced by Tn5 transposase. ](https://media.springernature.com/m685/springer-static/image/art%3A10.1038%2Fs41596-022-00692-9/MediaObjects/41596_2022_692_Fig1_HTML.png)
+
+## Differential Accessibility Analysis
+
+![Differential Accessibility.](https://stuartlab.org/signac/articles/pbmc_vignette_files/figure-html/unnamed-chunk-44-1.png){#fig-differential-accessibility}
+
+**Differential binding detection**: DESeq2, edgeR, csaw, DiffBind
+
+::: {.center}
+Replicates required!
+:::
+
+## Data preparation
+
+::: {.incremental}
+- Region creation
+- Count matrix generation
+- Normalization
+- Differential analysis
+
+```{r echo=FALSE}
+mat = matrix(sample(0:1000,50,replace=TRUE),nc=5)
+rownames(mat) = paste0("Region_", 1:10)
+colnames(mat) = paste0("Sample_", 1:5)
+df = as.data.frame(mat)
+df
+```
+:::
+
+## Peak annotation
+
+![](https://media.springernature.com/full/springer-static/image/art%3A10.1186%2F1471-2105-11-237/MediaObjects/12859_2009_Article_3694_Fig8_HTML.jpg){width="600px" fig-align="center"}
+
+
+- <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-237>
+- [ChipPeakAnno](https://bioconductor.org/packages/ChipPeakAnno/) package
+
+## Other 
+
+- Motif Analysis
+- Functional Annotation
+
+**Annotation Strategies**
+
+- **Promoter assignment**: TSS ± 2kb
+- **Enhancer prediction**: Distal peaks + H3K27ac
+- **Gene assignment**: Nearest gene, regulatory domains
+- **Pathway analysis**: GO, KEGG, Reactome
+
+# Single-cell ATAC-seq (scATAC-seq)
+
+## Overview of scATAC-seq
+
+```{mermaid}
+%%| fig-cap: "Wet-lab workflow for single-cell ATAC-seq (scATAC-seq)."
+%%| fig-align: "center"
+%%| echo: false
+flowchart TD
+    A[Single-cell ATAC-seq] --> B[Cell Isolation]
+    B --> C[Transposition with Tn5]
+    C --> D[Library Preparation]
+    D --> E[Sequencing]
+```
+
+## scATAC-seq Workflow
+
+```{mermaid}
+%%| fig-cap: "Computational workflow for single-cell ATAC-seq (scATAC-seq)."
+%%| echo: false
+%%| fig-align: "center"
+flowchart TD
+    A[scATAC-seq Data] --> B[Quality Control]
+    B --> C[Alignment]
+    C --> D[Binning and Counting]
+    D --> E[Cell Barcode Assignment]
+    E --> F[Dimensionality Reduction]
+    F --> G[Clustering]
+```
+
+## Clustering
+
+![Assigning cell types to clusters involves "mapping" back into RNA space. Multiple approaches exist that utilize biological knowledge or ATAC-seq signal information. ](https://www.activemotif.com/uploads/images/web_site/services-hp-dec2015/scATAC-kidney-figure-1-v2.png){fig-align="center"}
+
+## Aggregating Reads from Single Cells
+
+![Aggregating reads to generate "pseudobulk" samples used for peak-calling, differential analysis, and cell type identification.](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs43586-020-00008-9/MediaObjects/43586_2020_8_Fig1_HTML.png){fig-align="center"}
+
+
+## Full stack analysis
+
+**Key Tools**: 
+
+- ArchR
+- Signac
+- SnapATAC
+- And the list goes on...
+
+# Practical Considerations
+
+## Experimental Design Principles
+
+::: {.incremental}
+- **Biological replicates**: Minimum 3 per condition
+- **Technical replicates**: Generally not necessary
+- **Batch effects**: Randomize sample processing
+- **Cell number**: 50,000 optimal for bulk ATAC-seq
+:::
+
+## Computational Infrastructure
+
+::: {.columns}
+::: {.column width="50%"}
+**Hardware Requirements**
+
+- **CPU**: 16+ cores recommended
+- **RAM**: 32+ GB for human genome
+- **Storage**: 1+ TB for large projects
+- **GPU**: Optional for deep learning
+:::
+
+::: {.column width="50%"}
+**Software Ecosystem**
+
+- **Alignment**: BWA-MEM, Bowtie2
+- **Peak calling**: MACS2, HOMER
+- **Visualization**: IGV, deepTools
+- **Analysis**: R/Bioconductor, Python
+:::
+:::
+
+## Workflow Management
+
+```bash
+# Example Snakemake workflow
+rule all:
+    input:
+        "results/multiqc_report.html",
+        "results/differential_peaks.bed"
+
+rule trim_adapters:
+    input:
+        r1="data/{sample}_R1.fastq.gz",
+        r2="data/{sample}_R2.fastq.gz"
+    output:
+        r1="trimmed/{sample}_R1_trimmed.fastq.gz",
+        r2="trimmed/{sample}_R2_trimmed.fastq.gz"
+    shell:
+        "trimmomatic PE {input.r1} {input.r2} {output.r1} {output.r2}"
+
+rule align:
+    input:
+        r1="trimmed/{sample}_R1_trimmed.fastq.gz",
+        r2="trimmed/{sample}_R2_trimmed.fastq.gz"
+    output:
+        "aligned/{sample}.bam"
+    shell:
+        "bwa mem genome.fa {input.r1} {input.r2} | samtools sort -o {output}"
+```
+
+**Tools**: Snakemake, Nextflow, WDL [@Snakemak56:online]
+
+## Reproducibility Best Practices
+
+::: {.incremental}
+- **Version control**: Git for code, DVC for data
+- **Environment management**: Conda, Docker, Singularity
+- **Documentation**: Literate programming with R Markdown/Quarto
+- **Code sharing**: GitHub, Zenodo for long-term archival
+- **Data repositories**: GEO, SRA, ENCODE portal
+:::
+
+
+
+## Online Resources
+
+- **ENCODE Portal**: https://www.encodeproject.org/
+- **Bioconductor workflows**: https://bioconductor.org/packages/ATACseqQC/
+- **Galaxy Training**: https://training.galaxyproject.org/training-material/topics/epigenetics/
+- **nf-core/atacseq**: https://nf-co.re/atacseq
+
+## References

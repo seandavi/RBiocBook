@@ -246,14 +246,14 @@ print(fragLenPlot + theme_bw() + lims(x = c(-1, 500)))
 Knowing that the nucleosome-free regions will have insert sizes shorter than one nucleosome, we can isolate the read pairs that have that characteristic.
 
 ```{r}
-gl_nf <- greenleaf[mcols(GenomicAlignments::first(greenleaf))$isize < 100]
+gl_nf <- greenleaf[mcols(GenomicAlignments::first(greenleaf))$isize < 147]
 ```
 
-And the mononucleosome reads will be between 187 and 250 base pairs for insert size/fragment length.
+And the mononucleosome reads will be between 147 and 294 base pairs for insert size/fragment length.
 
 ```{r}
-gl_mn <- greenleaf[mcols(GenomicAlignments::first(greenleaf))$isize > 187 &
-    mcols(GenomicAlignments::first(greenleaf))$isize < 250]
+gl_mn <- greenleaf[mcols(GenomicAlignments::first(greenleaf))$isize > 147 &
+    mcols(GenomicAlignments::first(greenleaf))$isize < 294]
 ```
 
 Finally, we expect nucleosome-free reads to be enriched near the TSS while mononucleosome reads should not be. We will use the `r Biocpkg('heatmaps')` package to take a look at these two sets of reads with respect to the tss of the human genome.
@@ -267,22 +267,21 @@ seqlevels(proms, pruning.mode = "coarse") <- seqs # only chromosome 21 and 22
 
 Take a look at the `r Biocpkg('heatmaps')` package vignette to learn more about the heatmaps package capabilities.
 
-```{r fig.cap = "Enrichment of nucleosome free reads just upstream of the TSS."}
+```{r }
 library(heatmaps)
 gl_nf_hm <- CoverageHeatmap(proms, coverage(gl_nf), coords = c(-250, 250))
 label(gl_nf_hm) <- "NucFree"
 scale(gl_nf_hm) <- c(0, 10)
-plotHeatmapMeta(gl_nf_hm)
 ```
 
-```{r fig.cap = "Depletion of nucleosome free reads just upstream of the TSS."}
+```{r fig.cap = "Enrichment of nucleosome-free reads and depletion of mononucleosome reads around the TSS."}
 gl_mn_hm <- CoverageHeatmap(proms, coverage(gl_mn), coords = c(-250, 250))
 label(gl_mn_hm) <- "MonoNuc"
 scale(gl_mn_hm) <- c(0, 10)
-plotHeatmapMeta(gl_mn_hm)
+plotHeatmapMeta(list(gl_nf_hm, gl_mn_hm))
 ```
 
-```{r fig.cap = "Comparison of signals at TSS. Mononucleosome data on the left, nucleosome-free on the right."}
+```{r fig.cap = "Comparison of signals at TSS. Mononucleosome data on the left, nucleosome-free on the right. Both plots are scaled to the same range."}
 plotHeatmapList(list(gl_mn_hm, gl_nf_hm))
 ```
 
