@@ -615,7 +615,7 @@ window.Quarto = {
 <span class="header-section-number">28.1</span> Introduction</h2>
 <p>Single-cell RNA sequencing (scRNA-seq) is a powerful technique that allows us to measure gene expression in individual cells rather than bulk tissue samples. This capability has revolutionized our understanding of cellular heterogeneity, developmental processes, and disease mechanisms. Unlike traditional bulk RNA-seq, which provides an average expression profile across all cells in a sample, scRNA-seq reveals the unique molecular signatures of individual cells, enabling identification of distinct cell types, states, and trajectories.</p>
 <p>This tutorial will walk through a typical scRNA-seq analysis workflow using R and the Bioconductor ecosystem. We’ll cover data loading, quality control, normalization, dimensionality reduction, clustering, and visualization - the fundamental steps that transform raw sequencing data into biological insights.</p>
-</section><section id="setup-and-data-loading" class="level2" data-number="28.2"><h2 data-number="28.2" class="anchored" data-anchor-id="setup-and-data-loading">
+</section><section id="setup-and-data-loading" class="level2 page-columns page-full" data-number="28.2"><h2 data-number="28.2" class="anchored" data-anchor-id="setup-and-data-loading">
 <span class="header-section-number">28.2</span> Setup and Data Loading</h2>
 <section id="loading-essential-libraries" class="level3" data-number="28.2.1"><h3 data-number="28.2.1" class="anchored" data-anchor-id="loading-essential-libraries">
 <span class="header-section-number">28.2.1</span> Loading Essential Libraries</h3>
@@ -636,7 +636,7 @@ window.Quarto = {
 <strong>scater</strong>: Offers tools for quality control, visualization, and exploratory data analysis. See <span class="citation" data-cites="McCarthy2017scater">McCarthy et al. (<a href="../references.html#ref-McCarthy2017scater" role="doc-biblioref">2017</a>)</span>.</li>
 </ul>
 <p>Single-cell data has unique characteristics (sparsity, high dimensionality, technical noise) that require specialized tools. These packages form the backbone of the Bioconductor single-cell analysis ecosystem and provide methods that account for the specific challenges of single-cell data.</p>
-</section><section id="exploring-available-datasets" class="level3" data-number="28.2.2"><h3 data-number="28.2.2" class="anchored" data-anchor-id="exploring-available-datasets">
+</section><section id="exploring-available-datasets" class="level3 page-columns page-full" data-number="28.2.2"><h3 data-number="28.2.2" class="anchored" data-anchor-id="exploring-available-datasets">
 <span class="header-section-number">28.2.2</span> Exploring Available Datasets</h3>
 <p>We are going to use the <code>scRNAseq</code> package to access a curated collection of single-cell datasets. This package provides a convenient way to load and explore publicly available datasets that have been processed and annotated.</p>
 <div class="cell">
@@ -726,7 +726,15 @@ Abstract: Zeisel Brain Dataset
 <div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">scRNAseq</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/scRNAseq/man/ZeiselBrainData.html">ZeiselBrainData</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>What is the <code>sce</code> object? It is a <code>SingleCellExperiment</code> object, which is a data structure specifically designed for single-cell RNA-seq data. As with other Bioconductor data structures, it is built on top of the <code>SummarizedExperiment</code> class, which allows us to store not only the count matrix but also metadata about cells and features (genes).</p>
+<p>What is the <code>sce</code> object? It is a <code>SingleCellExperiment</code> object, which is a data structure specifically designed for single-cell RNA-seq data. As with other Bioconductor data structures, it is built on top of the <code>SummarizedExperiment</code> class (see <a href="#fig-scRNAseq-sce" class="quarto-xref">Figure&nbsp;<span>28.1</span></a>), which allows us to store not only the count matrix but also metadata about cells and features (genes).</p>
+<div id="fig-scRNAseq-sce" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-scRNAseq-sce-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41592-019-0654-x/MediaObjects/41592_2019_654_Fig2_HTML.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scRNAseq-sce-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.1: The SingleCellExperiment object.
+</figcaption></figure>
+</div>
 <p>Printing the <code>sce</code> object gives us a summary of the dataset:</p>
 <div class="cell">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -807,12 +815,12 @@ altExpNames(2): repeat ERCC</code></pre>
 <img src="setup_files/figure-html/fig-scRNAseq-hvg-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scRNAseq-hvg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;28.1: A plot of the mean vs variance of log-expression for all the genes in the dataset, with the highly variable genes highlighted in red. Here, the x-axis represents the mean log-expression of each gene, and the y-axis represents the variance of log-expression. The blue curve represents the trend of variance as a function of mean expression, while the red points represent the highly variable genes.
+Figure&nbsp;28.2: A plot of the mean vs variance of log-expression for all the genes in the dataset, with the highly variable genes highlighted in red. Here, the x-axis represents the mean log-expression of each gene, and the y-axis represents the variance of log-expression. The blue curve represents the trend of variance as a function of mean expression, while the red points represent the highly variable genes.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-scRNAseq-hvg" class="quarto-xref">Figure&nbsp;<span>28.1</span></a> shows the mean vs.&nbsp;variance of log-expression for all genes in the dataset, with highly variable genes highlighted in red. The blue curve represents the trend of variance as a function of mean expression, while the red points represent the highly variable genes.</p>
+<p><a href="#fig-scRNAseq-hvg" class="quarto-xref">Figure&nbsp;<span>28.2</span></a> shows the mean vs.&nbsp;variance of log-expression for all genes in the dataset, with highly variable genes highlighted in red. The blue curve represents the trend of variance as a function of mean expression, while the red points represent the highly variable genes.</p>
 <p>We next proceed to calculating PCA using the subset of highly variable genes. PCA is a linear dimensionality reduction technique that finds the directions of maximum variance in the data. It’s computationally efficient and provides a good foundation for further analysis. The first few principal components capture the most important patterns of variation in the dataset.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -881,7 +889,7 @@ Why PCA first?
 <img src="setup_files/figure-html/fig-level1-class-1.png" id="fig-level1-class" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig quarto-uncaptioned margin-caption" id="fig-level1-class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;28.2
+Figure&nbsp;28.3
 </figcaption></figure>
 </div>
 </div>
@@ -895,7 +903,7 @@ Figure&nbsp;28.2
 <img src="setup_files/figure-html/fig-level2-class-1.png" id="fig-level2-class" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig quarto-uncaptioned margin-caption" id="fig-level2-class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;28.3
+Figure&nbsp;28.4
 </figcaption></figure>
 </div>
 </div>
@@ -909,7 +917,7 @@ Figure&nbsp;28.3
 <img src="setup_files/figure-html/fig-level1-tissue-1.png" id="fig-level1-tissue" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig quarto-uncaptioned margin-caption" id="fig-level1-tissue-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;28.4
+Figure&nbsp;28.5
 </figcaption></figure>
 </div>
 </div>
