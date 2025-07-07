@@ -1,0 +1,425 @@
+# Microbiome analysis
+
+The human microbiome is a complex ecosystem of bacteria, viruses, fungi, and other microorganisms that live in and on the human body. These microorganisms play a crucial role in human health and disease, influencing everything from digestion and metabolism to immune function and mental health. Understanding the composition and function of the human microbiome is a rapidly growing area of research with implications for a wide range of fields, including medicine, agriculture, and environmental science.
+
+Microbiome analysis involves studying the microbial communities that inhabit different environments, such as the human gut, skin, mouth, and soil. The analysis of microbiome data typically involves quantifying the abundance of different microorganisms in a given sample and comparing the microbial communities across different samples or conditions. This can help researchers identify patterns, relationships, and associations between microbial communities and various factors, such as health status, diet, lifestyle, and environmental conditions.
+
+In this chapter, we will assume that the data has already been processed and cleaned, and we will focus on analyzing the microbiome data using R. 
+
+## Getting started
+
+We'll be using the `mia` package for microbiome analysis in R. The `mia` package provides a suite of tools for analyzing microbiome data, including functions for loading, processing, and visualizing microbiome data. The package is designed to work with the `SummarizedExperiment` and `TreeSummarizedExperiment` classes, which are specialized data structures for storing microbiome data in R.
+
+To get started, you'll need to install the `mia` package from GitHub using the `BiocManager` package. If you don't already have the `BiocManager` package installed, you can install it using the following command:
+
+```{r eval=FALSE}
+# Install the mia package
+BiocManager::install("microbiome/mia")
+```
+
+::: {.callout-note}
+**Note:** The `mia` package is part of the Bioconductor project, but in this case, we are installing it directly from GitHub using the `microbiome/mia` repository. This is a common practice when working with development versions of packages or with packages that are not yet available on Bioconductor. 
+
+:::
+
+Once the `mia` package is installed, you can load it into your R session using the following command:
+
+```{r message=FALSE, warning=FALSE}
+# Load the mia package
+library(mia)
+```
+
+Now that the `mia` package is loaded, we can load the microbiome dataset that we will be working with. 
+
+## Accessing microbiome datasets
+
+There are many publicly available microbiome datasets that you can use for analysis. Bioconductor provides several packages that contain curated microbiome datasets that facilitate access to and loading microbiome data into R for analysis.
+
+[curatedMetagenomicData](https://bioconductor.org/packages/curatedMetagenomicsData) is a large collection of curated human microbiome datasets, provided as TreeSE objects (Pasolli et al. 2017). The resource provides curated human microbiome data including gene families, marker abundance, marker presence, pathway abundance, pathway coverage, and relative abundance for samples from different body sites. See the package homepage for more details on data availability and access.
+
+[The microbiomeDataSets package](https://bioconductor.org/packages/microbiomeDataSets) provides a collection of curated microbiome datasets for teaching and research purposes. The package contains several example datasets that can be used to explore different aspects of microbiome analysis, such as alpha and beta diversity, differential abundance analysis, and visualization.
+
+[The mia package](https://bioconductor.org/packages/mia) and several other packages provide example datasets for learning and testing the functions in the package. These datasets are typically small and easy to work with, making them ideal for learning how to analyze microbiome data in R.
+
+## Data containers
+
+Bioconductor provides several specialized data structures for storing and working with microbiome data in R. These data structures are designed to handle the complex and high-dimensional nature of microbiome data and provide a convenient and efficient way to store, manipulate, and analyze microbiome data in R.
+
+[SummarizedExperiment (SE)](https://bioconductor.org/packages/SummarizedExperiment) (Morgan et al. 2020) is a generic and highly optimized container for complex data structures. It has become a common choice for analyzing various types of biomedical profiling data, such as RNAseq, ChIp-Seq, microarrays, flow cytometry, proteomics, and single-cell sequencing.
+
+
+[TreeSummarizedExperiment](https://bioconductor.org/packages/TreeSummarizedExperiment) (Huang 2020) was developed as an extension to incorporate hierarchical information (such as phylogenetic trees and sample hierarchies) and reference sequences.
+
+
+## Loading a microbiome dataset
+
+We will be using the `curatedMetagenomicData` package to load the `FengQ_2015` dataset. This dataset contains microbiome data from a study by [Feng et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/25758642/). The curatedMetagenomicData package provides a convenient interface for accessing microbiome datasets that have been pre-processed and curated for analysis. 
+
+::: {.callout-note}
+Take a moment to familiarize yourself with at least the title and abstract from the paper. 
+We won't be reproducing the analysis in the paper, but it is helpful to connect the code in this workflow to the biology and research.
+:::
+
+
+```{r eval=FALSE}
+# Again, before using a package, we must install it
+# just once.
+BiocManager::install('curatedMetagenomicData')
+```
+
+Once installed, we can use the package. 
+
+Ignore the details of the next few lines of code for now, but suffice it to say that what the code will do for us is to load a dataset for downstream analysis.
+
+```{r}
+# Load the FengQ_2015 dataset
+library(curatedMetagenomicData)
+tse <- curatedMetagenomicData("FengQ_2015.relative_abundance", dryrun = FALSE, rownames = "short")[[1]]
+```
+
+This code goes out to the internet and downloads the dataset for you. The `tse` object is a `TreeSummarizedExperiment` object that contains the microbiome data from the Feng et al. (2015) study. The `TreeSummarizedExperiment` class is a specialized data structure for storing microbiome data in R, and it is used by the `mia` package for microbiome analysis.
+
+::: {.callout-tip}
+If you are working with your own microbiome data, you will often need to  load it into R using functions like `read.csv()` or `read.table()` to read tabular data files. Make sure your data is properly formatted and cleaned before loading it into R for analysis. 
+:::
+
+Once the data is loaded into R, we can start exploring the data to understand its structure and contents. The `tse` object is a `TreeSummarizedExperiment` object, which is a specialized data structure for storing microbiome data in R. It works quite like a data.frame in, but with many specialized structures for storing microbiome experiment data as shown in @fig-tse-anatomy. We can use various functions to explore the data stored in the `tse` object. See the [TreeSummarizedExperiment](https://bioconductor.org/packages/TreeSummarizedExperiment) package for more details.
+
+This section provides an introduction to these data containers. In microbiome data science, these containers link taxonomic abundance tables with rich side information on the features (microbes) and samples. Taxonomic abundance data can be obtained by 16S rRNA amplicon or metagenomic sequencing, phylogenetic microarrays, or by other means. Many microbiome experiments include multiple versions and types of data generated independently or derived from each other through transformation or agglomeration. 
+
+
+![Anatomy of a TreeSummarizedExperiment object. Compared to the SingleCellExperiment objects, TreeSummarizedExperiment has five additional slots. **rowTree**: the hierarchical structure on the rows of the assays. 
+**rowLinks**: the link information between rows of the assays and the rowTree.
+**colTree**: the hierarchical structure on the columns of the assays.
+**colLinks**: the link information between columns of the assays and the colTree.
+**referenceSeq** (optional): the reference sequence data per feature (row).
+](images/treesummarizedexperiment.png){#fig-tse-anatomy}
+
+
+To get an overview of the data, we can simply type the name of the object in the R console:
+
+```{r}
+# Print the object
+tse
+```
+
+Observe how the output of the `tse` object will show you the dimensions of the data, the metadata associated with the samples and features, etc. However, the data themselves are not printed to the console due to the large size of the dataset. The `TreeSummarizedExperiment` object is a complex data structure that contains multiple components, including the abundance data, sample information, feature information, and other metadata.
+
+Next, we'll look at some of the key components of the `TreeSummarizedExperiment` object and how to access and manipulate them.
+
+### Experimental measurements: `assays`
+
+When working with high-throughput biological data, the results of a workflow (often complex), is usually something resembling an Excel spreadsheet with samples as columns and features (genes, microbes, CpG sites, ...) as rows. 
+The quantitative information (the numbers) are called "assay" data since they result from running an "assay." 
+The microbiome is the collection of all microbes (such as bacteria, viruses, fungi, etc.) in the body. 
+When studying these microbes, data is needed, and that’s where assays come in. 
+An assay is a way of measuring the presence and abundance of different types of microbes in a sample. 
+For example, if you want to know how many bacteria of a certain type are in your gut, you can use an assay to measure this. 
+When storing assays, the original data is count-based. 
+However, the original count-based taxonomic abundance tables may undergo different transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative abundance. 
+These are typically stored in **assays**.
+
+The assays slot contains the experimental data as multiple count matrices. The result of assays is a list of matrices.
+
+```{r}
+assays(tse)
+```
+
+Individual assays can be accessed via `assay()` function. The result is a matrix. And recall that when we subset a matrix, we use `[]` and specify the `[<rows>, <columns>]`. 
+
+```{r}
+# just the first 5 rows and columns to make the results easier to see
+assay(tse, "relative_abundance")[1:5, 1:5]
+```
+
+You can, of course, choose a different number of rows or columns it you like. 
+
+### Sample information: `colData`
+
+colData contains information about the samples used in the study. 
+This information can include details such as the sample ID, the primers used in the analysis, the barcodes associated with the sample (truncated or complete), the type of sample (e.g. soil, fecal, mock) and a description of the sample. 
+You can also add experimental details about samples as you see fit (eg., the sample preparation data, prep kit lot number, or anything else you might want to track).
+
+```{r}
+colData(tse)
+```
+
+As you can see, there is a lot of information stored in the `colData` slot, including sample IDs, study conditions, and other metadata associated with the samples. 
+This information is essential for understanding the context of the microbiome data and for performing downstream analyses. 
+
+::: {.callout-tip}
+## Use sample colData as database of information about your samples.
+By keeping a relatively complete colData, you can answer questions about your findings without having to refer back to external Excel spreadsheets or lab notebooks.
+:::
+
+
+### Measured feature information: `rowData`
+
+rowData contains data on the features of the analyzed samples. This is particularly important in the microbiome field for storing taxonomic information. This taxonomic information is extremely important for understanding the composition and diversity of the microbiome in each sample analyzed. It enables identification of the different types of microorganisms present in samples. It also allows you to explore the relationships between microbiome composition and various environmental or health factors.
+
+```{r}
+head(rowData(tse))
+```
+
+### rowTree
+
+Phylogenetic trees also play an important role in the microbiome field. The TreeSE class can keep track of features and node relations via two functions, rowTree and rowLinks.
+
+A tree can be accessed via `rowTree()` as `phylo` object.
+
+::: {.callout-note}
+## What is this tree of which we speak?
+
+The "tree" in a `TreeSummarizedExperiment` is a phylogenetic tree describing the inferred evolutionary relationships among various biological species or other entities based upon similarities and differences in their physical or genetic characteristics. 
+The tree of life is a phylogenetic tree that shows the evolutionary relationships among all living organisms on Earth.
+
+In the context of microbiome analysis, phylogenetic trees are used to represent the evolutionary relationships between different microbial taxa based on their genetic sequences. 
+These trees can help researchers understand the diversity and relatedness of different microbes in a sample and provide insights into the evolutionary history of the microbial community.
+
+The `phylo` class in R is used to represent phylogenetic trees and provides functions for working with and visualizing these trees. The `ggtree` package is a popular package for visualizing phylogenetic trees in R and provides a wide range of options for customizing the appearance of the tree.
+:::
+
+```{r}
+rowTree(tse)
+```
+
+The `rowTree` slot contains information about the hierarchical structure of the data, such as the relationships between different microbial taxa based on their genetic sequences. This information can be used to explore the evolutionary relationships between different microbes and to visualize the diversity and relatedness of the microbial community in a sample. 
+
+We can visualize the phylogenetic tree using the `ggtree` package in R. The `ggtree` package provides functions for visualizing phylogenetic trees in a variety of formats, including circular, rectangular, and radial layouts. Here, we'll use the `ggtree` package to visualize the phylogenetic tree stored in the `rowTree` slot of the `TreeSummarizedExperiment` object.
+
+```{r message=FALSE}
+library(ggtree)
+ggtree(rowTree(tse))
+```
+
+See the [ggtree](https://bioconductor.org/packages/ggtree) package for more details on visualizing tree structures in R and, for more fun, the [ggtree book](https://yulab-smu.top/treedata-book/). 
+
+The `rowLink` slot contains information about the relationships between the features and the tree structure. This information can be used to link the features in the data to the nodes in the tree and to explore the relationships between the features based on their abundance profiles.
+
+```{r}
+rowLinks(tse)
+```
+
+Both `rowTree` and `rowLinks` are optional components of the `TreeSummarizedExperiment` object, but when present, they provide valuable information about the hierarchical structure of the data and the relationships between the features in the data.
+
+## Wrangling and subsetting
+
+One of the huge advantages of using the `SummarizedExperiment` classes in R/Bioconductor is their ability to encapsulate all the information necessary to describe the samples (colData), measured features (rowData, rowTree), and the measurements themselves (assays). 
+When we manipulate or subset these objects, all the associated information about samples, features, and assays are also subsetted. 
+
+The `mia` package provides several functions for wrangling and subsetting microbiome data. These functions allow you to filter, transform, and manipulate the data to extract the information you need for analysis.
+
+### Subsetting samples
+
+You can subset the samples in a `TreeSummarizedExperiment` object similarly to how you would subset a `data.frame`. For example, to subset out data based on the age category of the samples, you can use the following code:
+
+```{r}
+head(colData(tse)$age)
+```
+
+Since accessing the colData is such a common way of interacting with a `SummarizedExperiment`, we can also access the colData as if it were a data.frame.
+
+```{r}
+head(tse$age)
+# and get a summary of all patient ages
+summary(tse$age)
+```
+
+Age is a numeric variable. Let's focus on older patients.
+
+```{r}
+# Include all rows, but only columns (samples) who are older than 50
+tse_subset_by_age <- tse[, tse$age > 50]
+tse_subset_by_age
+```
+
+The `tse_subset_by_age` is a copy of the original `tse`, but with only the 50+ year old patients. 
+If you want to double-check, you can look at the ages in this new `tse_subset_by_age`.
+
+```{r}
+summary(tse_subset_by_age$age)
+```
+
+### Agglomerating data
+
+The microbiome features (organisms) that are measured may be measured at different taxonomic levels. For example, the data may be available at the species, genus, family, or phylum level. Agglomerating data is the process of summarizing the data at a higher taxonomic level by combining the abundances of the lower-level taxa. This can be useful for simplifying the data and reducing the dimensionality of the data.
+
+The `agglomerateByRank` function in the `mia` package can be used to agglomerate the data at a specified taxonomic rank. For example, to agglomerate the data at the phylum level, you can use the following code:
+
+```{r}
+new_tse <- agglomerateByRank(tse, rank = "phylum")
+# observe the new object, particularly the number of features (rows)
+new_tse
+```
+
+The resulting `TreeSummarizedExperiment` object contains the data aggregated at the phylum level, with the abundances of the lower-level taxa combined to create a summary at the phylum level. This can make the data easier to work with and interpret, especially when dealing with large and complex microbiome datasets.
+
+## Community indices
+
+In the field of microbiome ecology several indices to describe samples and
+community of samples are available. In this vignette we just want to give a
+very brief introduction.
+
+### Alpha diversity
+
+diversity in microbiology is measured by several indices:
+
+- species richness (total number of species)
+- equitability (distribution of species within a microbiome)
+- diversity (combination of the two)
+
+Functions for calculating alpha and beta diversity indices are available.
+Using `addAlpha` multiple diversity indices are calculated by default
+and results are stored automatically in `colData`. 
+
+::: {.callout-note}
+## Why do we care about alpha diversity?
+
+Alpha diversity is a "statistic" that somehow represents how complex or "diverse" a microbiome sample is.
+You can imagine lots of situations that might significantly alter the diversity of a sample, such as antibiotic use, systemic chemotherapy, autoimmune conditions, dietary changes, etc. 
+When we have two experimental conditions such antibiotic use vs no antibiotic use, the alpha diversity in the two sample groups may differ significantly.
+That association, if present, could be helpful in understanding biology or even developing a biomarker. 
+:::
+
+In the code below we calculate the Shannon and observed diversity indices. 
+
+```{r}
+tse <- addAlpha(tse, index = "shannon", assay.type = "relative_abundance")
+tse <- addAlpha(tse, index = "observed", assay.type = "relative_abundance")
+colnames(colData(tse))
+```
+
+The `observed` index is a simple count of the number of species present in a sample, while the `shannon` index takes into account both the number of species and their relative abundances. 
+These indices provide information about the diversity and richness of the microbial community in each sample.
+
+And we can look at the resulting colData() which now contains the calculated alpha diversity indices.
+
+```{r}
+colData(tse)
+```
+
+The `scater` package provides some convenient plotting functions that are designed to work with the `SummarizedExperiment` class.
+
+```{r messasge=FALSE}
+#| label: plotAlphaDiversity
+library(scater)
+plotColData(tse,
+    "observed",             # the y-axis value that we just calculated
+    "study_condition",      # The x-axis
+    colour_by = "gender"    # Color the points by gender
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(y = expression(Richness[Observed]))  # and give a meaningful label
+```
+
+### Beta diversity
+
+Community similarity refers to the way microorganisms resemble each other in terms of their composition and abundance of different microbial taxa. This can help us understand to what degree different samples resemble each other and finding key information. In microbiome analysis however, it's more common to measure the dissimilarity/Beta diversity between two samples A and B using the Bray-Curtis measure which is defined as follows:
+
+$$
+BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
+$$ 
+
+where $A_{k}$ and $B_{k}$ are the abundances of taxon $k$ in samples A and B, respectively. The Bray-Curtis dissimilarity ranges from 0 (identical communities) to 1 (completely different communities).
+
+The `mia` package provides functions for calculating beta diversity indices, such as the Bray-Curtis dissimilarity, Jaccard similarity, and UniFrac distance. These indices can be used to compare the microbial communities between different samples and to identify patterns and relationships between samples based on their microbial composition.
+
+```{r message=FALSE}
+#| label: calculateBrayCurtis
+#| output: false
+
+# Run PCoA on relabundance assay with Bray-Curtis distances
+library(vegan)
+
+tse <- runMDS(tse,
+    FUN = vegdist,
+    method = "bray",
+    assay.type = "relative_abundance",
+    name = "MDS_bray"
+)
+```
+
+This code is a bit to unpack. It calculates the Bray-Curtis dissimilarity between samples in the `tse` object using the `vegdist` function from the `vegan` package. The resulting dissimilarity matrix is then used to perform a Principal Coordinate Analysis (PCoA) using the `runMDS` function from the `scater` package. The PCoA is a dimensionality reduction technique that projects the high-dimensional Bray-Curtis dissimilarity matrix onto a lower-dimensional space while preserving the pairwise distances between samples.
+
+The resulting `TreeSummarizedExperiment` object now contains the Bray-Curtis dissimilarity matrix in the `MDS_bray` slot, which can be used to visualize the relationships between samples based on their microbial composition.
+
+We can visualize the results of the PCoA using the `plotReducedDim` function from the `scater` package. This function creates a plot of the reduced dimensions (PCoA) and colors the samples based on a specified variable, such as the study condition
+
+```{r}
+#| label: showPCoA
+# Create ggplot object
+p <- plotReducedDim(tse, "MDS_bray", colour_by = "study_condition")
+
+print(p)
+```
+
+You can experiment with different variables to color the samples and explore the relationships between samples based on their microbial composition.
+
+## Microbial composition
+
+Let's now look at the microbial composition of the samples in the `tse` object. The microbial composition refers to the relative abundances of different microbial taxa in each sample. This information can provide insights into the diversity and structure of the microbial community in each sample and help identify patterns and relationships between samples based on their microbial composition.
+
+The `mia` package provides functions for visualizing the microbial composition of samples, such as bar plots, heatmaps, and stacked bar plots. These plots can help you explore the relative abundances of different microbial taxa in each sample and identify patterns and relationships between samples based on their microbial composition.
+
+### Abundance
+
+We can start by creating a bar plot of the top 40 most abundant taxa in the dataset. This plot shows the relative abundances of the top 40 taxa in each sample, with the taxa sorted by abundance.
+
+```{r}
+#| label: plotTopTaxa
+library(miaViz)
+plotAbundanceDensity(tse,
+    layout = "jitter",
+    assay.type = "relative_abundance",
+    n = 40
+) +
+    scale_x_log10(label = scales::percent)
+```
+
+We can also look at the relative abundances of specific taxa in the dataset. 
+
+```{r}
+plotAbundanceDensity(tse,
+    layout = "density",
+    assay.type = "relative_abundance",
+    n = 5, colour_by = "study_condition"
+) +
+    scale_x_log10()
+```
+
+
+### Prevalence
+
+Prevalence refers to the proportion of samples in which a taxon is present. This information can help identify the most common and rare taxa in the dataset and provide insights into the distribution of different taxa across samples.
+
+Let's agglomerate the data at the genus level and then plot the prevalence of the top 20 most prevalent genera in the dataset.
+
+
+```{r}
+tse_genus <- agglomerateByRank(tse, rank = "genus")
+```
+
+```{r}
+head(getPrevalence(tse_genus,
+    detection = 1 / 100,
+    sort = TRUE, assay.type = "relative_abundance",
+    as.relative = TRUE
+))
+```
+
+
+## Heatmaps
+
+Heatmaps are a common way to visualize microbiome data and can provide insights into the relative abundances of different microbial taxa in each sample. To keep things simple, we'll create a heatmap of the relative abundances of the phyla in the dataset.
+
+We first agglomerate the data at the phylum level and then create a heatmap of the relative abundances of the phyla in the dataset.
+
+```{r message=FALSE}
+library(pheatmap)
+tse_phylum <- agglomerateByRank(tse, rank = "phylum")
+pheatmap(assay(tse_phylum, "relative_abundance"))
+```
+
+## Further fun
+
+The mia package folks have created a [book on microbome analysis in R](https://microbiome.github.io/OMA/docs/devel/) that you can explore for more details on microbiome analysis in R. The book covers a wide range of topics related to microbiome analysis, including data loading, preprocessing, visualization, and statistical analysis. It provides detailed explanations and examples of how to work with microbiome data in R and is a valuable resource for anyone interested in learning more about microbiome analysis.
