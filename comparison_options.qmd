@@ -1,0 +1,792 @@
+---
+title: Base R vs tidy
+authors: Sean Davis, Martin Morgan, Lori Kern
+---
+
+R is flexible and often has multiple ways of accomplishing the same or similar
+tasks. Find the options, packages, styles, etc. that work best for you. In this
+chapter, we will recap some of the previous BRFSS study that utilized base R
+objects and graphing, and compare doing the same exact anaysis using
+[tidyverse](https://www.tidyverse.org/) and [ggplot2](https://ggplot2.tidyverse.org/).
+
+
+## Loading the Dataset
+
+First, let's load the dataset into R. We will use the `read.csv()` function from
+the base R package to read the data and store it in a data frame called
+brfss. We will also use the `read_csv()` function from the readr package to load
+the tidyverse tibble data.frame. Make sure the CSV file is in your working
+directory, or provide the full path to the file.
+
+<!--
+```{r echo=FALSE}
+path <- "BRFSS-subset.csv"
+library(dplyr)
+```
+-->
+
+```{r ALL-choose-A3, eval=FALSE}
+path <- file.choose()    # look for BRFSS-subset.csv
+
+# We will be using dplyr throughout so let's load now
+library(dplyr)
+```
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+```{r ALL-input-A3}
+# loading using base R
+stopifnot(file.exists(path))
+brfss_DF <- read.csv(path)
+```
+:::
+::: {.column width="50%"}
+
+```{r, message = FALSE}
+# loading using readr
+library(readr)
+brfss_tbl <- readr::read_csv(path)
+```
+:::
+:::
+
+Let's examine our objects:
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+# Classic data frame
+head(brfss_DF)
+```
+:::
+::: {.column width="50%"}
+
+```{r}
+# Tidyverse tibble
+head(brfss_tbl)
+```
+:::
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+# Classic data frame
+class(brfss_DF)
+```
+:::
+::: {.column width="50%"}
+
+```{r}
+# Tidyverse tibble
+class(brfss_tbl)
+```
+:::
+:::
+
+::: {.callout-note}
+**Note:** A tidyverse tibble object inherits a data.frame class. This means that
+most data.frame operations like `dim()`, `colnames()`, `$`, `[`, etc. will work on the tibble
+object as well. 
+:::
+
+## Clean data
+
+Both 'Sex' and 'Year' are really `factor` values (each can only take on specific
+levels, 'Female' and 'Male' for 'Sex', and '1990' and '2010' for 'Year').
+
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+# base R / data.frame
+brfss_DF$Year <- factor(brfss_DF$Year)
+brfss_DF$Sex <- factor(brfss_DF$Sex)
+```
+:::
+::: {.column width="50%"}
+
+```{r}
+# dplyr / tibble 
+brfss_tbl <-
+brfss_tbl |>
+    mutate(
+        Sex = factor(Sex,
+	      levels = c("Female", "Male")),
+        Year = factor(Year,
+	      levels = c("1990", "2010"))
+    )
+```
+:::
+:::
+
+## Data Exploration
+
+Let's execute some basic exploration.  `summary()` works the same for both
+objects but lets looks at some summary tables and counts. They produce the same
+results but in different formats.
+
+We'll start with basic table of a single variable:
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R / data.frame
+table(brfss_DF$Year)
+```
+:::
+::: {.column width="50%"}
+
+```{r, eval=FALSE}
+# dplyr / tibble
+brfss_tbl |> count(Year)
+```
+:::
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R / data.frame
+table(brfss_DF$Year)
+```
+:::
+::: {.column width="50%"}
+
+```{r, echo=FALSE}
+# dplyr / tibble
+brfss_tbl |> count(Year)
+```
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R / data.frame
+table(brfss_DF$Sex)
+```
+:::
+::: {.column width="50%"}
+
+```{r, eval=FALSE}
+# dplyr / tibble
+brfss_tbl |> count(Sex)
+```
+:::
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R / data.frame
+table(brfss_DF$Sex)
+```
+:::
+::: {.column width="50%"}
+
+```{r, echo=FALSE}
+# dplyr / tibble
+brfss_tbl |> count(Sex)
+```
+:::
+:::
+
+
+Now let's look at contingency table
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+# base R / data.frame
+table(brfss_DF$Sex, brfss_DF$Year)
+```
+:::
+::: {.column width="50%"}
+
+```{r}
+# dplyr / tibble
+brfss_tbl |> count(Sex, Year)
+```
+:::
+:::
+
+We can get the tidy table to look even more similar to the base R table with the
+help of the tidyr package's function `pivot_wider`
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+# base R / data.frame
+table(brfss_DF$Sex, brfss_DF$Year)
+```
+:::
+::: {.column width="50%"}
+
+```{r}
+# dplyr / tibble
+library(tidyr)
+brfss_tbl |> count(Sex, Year) |>
+    tidyr::pivot_wider(names_from = "Year", values_from = "n")
+
+```
+:::
+:::
+
+What about some summary statistics on the columns of data? `summarize()` will
+create the new data.frame automatically; base R you have to create your own.
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R / data.frame
+data.frame(
+  avg_age = mean(brfss_DF$Age, na.rm = TRUE),
+  ave_wt  = mean(brfss_DF$Weight, na.rm = TRUE),
+  ave_ht  = mean(brfss_DF$Height, na.rm = TRUE)
+)
+```
+:::
+::: {.column width="50%"}
+
+```{r, eval=FALSE}
+# dplyr / tibble
+brfss_tbl |>
+    summarize(
+        avg_age = mean(Age, na.rm = TRUE),
+        ave_wt = mean(Weight, na.rm = TRUE),
+        ave_ht = mean(Height, na.rm = TRUE)
+	)
+```
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R / data.frame
+data.frame(
+  avg_age = mean(brfss_DF$Age, na.rm = TRUE),
+  ave_wt  = mean(brfss_DF$Weight, na.rm = TRUE),
+  ave_ht  = mean(brfss_DF$Height, na.rm = TRUE)
+)
+```
+:::
+::: {.column width="50%"}
+
+```{r, echo=FALSE}
+# dplyr / tibble
+brfss_tbl |>
+    summarize(
+        avg_age = mean(Age, na.rm = TRUE),
+        ave_wt = mean(Weight, na.rm = TRUE),
+        ave_ht = mean(Height, na.rm = TRUE)
+	)
+```
+:::
+:::
+
+If we want to get more complex with groupings by Year and Sex, dlpyr uses
+`group_by` where base R would use `aggregate`.
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R / data.frame
+aggregate(
+  cbind(Age, Weight, Height) ~ Sex + Year,
+  data = brfss_DF,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+```
+:::
+::: {.column width="50%"}
+
+```{r, eval=FALSE}
+# dplyr / tibble
+brfss_tbl |>
+    group_by(Sex, Year) |>
+    summarize(
+        avg_age = mean(Age, na.rm = TRUE),
+        ave_wt = mean(Weight, na.rm = TRUE),
+        ave_ht = mean(Height, na.rm = TRUE)
+    )
+```
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R / data.frame
+aggregate(
+  cbind(Age, Weight, Height) ~ Sex + Year,
+  data = brfss_DF,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+```
+:::
+::: {.column width="50%"}
+
+```{r, echo=FALSE, message=FALSE}
+# dplyr / tibble
+brfss_tbl |>
+    group_by(Sex, Year) |>
+    summarize(
+        avg_age = mean(Age, na.rm = TRUE),
+        ave_wt = mean(Weight, na.rm = TRUE),
+        ave_ht = mean(Height, na.rm = TRUE)
+    )
+```
+:::
+:::
+
+
+## Visualization
+
+Before we start visualizing, lets create a few different subsets of data.
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+# base R / data.frame
+brfss_female_DF <-
+    brfss_DF[brfss_DF$Sex == "Female",]
+brfss_male_DF <-
+    brfss_DF[brfss_DF$Sex == "Male",]
+brfss_2010_DF <-
+    brfss_DF[brfss_DF$Year == "2010",]
+```
+:::
+::: {.column width="50%"}
+
+```{r}
+# dplyr / tibble
+brfss_male_tbl <-
+    brfss_tbl |> filter(Sex == "Male")
+brfss_female_tbl <-
+    brfss_tbl |> filter(Sex == "Female")
+brfss_2010_tbl <-
+    brfss_tbl |> filter(Year == "2010")
+```
+:::
+:::
+
+We should also load the ggplot2 package so we can compare base R graphics vs
+ggplot2
+
+```{r}
+library(ggplot2)
+```
+
+Let's start with a boxplot that compares the Weights of Males vs Females for the
+2010 dataset.
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+plot(Weight ~ Sex, brfss_2010_DF)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, eval=FALSE}
+# ggplot2
+ggplot(brfss_2010_tbl) +
+    aes(x = Sex, y = Weight) +
+    geom_boxplot()
+```
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+plot(Weight ~ Sex, brfss_2010_DF)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, echo=FALSE}
+# ggplot2
+ggplot(brfss_2010_tbl) +
+    aes(x = Sex, y = Weight) +
+    geom_boxplot()
+```
+:::
+:::
+
+
+Let's look at some density and scatterplots.
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+den_male <- density(brfss_2010_DF$Weight[brfss_2010_DF$Sex == "Male"], na.rm = TRUE)
+den_female <- density(brfss_2010_DF$Weight[brfss_2010_DF$Sex == "Female"], na.rm = TRUE)
+plot(den_male, 
+     col = "skyblue", lwd = 2,
+     main = "Density of Weight by Sex",
+     xlab = "Weight")
+
+lines(den_female, 
+      col = "lightsalmon", lwd = 2)
+
+legend("topright",
+    legend = c("Male", "Female"),
+    col = c("skyblue", "lightsalmon"), lwd = 2)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Weight, color= Sex) +
+    geom_density()
+```
+:::
+:::
+
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+den_male <- density(brfss_2010_DF$Weight[brfss_2010_DF$Sex == "Male"], na.rm = TRUE)
+den_female <- density(brfss_2010_DF$Weight[brfss_2010_DF$Sex == "Female"], na.rm = TRUE)
+plot(den_male, 
+     col = "skyblue", lwd = 2,
+     main = "Density of Weight by Sex",
+     xlab = "Weight")
+
+lines(den_female, 
+      col = "lightsalmon", lwd = 2)
+
+legend("topright",
+    legend = c("Male", "Female"),
+    col = c("skyblue", "lightsalmon"), lwd = 2)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Weight, color= Sex) +
+    geom_density()
+```
+:::
+:::
+
+Presumably taller people are heavier than shorter people. Let's examine this
+relationship.
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+plot(Weight ~ Height, brfss_2010_DF)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Height, y = Weight) +
+    geom_point()
+```
+:::
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+plot(Weight ~ Height, brfss_2010_DF)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Height, y = Weight) +
+    geom_point()
+```
+:::
+:::
+
+Let's fit the linear regression
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+plot(Weight ~ Height, brfss_2010_DF)
+fit <- lm(Weight ~ Height, brfss_2010_DF)
+abline(fit, col="blue", lwd=2)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Height, y = Weight) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+:::
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+plot(Weight ~ Height, brfss_2010_DF)
+fit <- lm(Weight ~ Height, brfss_2010_DF)
+abline(fit, col="blue", lwd=2)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Height, y = Weight) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+:::
+:::
+
+We saw that there could be a difference based on Sex. Let's add color to the
+points
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+colors <- c("Female" = "lightsalmon", "Male" = "skyblue")
+plot(Weight ~ Height, brfss_2010_DF,
+  col = colors[Sex], pch = 16)
+for (sex in levels(brfss_2010_DF$Sex)) {
+  subset_data <- subset(brfss_2010_DF, Sex == sex)
+  fit <- lm(Weight ~ Height, data = subset_data)
+  abline(fit, col = colors[sex], lwd = 2)
+}
+legend("topleft", legend = levels(brfss_2010_DF$Sex), 
+       col = colors, pch = 16, bty = "n")
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Height, y = Weight, color = Sex) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+:::
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+colors <- c("Female" = "lightsalmon","Male" = "skyblue")
+plot(Weight ~ Height, brfss_2010_DF,
+  col = colors[Sex], pch = 16)
+for (sex in levels(brfss_2010_DF$Sex)) {
+  subset_data <- subset(brfss_2010_DF, Sex == sex)
+  fit <- lm(Weight ~ Height, data = subset_data)
+  abline(fit, col = colors[sex], lwd = 2)
+}
+legend("topleft", legend = levels(brfss_2010_DF$Sex), 
+       col = colors, pch = 16, bty = "n")
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# ggplot2
+brfss_2010_tbl |>
+    ggplot() +
+    aes(x = Height, y = Weight, color = Sex) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+:::
+:::
+
+Let's dig into some visualizations of the 2010 Males and recreate the
+histograms of Weight but we did not create that subset.
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+brfss_2010_Male <- subset(brfss_DF,
+    Year == 2010 & Sex == "Male")
+hist(brfss_2010_Male$Weight)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# ggplot2
+brfss_2010_tbl |> filter(Sex == "Male") |>
+    ggplot() +
+    aes(x = Weight) +
+    geom_histogram(col = "white")
+```
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+brfss_2010_Male <- subset(brfss_DF,
+    Year == 2010 & Sex == "Male")
+hist(brfss_2010_Male$Weight)
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# ggplot2
+brfss_2010_tbl |> filter(Sex == "Male") |>
+    ggplot() +
+    aes(x = Weight) +
+    geom_histogram(col = "white")
+```
+:::
+:::
+
+What if we took all the Males and looked to see if the relationship of Height
+and Weight changed between 1990 and 2010.
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, eval=FALSE}
+# base R
+colors <- c("1990" = "lightsalmon","2010" = "skyblue")
+plot(log10(Weight) ~ Height, brfss_male_DF,
+  col = colors[Year], pch = 16, ylab = "log10(Weight)")
+for (yr in levels(brfss_male_DF$Year)) {
+  subset_data <- subset(brfss_male_DF, Year == yr)
+  fit <- lm(log10(Weight) ~ Height, data = subset_data)
+  abline(fit, col = colors[yr], lwd = 2)
+}
+legend("topleft", legend = levels(brfss_male_DF$Year), 
+       col = colors, pch = 16, bty = "n")
+
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# ggplot2
+ggplot(brfss_male_tbl) +
+    aes(x = Height, y = log10(Weight), color = Year) +
+    geom_point() +
+    geom_smooth(method = "lm") +
+    labs(title = "BRFSS Male Subset")
+```
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=FALSE}
+# base R
+colors <- c("1990" = "lightsalmon","2010" = "skyblue")
+plot(log10(Weight) ~ Height, brfss_male_DF,
+  col = colors[Year], pch = 16, ylab = "log10(Weight)")
+for (yr in levels(brfss_male_DF$Year)) {
+  subset_data <- subset(brfss_male_DF, Year == yr)
+  fit <- lm(log10(Weight) ~ Height, data = subset_data)
+  abline(fit, col = colors[yr], lwd = 2)
+}
+legend("topleft", legend = levels(brfss_male_DF$Year), 
+       col = colors, pch = 16, bty = "n")
+```
+:::
+::: {.column width="50%"}
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# ggplot2
+ggplot(brfss_male_tbl) +
+    aes(x = Height, y = log10(Weight), color = Year) +
+    geom_point() +
+    geom_smooth(method = "lm") +
+    labs(title = "BRFSS Male Subset")
+```
+:::
+:::
+
+
+## Summary
+
+There are many visualization packages in R. You can explore the many options and
+what each has to offer to design high quality, customized plots for reporting. 

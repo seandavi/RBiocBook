@@ -1,0 +1,381 @@
+---
+author: "Lori Kern"
+---
+# Control Statements
+
+Control statements help determine the flow and execution of commands based on
+conditional statements. This chapter will cover a brief overview of the
+following:
+
+- Conditional Statements
+  * if
+  * if-else
+  * ifelse
+
+- Loops
+  * for
+  * while
+  * repeat-break
+  
+- Special
+  * break
+  * return
+  * next
+
+- Other
+  * nested
+  * try / tryCatch
+  * vectorization and apply functions
+
+
+::: {.callout-important}
+Pay attention to syntax. It is important to include all parenthesis and
+brackets. In general if you have an open parenthesis or bracket, you will need a
+closed parenthesis or bracket.
+:::
+
+::: {.callout-tip}
+Good coding practices involve consistent indenting and spacing. Once a control
+statement is initialized, all code in its brackets are indented to show clearly
+what code/statements are being executed for that section. This becomes
+especially important if you start nesting control statements.  
+:::
+
+## Conditional Statements
+
+### if 
+
+Let's start with an `if` statement. An if statement evaluates an expression and
+depending on its result performs a sub-section of select code.
+
+**Syntax:**
+
+```{r, eval=FALSE}
+if (expression){
+  # additional code to run if expression is TRUE
+  ...
+}
+```
+The expression contained in parenthesis will result in a boolean (TRUE/FALSE)
+value used to determine if the code in the braces should be executed. 
+
+**Example:**
+
+```{r}
+x <- 12
+if (x > 0){
+  message(x, " is greater than 0")
+  x <- 0
+}
+x
+```
+
+::: {.callout-tip}
+Notice all lines in the braces are executed including a assignment that changes
+our original value
+:::
+
+### if-else
+
+An `if-else` statement adds additional code to be executed if the expression is
+FALSE.
+
+**Syntax:**
+
+```{r, eval=FALSE}
+if (expression){
+  # additional code to run if expression is TRUE
+  ...
+} else {
+  # additional code to run if expression if FALSE
+  ...
+}
+```
+We could read this allowed as if the expression is true execute this code else
+if the expression is false execute this other code.
+
+**Example:**
+
+```{r}
+if (x > 0){
+  message(x, " is greater than 0")
+  x <- 0
+} else {
+  message(x, " is not greater than 0")
+  x <- x + 2
+}
+```
+
+What is x now?
+
+
+### ifelse
+
+A specialized if-else statement is the `ifelse`. It is a simplified version
+where an object can be coerced into logical form and return values for
+true/false.
+
+**Syntax:**
+
+```{r, eval=FALSE}
+ifelse(test_expression, yes_value, no_value)
+```
+
+**Example**
+
+```{r}
+num_vec <- -3:3
+ifelse(num_vec >= 0, "positive", "negative")
+```
+
+## Loops
+
+Loops are control statements that allow for repeated code execution either for a
+set number of times, over a certain set of elements, or until a conditional
+statement is met.
+
+### for
+
+A `for` loop will execute commands over a certain set of elements.
+
+**Syntax:**
+
+```{r, eval=FALSE}
+for(value in vector){
+  ## code to execute for each item in vector
+  ...
+}
+```
+value can be utilized in the executed code.
+
+**Examples**
+
+In this example, the vector of names is looped over, printing the number of
+characters in each name.
+
+```{r}
+names <- c("Donna", "John", "Bradley", "Kara")
+for(nm in names){
+  print(paste(nm, "has", nchar(nm), "letters"))
+}
+```
+In this example, for each value 1 to 5 (1,2,3,4,5), we take that value and add
+to the current value of x. Notice how this updates x each time.
+
+```{r}
+x <- 0
+for(i in 1:5){
+  print(paste("add", i, "to", x))
+  x <- x + i
+}
+```
+In this example, we loop over the elements of a list. For each list element we
+get the name of the item in the list and how many items that list element contains.
+
+```{r}
+my_list <- list(people=names,
+                ages=c(54, 78, 40, 5, 25),
+		animals=c("dog", "fish"))
+for(i in seq_along(my_list)){
+  list_element <- my_list[[i]]
+  print(paste("List element", names(my_list)[i], "contains",
+  length(my_list[[i]]), "values"))
+}
+```
+### while
+
+A `while` loop will execute until an expression is met.
+
+**Syntax:**
+
+```{r, eval=FALSE}
+while(expression){
+  ## code to execute until the expression is met
+  ## be sure to update variable used in expression
+  ...
+}
+```
+In this example we will start at the value 1 and as long as that value stays
+less than or equal to 5, we will print the value, incrementing by 1 each loop:
+
+**Example**
+```{r}
+value <- 1
+while (value <= 5){
+  print(value)
+  value = value + 1
+}
+```
+::: {.callout-important}
+Notice how we have to update the value that is being checked each time and that
+it is logical that it should eventually reach a point where the loop exists. Be
+cautious of **infinite loops**. These occur when the loop will never reach a
+stopping point because the expression will never be FALSE
+:::
+
+### repeat
+
+`repeat` is a indefinite loop. A `break` statement must be used to terminate the
+loop.
+
+**Syntax:**
+
+```{r, eval=FALSE}
+repeat{
+  ## code to be evaluated
+  if (condition){
+    break
+  }
+}	
+```
+In this example we will repeat ourself until the breaking conditions reaches the
+number of times we set to repeat. Notice how the code inside the loop alters the
+variable used in the conditional statement. 
+
+**Example**
+```{r}
+i <- 0
+times <- 3
+repeat{
+  print("I am repeating myself")
+  i <- i + 1
+  if (i == times){
+    break
+  }
+}
+```
+
+## Special
+
+There are some special other options used to customize control statements. These
+are used within control statements and can be especially useful in nested
+statements. 
+
+<center>
+**break**
+</center>
+We have already seen `break` usage with repeat. Break will stop and exit the
+control statement immediately when it hits.
+
+<center>
+**return**
+</center>
+
+`return` is similar to break in that it will stop and ext the control statement
+immediately when it is hit, however it will return the result of the given
+executed function or variable value upon exiting. It is generally used within
+functions.
+
+**Syntax:**
+```{r, eval=FALSE}
+return(expression)
+```
+
+This example creates a function that takes argument x.  If x is equal to 0 it
+returns the string "zero". If it does not equal 0 it continues to execute
+code. It will add 4 to the value. If that value is less than 0 it returns the
+value, otherwise it returns the value multipled by 2. 
+
+**Example**
+```{r}
+func <- function(x){
+  if(x == 0){
+    return("zero")
+  }
+  x <- x+4
+  if (x <= 0){
+    return(x)
+  }else{
+    return(x*2)
+  } 
+}
+
+func(0)
+func(-8)
+func(6)
+```
+
+<center>
+**next**
+</center>
+
+`next` will skip the current iteration of a loop without executing any further
+statements without terminating the loop.
+
+**Example**
+```{r}
+for(i in 1:10){
+  if(i%%2 != 0){
+    next
+  }
+  print(i)
+}
+```
+
+## Other
+
+### nesting
+
+We already saw an example of a nesting built into the design of repeat-break;
+nesting an if statement inside the repeat. All control statements can have
+multiple nesting.
+Nesting multiple for loops to loop over the row and columns of a matrix is such
+an example.
+
+**Example:**
+
+In this example we create a numeric matrix with 5 rows and 3 columns and fill
+the numbers 1 through 15 by column. Let us loop over by row and print out each
+cell of the matrix. 
+
+```{r}
+mat <- matrix(1:15, ncol=3)
+mat
+for (r in seq(nrow(mat))) {
+  for (c in seq(ncol(mat))) {
+    print(mat[r, c])
+  }
+}
+
+```
+
+### try / tryCatch
+
+This isn't necessarily a control statement but fits well enough to disucss. A
+`tryCatch` statement is a way to handle code that may produce errors, warnings,
+or other conditions that may arise.
+
+**Syntax:**
+```{r, eval=FALSE}
+tryCatch(expr,
+         error = function(e) {
+	     ## error handling code 
+	 },
+         warning = function(w) {
+	     ## warning handling code 
+	 },
+         finally = {
+	    ## code to execute regardless of conditions
+	 }
+)
+```
+It can include all error, warning, finally or any subset of the three. expr is
+an expression or block of code that is attempted to be executed. The error if a
+function that is triggered if running the expr resulted in an error. The
+argument e is generally an error object that contains details about the error
+for reference or parsing if necessary. warning similar to error but handles
+warnings with argument w. finally is code that executed regardless of what
+happens. This is particularly useful for when the expr opens a connection such
+as a database or file; finally can be used to close or clean up these open
+connections.
+
+### vectorization and apply functions
+
+Some most common and simply implementations of control functions are to perform
+functions over a vector or applying a function over the columns or rows of a
+matrix. While control statement can be utilized, they may not be the most
+efficient way to accomplish these tasks. It is encouraged to invesetigate if an
+already existing vectorized function exists for common tasks (mean, average, etc
+are already vectorized) or to utilized apply functions. Apply functions
+include: `apply()`, `lapply()`, `sapply()`, `mapply()`, and `tapply()`. 
+
