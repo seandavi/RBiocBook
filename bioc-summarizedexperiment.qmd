@@ -1,32 +1,50 @@
-# Introduction to `SummarizedExperiment`
+---
+title: "Storing experiments with SummarizedExperiment"
+---
 
-<!-- This is taken from the summarizedExperiment package vignette -->
+An RNA-seq or microarray experiment hands you several things at once: a matrix of
+numbers (counts or intensities), a description of every feature down the side
+(which gene is in each row), and a description of every sample across the top
+(which condition, which patient). Keep these in three separate variables and they
+*will* drift out of sync — you drop a bad sample from the count matrix, forget to
+drop it from the sample table, and now your "treated vs. control" labels point at
+the wrong columns. Mismatches exactly like this have produced retracted papers.
 
-The `SummarizedExperiment` class is used to store rectangular matrices of
-experimental results, which are commonly produced by sequencing and microarray
-experiments.  Each object stores observations of one or more samples, along
-with additional meta-data describing both the observations (features) and
-samples (phenotypes).
+`SummarizedExperiment` is Bioconductor's answer: one object that holds the assay
+matrix, the feature data, and the sample data together, and keeps them aligned
+for you whenever you subset.
 
-A key aspect of the `SummarizedExperiment` class is the coordination of the
-meta-data and assays when subsetting. For example, if you want to exclude a
-given sample you can do for both the meta-data and assay in one operation,
-which ensures the meta-data and observed data will remain in sync.  Improperly
-accounting for meta and observational data has resulted in a number of
-incorrect results and retractions so this is a very desirable
-property.
+It is, in many ways, a modern replacement for the historical `ExpressionSet`. The
+main difference is that `SummarizedExperiment` is more flexible about its feature
+(row) information: features can be described either by genomic ranges (`GRanges`)
+or by an arbitrary table (`DataFrame`). That flexibility makes it a natural fit
+for sequencing experiments such as RNA-seq and ChIP-seq.
 
-`SummarizedExperiment` is in many ways similar to the historical
-`ExpressionSet`, the main distinction being that `SummarizedExperiment` is more
-flexible in it's row information, allowing both `GRanges` based as well as those
-described by arbitrary `DataFrame`s.  This makes it ideally suited to a variety
-of experiments, particularly sequencing based experiments such as RNA-Seq and
-ChIp-Seq.
+## What you'll learn
+
+By the end of this chapter you will be able to:
+
+- Describe the three coordinated parts of a `SummarizedExperiment`: `assays()`,
+  `rowData()`/`rowRanges()`, and `colData()`.
+- Subset an experiment by sample or feature and trust that the metadata follows.
+- Reach into assays, sample data, and experiment-wide metadata with the accessor
+  functions.
+- Build a `SummarizedExperiment` from raw matrices and data frames.
+
+This chapter assumes you've met `GRanges` and `DataFrame`. If "genomic ranges"
+isn't familiar yet, the GenomicRanges chapters come earlier in the Bioconductor
+part of the book — skim those first.
+
+::: {.callout-tip}
+## Installing the packages
+
+The examples below use the `SummarizedExperiment` class and the `airway` example
+dataset. Install both once with `BiocManager`:
 
 ```{r eval=FALSE}
-BiocManager::install('airway')
-BiocManager::install('SummarizedExperiment')
+BiocManager::install(c("SummarizedExperiment", "airway"))
 ```
+:::
 
 ##  Anatomy of a `SummarizedExperiment`
 
@@ -44,7 +62,7 @@ feature in the corresponding row of the `SummarizedExperiment` object. Columns
 of the DataFrame represent different attributes of the features of interest,
 e.g., gene or transcript IDs, etc.
 
-`RangedSummarizedExperiment` is the "child"" of the `SummarizedExperiment` class
+`RangedSummarizedExperiment` is the "child" of the `SummarizedExperiment` class,
 which means that all the methods on `SummarizedExperiment` also work on a
 `RangedSummarizedExperiment`.
 
@@ -60,12 +78,29 @@ vertical (column) and horizontal (row) relationships.
 
 ![Summarized Experiment. There are three main components, the `colData()`, the `rowData()` and the `assays()`. The accessors for the various parts of a complete SummarizedExperiment object match the names. ](images/se.png){#fig-se-diagram}
 
+::: {.callout-note}
+## A mental model: three linked sheets
+
+Picture a spreadsheet workbook with three sheets that are *locked together*:
+
+- the **assay** sheet — the matrix of numbers, features (genes) × samples;
+- the **row** sheet (`rowData`/`rowRanges`) — one row of annotation per feature,
+  lined up with the assay's rows;
+- the **column** sheet (`colData`) — one row of annotation per sample, lined up
+  with the assay's columns.
+
+The magic is the lock: when you delete a sample, all three sheets update together,
+so the numbers and their labels can never disagree. Every accessor below is just a
+way of looking at one of these sheets.
+:::
+
 ### Assays
 
-The `airway` package contains an example dataset from an RNA-Seq experiment of
-read counts per gene for airway smooth muscles.  These data are stored
-in a `RangedSummarizedExperiment` object which contains 8 different
-experimental and assays 64,102 gene transcripts.
+The `airway` package contains an example dataset from an RNA-seq experiment of
+read counts per gene for airway smooth muscle cells. These data are stored in a
+`RangedSummarizedExperiment` object that holds read counts for tens of thousands
+of gene transcripts across 8 samples (we'll confirm the exact dimensions in a
+moment).
 
 ```{r, echo=FALSE}
 suppressPackageStartupMessages(library(SummarizedExperiment))
@@ -81,6 +116,11 @@ data(airway, package="airway")
 se <- airway
 se
 ```
+
+Read that printout like a label on the box: `dim` tells you it's
+`r format(nrow(se), big.mark=",")` features across `r ncol(se)` samples, and the
+`assays`, `rowRanges`, and `colData` lines preview the three linked sheets from
+the model above. The sections that follow open each one in turn.
 
 To retrieve the experiment data from a `SummarizedExperiment` object one can
 use the `assays()` accessor.  An object can have multiple assay datasets
@@ -119,7 +159,11 @@ sample row.
 colData(se)
 ```
 
-This sample metadata can be accessed using the `$` accessor which makes it 
+Each row here is one sample, and each column is something we know about that
+sample — including `dex`, which records whether the cells were treated with
+dexamethasone. That `dex` column is what makes the next operation possible.
+
+This sample metadata can be accessed using the `$` accessor, which makes it
 easy to subset the entire object by a given phenotype.
 
 ```{r columnSubset}
@@ -199,17 +243,21 @@ assay(se, 1)[1:5, 1:5]
 associated functions.  This includes `subsetByOverlaps()`, which makes it easy
 to subset a `SummarizedExperiment` object by an interval.
 
-In tne next code block, we define a region of interest (or many regions of interest)
-and then subset our `SummarizedExperiment` by overlaps with this region.
+In the next code block, we define a region of interest (a single genomic range)
+and then subset our `SummarizedExperiment` to the genes that overlap it.
 
 ```{r overlap}
-# Subset for only rows which are in the interval 100,000 to 110,000 of
-# chromosome 1
-roi <- GRanges(seqnames="1", ranges=100000:1100000)
-sub_se = subsetByOverlaps(se, roi)
+# Subset for only the genes that fall in the interval 100,000 to 1,100,000
+# of chromosome 1
+roi <- GRanges(seqnames="1", ranges=IRanges(start=100000, end=1100000))
+sub_se <- subsetByOverlaps(se, roi)
 sub_se
 dim(sub_se)
 ```
+
+Notice that `subsetByOverlaps()` worked on the *ranges* (`rowRanges`) but returned
+a full `SummarizedExperiment` — the assay matrix and `colData` came along
+automatically, kept in sync with the smaller set of genes.
 
 
 ## Constructing a `SummarizedExperiment` 
@@ -259,7 +307,7 @@ Remember that the DeRisi dataset has four _different_ assays,
 | assay | description |
 |-------|-------------|
 | R | Red fluorescence |
-| G | Green luorescence |
+| G | Green fluorescence |
 | Rb | Red background fluorescence |
 | Gb | Green background fluorescence |
 
@@ -276,7 +324,7 @@ When we create a SummarizedExperiment object, the "constructor" will check to se
 that the colnames of the matrices in the list are the same as the _rownames_ of the 
 `colData` `DataFrame`, and that the rownames of the matrices in the list are the same as the _rownames_ of the `rowData` `DataFrame`.
 
-So, we need to fix that all up. Let's start wit the rownames of the `rowData` `DataFrame`:
+So, we need to fix that all up. Let's start with the rownames of the `rowData` `DataFrame`:
 
 ```{r}
 rownames(rdata) <- rdata$ORF
@@ -339,3 +387,52 @@ head(assays(se)$logRatios)
 ```{r}
 hist(assays(se)$logRatios, breaks=50, main="Log Ratios of Red and Green Foreground Fluorescence", xlab="Log Ratio")
 ```
+
+## Summary
+
+A `SummarizedExperiment` bundles an assay matrix together with aligned feature
+data (`rowData`/`rowRanges`) and sample data (`colData`) into a single object that
+stays internally consistent when you subset. In this chapter you toured the
+accessors (`assays()`, `rowData()`, `colData()`, `metadata()`), subset an
+experiment by phenotype and by genomic range, and built a
+`SummarizedExperiment` from scratch out of the DeRisi microarray data. From here
+on, most Bioconductor analysis packages will hand you — or expect — an object
+shaped exactly like this.
+
+## Exercises
+
+The `airway` dataset is a good sandbox. Load a fresh copy so you're not relying on
+any object created earlier in the chapter:
+
+```{r}
+data(airway, package = "airway")
+air <- airway
+```
+
+1. How many genes (rows) and samples (columns) does `air` have? Which accessor
+   tells you each sample's treatment status?
+2. Subset `air` to just the untreated samples (`dex == "untrt"`) and confirm that
+   both the assay matrix and the `colData` shrank to match.
+3. Pull the `counts` assay for the first 5 genes and first 3 samples into a plain
+   matrix.
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+```{r}
+# 1. shape and the treatment column
+dim(air)              # genes x samples
+colData(air)$dex      # treatment per sample
+
+# 2. subsetting carries the metadata along
+untrt <- air[, air$dex == "untrt"]
+dim(untrt)            # fewer columns; same number of rows
+ncol(colData(untrt))  # colData has the same columns, fewer rows
+
+# 3. reach into one assay and slice it
+assay(air, "counts")[1:5, 1:3]
+```
+
+The key idea in exercise 2: you subset the *object*, and `colData` follows in
+lockstep — you never have to remember to subset the sample table separately.
+:::
