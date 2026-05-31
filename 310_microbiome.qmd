@@ -417,7 +417,10 @@ We first agglomerate the data at the phylum level and then create a heatmap of t
 ```{r message=FALSE}
 library(pheatmap)
 tse_phylum <- agglomerateByRank(tse, rank = "phylum")
-pheatmap(assay(tse_phylum, "relative_abundance"))
+pheatmap(
+    assay(tse_phylum, "relative_abundance"),
+    annotation_col = as.data.frame(colData(tse_phylum)[, c("study_condition")])
+)
 ```
 
 ## Further fun
