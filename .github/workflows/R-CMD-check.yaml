@@ -31,7 +31,19 @@ jobs:
           needs: check
 
       - name: Install R package dependencies
-        run: Rscript -e "install.packages('devtools', repos='http://cran.us.r-project.org'); devtools::install_deps(dependencies=TRUE)"
+        # Install the DESCRIPTION Depends: via BiocManager so CRAN + Bioconductor
+        # packages resolve together. (The old devtools::install_deps() path now
+        # fails on current devtools: install_deps() is deprecated and errors with
+        # "The package remotes is required".)
+        run: |
+          Rscript -e '
+            install.packages("BiocManager", repos="https://cloud.r-project.org")
+            options(repos = BiocManager::repositories())
+            deps <- read.dcf("DESCRIPTION")[1, "Depends"]
+            deps <- trimws(gsub("\\(.*?\\)", "", strsplit(deps, ",")[[1]]))
+            deps <- deps[deps != "" & deps != "R"]
+            BiocManager::install(deps, update = TRUE, ask = FALSE)
+          '
 
       - name: setup-quarto
         uses: quarto-dev/quarto-actions/setup@v2
