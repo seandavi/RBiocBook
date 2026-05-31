@@ -1,5 +1,10 @@
 project:
   type: book
+  # quartobot citation pipeline: resolves persistent-identifier cite keys
+  # (@doi:…, @pmid:…) via manubot into references.resolved.bib before render.
+  # Hand-curated keys in bibliography.bib are left untouched. Requires the
+  # quartobot CLI on PATH (`uv tool install quartobot`).
+  pre-render: quartobot resolve --from-scan . --id-mode citation-key
 
 author:
   - name: Sean Davis
@@ -111,8 +116,9 @@ book:
       - text: "License"
         href: license.qmd
 
-bibliography: 
+bibliography:
   - bibliography.bib
+  - references.resolved.bib
 
 format:
   html:
