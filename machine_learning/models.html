@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -311,7 +346,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../visualization_guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Self-Guided Data Visualization in R</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></span></a>
   </div>
 </li>
       </ul>
@@ -500,24 +535,23 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#a-framework-for-understanding-supervised-algorithms" id="toc-a-framework-for-understanding-supervised-algorithms" class="nav-link active" data-scroll-target="#a-framework-for-understanding-supervised-algorithms"><span class="header-section-number">20.1</span> A Framework for Understanding Supervised Algorithms</a></li>
+<li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">20.1</span> What you’ll learn</a></li>
+  <li><a href="#a-framework-for-understanding-supervised-algorithms" id="toc-a-framework-for-understanding-supervised-algorithms" class="nav-link" data-scroll-target="#a-framework-for-understanding-supervised-algorithms"><span class="header-section-number">20.2</span> A framework for understanding supervised algorithms</a></li>
+  <li><a href="#our-shared-dataset-palmer-penguins" id="toc-our-shared-dataset-palmer-penguins" class="nav-link" data-scroll-target="#our-shared-dataset-palmer-penguins"><span class="header-section-number">20.3</span> Our shared dataset: Palmer penguins</a></li>
+  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression"><span class="header-section-number">20.4</span> Linear regression</a></li>
+  <li><a href="#k-nearest-neighbours" id="toc-k-nearest-neighbours" class="nav-link" data-scroll-target="#k-nearest-neighbours"><span class="header-section-number">20.5</span> K-nearest neighbours</a></li>
   <li>
-<a href="#supervised-learning" id="toc-supervised-learning" class="nav-link" data-scroll-target="#supervised-learning"><span class="header-section-number">20.2</span> Supervised Learning</a>
+<a href="#penalized-regression" id="toc-penalized-regression" class="nav-link" data-scroll-target="#penalized-regression"><span class="header-section-number">20.6</span> Penalized regression</a>
   <ul class="collapse">
-<li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression"><span class="header-section-number">20.2.1</span> Linear regression</a></li>
-  <li><a href="#k-nearest-neighbor" id="toc-k-nearest-neighbor" class="nav-link" data-scroll-target="#k-nearest-neighbor"><span class="header-section-number">20.2.2</span> K-nearest Neighbor</a></li>
+<li><a href="#ridge-regression" id="toc-ridge-regression" class="nav-link" data-scroll-target="#ridge-regression"><span class="header-section-number">20.6.1</span> Ridge regression</a></li>
+  <li><a href="#lasso-regression" id="toc-lasso-regression" class="nav-link" data-scroll-target="#lasso-regression"><span class="header-section-number">20.6.2</span> LASSO regression</a></li>
+  <li><a href="#elastic-net" id="toc-elastic-net" class="nav-link" data-scroll-target="#elastic-net"><span class="header-section-number">20.6.3</span> Elastic net</a></li>
   </ul>
 </li>
-  <li>
-<a href="#penalized-regression" id="toc-penalized-regression" class="nav-link" data-scroll-target="#penalized-regression"><span class="header-section-number">20.3</span> Penalized regression</a>
-  <ul class="collapse">
-<li><a href="#ridge-regression" id="toc-ridge-regression" class="nav-link" data-scroll-target="#ridge-regression"><span class="header-section-number">20.3.1</span> Ridge regression</a></li>
-  <li><a href="#lasso-regression" id="toc-lasso-regression" class="nav-link" data-scroll-target="#lasso-regression"><span class="header-section-number">20.3.2</span> LASSO regression</a></li>
-  <li><a href="#elastic-net" id="toc-elastic-net" class="nav-link" data-scroll-target="#elastic-net"><span class="header-section-number">20.3.3</span> Elastic Net</a></li>
-  <li><a href="#classification-and-regression-trees-cart" id="toc-classification-and-regression-trees-cart" class="nav-link" data-scroll-target="#classification-and-regression-trees-cart"><span class="header-section-number">20.3.4</span> Classification and Regression Trees (CART)</a></li>
-  <li><a href="#randomforest" id="toc-randomforest" class="nav-link" data-scroll-target="#randomforest"><span class="header-section-number">20.3.5</span> RandomForest</a></li>
-  </ul>
-</li>
+  <li><a href="#classification-and-regression-trees-cart" id="toc-classification-and-regression-trees-cart" class="nav-link" data-scroll-target="#classification-and-regression-trees-cart"><span class="header-section-number">20.7</span> Classification and regression trees (CART)</a></li>
+  <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests"><span class="header-section-number">20.8</span> Random forests</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">20.9</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">20.10</span> Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/machine_learning/models.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/machine_learning/models.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -565,95 +599,286 @@ window.Quarto = {
   
 
 
-</header><p>In the previous chapter, we introduced the three main paradigms of machine learning: supervised, unsupervised, and reinforcement learning. We also highlighted the importance of a structured workflow, particularly the critical step of data splitting to prevent overfitting. Now, we’ll dive deeper into the world of <strong>supervised learning</strong>, the most common and widely applied category of machine learning.</p>
-<p>This chapter provides a practical framework for understanding how different supervised learning algorithms work. Instead of viewing each algorithm as a completely separate entity, we’ll see that they all share a common conceptual structure. By grasping this structure, you can more easily understand, compare, and select the right algorithm for your problem. We will then use this framework to explore some of the most fundamental and popular algorithms for both regression and classification tasks.</p>
-<section id="a-framework-for-understanding-supervised-algorithms" class="level2" data-number="20.1"><h2 data-number="20.1" class="anchored" data-anchor-id="a-framework-for-understanding-supervised-algorithms">
-<span class="header-section-number">20.1</span> A Framework for Understanding Supervised Algorithms</h2>
-<p>At a high level, every supervised learning algorithm can be understood as having three core components: the <strong>hypothesis space</strong>, the <strong>objective function</strong>, and the <strong>learning algorithm</strong>. Thinking about new algorithms in terms of these three parts can demystify how they operate and highlight their key differences.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+</header><p>Imagine you have measured a few hundred penguins on a remote island — the length and depth of each bird’s bill, the length of its flipper. Now a new bird shows up. Can you predict its <strong>body mass</strong> from those measurements alone? Or guess which <strong>species</strong> it belongs to? That is exactly the kind of question supervised learning answers: you have examples where you know the answer, and you want a rule that predicts the answer for a new case you haven’t seen.</p>
+<p>The same shape of problem shows up everywhere in biology. Predict a tumour’s response to a drug from its gene-expression profile. Predict a patient’s blood pressure from a panel of clinical measurements. Classify a cell as healthy or diseased from its morphology. In every case you have <strong>features</strong> (the inputs you measure) and a <strong>target</strong> (the answer you want to predict), and a pile of past examples to learn from.</p>
+<p>In the <a href="../machine_learning/intro.html">previous chapter</a> we met the three paradigms of machine learning and the all-important habit of splitting data to avoid fooling ourselves. This chapter is a guided tour of the workhorse <strong>supervised</strong> algorithms — linear regression, k-nearest neighbours, ridge/LASSO/elastic-net, decision trees, and random forests. For each one you’ll get a plain-language intuition and a small, runnable example on a single shared dataset, so you can see the algorithms as variations on one theme rather than a zoo of unrelated tricks. (The later <a href="../machine_learning/mlr3verse_intro.html">mlr3verse chapter</a> shows how to run all of these through one tidy interface; here we stay close to base R so the moving parts stay visible.)</p>
+<section id="what-youll-learn" class="level2" data-number="20.1"><h2 data-number="20.1" class="anchored" data-anchor-id="what-youll-learn">
+<span class="header-section-number">20.1</span> What you’ll learn</h2>
+<ul>
+<li>Describe any supervised algorithm in terms of its <strong>hypothesis space</strong>, <strong>objective function</strong>, and <strong>learning algorithm</strong>.</li>
+<li>Fit and interpret a <strong>linear regression</strong> with <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>.</li>
+<li>Make predictions with <strong>k-nearest neighbours</strong> using <code><a href="https://rdrr.io/pkg/class/man/knn.html">class::knn()</a></code>, and explain why feature scaling matters.</li>
+<li>Fit <strong>ridge</strong>, <strong>LASSO</strong>, and <strong>elastic-net</strong> models with <code><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet()</a></code>, and read off which features each one keeps.</li>
+<li>Grow and read a <strong>decision tree</strong> with <code>rpart</code>, and a <strong>random forest</strong> with <code>ranger</code>.</li>
+</ul></section><section id="a-framework-for-understanding-supervised-algorithms" class="level2" data-number="20.2"><h2 data-number="20.2" class="anchored" data-anchor-id="a-framework-for-understanding-supervised-algorithms">
+<span class="header-section-number">20.2</span> A framework for understanding supervised algorithms</h2>
+<p>Every supervised algorithm in this chapter — and almost every one you’ll meet elsewhere — can be taken apart into the same three pieces. Once you can name those three pieces for an algorithm, you understand most of what makes it tick, and you can compare any two algorithms cleanly.</p>
+<div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>The Three Pillars of a Supervised Algorithm
+<span class="screen-reader-only">Important</span>The three pillars of a supervised algorithm
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p><strong>Hypothesis Space (The Model Family):</strong> This is the set of all possible models the algorithm is allowed to consider. For example, in linear regression, the hypothesis space is the set of all possible straight lines. For a decision tree, it’s the set of all possible branching rules. The choice of hypothesis space imposes a certain structure or <em>bias</em> on the solution.</p></li>
-<li><p><strong>Objective Function (The Goal):</strong> This function defines what a “good” model looks like. It measures how well a particular model from the hypothesis space fits the training data. For instance, in regression, a common objective function is the <em>Mean Squared Error (MSE)</em>, which penalizes models for making large prediction errors. The goal of learning is to find the model that minimizes this objective function.</p></li>
-<li><p><strong>Learning Algorithm (The Optimizer):</strong> This is the computational procedure used to search through the hypothesis space and find the model that best minimizes the objective function. This could be a straightforward mathematical formula (as in simple linear regression) or a complex iterative process (as in training neural networks).</p></li>
+<li><p><strong>Hypothesis space (the model family).</strong> The set of all candidate models the algorithm is allowed to consider. For linear regression it’s “all straight lines”; for a decision tree it’s “all branching yes/no rule sets.” This choice bakes in an assumption — a <em>bias</em> — about what the answer can look like.</p></li>
+<li><p><strong>Objective function (the goal).</strong> A number that says how <em>good</em> a candidate model is on the training data — usually how badly it errs, so smaller is better. For regression that’s often the <em>mean squared error</em>. Learning means finding the model that makes this number as small as possible.</p></li>
+<li><p><strong>Learning algorithm (the optimiser).</strong> The actual procedure that searches the hypothesis space for the model with the best objective value. Sometimes it’s a one-shot formula (ordinary linear regression); sometimes it’s a long iterative grind (neural networks).</p></li>
 </ol>
 </div>
 </div>
-<p>By framing algorithms in this way, we can see, for example, that Ridge and Lasso regression share the same hypothesis space and learning algorithm as linear regression but differ in their objective function, which includes a penalty for complexity. This small change in the objective function has profound effects on the final model, helping to prevent overfitting.</p>
-</section><section id="supervised-learning" class="level2 page-columns page-full" data-number="20.2"><h2 data-number="20.2" class="anchored" data-anchor-id="supervised-learning">
-<span class="header-section-number">20.2</span> Supervised Learning</h2>
-<section id="linear-regression" class="level3" data-number="20.2.1"><h3 data-number="20.2.1" class="anchored" data-anchor-id="linear-regression">
-<span class="header-section-number">20.2.1</span> Linear regression</h3>
-<p>In <a href="https://en.wikipedia.org/wiki/Statistics" title="Statistics">statistics</a>, <strong>linear regression</strong> is a <a href="https://en.wikipedia.org/wiki/Linearity" title="Linearity">linear</a> approach for modelling the relationship between a <a href="https://en.wikipedia.org/wiki/Scalar_(mathematics)" title="Scalar (mathematics)">scalar</a> response and one or more explanatory variables (also known as <a href="https://en.wikipedia.org/wiki/Dependent_and_independent_variables" title="Dependent and independent variables">dependent and independent variables</a>). The case of one explanatory variable is called <em><a href="https://en.wikipedia.org/wiki/Simple_linear_regression" title="Simple linear regression">simple linear regression</a></em>; for more than one, the process is called <strong>multiple linear regression</strong>. This term is distinct from <a href="https://en.wikipedia.org/wiki/Multivariate_linear_regression" title="Multivariate linear regression">multivariate linear regression</a>, where multiple <a href="https://en.wikipedia.org/wiki/Correlation_and_dependence" title="Correlation and dependence">correlated</a> dependent variables are predicted, rather than a single scalar variable.</p>
-<p>In linear regression, the relationships are modeled using <a href="https://en.wikipedia.org/wiki/Linear_predictor_function" title="Linear predictor function">linear predictor functions</a> whose unknown model <a href="https://en.wikipedia.org/wiki/Parameters" title="Parameters">parameters</a> are <a href="https://en.wikipedia.org/wiki/Estimation_theory" title="Estimation theory">estimated</a> from the <a href="https://en.wikipedia.org/wiki/Data" title="Data">data</a>. Such models are called <a href="https://en.wikipedia.org/wiki/Linear_model" title="Linear model">linear models</a>. Most commonly, the <a href="https://en.wikipedia.org/wiki/Conditional_expectation" title="Conditional expectation">conditional mean</a> of the response given the values of the explanatory variables (or predictors) is assumed to be an <a href="https://en.wikipedia.org/wiki/Affine_transformation" title="Affine transformation">affine function</a> of those values; less commonly, the conditional <a href="https://en.wikipedia.org/wiki/Median" title="Median">median</a> or some other <a href="https://en.wikipedia.org/wiki/Quantile" title="Quantile">quantile</a> is used. Like all forms of <a href="https://en.wikipedia.org/wiki/Regression_analysis" title="Regression analysis">regression analysis</a>, linear regression focuses on the <a href="https://en.wikipedia.org/wiki/Conditional_probability_distribution" title="Conditional probability distribution">conditional probability distribution</a> of the response given the values of the predictors, rather than on the <a href="https://en.wikipedia.org/wiki/Joint_probability_distribution" title="Joint probability distribution">joint probability distribution</a> of all of these variables, which is the domain of <a href="https://en.wikipedia.org/wiki/Multivariate_analysis" title="Multivariate analysis">multivariate analysis</a>.</p>
-<p>Linear regression was the first type of regression analysis to be studied rigorously, and to be used extensively in practical applications. This is because models which depend linearly on their unknown parameters are easier to fit than models which are non-linearly related to their parameters and because the statistical properties of the resulting estimators are easier to determine.</p>
-</section><section id="k-nearest-neighbor" class="level3 page-columns page-full" data-number="20.2.2"><h3 data-number="20.2.2" class="anchored" data-anchor-id="k-nearest-neighbor">
-<span class="header-section-number">20.2.2</span> K-nearest Neighbor</h3>
-<div class="cell page-columns page-full">
-<div class="cell-output-display page-columns page-full">
-<div class="quarto-figure quarto-figure-center page-columns page-full">
-<figure class="figure page-columns page-full"><p><img src="https://www.kdnuggets.com/wp-content/uploads/rapidminer-knn-image1.jpg" class="img-fluid figure-img"></p>
-<figcaption class="margin-caption"><strong>Figure</strong>. The k-nearest neighbor algorithm can be used for regression or classification.</figcaption></figure>
+<p>Here’s the payoff of this framing. Ridge and LASSO regression, which we’ll meet shortly, use the <em>same</em> hypothesis space and <em>same</em> style of optimiser as plain linear regression. The <em>only</em> thing they change is the objective function — they add a penalty for being too complicated. That one small change is what lets them avoid overfitting. Keep the three pillars in mind and each new algorithm becomes a small variation, not a whole new world.</p>
+</section><section id="our-shared-dataset-palmer-penguins" class="level2" data-number="20.3"><h2 data-number="20.3" class="anchored" data-anchor-id="our-shared-dataset-palmer-penguins">
+<span class="header-section-number">20.3</span> Our shared dataset: Palmer penguins</h2>
+<p>To keep the tour concrete, we’ll use one small, friendly biological dataset throughout: measurements of penguins from three species on islands in the Palmer Archipelago, Antarctica. It lives in the <code>palmerpenguins</code> package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://allisonhorst.github.io/palmerpenguins/">palmerpenguins</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">penguins_clean</span> <span class="op">&lt;-</span> <span class="va">penguins</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="op">)</span>            <span class="co"># drop the handful of rows with missing measurements</span></span>
+<span></span>
+<span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse</a></span><span class="op">(</span><span class="va">penguins_clean</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 333
+Columns: 8
+$ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…
+$ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…
+$ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, 36.7, 39.3, 38.9, 39.2, 41.1, 38.6…
+$ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, 19.3, 20.6, 17.8, 19.6, 17.6, 21.2…
+$ flipper_length_mm &lt;int&gt; 181, 186, 195, 193, 190, 181, 195, 182, 191, 198, 18…
+$ body_mass_g       &lt;int&gt; 3750, 3800, 3250, 3450, 3650, 3625, 4675, 3200, 3800…
+$ sex               &lt;fct&gt; male, female, female, female, male, female, male, fe…
+$ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…</code></pre>
 </div>
 </div>
-</div>
-<p>The <strong><em>k</em>-nearest neighbors algorithm</strong> (<strong><em>k</em>-NN</strong>) is a <a href="https://en.wikipedia.org/wiki/Non-parametric_statistics" title="Non-parametric statistics">non-parametric</a> <a href="https://en.wikipedia.org/wiki/Supervised_learning" title="Supervised learning">supervised learning</a> method first developed by <a href="https://en.wikipedia.org/wiki/Evelyn_Fix" title="Evelyn Fix">Evelyn Fix</a> and <a href="https://en.wikipedia.org/wiki/Joseph_Lawson_Hodges_Jr." title="Joseph Lawson Hodges Jr.">Joseph Hodges</a> in 1951, and later expanded by <a href="https://en.wikipedia.org/wiki/Thomas_M._Cover" title="Thomas M. Cover">Thomas Cover</a>. It is used for <a href="https://en.wikipedia.org/wiki/Statistical_classification" title="Statistical classification">classification</a> and <a href="https://en.wikipedia.org/wiki/Regression_analysis" title="Regression analysis">regression</a>. In both cases, the input consists of the <em>k</em> closest training examples in a <a href="https://en.wikipedia.org/wiki/Data_set" title="Data set">data set</a>.</p>
-<p>The k-nearest neighbor (k-NN) algorithm is a simple, yet powerful, supervised machine learning method used for classification and regression tasks. It is an instance-based, non-parametric learning method that stores the entire training dataset and makes predictions based on the similarity between data points. The underlying principle of the k-NN algorithm is that similar data points (those that are close to each other in multidimensional space) are likely to have similar outcomes or belong to the same class.</p>
-<p>Here’s a description of how the k-NN algorithm works:</p>
-<ol type="1">
-<li>Determine the value of k: The first step is to choose the number of nearest neighbors (k) to consider when making predictions. The value of k is a user-defined hyperparameter and can significantly impact the algorithm’s performance. A small value of k can lead to overfitting, while a large value may result in underfitting.</li>
-<li>Compute distance: Calculate the distance between the new data point (query point) and each data point in the training dataset. The most common distance metrics used are Euclidean, Manhattan, and Minkowski distance. The choice of distance metric depends on the problem and the nature of the data.</li>
-<li>Find k-nearest neighbors: Identify the k data points in the training dataset that are closest to the query point, based on the chosen distance metric.</li>
-<li>Make predictions: Once the k-nearest neighbors are identified, the final step is to make predictions. The prediction for the query point can be made in two ways:
-<ol type="a">
-<li>For classification, determine the class labels of the k-nearest neighbors and assign the class label with the highest frequency (majority vote) to the query point. In case of a tie, one can choose the class with the smallest average distance to the query point or randomly select one among the tied classes.</li>
-<li>For regression tasks, the k-NN algorithm follows a similar process, but instead of majority voting, it calculates the mean (or median) of the target values of the k-nearest neighbors and assigns it as the prediction for the query point.</li>
-</ol>
-</li>
-</ol>
-<p>The k-NN algorithm is known for its simplicity, ease of implementation, and ability to handle multi-class problems. However, it has some drawbacks, such as high computational cost (especially for large datasets), sensitivity to the choice of k and distance metric, and poor performance with high-dimensional or noisy data. Scaling and preprocessing the data, as well as using dimensionality reduction techniques, can help mitigate some of these issues.</p>
+<p>Each row is one bird. We’ll use two prediction problems throughout:</p>
 <ul>
-<li><p>In <em>k-NN classification</em>, the output is a class membership. An object is classified by a plurality vote of its neighbors, with the object being assigned to the class most common among its <em>k</em> nearest neighbors (<em>k</em> is a positive <a href="https://en.wikipedia.org/wiki/Integer" title="Integer">integer</a>, typically small). If <em>k</em>&nbsp;=&nbsp;1, then the object is simply assigned to the class of that single nearest neighbor.</p></li>
-<li><p>In <em>k-NN regression</em>, the output is the property value for the object. This value is the average of the values of <em>k</em> nearest neighbors.</p></li>
+<li>
+<strong>Regression:</strong> predict <code>body_mass_g</code> (a continuous number) from the body measurements.</li>
+<li>
+<strong>Classification:</strong> predict <code>species</code> (one of three categories) from the same measurements.</li>
 </ul>
-<p><em>k</em>-NN is a type of <a href="https://en.wikipedia.org/wiki/Classification" title="Classification">classification</a> where the function is only approximated locally and all computation is deferred until function evaluation. Since this algorithm relies on distance for classification, if the features represent different physical units or come in vastly different scales then <a href="https://en.wikipedia.org/wiki/Normalization_(statistics)" title="Normalization (statistics)">normalizing</a> the training data can improve its accuracy dramatically.</p>
-<p>Both for classification and regression, a useful technique can be to assign weights to the contributions of the neighbors, so that the nearer neighbors contribute more to the average than the more distant ones. For example, a common weighting scheme consists in giving each neighbor a weight of 1/<em>d</em>, where <em>d</em> is the distance to the neighbor.</p>
-<p>The neighbors are taken from a set of objects for which the class (for <em>k</em>-NN classification) or the object property value (for <em>k</em>-NN regression) is known. This can be thought of as the training set for the algorithm, though no explicit training step is required.</p>
-</section></section><section id="penalized-regression" class="level2 page-columns page-full" data-number="20.3"><h2 data-number="20.3" class="anchored" data-anchor-id="penalized-regression">
-<span class="header-section-number">20.3</span> Penalized regression</h2>
-<p>Adapted from http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/.</p>
-<p>Penalized regression is a type of regression analysis that introduces a penalty term to the loss function in order to prevent overfitting and improve the model’s ability to generalize. Remember that in regression, the <em>loss</em> function is the sum of squares <a href="#eq-sum-of-squares" class="quarto-xref">Equation&nbsp;<span>20.1</span></a>.</p>
-<p><span id="eq-sum-of-squares"><span class="math display">\[L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 \tag{20.1}\]</span></span></p>
-<p>In <a href="#eq-sum-of-squares" class="quarto-xref">Equation&nbsp;<span>20.1</span></a>, <span class="math inline">\(\hat{y}_i\)</span> is the predicted output, <span class="math inline">\(y_i\)</span> is the actual output, and n is the number of observations. The goal of regression is to minimize the loss function by finding the optimal values of the model parameters or coefficients. The model parameters are estimated using the training data. The model is then evaluated using the test data. If the model performs well on the training data but poorly on the test data, it is said to be overfit. Overfitting occurs when the model learns the training data too well, including the noise, and is not able to generalize well to new data. This is a common problem in machine learning, particularly when there are a large number of predictors compared to the number of observations, and can be addressed by penalized regression.</p>
-<p>The two most common types of penalized regression are Ridge Regression (L2 penalty) and LASSO Regression (L1 penalty). Both Ridge and LASSO help to reduce model complexity and prevent over-fitting which may result from simple linear regression. However, the choice between Ridge and LASSO depends on the situation and the dataset at hand. If feature selection is important for the interpretation of the model, LASSO might be preferred. If the goal is prediction accuracy and the model needs to retain all features, Ridge might be the better choice.</p>
-<section id="ridge-regression" class="level3" data-number="20.3.1"><h3 data-number="20.3.1" class="anchored" data-anchor-id="ridge-regression">
-<span class="header-section-number">20.3.1</span> Ridge regression</h3>
-<p>Ridge regression shrinks the regression coefficients, so that variables, with minor contribution to the outcome, have their coefficients close to zero. The shrinkage of the coefficients is achieved by penalizing the regression model with a penalty term called L2-norm, which is the sum of the squared coefficients. The amount of the penalty can be fine-tuned using a constant called lambda (λ). Selecting a good value for λ is critical. When λ=0, the penalty term has no effect, and ridge regression will produce the classical least square coefficients. However, as λ increases to infinite, the impact of the shrinkage penalty grows, and the ridge regression coefficients will get close zero. The loss function for Ridge Regression is:</p>
-<p><span id="eq-ridge"><span class="math display">\[L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=0}^{k} \beta_j^2 \tag{20.2}\]</span></span></p>
-<p>Here, <span class="math inline">\(\hat{y}_i\)</span> is the predicted output, <span class="math inline">\(y_i\)</span> is the actual output, <span class="math inline">\({\beta_j}\)</span> represents the model parameters or coefficients, and λ is the regularization parameter. The second term, λ∑βj^2, is the penalty term where all parameters are squared and summed. Ridge regression tends to shrink the coefficients but doesn’t necessarily zero them.</p>
-<p>Note that, in contrast to the ordinary least square regression, ridge regression is highly affected by the scale of the predictors. Therefore, it is better to standardize (i.e., scale) the predictors before applying the ridge regression (James et al.&nbsp;2014), so that all the predictors are on the same scale. The standardization of a predictor x, can be achieved using the formula <span class="math inline">\(x' = \frac{x}{sd(x)}\)</span>, where <span class="math inline">\(sd(x)\)</span> is the standard deviation of <span class="math inline">\(x\)</span>. The consequence of this is that, all standardized predictors will have a standard deviation of one allowing the final fit to not depend on the scale on which the predictors are measured.</p>
-<p>One important advantage of the ridge regression, is that it still performs well, compared to the ordinary least square method (see <a href="#eq-sum-of-squares" class="quarto-xref">Equation&nbsp;<span>20.1</span></a>), in a situation where you have a large multivariate data with the number of predictors (p) larger than the number of observations (n). One disadvantage of the ridge regression is that, it will include all the predictors in the final model, unlike the stepwise regression methods, which will generally select models that involve a reduced set of variables. Ridge regression shrinks the coefficients towards zero, but it will not set any of them exactly to zero. The LASSO regression is an alternative that overcomes this drawback.</p>
-</section><section id="lasso-regression" class="level3" data-number="20.3.2"><h3 data-number="20.3.2" class="anchored" data-anchor-id="lasso-regression">
-<span class="header-section-number">20.3.2</span> LASSO regression</h3>
-<p>LASSO stands for <em>Least Absolute Shrinkage and Selection Operator</em>. It shrinks the regression coefficients toward zero by penalizing the regression model with a penalty term called L1-norm, which is the sum of the absolute coefficients. In the case of LASSO regression, the penalty has the effect of forcing some of the coefficient estimates, with a minor contribution to the model, to be exactly equal to zero. This means that, LASSO can be also seen as an alternative to the subset selection methods for performing variable selection in order to reduce the complexity of the model. As in ridge regression, selecting a good value of <span class="math inline">\(\lambda\)</span> for the LASSO is critical. The loss function for LASSO Regression is:</p>
-<p><span id="eq-lasso"><span class="math display">\[L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=0}^{k} |\beta_j| \tag{20.3}\]</span></span></p>
-<p>Similar to Ridge, ŷi is the predicted output, yi is the actual output, βj represents the model parameters or coefficients, and λ is the regularization parameter. The second term, λ∑|βj|, is the penalty term where the absolute values of all parameters are summed. LASSO regression tends to shrink the coefficients and can zero out some of them, effectively performing variable selection.</p>
-<p>One obvious advantage of LASSO regression over ridge regression, is that it produces simpler and more interpretable models that incorporate only a reduced set of the predictors. However, neither ridge regression nor the LASSO will universally dominate the other. Generally, LASSO might perform better in a situation where some of the predictors have large coefficients, and the remaining predictors have very small coefficients. Ridge regression will perform better when the outcome is a function of many predictors, all with coefficients of roughly equal size (James et al.&nbsp;2014).</p>
-<p>Cross-validation methods can be used for identifying which of these two techniques is better on a particular data set.</p>
-</section><section id="elastic-net" class="level3" data-number="20.3.3"><h3 data-number="20.3.3" class="anchored" data-anchor-id="elastic-net">
-<span class="header-section-number">20.3.3</span> Elastic Net</h3>
-<p>Elastic Net produces a regression model that is penalized with both the L1-norm and L2-norm. The consequence of this is to effectively shrink coefficients (like in ridge regression) and to set some coefficients to zero (as in LASSO).</p>
-</section><section id="classification-and-regression-trees-cart" class="level3 page-columns page-full" data-number="20.3.4"><h3 data-number="20.3.4" class="anchored" data-anchor-id="classification-and-regression-trees-cart">
-<span class="header-section-number">20.3.4</span> Classification and Regression Trees (CART)</h3>
-<p><a href="https://en.wikipedia.org/wiki/Decision_tree_learning">Decision Tree Learning</a> is supervised learning approach used in statistics, data mining and machine learning. In this formalism, a classification or regression decision tree is used as a predictive model to draw conclusions about a set of observations. Decision trees are a popular machine learning method used for both classification and regression tasks. They are hierarchical, tree-like structures that model the relationship between features and the target variable by recursively splitting the data into subsets based on the feature values. Each internal node in the tree represents a decision or test on a feature, and each branch represents the outcome of that test. The leaf nodes contain the final prediction, which is the majority class for classification tasks or the mean/median of the target values for regression tasks.</p>
+<p>As we insisted in the previous chapter, we never judge a model on the same data we trained it on. So let’s split once, here, into a <strong>training</strong> set and a <strong>test</strong> set, and reuse that split for every algorithm.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">penguins_clean</span><span class="op">)</span></span>
+<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">0.7</span> <span class="op">*</span> <span class="va">n</span><span class="op">)</span>   <span class="co"># 70% for training</span></span>
+<span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">penguins_clean</span><span class="op">[</span><span class="va">train_idx</span>, <span class="op">]</span></span>
+<span><span class="va">test</span>  <span class="op">&lt;-</span> <span class="va">penguins_clean</span><span class="op">[</span><span class="op">-</span><span class="va">train_idx</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>train <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">train</span><span class="op">)</span>, test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">test</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>train  test 
+  233   100 </code></pre>
+</div>
+</div>
+<p>We now have 233 birds to learn from and 100 held back to test on honestly.</p>
+</section><section id="linear-regression" class="level2" data-number="20.4"><h2 data-number="20.4" class="anchored" data-anchor-id="linear-regression">
+<span class="header-section-number">20.4</span> Linear regression</h2>
+<p><strong>Plain-language intuition.</strong> Linear regression draws the best straight-line relationship between your features and a continuous target. “Best” means the line that makes the total squared prediction error as small as possible. Each feature gets a <em>coefficient</em> — a slope — telling you how much the target changes when that feature goes up by one unit. It is the simplest, most interpretable model in the toolbox, and a sensible first thing to try.</p>
+<p>In the language of the three pillars: the hypothesis space is “all straight-line combinations of the features,” the objective function is the sum of squared errors (<a href="#eq-sum-of-squares" class="quarto-xref">Equation&nbsp;<span>20.1</span></a>), and the learning algorithm is a tidy formula that R solves instantly.</p>
+<p><span id="eq-sum-of-squares"><span class="math display">\[L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 \tag{20.1}\]</span></span></p>
+<p>Here <span class="math inline">\(\hat{y}_i\)</span> is the predicted value, <span class="math inline">\(y_i\)</span> is the true value, and <span class="math inline">\(n\)</span> is the number of observations. Let’s predict penguin body mass from flipper length and bill dimensions:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">body_mass_g</span> <span class="op">~</span> <span class="va">flipper_length_mm</span> <span class="op">+</span> <span class="va">bill_length_mm</span> <span class="op">+</span> <span class="va">bill_depth_mm</span>,</span>
+<span>             data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_lm</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      (Intercept) flipper_length_mm    bill_length_mm     bill_depth_mm 
+      -6359.49030          50.52663           1.88153          18.08102 </code></pre>
+</div>
+</div>
+<p>Read the coefficients as “holding the others fixed, one extra millimetre of flipper length is associated with about 51 grams more body mass.” That is the chief virtue of linear regression: the model <em>is</em> its explanation.</p>
+<p>Now the honest test — how far off are the predictions on the held-out birds? We summarise that with the <strong>root mean squared error</strong> (RMSE), roughly the typical prediction error in grams:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_lm</span>, newdata <span class="op">=</span> <span class="va">test</span><span class="op">)</span></span>
+<span><span class="va">rmse</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">actual</span>, <span class="va">predicted</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">actual</span> <span class="op">-</span> <span class="va">predicted</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">rmse</span><span class="op">(</span><span class="va">test</span><span class="op">$</span><span class="va">body_mass_g</span>, <span class="va">pred_lm</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 387.8589</code></pre>
+</div>
+</div>
+<p>So the model’s predictions are typically off by around that many grams — for birds weighing 3,000–6,000 g, not bad for three measurements and a straight line.</p>
+</section><section id="k-nearest-neighbours" class="level2" data-number="20.5"><h2 data-number="20.5" class="anchored" data-anchor-id="k-nearest-neighbours">
+<span class="header-section-number">20.5</span> K-nearest neighbours</h2>
+<p><strong>Plain-language intuition.</strong> k-nearest neighbours (k-NN) is the “you are who your neighbours are” algorithm. To predict the answer for a new penguin, it finds the <em>k</em> most similar penguins in the training data — the ones closest to it in measurement space — and lets them vote. For classification, the new bird is assigned the most common species among its <em>k</em> neighbours. For regression, it gets the average of their values.</p>
+<p>k-NN is unusual: it has no real “training” step and no equation to fit. It just stores the data and measures distances at prediction time. Its one knob is <em>k</em>: a small <em>k</em> (say 1) follows every wiggle in the data and can overfit; a large <em>k</em> smooths things out and can underfit. <em>k</em> is a <strong>hyperparameter</strong> you tune, exactly like we discussed in the previous chapter.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Scale your features first
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>k-NN decides “closeness” using distance, so a feature measured in large numbers will dominate one measured in small numbers — purely because of its units, not its importance. Flipper length (≈ 200 mm) would swamp bill depth (≈ 17 mm) if we left them as-is. The fix is to <strong>standardise</strong> every feature to a common scale before computing distances. Forgetting this is the single most common k-NN mistake.</p>
+</div>
+</div>
+<p>Let’s classify penguin <strong>species</strong> from the three measurements. We standardise using the training set’s mean and standard deviation, then apply the <em>same</em> shift and scale to the test set:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/">class</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"flipper_length_mm"</span>, <span class="st">"bill_length_mm"</span>, <span class="st">"bill_depth_mm"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">train_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">train</span><span class="op">[</span><span class="va">features</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">train_sds</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">train</span><span class="op">[</span><span class="va">features</span><span class="op">]</span>, <span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">scale_with</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">df</span><span class="op">[</span><span class="va">features</span><span class="op">]</span>, center <span class="op">=</span> <span class="va">train_means</span>, scale <span class="op">=</span> <span class="va">train_sds</span><span class="op">)</span></span>
+<span><span class="va">train_x</span> <span class="op">&lt;-</span> <span class="fu">scale_with</span><span class="op">(</span><span class="va">train</span><span class="op">)</span></span>
+<span><span class="va">test_x</span>  <span class="op">&lt;-</span> <span class="fu">scale_with</span><span class="op">(</span><span class="va">test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">knn_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/class/man/knn.html">knn</a></span><span class="op">(</span>train <span class="op">=</span> <span class="va">train_x</span>, test <span class="op">=</span> <span class="va">test_x</span>, cl <span class="op">=</span> <span class="va">train</span><span class="op">$</span><span class="va">species</span>, k <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">knn_pred</span> <span class="op">==</span> <span class="va">test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>   <span class="co"># accuracy: fraction classified correctly</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.98</code></pre>
+</div>
+</div>
+<p>With <code>k = 5</code> neighbours, k-NN gets the species right for the large majority of held-out birds. The three penguin species really do cluster into distinct regions of measurement space, which is exactly the situation where “ask your neighbours” works beautifully.</p>
+</section><section id="penalized-regression" class="level2" data-number="20.6"><h2 data-number="20.6" class="anchored" data-anchor-id="penalized-regression">
+<span class="header-section-number">20.6</span> Penalized regression</h2>
+<p><em>Some material in this section is adapted from the</em> <a href="http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/">STHDA penalized-regression tutorial</a>.</p>
+<p>Plain linear regression has a weakness: when you have many features — especially more features than observations, the common situation in genomics — it can chase noise and overfit. <strong>Penalized regression</strong> fixes this by tweaking the <em>objective function</em> (pillar two). It keeps the squared-error term but adds a <strong>penalty</strong> that grows as the coefficients get large, gently pressuring the model to stay simple.</p>
+<p>A single dial, <strong>lambda</strong> (<span class="math inline">\(\lambda\)</span>), controls how hard that pressure pushes. When <span class="math inline">\(\lambda = 0\)</span> there’s no penalty and you’re back to ordinary linear regression. As <span class="math inline">\(\lambda\)</span> grows, coefficients are squeezed toward zero. The three methods below — ridge, LASSO, and elastic net — differ only in the <em>shape</em> of the penalty.</p>
+<p>We’ll fit all three with the <code>glmnet</code> package. <code>glmnet</code> does not take a formula; it wants a numeric <strong>matrix</strong> of features <code>x</code> and a response vector <code>y</code>. The <code><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix()</a></code> step below builds that matrix (and drops the intercept column with <code>[, -1]</code>):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">body_mass_g</span> <span class="op">~</span> <span class="va">flipper_length_mm</span> <span class="op">+</span> <span class="va">bill_length_mm</span> <span class="op">+</span></span>
+<span>                           <span class="va">bill_depth_mm</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">y_train</span> <span class="op">&lt;-</span> <span class="va">train</span><span class="op">$</span><span class="va">body_mass_g</span></span>
+<span></span>
+<span><span class="va">x_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">body_mass_g</span> <span class="op">~</span> <span class="va">flipper_length_mm</span> <span class="op">+</span> <span class="va">bill_length_mm</span> <span class="op">+</span></span>
+<span>                          <span class="va">bill_depth_mm</span>, data <span class="op">=</span> <span class="va">test</span><span class="op">)</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">y_test</span> <span class="op">&lt;-</span> <span class="va">test</span><span class="op">$</span><span class="va">body_mass_g</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="ridge-regression" class="level3" data-number="20.6.1"><h3 data-number="20.6.1" class="anchored" data-anchor-id="ridge-regression">
+<span class="header-section-number">20.6.1</span> Ridge regression</h3>
+<p><strong>Plain-language intuition.</strong> Ridge adds an <strong>L2 penalty</strong>: the sum of the <em>squared</em> coefficients (<a href="#eq-ridge" class="quarto-xref">Equation&nbsp;<span>20.2</span></a>). This shrinks every coefficient toward zero but never quite <em>to</em> zero — so ridge keeps all your features, just turns down their volume. It’s the right choice when you believe many features each contribute a little.</p>
+<p><span id="eq-ridge"><span class="math display">\[L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} \beta_j^2 \tag{20.2}\]</span></span></p>
+<p>In <code>glmnet</code>, ridge is <code>alpha = 0</code>. We use <code><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet()</a></code> to let cross-validation pick a good <span class="math inline">\(\lambda\)</span> automatically:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">fit_ridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_ridge</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 1 sparse Matrix of class "dgCMatrix"
+                   lambda.min
+(Intercept)       -4592.10682
+flipper_length_mm    41.68954
+bill_length_mm       13.28295
+bill_depth_mm       -10.47499</code></pre>
+</div>
+</div>
+<p>Notice that all three coefficients are present and non-zero — ridge shrank them but kept them. Its test error:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_ridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_ridge</span>, newx <span class="op">=</span> <span class="va">x_test</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span>
+<span><span class="fu">rmse</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_ridge</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 396.0116</code></pre>
+</div>
+</div>
+</section><section id="lasso-regression" class="level3" data-number="20.6.2"><h3 data-number="20.6.2" class="anchored" data-anchor-id="lasso-regression">
+<span class="header-section-number">20.6.2</span> LASSO regression</h3>
+<p><strong>Plain-language intuition.</strong> LASSO (Least Absolute Shrinkage and Selection Operator) adds an <strong>L1 penalty</strong>: the sum of the <em>absolute</em> coefficients (<a href="#eq-lasso" class="quarto-xref">Equation&nbsp;<span>20.3</span></a>). The difference from ridge sounds small but matters a lot: the L1 penalty can push a coefficient <em>exactly</em> to zero, effectively deleting that feature from the model. So LASSO does <strong>automatic feature selection</strong> — it hands you a simpler model that uses only the features that earn their keep.</p>
+<p><span id="eq-lasso"><span class="math display">\[L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} |\beta_j| \tag{20.3}\]</span></span></p>
+<p>LASSO is <code>alpha = 1</code> in <code>glmnet</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">fit_lasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_lasso</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 1 sparse Matrix of class "dgCMatrix"
+                    lambda.min
+(Intercept)       -5499.365152
+flipper_length_mm    47.897811
+bill_length_mm        1.414023
+bill_depth_mm         .       </code></pre>
+</div>
+</div>
+<p>Any coefficient shown as <code>.</code> has been zeroed out and dropped. With only three strong features here, LASSO may keep all of them — but on a genomics dataset with thousands of features, this is how you go from “20,000 genes” to “the handful that actually predict the outcome.”</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Ridge or LASSO? Let the data decide
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Neither always wins. LASSO shines when a few features carry the signal and the rest are noise (so zeroing them helps). Ridge shines when <em>many</em> features each contribute a bit. When you’re unsure — which is most of the time — fit both with cross-validation and compare their test error, exactly as we’re doing here.</p>
+</div>
+</div>
+</section><section id="elastic-net" class="level3" data-number="20.6.3"><h3 data-number="20.6.3" class="anchored" data-anchor-id="elastic-net">
+<span class="header-section-number">20.6.3</span> Elastic net</h3>
+<p><strong>Plain-language intuition.</strong> Why choose? Elastic net <strong>blends</strong> the L1 and L2 penalties, so it can zero out useless features (the LASSO trick) <em>while</em> gracefully handling groups of correlated features (the ridge strength). When two features are highly correlated, pure LASSO tends to arbitrarily keep one and drop the other; elastic net is happier keeping both, which is common and useful in biology where genes in the same pathway move together.</p>
+<p>The mixing dial is <code>alpha</code>, between 0 and 1: <code>alpha = 0</code> is pure ridge, <code>alpha = 1</code> is pure LASSO, and anything in between is elastic net. Let’s use a 50/50 blend, <code>alpha = 0.5</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">fit_enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_enet</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 1 sparse Matrix of class "dgCMatrix"
+                    lambda.min
+(Intercept)       -6166.200623
+flipper_length_mm    49.790369
+bill_length_mm        2.389242
+bill_depth_mm        14.153060</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_enet</span>, newx <span class="op">=</span> <span class="va">x_test</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span>
+<span><span class="fu">rmse</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_enet</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 388.1342</code></pre>
+</div>
+</div>
+<p>Elastic net gives you a coefficient profile somewhere between ridge’s “keep everything, shrunk” and LASSO’s “keep a few.” On this small three-feature problem all four regression models land in roughly the same place; the penalized methods earn their keep when features are many and correlated.</p>
+</section></section><section id="classification-and-regression-trees-cart" class="level2 page-columns page-full" data-number="20.7"><h2 data-number="20.7" class="anchored" data-anchor-id="classification-and-regression-trees-cart">
+<span class="header-section-number">20.7</span> Classification and regression trees (CART)</h2>
+<p><strong>Plain-language intuition.</strong> A decision tree predicts by asking a series of simple yes/no questions about the features, like a flow chart or the game of Twenty Questions. “Is the flipper longer than 206 mm? If yes, is the bill deeper than 17 mm?” Each question splits the data into purer and purer groups, until a final <strong>leaf</strong> gives the prediction — the majority species (for classification) or the average value (for regression).</p>
+<p>In three-pillar terms: the hypothesis space is “all such question trees,” the objective at each split is to make the resulting groups as <em>pure</em> as possible (measured by the Gini index or entropy), and the learning algorithm greedily picks the best split at each step. Trees are prized because you can <em>read</em> them — they match how people naturally reason.</p>
+<p>We’ll grow a classification tree for species with <code>rpart</code> (which ships with R):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bethatkinson/rpart">rpart</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">fit_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rpart/man/rpart.html">rpart</a></span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">flipper_length_mm</span> <span class="op">+</span> <span class="va">bill_length_mm</span> <span class="op">+</span> <span class="va">bill_depth_mm</span>,</span>
+<span>                  data <span class="op">=</span> <span class="va">train</span>, method <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tree_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_tree</span>, newdata <span class="op">=</span> <span class="va">test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">tree_pred</span> <span class="op">==</span> <span class="va">test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>   <span class="co"># test accuracy</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.94</code></pre>
+</div>
+</div>
+<p>The tree learned a short list of measurement thresholds that separate the species, and it classifies the held-out birds with high accuracy. We can even print the learned rules:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_tree</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n= 233 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+1) root 233 131 Adelie (0.43776824 0.19742489 0.36480687)  
+  2) flipper_length_mm&lt; 206.5 142  42 Adelie (0.70422535 0.29577465 0.00000000)  
+    4) bill_length_mm&lt; 44.2 101   3 Adelie (0.97029703 0.02970297 0.00000000) *
+    5) bill_length_mm&gt;=44.2 41   2 Chinstrap (0.04878049 0.95121951 0.00000000) *
+  3) flipper_length_mm&gt;=206.5 91   6 Gentoo (0.02197802 0.04395604 0.93406593)  
+    6) bill_depth_mm&gt;=17.2 7   3 Chinstrap (0.28571429 0.57142857 0.14285714) *
+    7) bill_depth_mm&lt; 17.2 84   0 Gentoo (0.00000000 0.00000000 1.00000000) *</code></pre>
+</div>
+</div>
+<p><a href="#fig-decision-tree" class="quarto-xref">Figure&nbsp;<span>20.1</span></a> shows the same idea drawn out for a clinical example: each internal node tests one feature, and following the branches leads to a leaf with a predicted class.</p>
 <div id="fig-decision-tree" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-decision-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../images/decision_tree.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
@@ -662,41 +887,214 @@ window.Quarto = {
 Figure&nbsp;20.1: A classification tree for a breast-cancer screening example. Each internal (blue) node tests one feature; following the branch that matches a sample leads, eventually, to a leaf (green/red) that gives the predicted class.
 </figcaption></figure>
 </div>
-<p>Here’s an overview of the decision tree learning process:</p>
-<ul>
-<li>Select the best feature and split value: Start at the root node and choose the feature and split value that results in the maximum reduction of impurity (or increase in information gain) in the child nodes. For classification tasks, impurity measures like Gini index or entropy are commonly used, while for regression tasks, mean squared error (MSE) or mean absolute error (MAE) can be used.</li>
-<li>Split the data: Partition the dataset into subsets based on the chosen feature and split value.</li>
-<li>Recursion: Repeat steps 1 and 2 for each subset until a stopping criterion is met. Stopping criteria can include reaching a maximum tree depth, a minimum number of samples per leaf, or no further improvement in impurity.</li>
-<li>Prune the tree (optional): To reduce overfitting, decision trees can be pruned by removing branches that do not significantly improve the model’s performance on the validation dataset. This can be done using techniques like reduced error pruning or cost-complexity pruning.</li>
-</ul>
-<p>Decision trees have several advantages, such as:</p>
-<ul>
-<li>Interpretability</li>
-</ul>
-<p>: They are easy to understand, visualize, and explain, even for non-experts. * Minimal data preprocessing : Decision trees can handle both numerical and categorical data, and they are robust to outliers and missing values. * Non-linear relationships : They can capture complex non-linear relationships between features and the target variable.</p>
-<p>However, decision trees also have some drawbacks:</p>
-<ul>
-<li>Overfitting</li>
-</ul>
-<p>: They are prone to overfitting, especially when the tree is deep or has few samples per leaf. Pruning and setting stopping criteria can help mitigate this issue. * Instability : Small changes in the data can lead to different tree structures. This can be addressed by using ensemble methods like random forests or gradient boosting machines (GBMs). * Greedy learning : Decision tree algorithms use a greedy approach, meaning they make locally optimal choices at each node. This may not always result in a globally optimal tree.</p>
-<p>Despite these limitations, decision trees are widely used in various applications due to their simplicity, interpretability, and ability to handle diverse data types.</p>
-</section><section id="randomforest" class="level3 page-columns page-full" data-number="20.3.5"><h3 data-number="20.3.5" class="anchored" data-anchor-id="randomforest">
-<span class="header-section-number">20.3.5</span> RandomForest</h3>
-<p><strong>Random forests</strong> or <strong>random decision forests</strong> is an <a href="https://en.wikipedia.org/wiki/Ensemble_learning" title="Ensemble learning">ensemble learning</a> method for <a href="https://en.wikipedia.org/wiki/Statistical_classification" title="Statistical classification">classification</a>, <a href="https://en.wikipedia.org/wiki/Regression_analysis" title="Regression analysis">regression</a> and other tasks that operates by constructing a multitude of <a href="https://en.wikipedia.org/wiki/Decision_tree_learning" title="Decision tree learning">decision trees</a> at training time. For classification tasks, the output of the random forest is the class selected by most trees. For regression tasks, the mean or average prediction of the individual trees is returned. Random decision forests correct for decision trees’ habit of <a href="https://en.wikipedia.org/wiki/Overfitting" title="Overfitting">overfitting</a> to their <a href="https://en.wikipedia.org/wiki/Test_set" title="Test set">training set</a>. Random forests generally outperform <a href="https://en.wikipedia.org/wiki/Decision_tree_learning" title="Decision tree learning">decision trees</a>, but their accuracy is lower than gradient boosted trees[<em><a href="https://en.wikipedia.org/wiki/Wikipedia:Citation_needed" title="Wikipedia:Citation needed">citation needed</a></em>]. However, data characteristics can affect their performance.</p>
-<p>The first algorithm for random decision forests was created in 1995 by <a href="https://en.wikipedia.org/wiki/Tin_Kam_Ho" title="Tin Kam Ho">Tin Kam Ho</a> using the <a href="https://en.wikipedia.org/wiki/Random_subspace_method" title="Random subspace method">random subspace method</a>, which, in Ho’s formulation, is a way to implement the “stochastic discrimination” approach to classification proposed by Eugene Kleinberg.</p>
-<p>An extension of the algorithm was developed by <a href="https://en.wikipedia.org/wiki/Leo_Breiman" title="Leo Breiman">Leo Breiman</a> and <a href="https://en.wikipedia.org/wiki/Adele_Cutler" title="Adele Cutler">Adele Cutler</a>, who registered “Random Forests” as a <a href="https://en.wikipedia.org/wiki/Trademark" title="Trademark">trademark</a> in 2006 (as of 2019<a href="https://en.wikipedia.org/w/index.php?title=Random_forest&amp;action=edit">[update]</a>, owned by <a href="https://en.wikipedia.org/wiki/Minitab" title="Minitab">Minitab, Inc.</a>). The extension combines Breiman’s “<a href="https://en.wikipedia.org/wiki/Bootstrap_aggregating" title="Bootstrap aggregating">bagging</a>” idea and random selection of features, introduced first by Ho and later independently by Amit and <a href="https://en.wikipedia.org/wiki/Donald_Geman" title="Donald Geman">Geman</a> in order to construct a collection of decision trees with controlled variance.</p>
-<p>Random forests are frequently used as “blackbox” models in businesses, as they generate reasonable predictions across a wide range of data while requiring little configuration.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>A single tree is twitchy
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Decision trees have a real flaw: they’re <strong>unstable</strong>. Change a few training rows and you can get a noticeably different tree. A single deep tree also overfits easily. The fix — averaging many trees together — is exactly the idea behind random forests, next.</p>
+</div>
+</div>
+</section><section id="random-forests" class="level2 page-columns page-full" data-number="20.8"><h2 data-number="20.8" class="anchored" data-anchor-id="random-forests">
+<span class="header-section-number">20.8</span> Random forests</h2>
+<p><strong>Plain-language intuition.</strong> If one decision tree is twitchy, build <em>hundreds</em> of them and let them vote. A <strong>random forest</strong> grows many trees, each on a random bootstrap sample of the data and each allowed to consider only a random subset of features at every split. That deliberate randomness makes the individual trees disagree in their mistakes — and when you average many imperfect-but-different predictions, the errors cancel out. The result is far more stable and accurate than any single tree, while needing very little tuning. <a href="#fig-random-forest" class="quarto-xref">Figure&nbsp;<span>20.2</span></a> sketches the idea: many trees, one combined vote.</p>
 <div id="fig-random-forest" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-random-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../images/random-forest.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-random-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.2: Graphical representation of random forests.
+Figure&nbsp;20.2: Graphical representation of a random forest: many decision trees, each grown on a slightly different view of the data, combine their votes into one prediction.
 </figcaption></figure>
 </div>
+<p>We’ll use the fast <code>ranger</code> package. Random forests are randomised, so we set a seed for a reproducible result:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://imbs-hl.github.io/ranger/">ranger</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">fit_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://imbs-hl.github.io/ranger/reference/ranger.html">ranger</a></span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">flipper_length_mm</span> <span class="op">+</span> <span class="va">bill_length_mm</span> <span class="op">+</span> <span class="va">bill_depth_mm</span>,</span>
+<span>                 data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_rf</span>, data <span class="op">=</span> <span class="va">test</span><span class="op">)</span><span class="op">$</span><span class="va">predictions</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">rf_pred</span> <span class="op">==</span> <span class="va">test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>   <span class="co"># test accuracy</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.97</code></pre>
+</div>
+</div>
+<p>The forest typically matches or beats the single tree on the held-out birds, with no manual tuning — which is exactly why random forests are such a popular, reliable default for tabular biological data.</p>
+</section><section id="summary" class="level2" data-number="20.9"><h2 data-number="20.9" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">20.9</span> Summary</h2>
+<p>You now have a working map of the supervised-learning landscape, and you’ve run every algorithm on it with your own hands:</p>
+<ul>
+<li>Every algorithm is a <strong>hypothesis space</strong> + an <strong>objective function</strong> + a <strong>learning algorithm</strong>. Name those three and you understand it.</li>
+<li>
+<strong>Linear regression</strong> (<code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>) fits an interpretable straight-line model; coefficients tell you how each feature moves the target.</li>
+<li>
+<strong>k-nearest neighbours</strong> (<code><a href="https://rdrr.io/pkg/class/man/knn.html">class::knn()</a></code>) predicts from the most similar training examples — remember to <strong>scale</strong> your features first.</li>
+<li>
+<strong>Penalized regression</strong> (<code><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet()</a></code>) adds a complexity penalty to fight overfitting: <strong>ridge</strong> (<code>alpha = 0</code>) shrinks all coefficients, <strong>LASSO</strong> (<code>alpha = 1</code>) zeroes some out for feature selection, and <strong>elastic net</strong> (<code>0 &lt; alpha &lt; 1</code>) blends the two.</li>
+<li>
+<strong>Decision trees</strong> (<code>rpart</code>) are readable flow charts but unstable on their own; <strong>random forests</strong> (<code>ranger</code>) average many trees into a stable, accurate, low-fuss predictor.</li>
+</ul>
+<p>In every case we trained on one split and judged on a held-out split — the habit that keeps you honest. The next chapters show how to run all of these through the unified <code>mlr3verse</code> interface, so swapping one algorithm for another becomes a one-line change.</p>
+</section><section id="exercises" class="level2" data-number="20.10"><h2 data-number="20.10" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">20.10</span> Exercises</h2>
+<ol type="1">
+<li>
+<p><strong>A simpler linear model.</strong> Refit the linear regression for <code>body_mass_g</code> using <em>only</em> <code>flipper_length_mm</code>. Compute its test RMSE and compare it to the three-feature model. Did dropping two features hurt much?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_simple</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">body_mass_g</span> <span class="op">~</span> <span class="va">flipper_length_mm</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
+<span><span class="va">pred_simple</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_simple</span>, newdata <span class="op">=</span> <span class="va">test</span><span class="op">)</span></span>
+<span><span class="fu">rmse</span><span class="op">(</span><span class="va">test</span><span class="op">$</span><span class="va">body_mass_g</span>, <span class="va">pred_simple</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 389.7472</code></pre>
+</div>
+</div>
+<p>Flipper length alone is a strong predictor of body mass, so the simpler model is usually only a little worse. That’s a useful reminder: more features are not automatically better.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Tuning k in k-NN.</strong> Try <code>k = 1</code>, <code>k = 5</code>, and <code>k = 25</code> for the species classifier. Which gives the best test accuracy? What goes wrong at the extremes?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">k</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">25</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">pred_k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/class/man/knn.html">knn</a></span><span class="op">(</span>train <span class="op">=</span> <span class="va">train_x</span>, test <span class="op">=</span> <span class="va">test_x</span>, cl <span class="op">=</span> <span class="va">train</span><span class="op">$</span><span class="va">species</span>, k <span class="op">=</span> <span class="va">k</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"k ="</span>, <span class="va">k</span>, <span class="st">" accuracy ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">pred_k</span> <span class="op">==</span> <span class="va">test</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>k = 1  accuracy = 0.98 
+k = 5  accuracy = 0.98 
+k = 25  accuracy = 0.96 </code></pre>
+</div>
+</div>
+<p>Very small <code>k</code> (like 1) follows noise and can overfit; very large <code>k</code> blurs the class boundaries and underfits. A middle value usually wins — which is why <code>k</code> is a hyperparameter worth tuning.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Watch LASSO select.</strong> Push the LASSO penalty up by using <code>lambda.1se</code> (a more aggressive, simpler model) instead of <code>lambda.min</code>, and look at the coefficients. Are any features dropped?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_lasso</span>, s <span class="op">=</span> <span class="st">"lambda.1se"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 1 sparse Matrix of class "dgCMatrix"
+                  lambda.1se
+(Intercept)       -4070.4745
+flipper_length_mm    41.1108
+bill_length_mm        .     
+bill_depth_mm         .     </code></pre>
+</div>
+</div>
+<p><code>lambda.1se</code> is the largest penalty whose error is still within one standard error of the best — a deliberately simpler model. Any coefficient printed as <code>.</code> has been set to exactly zero and removed. With strong features here it may keep them all, but the mechanism is the same one that prunes thousands of genes down to a few.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Feature importance from the forest.</strong> Refit the random forest with <code>importance = "impurity"</code> and print <code>fit_rf$variable.importance</code>. Which measurement matters most for telling the species apart?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">fit_rf_imp</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://imbs-hl.github.io/ranger/reference/ranger.html">ranger</a></span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">flipper_length_mm</span> <span class="op">+</span> <span class="va">bill_length_mm</span> <span class="op">+</span> <span class="va">bill_depth_mm</span>,</span>
+<span>                     data <span class="op">=</span> <span class="va">train</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">fit_rf_imp</span><span class="op">$</span><span class="va">variable.importance</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   bill_length_mm flipper_length_mm     bill_depth_mm 
+         58.71576          47.88220          40.17413 </code></pre>
+</div>
+</div>
+<p>The feature with the largest importance score contributed most to splitting the species apart across the forest’s trees. Importance scores are one of the friendliest things random forests give you — a ranked list of which measurements carry the signal.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Regression, three ways.</strong> You have test RMSE for linear regression, ridge, and elastic net. Compute it for LASSO too, then state which model you’d ship and why.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_lasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_lasso</span>, newx <span class="op">=</span> <span class="va">x_test</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>linear <span class="op">=</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_lm</span><span class="op">)</span>,</span>
+<span>  ridge  <span class="op">=</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_ridge</span><span class="op">)</span>,</span>
+<span>  lasso  <span class="op">=</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_lasso</span><span class="op">)</span>,</span>
+<span>  enet   <span class="op">=</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_enet</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  linear    ridge    lasso     enet 
+387.8589 396.0116 390.8471 388.1342 </code></pre>
+</div>
+</div>
+<p>On this small, low-dimensional problem the four are nearly tied, so you’d pick the simplest and most interpretable — plain linear regression. The penalized methods pull ahead only when features are numerous and correlated, as in real genomic data.</p>
+</div>
+</div>
+</div>
+</li>
+</ol>
 
 
-</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();

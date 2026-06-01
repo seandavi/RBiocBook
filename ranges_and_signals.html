@@ -339,7 +339,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./visualization_guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Self-Guided Data Visualization in R</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></span></a>
   </div>
 </li>
       </ul>
@@ -528,7 +528,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">27.1</span> Introduction</a></li>
+<li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">27.1</span> What you’ll learn</a></li>
   <li>
 <a href="#bioconductor-and-genomicranges" id="toc-bioconductor-and-genomicranges" class="nav-link" data-scroll-target="#bioconductor-and-genomicranges"><span class="header-section-number">27.2</span> Bioconductor and GenomicRanges</a>
   <ul class="collapse">
@@ -551,6 +551,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </ul>
 </li>
   <li><a href="#gene-models" id="toc-gene-models" class="nav-link" data-scroll-target="#gene-models"><span class="header-section-number">27.5</span> Gene models</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">27.6</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">27.7</span> Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/ranges_and_signals.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/ranges_and_signals.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -598,17 +600,31 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   
 
 
-</header><section id="introduction" class="level2" data-number="27.1"><h2 data-number="27.1" class="anchored" data-anchor-id="introduction">
-<span class="header-section-number">27.1</span> Introduction</h2>
-<p>Genomic ranges are essential components in the field of genomics, representing intervals on the genome that specify the start and end positions of DNA segments. These ranges can denote various genomic features, such as genes, exons, regulatory elements, and regions identified in genomic studies like ChIP-seq peaks. They play a pivotal role in the annotation, comparison, and interpretation of genomic features and experimental data, making them indispensable in biological data analysis.</p>
-<p>Understanding genomic ranges begins with the concept of coordinate systems. Different databases and tools adopt different conventions for indexing genomic coordinates. For instance, the UCSC Genome Browser uses a 0-based coordinate system, while Ensembl employs a 1-based system. Moreover, genomic ranges often include strand information, indicating whether the feature is on the positive or negative DNA strand, which is crucial for correctly interpreting gene expression and other genomic functions.</p>
-<p>Genomic ranges come in various forms, from single ranges defined by a simple start and end position (such as a single exon) to complex multi-range sets encompassing collections of ranges like all exons of a gene. Manipulating these ranges involves several fundamental operations. Intersection allows researchers to find overlapping regions between two sets of ranges, such as identifying ChIP-seq peaks that overlap with promoter regions. Union operations combine multiple ranges into a single contiguous range, while set difference identifies regions in one set that do not overlap with another set.</p>
-<p>Several tools and libraries have been developed to facilitate the manipulation of genomic ranges. In the R programming environment, the Bioconductor project provides the GenomicRanges package, which is specifically designed for representing and manipulating genomic ranges. This package offers a variety of functions for range arithmetic and efficient overlap queries. Another useful R package is rtracklayer, which enables the import and export of genomic data in various formats, including BED and GFF files.</p>
-<p>For those who prefer a command-line interface, BEDTools offers a suite of utilities for performing a wide range of operations on genomic intervals. This toolset is highly versatile, supporting tasks like intersecting, merging, and complementing genomic intervals. In the Python ecosystem, PyRanges provides a fast and flexible library for manipulating genomic intervals, offering similar functionality to Bioconductor’s GenomicRanges.</p>
-<p>The applications of genomic ranges are diverse and far-reaching. In gene annotation, for instance, RNA-seq reads are mapped to known gene models to quantify gene expression levels. Variant annotation involves mapping variants identified from sequencing data to their genomic context, predicting functional consequences based on their location within genes or intergenic regions. Comparative genomics leverages genomic ranges to compare intervals between species, identifying conserved regions that might indicate essential functional elements. Epigenomic studies utilize genomic ranges to intersect DNA methylation data or histone modification peaks with genomic features, providing insights into regulatory mechanisms.</p>
-<p>Despite their utility, working with genomic ranges presents several challenges. Converting coordinates between different reference genomes or different versions of the same genome can be complex and prone to errors. Integrating diverse types of genomic data, such as DNA sequences, epigenetic marks, and RNA-seq data, requires meticulous handling of genomic coordinates and ranges to ensure accurate analyses. Moreover, the sheer scale of genomic data necessitates optimized algorithms and data structures to handle large datasets efficiently.</p>
-<p>Interpreting genomic ranges within their biological context is crucial for drawing meaningful conclusions. For instance, a range within a gene’s promoter region might indicate potential regulatory activity. Understanding the functional implications of genomic ranges often involves overlapping these ranges with known functional elements, such as enhancers or silencers, to infer gene regulation mechanisms and their phenotypic consequences. Tools like the UCSC Genome Browser and the Integrative Genomics Viewer (IGV) are invaluable for visualizing genomic ranges alongside other genomic annotations, aiding in the interpretation and exploration of genomic data.</p>
-</section><section id="bioconductor-and-genomicranges" class="level2 page-columns page-full" data-number="27.2"><h2 data-number="27.2" class="anchored" data-anchor-id="bioconductor-and-genomicranges">
+</header><p>Almost everything you study in genomics lives at a <em>place</em> on the genome. A gene sits between two coordinates on a chromosome. An exon is a stretch within that gene. A ChIP-seq peak marks where a protein bound. A SNP is a single position. As soon as you have two such sets of places, the most interesting biological questions become questions about <em>location</em>: Which peaks fall inside a promoter? What is the nearest gene to this variant? Where do these two experiments agree?</p>
+<p>In this chapter you’ll learn to represent those places as <strong>genomic ranges</strong> and to ask how they relate to one another. The workhorse is Bioconductor’s <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> package <span class="citation" data-cites="lawrence_software_2013">(<a href="references.html#ref-lawrence_software_2013" role="doc-biblioref">Lawrence et al. 2013</a>)</span>, which gives you a compact object to hold ranges plus any data attached to them, and a vocabulary of fast operations — overlap, nearest-neighbor, flank, reduce — that scale to millions of regions. We’ll build small example objects by hand so you can see exactly what each operation does, then finish with real gene models pulled from a genome annotation.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>A note on coordinate systems
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Different tools count positions differently. The UCSC Genome Browser uses 0-based, half-open coordinates internally, while Ensembl and Bioconductor use 1-based, inclusive coordinates (position 1 is the first base, and both endpoints are included). <code>GRanges</code> objects are always 1-based and inclusive, which is one fewer thing to track once you stay inside Bioconductor.</p>
+</div>
+</div>
+<section id="what-youll-learn" class="level2" data-number="27.1"><h2 data-number="27.1" class="anchored" data-anchor-id="what-youll-learn">
+<span class="header-section-number">27.1</span> What you’ll learn</h2>
+<ul>
+<li>Build a <code>GRanges</code> object and read its two-part display (coordinates on the left, metadata on the right).</li>
+<li>Subset and extract parts of a <code>GRanges</code> object with accessors like <code><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/range-squeezers.html">ranges()</a></code>, <code><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html">strand()</a></code>, and <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>.</li>
+<li>Apply intra-range operations (<code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>) and inter-range operations (<code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">disjoin()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">gaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code>).</li>
+<li>Find relationships between two sets of ranges with <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code>.</li>
+<li>Group ranges into a <code>GRangesList</code> (for example, the exons of a transcript).</li>
+<li>Pull gene, transcript, and exon models out of a <code>TxDb</code> annotation package.</li>
+</ul></section><section id="bioconductor-and-genomicranges" class="level2 page-columns page-full" data-number="27.2"><h2 data-number="27.2" class="anchored" data-anchor-id="bioconductor-and-genomicranges">
 <span class="header-section-number">27.2</span> Bioconductor and GenomicRanges</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -691,7 +707,7 @@ The CompressedGRangesList class provides a space-efficient way to represent a la
 <tr class="odd">
 <td>GPos</td>
 <td>Represents genomic positions.</td>
-<td>SNPs or other single nicleotide locations</td>
+<td>SNPs or other single-nucleotide locations</td>
 </tr>
 <tr class="even">
 <td>GAlignments</td>
@@ -845,6 +861,19 @@ Table&nbsp;27.3: Methods for comparing and combining multiple GenomicRanges-clas
 </div>
 </div>
 <p>This creates a <code>GRanges</code> object with 10 genomic ranges. The output of the <code>GRanges</code> <code><a href="https://rdrr.io/r/methods/show.html">show()</a></code> method separates the information into a left and right hand region that are separated by <code>|</code> symbols (see <a href="#fig-granges-structure" class="quarto-xref">Figure&nbsp;<span>27.1</span></a>). The genomic coordinates (seqnames, ranges, and strand) are located on the left-hand side and the metadata columns are located on the right. For this example, the metadata is comprised of score and GC information, but almost anything can be stored in the metadata portion of a GRanges object.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Reading a <code>GRanges</code>: the <code>|</code> is the dividing line
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Think of a <code>GRanges</code> as a spreadsheet with a heavy vertical rule drawn down the middle. <strong>Everything to the left of the <code>|</code> answers “where?”</strong> — the chromosome (<code>seqnames</code>), the start and end (<code>ranges</code>), and the <code>strand</code>. These columns are mandatory and have their own special accessors. <strong>Everything to the right of the <code>|</code> answers “what do we know about it?”</strong> — the metadata: scores, GC content, gene names, p-values, whatever you attach. These are optional and you reach them all at once with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>. Keeping that line in mind makes every later operation easier: range operations rearrange the <em>left</em> side; your annotations ride along on the <em>right</em>.</p>
+</div>
+</div>
 <div id="fig-granges-structure" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-granges-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/granges_structure.png" class="img-fluid figure-img">
@@ -918,9 +947,9 @@ j        10  0.000000</code></pre>
 <pre><code> [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
 </div>
 </div>
-<p>We can even assign a new column.</p>
+<p>We can even assign a new column. Here we add an <code>AT</code> column derived from <code>GC</code> (since the fractions sum to 1). Notice that the new column appears on the right of the <code>|</code>, alongside <code>score</code> and <code>GC</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">$</span><span class="va">AT</span> <span class="op">=</span> <span class="fl">1</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">$</span><span class="va">GC</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">$</span><span class="va">AT</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">$</span><span class="va">GC</span></span>
 <span><span class="va">gr</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 10 ranges and 3 metadata columns:
@@ -942,10 +971,10 @@ j        10  0.000000</code></pre>
 </div>
 <p>Another common way to create a <code>GRanges</code> object is to start with a <code>data.frame</code>, perhaps created by hand like below or read in using <code>read.csv</code> or <code>read.table</code>. We can convert from a <code>data.frame</code>, when columns are named appropriately, to a <code>GRanges</code> object.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df_regions</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>chromosome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"chr1"</span>,<span class="fl">10</span><span class="op">)</span>,</span>
-<span>                        start<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1000</span>,<span class="fl">10000</span>,<span class="fl">1000</span><span class="op">)</span>,</span>
-<span>                        end<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1100</span>, <span class="fl">10100</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">df_regions</span>,<span class="st">'GRanges'</span><span class="op">)</span> <span class="co"># note that names have to match with GRanges slots</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df_regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>chromosome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="fl">10</span><span class="op">)</span>,</span>
+<span>                         start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">10000</span>, <span class="fl">1000</span><span class="op">)</span>,</span>
+<span>                         end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1100</span>, <span class="fl">10100</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">df_regions</span>, <span class="st">'GRanges'</span><span class="op">)</span> <span class="co"># note that names have to match with GRanges slots</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 10 ranges and 0 metadata columns:
        seqnames      ranges strand
@@ -964,8 +993,8 @@ j        10  0.000000</code></pre>
   seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## fix column name</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html">colnames</a></span><span class="op">(</span><span class="va">df_regions</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="st">'seqnames'</span></span>
-<span><span class="va">gr2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">df_regions</span>,<span class="st">'GRanges'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html">colnames</a></span><span class="op">(</span><span class="va">df_regions</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">'seqnames'</span></span>
+<span><span class="va">gr2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">df_regions</span>, <span class="st">'GRanges'</span><span class="op">)</span></span>
 <span><span class="va">gr2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 10 ranges and 0 metadata columns:
@@ -985,6 +1014,7 @@ j        10  0.000000</code></pre>
   seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
+<p>The first <code><a href="https://rdrr.io/r/methods/as.html">as()</a></code> call worked even though the chromosome column was named <code>chromosome</code> — <code><a href="https://rdrr.io/r/methods/as.html">as()</a></code> recognized <code>start</code> and <code>end</code> and treated the rest as metadata. After we rename that column to <code>seqnames</code>, the conversion places it correctly on the <em>left</em> of the <code>|</code> as the sequence name.</p>
 <p><code>GRanges</code> have one-dimensional-like behavior. For instance, we can check the <code>length</code> and even give <code>GRanges</code> names.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1107,6 +1137,19 @@ j        10  0.000000</code></pre>
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Strand changes what “upstream” means
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">precede()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">follow()</a></code>, “upstream” and “downstream” are interpreted <em>relative to the strand</em>. On the <code>+</code> strand, upstream is toward lower coordinates; on the <code>-</code> strand it is toward higher coordinates. A <code>*</code> (unstranded) range is treated as <code>+</code>. If your ranges have the wrong strand — or you forgot to set it — these operations will silently flank the wrong side. When a result looks backwards, check <code><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html">strand()</a></code> first.</p>
+</div>
+</div>
 <p>Other examples of intra-range methods include <code>resize</code> and <code>shift</code>. The shift method will move the ranges by a specific number of base pairs, and the resize method will extend the ranges by a specified width.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift</a></span><span class="op">(</span><span class="va">g</span>, <span class="fl">5</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1162,7 +1205,19 @@ j        10  0.000000</code></pre>
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>In this case, we have not specified the lengths of the chromosomes, so Bioconductor is making the assumption (incorrectly) that the chromosomes end at the largest location on each chromosome. We can correct this by setting the <code>seqlengths</code> correctly, but we can ignore that detail for now.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span><code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">gaps()</a></code> needs to know how long each chromosome is
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We never told this object how long the chromosomes are, so Bioconductor assumes each chromosome ends at the largest coordinate it has seen. That means the final gap (from the last range to the true end of the chromosome) is missing. In real work you set the chromosome lengths with <code><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths()</a></code> so that <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">gaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code>, and friends know the full extent of each sequence. We can ignore that detail for these toy examples.</p>
+</div>
+</div>
 <p>The disjoin method represents a GRanges object as a collection of non-overlapping ranges:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">disjoin</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1201,8 +1256,8 @@ integer-Rle of length 0 with 0 runs
 </div>
 <p>The coverage is summarized as a <code>list</code> of coverages, one for each chromosome. The <code>Rle</code> class is used to store the values. Sometimes, one must convert these values to <code>numeric</code> using <code>as.numeric</code>. In many cases, this will happen automatically, though.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">covg</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
-<span><span class="va">covg_chr2</span> <span class="op">=</span> <span class="va">covg</span><span class="op">[[</span><span class="st">'chr2'</span><span class="op">]</span><span class="op">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">covg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
+<span><span class="va">covg_chr2</span> <span class="op">&lt;-</span> <span class="va">covg</span><span class="op">[[</span><span class="st">'chr2'</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">covg_chr2</span>, type<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
@@ -1211,6 +1266,7 @@ integer-Rle of length 0 with 0 runs
 </div>
 </div>
 </div>
+<p>The plot shows how many ranges cover each base along <code>chr2</code>: the line steps up to 2 where two ranges overlap and drops back to 0 in the gaps. This is exactly the kind of per-base signal you compute from aligned sequencing reads in RNA-seq or ChIP-seq.</p>
 <p>See the <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> help page <code><a href="https://rdrr.io/pkg/GenomicRanges/man/intra-range-methods.html">?"intra-range-methods"</a></code> for more details.</p>
 </section></section><section id="set-operations-for-granges-objects" class="level3" data-number="27.2.3"><h3 data-number="27.2.3" class="anchored" data-anchor-id="set-operations-for-granges-objects">
 <span class="header-section-number">27.2.3</span> Set operations for GRanges objects</h3>
@@ -1257,7 +1313,7 @@ integer-Rle of length 0 with 0 runs
 </div>
 </section></section><section id="grangeslist" class="level2 page-columns page-full" data-number="27.3"><h2 data-number="27.3" class="anchored" data-anchor-id="grangeslist">
 <span class="header-section-number">27.3</span> GRangesList</h2>
-<p>Some important genomic features, such as spliced transcripts that are are comprised of exons, are inherently compound structures. Such a feature makes much more sense when expressed as a compound object such as a GRangesList. If we thing of each transcript as a set of exons, each transcript would be summarized as a <code>GRanges</code> object. However, if we have multiple transcripts, we want to somehow keep them separate, with each transcript having its own exons. The <code>GRangesList</code> is then a list of <code>GRanges</code> objects that. Continuing with the transcripts thought, a <code>GRangesList</code> can contain all the transcripts and their exons; each transcript is an element in the list.</p>
+<p>Some important genomic features, such as spliced transcripts that are are comprised of exons, are inherently compound structures. Such a feature makes much more sense when expressed as a compound object such as a GRangesList. If we think of each transcript as a set of exons, each transcript would be summarized as a <code>GRanges</code> object. However, if we have multiple transcripts, we want to keep them separate, with each transcript holding its own exons. A <code>GRangesList</code> is a list of <code>GRanges</code> objects. Continuing with the transcripts idea, a <code>GRangesList</code> can contain all the transcripts and their exons; each transcript is one element in the list.</p>
 <div id="fig-granges-list-structure" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-granges-list-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/granges_list_structure.png" class="img-fluid figure-img">
@@ -1508,24 +1564,20 @@ The function returns a Hits (see <code><a href="https://rdrr.io/pkg/S4Vectors/ma
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>In some cases, you may be interested in only one hit when doing overlaps. Note the <code>select</code> parameter. See the help for <code>findOverlaps</code></p>
+<p>In some cases, you may be interested in only one hit per query range. The <code>select</code> parameter handles this: with <code>select="first"</code>, <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps()</a></code> returns a plain integer vector with one entry per query range (the index of its first overlapping subject, or <code>NA</code> if there is none) instead of a full <code>Hits</code> object.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps</a></span><span class="op">(</span><span class="va">gr1</span>, <span class="va">gr2</span>, select<span class="op">=</span><span class="st">"first"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3 1 1 1</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps</a></span><span class="op">(</span><span class="va">gr1</span>, <span class="va">gr2</span>, select<span class="op">=</span><span class="st">"first"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 3 1 1 1</code></pre>
 </div>
-</div>
-<p>The <code>%over%</code> logical operator allows us to do similar things to <code>findOverlaps</code> and <code>subsetByOverlaps</code>.</p>
+<p>The <code>%over%</code> logical operator allows us to do similar things to <code>findOverlaps</code> and <code>subsetByOverlaps</code>. It returns a <code>TRUE</code>/<code>FALSE</code> for each range, which is handy for subsetting.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr2</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">gr1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr2</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">gr1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  TRUE  TRUE  TRUE FALSE FALSE FALSE</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb102"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr1</span><span class="op">[</span><span class="va">gr1</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">gr2</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr1</span><span class="op">[</span><span class="va">gr1</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">gr2</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 4 ranges and 3 metadata columns:
     seqnames    ranges strand |     score        GC        AT
@@ -1543,7 +1595,7 @@ The function returns a Hits (see <code><a href="https://rdrr.io/pkg/S4Vectors/ma
 <p>There are a number of useful methods that find the nearest feature (region) in a second set for each element in the first set.</p>
 <p>We can review our two <code>GRanges</code> toy objects:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb104"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb102"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 3 ranges and 3 metadata columns:
     seqnames    ranges strand |     score        GC        AT
@@ -1554,7 +1606,7 @@ The function returns a Hits (see <code><a href="https://rdrr.io/pkg/S4Vectors/ma
   -------
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb106"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb104"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 10 ranges and 3 metadata columns:
     seqnames    ranges strand |     score        GC        AT
@@ -1592,15 +1644,16 @@ g)     *  |  +        |  ---&gt;
 h)     *  |  -        |  &lt;---
 i)     *  |  *        |  ---&gt;  (the only situation where * arbitrarily means +)</code></pre>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb109"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">gr</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb107"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">gr</span><span class="op">)</span></span>
 <span><span class="va">res</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 5 4 4</code></pre>
 </div>
 </div>
+<p>Each element of <code>res</code> is the index <em>into</em> <code>gr</code> of the nearest range to the corresponding range in <code>g</code>. So <code>gr[res]</code> would give you the actual nearest ranges.</p>
 <p>While <code>nearest</code> and friends give the index of the nearest feature, the distance to the nearest is sometimes also useful to have. The <code>distanceToNearest</code> method calculates the nearest feature as well as reporting the distance.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb111"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">gr</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb109"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">gr</span><span class="op">)</span></span>
 <span><span class="va">res</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Hits object with 3 hits and 1 metadata column:
@@ -1613,9 +1666,10 @@ i)     *  |  *        |  ---&gt;  (the only situation where * arbitrarily means 
   queryLength: 3 / subjectLength: 10</code></pre>
 </div>
 </div>
+<p>This returns a <code>Hits</code> object with an extra <code>distance</code> column. A distance of 0 means the two ranges overlap or touch; larger values are the gap in base pairs between them.</p>
 </section></section><section id="gene-models" class="level2 page-columns page-full" data-number="27.5"><h2 data-number="27.5" class="anchored" data-anchor-id="gene-models">
 <span class="header-section-number">27.5</span> Gene models</h2>
-<p>The <code>TxDb</code> package provides a convenient interface to gene models from a variety of sources. The <code>TxDb.Hsapiens.UCSC.hg38.knownGene</code> package provides access to the UCSC knownGene gene model for the hg19 build of the human genome.</p>
+<p>So far every range has been one we typed by hand. In practice you usually pull ranges from an annotation. A <code>TxDb</code> (“transcript database”) package provides a convenient interface to gene models from a variety of sources. The <a href="http://bioconductor.org/packages/TxDb.Hsapiens.UCSC.hg38.knownGene.html"><code>TxDb.Hsapiens.UCSC.hg38.knownGene</code></a> package provides access to the UCSC knownGene gene model for the <strong>hg38</strong> build of the human genome. Everything it returns is a <code>GRanges</code> (or <code>GRangesList</code>), so all the operations from this chapter apply directly.</p>
 <div id="fig-range-operations" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-range-operations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/range_operations_diagram.png" class="img-fluid figure-img">
@@ -1625,20 +1679,265 @@ Figure&nbsp;27.3: A graphical representation of range operations demonstrated on
 </figcaption></figure>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb113"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb111"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span><span class="op">)</span></span>
 <span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>transcripts</code> function returns a <code>GRanges</code> object with the transcripts for all genes in the database.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb114"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">transcripts</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb112"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">transcripts</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span>
+<span><span class="va">tx</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 412044 ranges and 2 metadata columns:
+                      seqnames        ranges strand |     tx_id
+                         &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt;
+       [1]                chr1   11121-14413      + |         1
+       [2]                chr1   11125-14405      + |         2
+       [3]                chr1   11410-14413      + |         3
+       [4]                chr1   11411-14413      + |         4
+       [5]                chr1   11426-14409      + |         5
+       ...                 ...           ...    ... .       ...
+  [412040] chrX_MU273397v1_alt 239036-260095      - |    412040
+  [412041] chrX_MU273397v1_alt 272358-282686      - |    412041
+  [412042] chrX_MU273397v1_alt 314193-316302      - |    412042
+  [412043] chrX_MU273397v1_alt 314813-315236      - |    412043
+  [412044] chrX_MU273397v1_alt 324527-324923      - |    412044
+                     tx_name
+                 &lt;character&gt;
+       [1] ENST00000832824.1
+       [2] ENST00000832825.1
+       [3] ENST00000832826.1
+       [4] ENST00000832827.1
+       [5] ENST00000832828.1
+       ...               ...
+  [412040] ENST00000710260.1
+  [412041] ENST00000710028.1
+  [412042] ENST00000710030.1
+  [412043] ENST00000710216.1
+  [412044] ENST00000710031.1
+  -------
+  seqinfo: 711 sequences (1 circular) from hg38 genome</code></pre>
+</div>
 </div>
 <p>The <code>exons</code> function returns a <code>GRanges</code> object with the exons.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb115"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">exons</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb114"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">exons</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span>
+<span><span class="va">ex</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 966596 ranges and 1 metadata column:
+                      seqnames        ranges strand |   exon_id
+                         &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt;
+       [1]                chr1   11121-11211      + |         1
+       [2]                chr1   11125-11211      + |         2
+       [3]                chr1   11410-11671      + |         3
+       [4]                chr1   11411-11671      + |         4
+       [5]                chr1   11426-11671      + |         5
+       ...                 ...           ...    ... .       ...
+  [966592] chrX_MU273397v1_alt 314193-314248      - |    966592
+  [966593] chrX_MU273397v1_alt 314813-315236      - |    966593
+  [966594] chrX_MU273397v1_alt 315258-315407      - |    966594
+  [966595] chrX_MU273397v1_alt 316254-316302      - |    966595
+  [966596] chrX_MU273397v1_alt 324527-324923      - |    966596
+  -------
+  seqinfo: 711 sequences (1 circular) from hg38 genome</code></pre>
 </div>
-<p>The <code>genes</code> function returns a <code>GRanges</code> object with the genes.</p>
+</div>
+<p>The <code>genes</code> function returns a <code>GRanges</code> object with one range per gene.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb116"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb116"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span>
+<span><span class="va">gn</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 35356 ranges and 1 metadata column:
+            seqnames              ranges strand |     gene_id
+               &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+          1    chr19   58345178-58362751      - |           1
+         10     chr8   18386273-18401218      + |          10
+        100    chr20   44584896-44652252      - |         100
+       1000    chr18   27932879-28177946      - |        1000
+  100008586     chrX   49551278-49568218      + |   100008586
+        ...      ...                 ...    ... .         ...
+       9990    chr15   34229784-34338060      - |        9990
+       9991     chr9 112215071-112333653      - |        9991
+       9992    chr21   34180729-34371381      + |        9992
+       9993    chr22   19036282-19122454      - |        9993
+       9997    chr22   50523568-50526461      - |        9997
+  -------
+  seqinfo: 711 sequences (1 circular) from hg38 genome</code></pre>
+</div>
+</div>
+<p>Notice the scale: these are real <code>GRanges</code> objects with tens of thousands of ranges, yet they print and subset instantly. That is the payoff of the compact representation — the same <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code> calls you practiced on the toy <code>gr</code> work unchanged here. For example, <code>subsetByOverlaps(gn, peaks)</code> would give you the genes hit by a set of ChIP-seq <code>peaks</code>, and <code>nearest(peaks, tx)</code> would assign each peak to its closest transcript.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Grouping exons by transcript
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>exons(txdb)</code> gives you a flat <code>GRanges</code> of every exon. When you instead want the exons <em>grouped by the transcript they belong to</em> — a <code>GRangesList</code>, one element per transcript — use <code>exonsBy(txdb, by = "tx")</code>. That is the natural object for counting reads per transcript and is exactly the <code>GRangesList</code> structure we built by hand earlier.</p>
+</div>
+</div>
+</section><section id="summary" class="level2" data-number="27.6"><h2 data-number="27.6" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">27.6</span> Summary</h2>
+<p>You now have a working vocabulary for genomic locations.</p>
+<ul>
+<li>A <strong><code>GRanges</code></strong> object holds a set of ranges. Coordinates (<code>seqnames</code>, <code>ranges</code>, <code>strand</code>) sit to the left of the <code>|</code>; optional metadata reached with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code> sits to the right. You can build one from scratch or coerce a <code>data.frame</code> with <code>as(df, "GRanges")</code>.</li>
+<li>
+<strong>Intra-range</strong> operations (<code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>) reshape each range on its own and respect strand. <strong>Inter-range</strong> operations (<code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">disjoin()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">gaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code>) summarize a set of ranges together.</li>
+<li>
+<strong>Between-set</strong> operations answer the integration questions: <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps()</a></code> and <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code> for overlap, <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code> and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code> for proximity, plus <code><a href="https://generics.r-lib.org/reference/setops.html">union()</a></code>/<code><a href="https://generics.r-lib.org/reference/setops.html">intersect()</a></code>/<code><a href="https://generics.r-lib.org/reference/setops.html">setdiff()</a></code> for set arithmetic.</li>
+<li>A <strong><code>GRangesList</code></strong> groups ranges by a parent feature, such as exons within a transcript.</li>
+<li>A <strong><code>TxDb</code></strong> package (here <a href="http://bioconductor.org/packages/TxDb.Hsapiens.UCSC.hg38.knownGene.html"><code>TxDb.Hsapiens.UCSC.hg38.knownGene</code></a>) hands you real gene, transcript, and exon models as <code>GRanges</code>, so every operation above applies to genome-scale annotation with no new syntax.</li>
+</ul></section><section id="exercises" class="level2" data-number="27.7"><h2 data-number="27.7" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">27.7</span> Exercises</h2>
+<p>These reuse the objects built earlier in the chapter: the 10-range <code>gr</code>, its 3-range subset <code>g</code>, and the <code>grl</code> <code>GRangesList</code>. Run the chapter’s chunks first so those objects exist.</p>
+<p><strong>1. Read the structure.</strong> Without running any code, which of these belong to the <em>left</em> of the <code>|</code> in a <code>GRanges</code> (the coordinates) and which to the <em>right</em> (the metadata): <code>strand</code>, <code>score</code>, <code>seqnames</code>, <code>GC</code>, <code>width</code>?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Left of the <code>|</code> (coordinates): <code>seqnames</code>, <code>strand</code>, and <code>width</code> (part of <code>ranges</code>). Right of the <code>|</code> (metadata): <code>score</code> and <code>GC</code>. The coordinate columns have dedicated accessors; the metadata columns are reached together with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>.</p>
+</div>
+</div>
+</div>
+<p><strong>2. Promoters by hand.</strong> A common task is to grab the region just upstream of a feature’s start — a rough promoter. Use <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> to get the 50 bases upstream of each range in <code>g</code>, then confirm with <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code> that each result is 50 bases wide.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb118"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">prom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank</a></span><span class="op">(</span><span class="va">g</span>, <span class="fl">50</span><span class="op">)</span></span>
+<span><span class="va">prom</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 3 ranges and 3 metadata columns:
+    seqnames    ranges strand |     score        GC        AT
+       &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;numeric&gt; &lt;numeric&gt;
+  a     chr1   112-161      - |         1  1.000000  0.000000
+  b     chr2    52-101      + |         2  0.888889  0.111111
+  c     chr2    53-102      + |         3  0.777778  0.222222
+  -------
+  seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb120"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">prom</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 50 50 50</code></pre>
+</div>
+</div>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> defaults to the upstream side (<code>start = TRUE</code>), measured relative to strand. Every flank is exactly 50 bases wide.</p>
+</div>
+</div>
+</div>
+<p><strong>3. Collapse overlaps.</strong> Use <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code> on <code>gr</code> to merge overlapping or adjacent ranges into a minimal set, then report how many ranges remain with <code><a href="https://rdrr.io/r/base/length.html">length()</a></code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb122"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
+<span><span class="va">reduced</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 7 ranges and 0 metadata columns:
+      seqnames    ranges strand
+         &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+  [1]     chr1   106-116      +
+  [2]     chr1   101-111      -
+  [3]     chr1   105-115      *
+  [4]     chr2   102-113      +
+  [5]     chr2   104-114      *
+  [6]     chr3   107-118      +
+  [7]     chr3   109-120      -
+  -------
+  seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb124"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">reduced</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 7</code></pre>
+</div>
+</div>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code> works per chromosome and per strand, merging ranges that overlap or abut into single ranges — the standard way to collapse overlapping exons into non-redundant regions.</p>
+</div>
+</div>
+</div>
+<p><strong>4. Overlap counting.</strong> Build <code>q &lt;- gr[1:4]</code> and <code>s &lt;- gr[3:8]</code>, then use <code>countOverlaps(q, s)</code> to find how many ranges in <code>s</code> each range in <code>q</code> overlaps. Which range in <code>q</code> has the most overlaps?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb126"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="va">gr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="va">s</span> <span class="op">&lt;-</span> <span class="va">gr</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
+<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps</a></span><span class="op">(</span><span class="va">q</span>, <span class="va">s</span><span class="op">)</span></span>
+<span><span class="va">counts</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>a b c d 
+1 2 2 2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb128"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.min.html">which.max</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>b 
+2 </code></pre>
+</div>
+</div>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps()</a></code> returns one integer per range in the query. Remember that strand participates in the overlap test, so a <code>+</code> query range will not overlap a <code>-</code> subject range unless you set <code>ignore.strand = TRUE</code>.</p>
+</div>
+</div>
+</div>
+<p><strong>5. Nearest with distance.</strong> Use <code>distanceToNearest(g, gr)</code> and pull out the <code>distance</code> metadata column with <code>mcols(...)$distance</code>. What does a distance of 0 tell you?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb130"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">gr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">hits</span><span class="op">)</span><span class="op">$</span><span class="va">distance</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0 0 0</code></pre>
+</div>
+</div>
+<p>A distance of 0 means the nearest range overlaps or directly touches the query range — here every range in <code>g</code> is also present in <code>gr</code>, so each finds itself at distance 0.</p>
+</div>
+</div>
 </div>
 
 

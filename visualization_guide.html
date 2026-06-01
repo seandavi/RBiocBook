@@ -7,7 +7,7 @@
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>15&nbsp; Self-Guided Data Visualization in R – The RBioc Book</title>
+<title>15&nbsp; A self-guided tour of data visualization in R – The RBioc Book</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -111,32 +111,6 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </script><style>html{ scroll-behavior: smooth; }</style>
-<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 </head>
 <body class="nav-sidebar floating nav-fixed slimcontent quarto-light">
 
@@ -214,7 +188,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./visualization_guide.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Self-Guided Data Visualization in R</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./visualization_guide.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -346,7 +320,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./visualization_guide.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Self-Guided Data Visualization in R</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></span></a>
   </div>
 </li>
       </ul>
@@ -535,26 +509,43 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#getting-started-with-ggplot2" id="toc-getting-started-with-ggplot2" class="nav-link active" data-scroll-target="#getting-started-with-ggplot2"><span class="header-section-number">15.1</span> Getting Started with ggplot2</a></li>
+<li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">15.1</span> What you’ll learn</a></li>
   <li>
-<a href="#core-principles-of-effective-data-visualization" id="toc-core-principles-of-effective-data-visualization" class="nav-link" data-scroll-target="#core-principles-of-effective-data-visualization"><span class="header-section-number">15.2</span> Core Principles of Effective Data Visualization</a>
+<a href="#sec-principles" id="toc-sec-principles" class="nav-link" data-scroll-target="#sec-principles"><span class="header-section-number">15.2</span> Two principles that make any plot better</a>
   <ul class="collapse">
-<li><a href="#the-least-ink-principle" id="toc-the-least-ink-principle" class="nav-link" data-scroll-target="#the-least-ink-principle"><span class="header-section-number">15.2.1</span> The “Least Ink” Principle</a></li>
-  <li><a href="#the-importance-of-clear-labeling" id="toc-the-importance-of-clear-labeling" class="nav-link" data-scroll-target="#the-importance-of-clear-labeling"><span class="header-section-number">15.2.2</span> The Importance of Clear Labeling</a></li>
-  <li><a href="#color-and-contrast" id="toc-color-and-contrast" class="nav-link" data-scroll-target="#color-and-contrast"><span class="header-section-number">15.2.3</span> Color and Contrast</a></li>
+<li><a href="#maximize-the-data-ink-ratio" id="toc-maximize-the-data-ink-ratio" class="nav-link" data-scroll-target="#maximize-the-data-ink-ratio"><span class="header-section-number">15.2.1</span> Maximize the data-ink ratio</a></li>
+  <li><a href="#label-everything" id="toc-label-everything" class="nav-link" data-scroll-target="#label-everything"><span class="header-section-number">15.2.2</span> Label everything</a></li>
+  <li><a href="#use-color-deliberately" id="toc-use-color-deliberately" class="nav-link" data-scroll-target="#use-color-deliberately"><span class="header-section-number">15.2.3</span> Use color deliberately</a></li>
   </ul>
 </li>
-  <li><a href="#introduction-to-ggplot2-the-grammar-of-graphics" id="toc-introduction-to-ggplot2-the-grammar-of-graphics" class="nav-link" data-scroll-target="#introduction-to-ggplot2-the-grammar-of-graphics"><span class="header-section-number">15.3</span> Introduction to ggplot2: The Grammar of Graphics</a></li>
-  <li><a href="#sets-and-intersections-upset-plots" id="toc-sets-and-intersections-upset-plots" class="nav-link" data-scroll-target="#sets-and-intersections-upset-plots"><span class="header-section-number">15.4</span> Sets and Intersections: UpSet Plots</a></li>
-  <li><a href="#complex-heatmaps" id="toc-complex-heatmaps" class="nav-link" data-scroll-target="#complex-heatmaps"><span class="header-section-number">15.5</span> Complex Heatmaps</a></li>
-  <li><a href="#genome-and-genomic-data-visualization" id="toc-genome-and-genomic-data-visualization" class="nav-link" data-scroll-target="#genome-and-genomic-data-visualization"><span class="header-section-number">15.6</span> Genome and Genomic Data Visualization</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">15.7</span> Conclusion</a></li>
+  <li>
+<a href="#sec-grammar" id="toc-sec-grammar" class="nav-link" data-scroll-target="#sec-grammar"><span class="header-section-number">15.3</span> The grammar of graphics, layer by layer</a>
+  <ul class="collapse">
+<li><a href="#step-1-data-and-aesthetics" id="toc-step-1-data-and-aesthetics" class="nav-link" data-scroll-target="#step-1-data-and-aesthetics"><span class="header-section-number">15.3.1</span> Step 1: data and aesthetics</a></li>
+  <li><a href="#step-2-add-a-geom" id="toc-step-2-add-a-geom" class="nav-link" data-scroll-target="#step-2-add-a-geom"><span class="header-section-number">15.3.2</span> Step 2: add a geom</a></li>
+  <li><a href="#step-3-map-a-third-variable-to-color" id="toc-step-3-map-a-third-variable-to-color" class="nav-link" data-scroll-target="#step-3-map-a-third-variable-to-color"><span class="header-section-number">15.3.3</span> Step 3: map a third variable to color</a></li>
+  <li><a href="#step-4-layer-on-a-second-geom" id="toc-step-4-layer-on-a-second-geom" class="nav-link" data-scroll-target="#step-4-layer-on-a-second-geom"><span class="header-section-number">15.3.4</span> Step 4: layer on a second geom</a></li>
+  <li><a href="#step-5-control-scales" id="toc-step-5-control-scales" class="nav-link" data-scroll-target="#step-5-control-scales"><span class="header-section-number">15.3.5</span> Step 5: control scales</a></li>
+  <li><a href="#step-6-facet-into-small-multiples" id="toc-step-6-facet-into-small-multiples" class="nav-link" data-scroll-target="#step-6-facet-into-small-multiples"><span class="header-section-number">15.3.6</span> Step 6: facet into small multiples</a></li>
+  <li><a href="#step-7-labels-and-theme" id="toc-step-7-labels-and-theme" class="nav-link" data-scroll-target="#step-7-labels-and-theme"><span class="header-section-number">15.3.7</span> Step 7: labels and theme</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#specialized-plots-for-biology" id="toc-specialized-plots-for-biology" class="nav-link" data-scroll-target="#specialized-plots-for-biology"><span class="header-section-number">15.4</span> Specialized plots for biology</a>
+  <ul class="collapse">
+<li><a href="#sets-and-intersections-upset-plots" id="toc-sets-and-intersections-upset-plots" class="nav-link" data-scroll-target="#sets-and-intersections-upset-plots"><span class="header-section-number">15.4.1</span> Sets and intersections: UpSet plots</a></li>
+  <li><a href="#heatmaps-for-data-matrices" id="toc-heatmaps-for-data-matrices" class="nav-link" data-scroll-target="#heatmaps-for-data-matrices"><span class="header-section-number">15.4.2</span> Heatmaps for data matrices</a></li>
+  <li><a href="#visualizing-the-genome-further-exploration" id="toc-visualizing-the-genome-further-exploration" class="nav-link" data-scroll-target="#visualizing-the-genome-further-exploration"><span class="header-section-number">15.4.3</span> Visualizing the genome (further exploration)</a></li>
+  </ul>
+</li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">15.5</span> Exercises</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">15.6</span> Summary</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/visualization_guide.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/visualization_guide.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./visualization_guide.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Self-Guided Data Visualization in R</span></a></li></ol></nav><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./visualization_guide.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Self-Guided Data Visualization in R</span>
+<span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/visualization_guide.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
@@ -596,106 +587,115 @@ window.Quarto = {
   
 
 
-</header><p>Data visualization is a critical skill in the data scientist’s toolkit. It’s the bridge between raw data and human understanding. Effective visualizations can reveal patterns, trends, and outliers that might be missed in a table of numbers. In the R programming language, the <code>ggplot2</code> package stands as the gold standard for creating beautiful, flexible, and powerful graphics.</p>
-<p>This document will guide you through the principles of effective data visualization and show you how to apply them using <code>ggplot2</code>. We’ll cover best practices, common plot types, and the “grammar of graphics” methodology that makes <code>ggplot2</code> so intuitive.</p>
-<p>Before diving in, though, there are a some truly amazing online resources that showcase what can be done with R graphics and also stimulate your imagination. Two of the best are:</p>
+</header><p>Imagine you have just finished an experiment. You have a spreadsheet with a thousand rows of penguin measurements, or a matrix of gene-expression values across dozens of samples, and you need to <em>see</em> what is going on. Which species are bigger? Are two genes switched on together? Staring at a wall of numbers will not tell you — but the right picture will. Data visualization is the bridge between raw measurements and human understanding, and it is one of the most useful skills a biologist can own.</p>
+<p>This chapter is a guided tour. We start with two ideas that make <em>any</em> plot better, then build up <code>ggplot2</code> — R’s standard plotting system — one layer at a time so you understand <em>why</em> the code looks the way it does. From there we tour a few specialized plot types you’ll meet in genomics: UpSet plots for set overlaps, heatmaps for expression matrices, and a pointer to genome-track visualization. The companion chapter <a href="./ggplot2/intro.html">Exploring data with ggplot2</a> walks a single dataset end to end; here we focus on the <em>grammar</em> and on the wider toolbox.</p>
+<section id="what-youll-learn" class="level2" data-number="15.1"><h2 data-number="15.1" class="anchored" data-anchor-id="what-youll-learn">
+<span class="header-section-number">15.1</span> What you’ll learn</h2>
 <ul>
-<li>
-<a href="https://r-graph-gallery.com/">The R Graph Gallery</a>: A comprehensive collection of R graphics examples, covering a wide range of plot types and customization options.</li>
-<li>
-<a href="https://data-to-viz.com/">From Data to Viz</a>: A guide that helps you choose the right type of visualization for your data and provides examples in R.</li>
-</ul>
-<p>After walking through this document, go back to these resources and explore the examples. You’ll see how the principles we discuss here are applied in real-world scenarios, and you’ll gain inspiration for your own visualizations.</p>
-<section id="getting-started-with-ggplot2" class="level2" data-number="15.1"><h2 data-number="15.1" class="anchored" data-anchor-id="getting-started-with-ggplot2">
-<span class="header-section-number">15.1</span> Getting Started with ggplot2</h2>
-<p>To get started, we need to load the <code>ggplot2</code> package, which is part of the <code>tidyverse</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the necessary R packages for data visualization</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section><section id="core-principles-of-effective-data-visualization" class="level2 page-columns page-full" data-number="15.2"><h2 data-number="15.2" class="anchored" data-anchor-id="core-principles-of-effective-data-visualization">
-<span class="header-section-number">15.2</span> Core Principles of Effective Data Visualization</h2>
-<p>Before we start plotting, it’s essential to understand what makes a visualization effective. Two key principles are maximizing the data-ink ratio and using clear labels.</p>
-<section id="the-least-ink-principle" class="level3 page-columns page-full" data-number="15.2.1"><h3 data-number="15.2.1" class="anchored" data-anchor-id="the-least-ink-principle">
-<span class="header-section-number">15.2.1</span> The “Least Ink” Principle</h3>
-<p>Coined by the statistician Edward Tufte, the <strong>data-ink ratio</strong> is the proportion of a graphic’s ink devoted to the non-redundant display of data information. The goal is to maximize this ratio. In simpler terms, <strong>every single pixel should have a reason to be there.</strong></p>
+<li>Apply two design principles — the data-ink ratio and clear labeling — to make any plot more readable.</li>
+<li>Read a <code>ggplot2</code> call as a stack of <strong>layers</strong>: data → aesthetics (<code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>) → geoms → scales → facets → themes.</li>
+<li>Build a plot incrementally, adding one layer at a time and interpreting each result.</li>
+<li>Choose a colorblind-safe palette with <code>RColorBrewer</code>.</li>
+<li>Reach for the right specialized plot — an UpSet plot for many sets, a heatmap for a data matrix — and produce a runnable example of each.</li>
+</ul></section><section id="sec-principles" class="level2 page-columns page-full" data-number="15.2"><h2 data-number="15.2" class="anchored" data-anchor-id="sec-principles">
+<span class="header-section-number">15.2</span> Two principles that make any plot better</h2>
+<p>Before we touch a single <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot()</a></code> call, it helps to know what we are aiming for. Two ideas carry most of the weight.</p>
+<section id="maximize-the-data-ink-ratio" class="level3 page-columns page-full" data-number="15.2.1"><h3 data-number="15.2.1" class="anchored" data-anchor-id="maximize-the-data-ink-ratio">
+<span class="header-section-number">15.2.1</span> Maximize the data-ink ratio</h3>
+<p>The statistician Edward Tufte coined the term <strong>data-ink ratio</strong>: the proportion of a graphic’s ink that is actually showing your data, rather than decoration. The goal is to keep that ratio high. Put simply, <strong>every mark on the plot should earn its place.</strong></p>
 <div id="fig-tufte-book" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-tufte-book-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/tufte-visual-display.jpg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tufte-book-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.1: Edward Tufte’s landmark book, “The Visual Display of Quantitative Information,” emphasizes the importance of maximizing the data-ink ratio.
+Figure&nbsp;15.1: Edward Tufte’s landmark book, <em>The Visual Display of Quantitative Information</em>, popularized the data-ink ratio.
 </figcaption></figure>
 </div>
-<p>Avoid chart junk like:</p>
+<p>Common “chart junk” to delete:</p>
 <ul>
-<li>Redundant grid lines</li>
-<li>Unnecessary backgrounds or colors</li>
-<li>3D effects on 2D plots</li>
-<li>Shadows and other decorative elements</li>
+<li>Redundant or heavy grid lines</li>
+<li>Busy backgrounds or unnecessary fill colors</li>
+<li>3D effects on what is really 2D data</li>
+<li>Drop shadows and other decoration</li>
 </ul>
-<p>Let’s look at an example. The first plot has a lot of “chart junk,” while the second one is cleaner and focuses on the data.</p>
+<p>Let’s see the difference. We’ll use R’s built-in <code>mpg</code> dataset (fuel-economy records for various car models) — the relationship is generic, but the lesson about ink transfers directly to a scatterplot of, say, gene length versus expression. First, a cluttered version:</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Using the built-in 'mpg' dataset</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">displ</span>, y <span class="op">=</span> <span class="va">hwy</span>, color <span class="op">=</span> <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_gray</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="co"># A theme with a lot of non-data ink</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Fuel Efficiency vs. Engine Displacement"</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_gray</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Fuel efficiency vs. engine displacement"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"This is a very busy plot"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Engine Displacement (Liters)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Highway Miles per Gallon"</span>,</span>
-<span>       color <span class="op">=</span> <span class="st">"Vehicle Class"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>       x <span class="op">=</span> <span class="st">"Engine displacement (litres)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Highway miles per gallon"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Vehicle class"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-bad-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-bad-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="visualization_guide_files/figure-html/fig-bad-plot-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-bad-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.2: A cluttered plot with low data-ink ratio. The gray background, heavy gridlines, and legend title are all unnecessary.
+Figure&nbsp;15.2: A cluttered plot with a low data-ink ratio. The gray background and heavy gridlines are decoration, not information.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>Here’s a cleaner version of the same plot that follows the “least ink” principle. Notice how it removes unnecessary elements while still conveying the same information.</p>
+<p>Now the same data with the decoration stripped away:</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">displ</span>, y <span class="op">=</span> <span class="va">hwy</span>, color <span class="op">=</span> <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">displ</span>, y <span class="op">=</span> <span class="va">hwy</span>, color <span class="op">=</span> <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="co"># A cleaner theme</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Fuel Efficiency vs. Engine Displacement"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Engine Displacement (Liters)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Highway Miles per Gallon"</span>,</span>
-<span>       color <span class="op">=</span> <span class="st">"Class"</span><span class="op">)</span> <span class="co"># Simpler legend title</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Fuel efficiency vs. engine displacement"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Engine displacement (litres)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Highway miles per gallon"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Class"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-good-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-good-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="visualization_guide_files/figure-html/fig-good-plot-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-good-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.3: A clean, minimalist plot that follows the ‘least ink’ principle. The focus is entirely on the relationship between the data points.
+Figure&nbsp;15.3: The same data with a high data-ink ratio. The eye goes straight to the points.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>While this is a subjective topic, the goal is to make your plots as clear and informative as possible. The “least ink” principle is a guideline, not a rule, but it can help you create more effective visualizations.</p>
-</section><section id="the-importance-of-clear-labeling" class="level3" data-number="15.2.2"><h3 data-number="15.2.2" class="anchored" data-anchor-id="the-importance-of-clear-labeling">
-<span class="header-section-number">15.2.2</span> The Importance of Clear Labeling</h3>
-<p>A plot without labels is just a picture. To be a useful piece of analysis, it needs to communicate context. Always ensure your plots have:</p>
+<p>The only change between <a href="#fig-bad-plot" class="quarto-xref">Figure&nbsp;<span>15.2</span></a> and <a href="#fig-good-plot" class="quarto-xref">Figure&nbsp;<span>15.3</span></a> is the theme, yet the second reads more easily: the trend (bigger engines get worse mileage) jumps out because nothing competes with it. This is a guideline, not a law — a faint gridline can genuinely help a reader estimate values — but “could I delete this?” is always worth asking.</p>
+</section><section id="label-everything" class="level3" data-number="15.2.2"><h3 data-number="15.2.2" class="anchored" data-anchor-id="label-everything">
+<span class="header-section-number">15.2.2</span> Label everything</h3>
+<p>A plot without labels is just a picture. To be analysis, it has to carry its context with it. Every finished plot should have:</p>
 <ul>
-<li>A clear and descriptive title.</li>
-<li>Labeled axes with units (<span class="math inline">\(e.g.\)</span>, “Temperature (°C)”).</li>
-<li>An informative legend if you’re using color, shape, or size to encode data.</li>
-</ul></section><section id="color-and-contrast" class="level3 page-columns page-full" data-number="15.2.3"><h3 data-number="15.2.3" class="anchored" data-anchor-id="color-and-contrast">
-<span class="header-section-number">15.2.3</span> Color and Contrast</h3>
-<p>Color is a powerful tool in data visualization, but it can also be misused. R provides several built-in color palettes, and you can also use packages like <code>RColorBrewer</code> for more options. Think in terms of colorblind-friendly palettes, and avoid using too many colors in a single plot.</p>
-<p>Color palettes can be roughly categorized into:</p>
+<li>A clear, descriptive title.</li>
+<li>Axis labels <em>with units</em> (e.g., “Body mass (g)”).</li>
+<li>A legend whenever color, shape, or size encodes a variable.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Labels are for future-you
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The most common audience for your plot is yourself, three months later, trying to remember what it showed. Spelling out units and a title costs seconds now and saves an embarrassing email later.</p>
+</div>
+</div>
+</section><section id="use-color-deliberately" class="level3 page-columns page-full" data-number="15.2.3"><h3 data-number="15.2.3" class="anchored" data-anchor-id="use-color-deliberately">
+<span class="header-section-number">15.2.3</span> Use color deliberately</h3>
+<p>Color is powerful and easy to overuse. Two rules of thumb: don’t use more colors than you have meaningful groups, and pick palettes that survive printing and colorblindness. The <code>RColorBrewer</code> package ships curated palettes in three families:</p>
 <ul>
-<li>Sequential palettes (first list of colors), which are suited to ordered data that progress from low to high (gradient).</li>
-<li>Qualitative palettes (second list of colors), which are best suited to represent nominal or categorical data. They not imply magnitude differences between groups.</li>
-<li>Diverging palettes (third list of colors), which put equal emphasis on mid-range critical values and extremes at both ends of the data range.</li>
+<li>
+<strong>Sequential</strong> palettes run light → dark and suit ordered data (a gradient from low to high expression).</li>
+<li>
+<strong>Qualitative</strong> palettes use distinct hues for <em>categories</em> with no order (species, treatment group).</li>
+<li>
+<strong>Diverging</strong> palettes emphasize a meaningful midpoint with two contrasting directions (log-fold-changes around zero).</li>
 </ul>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">RColorBrewer</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">RColorBrewer</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">display.brewer.all</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
@@ -704,99 +704,469 @@ Figure&nbsp;15.3: A clean, minimalist plot that follows the ‘least ink’ prin
 <img src="visualization_guide_files/figure-html/fig-color-palettes-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-color-palettes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.4: Examples of color palettes in R. The first row shows sequential palettes, the second row shows qualitative palettes, and the third row shows diverging palettes.
+Figure&nbsp;15.4: RColorBrewer palettes, grouped into sequential (top), qualitative (middle), and diverging (bottom) families.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>It is also important to consider colorblindness when choosing colors for your plots. The most common types of color blindness are red-green and blue-yellow. You can use tools like the <code>colorspace</code> package to check how your plots will look to people with different types of color vision deficiencies.</p>
+<p><a href="#fig-color-palettes" class="quarto-xref">Figure&nbsp;<span>15.4</span></a> is a menu: pick a palette name (like <code>"Set2"</code> or <code>"RdBu"</code>) and hand it to a <code><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_color_brewer()</a></code> or <code><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_fill_brewer()</a></code> layer.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Roughly 1 in 12 men is red-green colorblind
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A red/green scheme that looks fine to you can be unreadable to a chunk of your audience. <code>RColorBrewer</code> can show only the palettes that stay distinguishable under common color-vision deficiencies — restrict yourself to these when color carries meaning.</p>
+</div>
+</div>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">display.brewer.all</a></span><span class="op">(</span>colorblindFriendly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">display.brewer.all</a></span><span class="op">(</span>colorblindFriendly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-colorblind-friendly" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-colorblind-friendly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="visualization_guide_files/figure-html/fig-colorblind-friendly-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-colorblind-friendly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.5: A colorblind-friendly palette from the ‘colorspace’ package. This palette is designed to be distinguishable for people with various types of color vision deficiencies.
+Figure&nbsp;15.5: The subset of RColorBrewer palettes that remain distinguishable for viewers with common color-vision deficiencies.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section></section><section id="introduction-to-ggplot2-the-grammar-of-graphics" class="level2" data-number="15.3"><h2 data-number="15.3" class="anchored" data-anchor-id="introduction-to-ggplot2-the-grammar-of-graphics">
-<span class="header-section-number">15.3</span> Introduction to ggplot2: The Grammar of Graphics</h2>
-<p>Rather than reproducing excellent online resources, for this section, pick any or all of the following resources to learn about the grammar of graphics and how to use <code>ggplot2</code>:</p>
-<ul>
-<li><a href="https://r4ds.had.co.nz/data-visualisation.html">R for Data Science: Data Visualization</a></li>
-<li><a href="https://ggplot2.tidyverse.org/">ggplot2 documentation</a></li>
-<li><a href="https://rkabacoff.github.io/datavis/">Modern Data Visualization with R</a></li>
-</ul></section><section id="sets-and-intersections-upset-plots" class="level2 page-columns page-full" data-number="15.4"><h2 data-number="15.4" class="anchored" data-anchor-id="sets-and-intersections-upset-plots">
-<span class="header-section-number">15.4</span> Sets and Intersections: UpSet Plots</h2>
-<p>When dealing with multiple sets, visualizing their intersections can be challenging. Traditional Venn diagrams become cluttered and hard to read with more than three sets. An <strong>UpSet plot</strong> is a powerful alternative for visualizing the intersections of multiple sets. It consists of two main parts: a matrix that shows which sets are part of an intersection, and a bar chart that shows the size of each intersection. This makes it far more scalable and easier to interpret than a complex Venn diagram.</p>
-<p>To create an UpSet plot, we use the <code>UpSetR</code> package. It takes a specific input format where 0s and 1s indicate the absence or presence of an element in a set.</p>
-<div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># install.packages("UpSetR")</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hms-dbmi/UpSetR">UpSetR</a></span><span class="op">)</span></span>
-<span><span class="va">movies</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"movies.csv"</span>, package <span class="op">=</span> <span class="st">"UpSetR"</span><span class="op">)</span>, </span>
-<span>    header <span class="op">=</span> <span class="cn">T</span>, sep <span class="op">=</span> <span class="st">";"</span><span class="op">)</span></span>
+<p>The palettes in <a href="#fig-colorblind-friendly" class="quarto-xref">Figure&nbsp;<span>15.5</span></a> are the safe default set. When in doubt, choose from here.</p>
+</section></section><section id="sec-grammar" class="level2 page-columns page-full" data-number="15.3"><h2 data-number="15.3" class="anchored" data-anchor-id="sec-grammar">
+<span class="header-section-number">15.3</span> The grammar of graphics, layer by layer</h2>
+<p><code>ggplot2</code> is built on an idea called the <strong>grammar of graphics</strong>: every plot is assembled from a small set of independent parts, the way a sentence is built from nouns, verbs, and adjectives. Once you know the parts, you can describe an enormous variety of plots with the same handful of “words.” The parts are:</p>
+<ol type="1">
+<li>
+<strong>Data</strong> — the data frame you’re plotting.</li>
+<li>
+<strong>Aesthetics</strong> (<code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>) — which <em>variable</em> maps to which <em>visual channel</em> (x position, y position, color, size, shape).</li>
+<li>
+<strong>Geoms</strong> — the geometric shapes that actually get drawn (points, lines, bars).</li>
+<li>
+<strong>Scales</strong> — how data values translate into pixels and colors (axis ranges, color palettes).</li>
+<li>
+<strong>Facets</strong> — splitting one plot into small multiples by a grouping variable.</li>
+<li>
+<strong>Themes</strong> — the non-data styling (fonts, background, gridlines).</li>
+</ol>
+<p>Think of it like ordering a coffee: the <strong>data</strong> is the beans, the <strong>aesthetics</strong> say what goes in which cup, the <strong>geom</strong> is whether you get it as espresso or latte, and the <strong>theme</strong> is the mug it’s served in. We’ll build one plot up through these layers, adding exactly one new idea per step.</p>
+<p>We’ll use the <code>palmerpenguins</code> dataset — body measurements for three penguin species (<em>Adelie</em>, <em>Chinstrap</em>, <em>Gentoo</em>) recorded near Palmer Station, Antarctica. It’s real organismal biology and small enough to reason about.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://allisonhorst.github.io/palmerpenguins/">palmerpenguins</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Use the 'movies' dataset that comes with UpSetR</span></span>
-<span><span class="co"># This dataset is already in the correct binary format</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html">upset</a></span><span class="op">(</span><span class="va">movies</span>, </span>
-<span>      nsets <span class="op">=</span> <span class="fl">5</span>, <span class="co"># Show the 5 most frequent genres</span></span>
-<span>      order.by <span class="op">=</span> <span class="st">"freq"</span>,</span>
-<span>      mainbar.y.label <span class="op">=</span> <span class="st">"Intersection Size"</span>,</span>
-<span>      sets.x.label <span class="op">=</span> <span class="st">"Total Movies in Genre"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display page-columns page-full">
-<div id="fig-upset-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-upset-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="visualization_guide_files/figure-html/fig-upset-plot-1.png" class="img-fluid figure-img" width="672">
+<span><span class="co"># drop the few rows with missing measurements so plots don't warn</span></span>
+<span><span class="va">penguins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="va">penguins</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse</a></span><span class="op">(</span><span class="va">penguins</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 333
+Columns: 8
+$ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…
+$ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…
+$ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, 36.7, 39.3, 38.9, 39.2, 41.1, 38.6…
+$ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, 19.3, 20.6, 17.8, 19.6, 17.6, 21.2…
+$ flipper_length_mm &lt;int&gt; 181, 186, 195, 193, 190, 181, 195, 182, 191, 198, 18…
+$ body_mass_g       &lt;int&gt; 3750, 3800, 3250, 3450, 3650, 3625, 4675, 3200, 3800…
+$ sex               &lt;fct&gt; male, female, female, female, male, female, male, fe…
+$ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…</code></pre>
 </div>
-<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-upset-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.6: An UpSet plot visualizing movie genres. The main bar chart shows the size of intersections (e.g., how many movies are both ‘Comedy’ and ‘Romance’). The bottom-left matrix indicates which genres are part of each intersection. This is much clearer than a 5-set Venn diagram.
+</div>
+<p><code><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse()</a></code> shows each penguin has a species, an island, bill and flipper measurements, a body mass, and a sex. We’ll ask a biological question: <strong>how do the species differ in body size?</strong></p>
+<section id="step-1-data-and-aesthetics" class="level3 page-columns page-full" data-number="15.3.1"><h3 data-number="15.3.1" class="anchored" data-anchor-id="step-1-data-and-aesthetics">
+<span class="header-section-number">15.3.1</span> Step 1: data and aesthetics</h3>
+<p>We start by telling <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot()</a></code> <em>what data</em> to use and <em>which variables map to which axes</em>. Here, flipper length on x and body mass on y:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-blank" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-blank-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.6: Data plus aesthetics, but no geom: ggplot() sets up the axes but draws nothing yet.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>The UpSet plot clearly shows us, for instance, the number of movies that are exclusively “Drama” versus those that are a combination of “Drama,” “Comedy,” and “Romance.” This level of detail is difficult to achieve with a Venn diagram.</p>
-</section><section id="complex-heatmaps" class="level2" data-number="15.5"><h2 data-number="15.5" class="anchored" data-anchor-id="complex-heatmaps">
-<span class="header-section-number">15.5</span> Complex Heatmaps</h2>
-<p>Heatmaps are a powerful way to visualize complex data matrices, especially when dealing with large datasets. They allow you to see patterns and relationships in the data at a glance.</p>
-<p>What is a heatmap? It’s a graphical representation of data where individual values are represented as colors. The color intensity indicates the magnitude of the value, making it easy to spot trends and outliers. The underlying data is typically a matrix of numbers.</p>
+<p><a href="#fig-grammar-blank" class="quarto-xref">Figure&nbsp;<span>15.6</span></a> looks empty — and that’s the point. We’ve declared the axes (<code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> mapped <code>flipper_length_mm</code> to x and <code>body_mass_g</code> to y), but we haven’t said <em>what shape</em> to draw. A plot with no geom has nothing to show.</p>
+</section><section id="step-2-add-a-geom" class="level3 page-columns page-full" data-number="15.3.2"><h3 data-number="15.3.2" class="anchored" data-anchor-id="step-2-add-a-geom">
+<span class="header-section-number">15.3.2</span> Step 2: add a geom</h3>
+<p>A <strong>geom</strong> is the layer that draws something. We add layers with <code>+</code>. For two continuous variables, points make a scatterplot:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-points" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-points-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.7: Adding geom_point() draws one point per penguin.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Now <a href="#fig-grammar-points" class="quarto-xref">Figure&nbsp;<span>15.7</span></a> tells a story: heavier penguins tend to have longer flippers, a clear positive relationship. But the points seem to fall into a couple of clusters. Could that be the species?</p>
+</section><section id="step-3-map-a-third-variable-to-color" class="level3 page-columns page-full" data-number="15.3.3"><h3 data-number="15.3.3" class="anchored" data-anchor-id="step-3-map-a-third-variable-to-color">
+<span class="header-section-number">15.3.3</span> Step 3: map a third variable to color</h3>
+<p>Aesthetics aren’t limited to x and y. We can map a <em>categorical</em> variable onto <strong>color</strong> to encode a third dimension on the same flat plot:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-color" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-color-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-color-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-color-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.8: Mapping species to the color aesthetic reveals three clusters.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The clusters in <a href="#fig-grammar-color" class="quarto-xref">Figure&nbsp;<span>15.8</span></a> resolve cleanly: Gentoo penguins are the large ones (long flippers, heavy), while Adelie and Chinstrap overlap at the smaller end. We answered our biological question by adding <em>one word</em> to <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+<span class="screen-reader-only">Note</span>Inside <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> vs.&nbsp;outside it
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>A matrix is a two-dimensional array of numbers, where each element is identified by its row and column indices. Matrices can include only ONE data type.</p>
+<p>Put a setting <strong>inside</strong> <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> when it should vary <em>with the data</em> (<code>color = species</code>). Put it <strong>outside</strong> <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>, in the geom, when it’s a fixed constant (<code>geom_point(color = "blue")</code> makes every point blue). Mixing these up is the single most common <code>ggplot2</code> confusion.</p>
 </div>
 </div>
-<p>There are many ways to create heatmaps in R including the base R <code><a href="https://rdrr.io/r/stats/heatmap.html">heatmap()</a></code> function, the <code>ggplot2</code> package, and specialized packages like <code>ComplexHeatmap</code>.</p>
-<p>Feel free to explore the following resources for some of the most popular heatmap packages in R:</p>
+</section><section id="step-4-layer-on-a-second-geom" class="level3 page-columns page-full" data-number="15.3.4"><h3 data-number="15.3.4" class="anchored" data-anchor-id="step-4-layer-on-a-second-geom">
+<span class="header-section-number">15.3.4</span> Step 4: layer on a second geom</h3>
+<p>Layers stack. We can keep the points and add a <code><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth()</a></code> trend line on top. Because <code>color = species</code> is set in the shared <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>, we get one line per species for free:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-smooth" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-smooth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-smooth-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-smooth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.9: A second geom (a linear trend line) layered over the points, one line per species.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-grammar-smooth" class="quarto-xref">Figure&nbsp;<span>15.9</span></a> adds three regression lines (<code>method = "lm"</code>). All three slope upward, confirming the flipper-mass relationship holds <em>within</em> each species, not just across the pooled cloud. We also set <code>alpha = 0.6</code> (outside <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>, so it’s constant) to make overlapping points semi-transparent.</p>
+</section><section id="step-5-control-scales" class="level3 page-columns page-full" data-number="15.3.5"><h3 data-number="15.3.5" class="anchored" data-anchor-id="step-5-control-scales">
+<span class="header-section-number">15.3.5</span> Step 5: control scales</h3>
+<p><strong>Scales</strong> govern the translation from data to pixels and colors. Let’s swap in a colorblind-safe Brewer palette and label the axis ticks with units:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">3000</span>, <span class="fl">6000</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-scales" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-scales-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-scales-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-scales-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.10: A Brewer qualitative palette via scale_color_brewer() and tidy axis breaks.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>In <a href="#fig-grammar-scales" class="quarto-xref">Figure&nbsp;<span>15.10</span></a> the colors come from the qualitative <code>"Set2"</code> palette (safe under color blindness, per <a href="#sec-principles" class="quarto-xref"><span>Section 15.2</span></a>), and <code><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous()</a></code> sets even gridline breaks. Scales are where you take control of <em>how</em> the mapping looks without changing <em>what</em> is mapped.</p>
+</section><section id="step-6-facet-into-small-multiples" class="level3 page-columns page-full" data-number="15.3.6"><h3 data-number="15.3.6" class="anchored" data-anchor-id="step-6-facet-into-small-multiples">
+<span class="header-section-number">15.3.6</span> Step 6: facet into small multiples</h3>
+<p><strong>Faceting</strong> splits one plot into a grid of panels, one per group — often clearer than cramming everything together. <code>facet_wrap(~ species)</code> gives each species its own panel:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">species</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-facet" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-facet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-facet-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-facet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.11: Faceting by species puts each species in its own panel for side-by-side comparison.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-grammar-facet" class="quarto-xref">Figure&nbsp;<span>15.11</span></a> makes the per-species spread easy to compare: Gentoo not only sit higher and to the right, they also span a wider range of body mass than the other two.</p>
+</section><section id="step-7-labels-and-theme" class="level3 page-columns page-full" data-number="15.3.7"><h3 data-number="15.3.7" class="anchored" data-anchor-id="step-7-labels-and-theme">
+<span class="header-section-number">15.3.7</span> Step 7: labels and theme</h3>
+<p>Finally, the <strong>theme</strong> controls non-data styling, and <code><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs()</a></code> supplies the human context from <a href="#sec-principles" class="quarto-xref"><span>Section 15.2</span></a>. Putting it together:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins</span>,</span>
+<span>       mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">species</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Body mass increases with flipper length in all three species"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Flipper length (mm)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (g)"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Species"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-grammar-final" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-final-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-grammar-final-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-final-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.12: The finished plot: data, aesthetics, two geoms, a scale, facets, labels, and a clean theme.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-grammar-final" class="quarto-xref">Figure&nbsp;<span>15.12</span></a> is publication-grade, and you built it one layer at a time. Read the call top to bottom and you can <em>name</em> every part: data, the <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> mapping, two geoms, a color scale, facets, labels, and a minimal theme. That is the whole grammar of graphics — every <code>ggplot2</code> plot you ever write is some combination of these same pieces.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Combining whole plots: <code>patchwork</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Faceting splits <em>one</em> plot by a variable. To place <em>different</em> plots side by side, the <code>patchwork</code> package lets you add them with <code>+</code> or stack them with <code>/</code>, e.g. <code>plot_a + plot_b</code>. It’s the easiest way to assemble multi-panel figures.</p>
+</div>
+</div>
+</section></section><section id="specialized-plots-for-biology" class="level2 page-columns page-full" data-number="15.4"><h2 data-number="15.4" class="anchored" data-anchor-id="specialized-plots-for-biology">
+<span class="header-section-number">15.4</span> Specialized plots for biology</h2>
+<p><code>ggplot2</code> covers most everyday needs, but a few questions call for purpose-built plots. Here are two you’ll meet often in genomics.</p>
+<section id="sets-and-intersections-upset-plots" class="level3 page-columns page-full" data-number="15.4.1"><h3 data-number="15.4.1" class="anchored" data-anchor-id="sets-and-intersections-upset-plots">
+<span class="header-section-number">15.4.1</span> Sets and intersections: UpSet plots</h3>
+<p>Suppose you have several gene lists — genes up in treatment A, up in treatment B, bound by a transcription factor — and you want to know which genes are shared. The classic tool is a Venn diagram, but Venn diagrams become unreadable past three sets. An <strong>UpSet plot</strong> scales to many sets: a bar chart shows the size of each intersection, and a dot matrix beneath it shows <em>which</em> sets each bar combines.</p>
+<p><code>UpSetR</code> takes a data frame of 0s and 1s — one row per element, one column per set, a 1 marking membership. We’ll use the <code>movies</code> dataset bundled with the package (already in that binary format) as a stand-in for “genes × gene-lists”:</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hms-dbmi/UpSetR">UpSetR</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">movies</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"movies.csv"</span>, package <span class="op">=</span> <span class="st">"UpSetR"</span><span class="op">)</span>,</span>
+<span>                   header <span class="op">=</span> <span class="cn">TRUE</span>, sep <span class="op">=</span> <span class="st">";"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html">upset</a></span><span class="op">(</span><span class="va">movies</span>,</span>
+<span>      nsets <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>      order.by <span class="op">=</span> <span class="st">"freq"</span>,</span>
+<span>      mainbar.y.label <span class="op">=</span> <span class="st">"Intersection size"</span>,</span>
+<span>      sets.x.label <span class="op">=</span> <span class="st">"Total movies in genre"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-upset-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-upset-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-upset-plot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-upset-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.13: An UpSet plot of movie genres. Each bar is the size of one intersection; the dots below say which genres it combines. Read it as a scalable Venn diagram.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-upset-plot" class="quarto-xref">Figure&nbsp;<span>15.13</span></a> reads left to right by decreasing intersection size. The tallest bars with a single filled dot are the “only this set” groups; bars over two or more filled dots are the overlaps. You can see at a glance, for example, how many movies are <em>both</em> Drama and Comedy versus Drama alone — a comparison that a five-circle Venn diagram simply cannot show clearly. Swap the movie genres for your gene lists and the reading is identical.</p>
+</section><section id="heatmaps-for-data-matrices" class="level3 page-columns page-full" data-number="15.4.2"><h3 data-number="15.4.2" class="anchored" data-anchor-id="heatmaps-for-data-matrices">
+<span class="header-section-number">15.4.2</span> Heatmaps for data matrices</h3>
+<p>A <strong>heatmap</strong> turns a matrix of numbers into a grid of colored tiles, so the eye can pick out blocks and patterns that a table hides. In genomics, the rows are typically genes, the columns are samples, and the color is expression level. Heatmaps also usually <em>cluster</em> similar rows and columns together, so co-behaving genes and similar samples sit next to each other.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What is a matrix?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A matrix is a two-dimensional grid of values addressed by row and column, and — unlike a data frame — every entry must be the <em>same</em> type (here, all numbers). Heatmap functions expect a numeric matrix, not a data frame.</p>
+</div>
+</div>
+<p>Let’s make a runnable example with <code>pheatmap</code> (“pretty heatmap”). We’ll use the <code>mtcars</code> data as a numeric matrix — treat the cars as “samples” and the measurements as “features,” exactly as you would genes and samples. The catch: the columns are on wildly different scales (horsepower in the hundreds, number of cylinders in single digits), so we <strong>scale each column</strong> to comparable units first. Scaling is routine for expression data too.</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># build a numeric matrix and scale each column to mean 0, sd 1</span></span>
+<span><span class="va">car_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">car_matrix</span>,</span>
+<span>         main <span class="op">=</span> <span class="st">"Scaled car measurements"</span>,</span>
+<span>         color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fl">7</span>, <span class="st">"RdBu"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-pheatmap" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-pheatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-pheatmap-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-pheatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.14: A clustered heatmap of scaled car measurements. Rows (cars) and columns (features) are reordered so similar profiles sit together; the color shows how far above (red) or below (blue) average each value is.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-pheatmap" class="quarto-xref">Figure&nbsp;<span>15.14</span></a> clusters the rows and columns automatically. The tree diagrams (<strong>dendrograms</strong>) on the top and left show how cars and features were grouped. You can read off blocks: the fuel-efficiency feature (<code>mpg</code>) sits opposite the power/weight features, and the cars split into a heavy-and-powerful block versus a light-and-efficient one. Read genes for cars and samples for features, and this is exactly how an expression heatmap is interpreted.</p>
+<p>For richer needs — multiple annotation bars, split heatmaps, precise control over legends — Bioconductor’s <code>ComplexHeatmap</code> is the standard. It uses the same mental model (a matrix plus optional row/column annotations) with far more knobs; its <a href="https://jokergoo.github.io/ComplexHeatmap-reference/book/">reference book</a> is the place to go when <code>pheatmap</code> runs out of room.</p>
+</section><section id="visualizing-the-genome-further-exploration" class="level3" data-number="15.4.3"><h3 data-number="15.4.3" class="anchored" data-anchor-id="visualizing-the-genome-further-exploration">
+<span class="header-section-number">15.4.3</span> Visualizing the genome (further exploration)</h3>
+<p>The plots above are general-purpose. Some genomic questions need a view organized along <strong>genomic coordinates</strong> — gene models, read coverage, and peaks lined up against a chromosome. This is a heavier topic that leans on Bioconductor, so we flag it as further exploration rather than cover it in depth here:</p>
 <ul>
+<li>The <a href="https://www.bioconductor.org/packages/Gviz/"><code>Gviz</code> package</a> builds publication-quality, multi-track genome browser views — stacking gene annotations, alignments, and quantitative data over a coordinate axis.</li>
+<li>The <a href="https://www.bioconductor.org/packages/GenomicDistributions/"><code>GenomicDistributions</code> package</a> summarizes <em>where</em> a set of genomic regions falls — for example, how ChIP-seq or ATAC-seq peaks distribute relative to transcription start sites.</li>
+</ul>
+<p>When you reach a project that needs these, start from their vignettes; the grammar-of-graphics intuition from <a href="#sec-grammar" class="quarto-xref"><span>Section 15.3</span></a> still helps you read the layered tracks they produce.</p>
+</section></section><section id="exercises" class="level2 page-columns page-full" data-number="15.5"><h2 data-number="15.5" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">15.5</span> Exercises</h2>
+<p>Use the cleaned <code>penguins</code> data frame from <a href="#sec-grammar" class="quarto-xref"><span>Section 15.3</span></a> for the first three exercises (<code><a href="https://allisonhorst.github.io/palmerpenguins/">library(palmerpenguins); library(ggplot2); penguins &lt;- na.omit(penguins)</a></code>).</p>
+<ol type="1" class="page-columns page-full">
+<li class="page-columns page-full">
+<p><strong>A different geom.</strong> Make a scatterplot of bill length (<code>bill_length_mm</code>, x) versus bill depth (<code>bill_depth_mm</code>, y), colored by species. What do you notice?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">penguins</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">bill_length_mm</span>, y <span class="op">=</span> <span class="va">bill_depth_mm</span>, color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ex-bill" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-ex-bill-caption"><div aria-describedby="fig-ex-bill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-ex-bill-1.png" class="img-fluid figure-img" width="672">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Within each species, deeper bills go with longer bills, but the three species sit in clearly separated regions — bill shape is a good species fingerprint.</p>
+</div>
+</div>
+</div>
+<div id="fig-ex-bill-caption" class="margin-figure-caption column-margin callout-6-contents callout-collapse collapse callout-margin-content">
+Figure&nbsp;15.15: Bill length vs.&nbsp;depth, colored by species.
+</div></li>
+<li class="page-columns page-full">
+<p><strong>A distribution, not a relationship.</strong> Use <code><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot()</a></code> to compare body mass across the three species (species on x, <code>body_mass_g</code> on y). Which species is heaviest?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">penguins</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">species</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, fill <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ex-box" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-ex-box-caption"><div aria-describedby="fig-ex-box-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-ex-box-1.png" class="img-fluid figure-img" width="672">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Gentoo penguins are clearly the heaviest; Adelie and Chinstrap have similar, lower body masses. A boxplot summarizes a <em>distribution</em> (median, spread, outliers) rather than a point-to-point relationship.</p>
+</div>
+</div>
+</div>
+<div id="fig-ex-box-caption" class="margin-figure-caption column-margin callout-7-contents callout-collapse collapse callout-margin-content">
+Figure&nbsp;15.16: Body-mass distribution by species.
+</div></li>
+<li class="page-columns page-full">
+<p><strong>Add the labels.</strong> Take your boxplot from Exercise 2 and give it a title and properly-labeled axes with units, following <a href="#sec-principles" class="quarto-xref"><span>Section 15.2</span></a>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">penguins</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">species</span>, y <span class="op">=</span> <span class="va">body_mass_g</span>, fill <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Gentoo penguins are the heaviest of the three species"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Species"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (g)"</span>,</span>
+<span>       fill <span class="op">=</span> <span class="st">"Species"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ex-labels" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-ex-labels-caption"><div aria-describedby="fig-ex-labels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="visualization_guide_files/figure-html/fig-ex-labels-1.png" class="img-fluid figure-img" width="672">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>The title states the <em>finding</em>, not just the variables — a good title does the reader’s work for them.</p>
+</div>
+</div>
+</div>
+<div id="fig-ex-labels-caption" class="margin-figure-caption column-margin callout-8-contents callout-collapse collapse callout-margin-content">
+Figure&nbsp;15.17: The boxplot, now properly labeled.
+</div></li>
 <li>
-<a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">ggplot2 Heatmaps</a> allows you to create basic heatmaps using the <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_tile()</a></code> function. This is a good starting point for simple heatmaps.</li>
-<li>
-<a href="https://www.rdocumentation.org/packages/stats/topics/heatmap">The heatmap() function</a> in base R is a simple way to create heatmaps. It automatically scales the data and provides options for clustering rows and columns.</li>
-<li>
-<a href="https://biostatsquid.com/step-by-step-heatmap-tutorial-with-pheatmap/">The pheatmamp package</a> is a popular package for creating heatmaps with more customization options. It allows you to add annotations, customize colors, and control clustering.</li>
-<li>
-<a href="https://jokergoo.github.io/ComplexHeatmap-reference/book/">Complex Heatmaps</a> is a powerful R package for creating complex heatmaps. It allows you to visualize data matrices with multiple annotations, making it ideal for genomic data analysis.</li>
-<li>
-<a href="https://bioconductor.org/packages/release/bioc/html/InteractiveComplexHeatmap.html">Interactive Complex Heatmaps</a> is an extension of the Complex Heatmaps package that allows you to create interactive heatmaps. This can be useful for exploring large datasets and identifying patterns.</li>
-</ul></section><section id="genome-and-genomic-data-visualization" class="level2" data-number="15.6"><h2 data-number="15.6" class="anchored" data-anchor-id="genome-and-genomic-data-visualization">
-<span class="header-section-number">15.6</span> Genome and Genomic Data Visualization</h2>
-<p>The <a href="https://www.bioconductor.org/packages/Gviz/"><code>Gviz</code> package</a> is a powerful tool for visualizing genomic data in R. It allows you to create publication-quality plots of genomic features, such as gene annotations, sequence alignments, and expression data.</p>
-<p>The <a href="https://www.bioconductor.org/packages/GenomicDistributions/">GenomicDistributions package</a> is another useful package for visualizing genomic data. It provides functions for creating distribution plots of genomic features, such as coverage, chip-seq or atac-seq distributions relative to genomic features, etc.</p>
-</section><section id="conclusion" class="level2" data-number="15.7"><h2 data-number="15.7" class="anchored" data-anchor-id="conclusion">
-<span class="header-section-number">15.7</span> Conclusion</h2>
-<p>This document has provided a comprehensive foundation for creating effective data visualizations in R with <code>ggplot2</code>. We’ve covered the core principles of good design, explored a wide range of common plot types including heatmaps, and seen how <code>ggplot2</code>’s layered grammar allows for the creation of complex, insightful graphics by mapping multiple data dimensions to aesthetics. We also discussed why certain plots like Venn diagrams can be problematic and introduced powerful alternatives like UpSet plots.</p>
-<p>The key to mastering data visualization is practice. Experiment with different datasets, try new <code>geoms</code>, and always think critically about the story your plot is telling and the best way to tell it.</p>
+<p><strong>Pick the right palette family.</strong> You’re plotting log-fold-changes that range from strongly negative to strongly positive, with zero as the meaningful midpoint. Which <code>RColorBrewer</code> palette <em>family</em> should you use, and why?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A <strong>diverging</strong> palette (such as <code>"RdBu"</code>). Diverging palettes give two contrasting colors that meet at a neutral midpoint, so zero reads as “no change” and the two directions of change are immediately distinguishable. A sequential palette would hide the sign of the change.</p>
+</div>
+</div>
+</div>
+</li>
+</ol></section><section id="summary" class="level2" data-number="15.6"><h2 data-number="15.6" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">15.6</span> Summary</h2>
+<p>You now have both the principles and the toolbox for visualizing data in R:</p>
+<ul>
+<li>You can make any plot more readable by <strong>maximizing the data-ink ratio</strong> (deleting decoration) and <strong>labeling everything</strong> with a clear title and units.</li>
+<li>You can read and write a <code>ggplot2</code> call as a stack of <strong>layers</strong> — data, aesthetics, geoms, scales, facets, themes — and you built one up one layer at a time on real penguin data.</li>
+<li>You can map extra variables onto <strong>color</strong> and other aesthetics, and you know to put data-driven settings <em>inside</em> <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> and constants <em>outside</em> it.</li>
+<li>You can choose a <strong>colorblind-safe palette</strong> from <code>RColorBrewer</code>.</li>
+<li>You can reach for a specialized plot when you need one: an <strong>UpSet plot</strong> for intersections of many sets, and a clustered <strong>heatmap</strong> for an expression-style matrix.</li>
+</ul>
+<p>The grammar of graphics is the throughline: once a plot is just data plus a stack of layers, the way to build <em>any</em> new plot is to ask which layer you need to add next. For more depth on a single dataset, see <a href="./ggplot2/intro.html">Exploring data with ggplot2</a>; for inspiration, browse the <a href="https://r-graph-gallery.com/">R Graph Gallery</a> and <a href="https://data-to-viz.com/">From Data to Viz</a>.</p>
 
 
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
