@@ -35,7 +35,12 @@ RUN curl -fsSL -o /tmp/quarto.deb \
       "https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb" \
   && apt-get update && apt-get install -y --no-install-recommends /tmp/quarto.deb \
   && rm /tmp/quarto.deb && rm -rf /var/lib/apt/lists/*
-RUN quarto install tinytex --no-prompt
+# Install TinyTeX to a SYSTEM path so LaTeX (lualatex/tlmgr) is on PATH for any
+# user and any $HOME. GitHub Actions sets HOME=/github/home inside container
+# jobs, so a per-user `quarto install tinytex` (installed as root at build time)
+# isn't found at render time; the RStudio/Orchestra user needs it too.
+RUN Rscript -e 'install.packages("tinytex", repos = "https://cloud.r-project.org"); tinytex::install_tinytex(dir = "/opt/TinyTeX")'
+ENV PATH="/opt/TinyTeX/bin/x86_64-linux:${PATH}"
 RUN pip3 install --no-cache-dir --break-system-packages quartobot
 
 # The nmfs-opensci titlepage extension is project-local (_extensions/, gitignored)
