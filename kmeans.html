@@ -528,19 +528,22 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#history-of-the-k-means-algorithm" id="toc-history-of-the-k-means-algorithm" class="nav-link active" data-scroll-target="#history-of-the-k-means-algorithm"><span class="header-section-number">18.1</span> History of the k-means algorithm</a></li>
-  <li><a href="#the-k-means-algorithm" id="toc-the-k-means-algorithm" class="nav-link" data-scroll-target="#the-k-means-algorithm"><span class="header-section-number">18.2</span> The k-means algorithm</a></li>
-  <li><a href="#pros-and-cons-of-k-means-clustering" id="toc-pros-and-cons-of-k-means-clustering" class="nav-link" data-scroll-target="#pros-and-cons-of-k-means-clustering"><span class="header-section-number">18.3</span> Pros and cons of k-means clustering</a></li>
+<li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">18.1</span> What you’ll learn</a></li>
+  <li><a href="#what-k-means-does" id="toc-what-k-means-does" class="nav-link" data-scroll-target="#what-k-means-does"><span class="header-section-number">18.2</span> What k-means does</a></li>
+  <li><a href="#the-k-means-algorithm" id="toc-the-k-means-algorithm" class="nav-link" data-scroll-target="#the-k-means-algorithm"><span class="header-section-number">18.3</span> The k-means algorithm</a></li>
+  <li><a href="#pros-and-cons-of-k-means-clustering" id="toc-pros-and-cons-of-k-means-clustering" class="nav-link" data-scroll-target="#pros-and-cons-of-k-means-clustering"><span class="header-section-number">18.4</span> Pros and cons of k-means clustering</a></li>
   <li>
-<a href="#an-example-of-k-means-clustering" id="toc-an-example-of-k-means-clustering" class="nav-link" data-scroll-target="#an-example-of-k-means-clustering"><span class="header-section-number">18.4</span> An example of k-means clustering</a>
+<a href="#a-worked-example-the-diauxic-shift" id="toc-a-worked-example-the-diauxic-shift" class="nav-link" data-scroll-target="#a-worked-example-the-diauxic-shift"><span class="header-section-number">18.5</span> A worked example: the diauxic shift</a>
   <ul class="collapse">
-<li><a href="#the-data-and-experimental-background" id="toc-the-data-and-experimental-background" class="nav-link" data-scroll-target="#the-data-and-experimental-background"><span class="header-section-number">18.4.1</span> The data and experimental background</a></li>
+<li><a href="#the-data-and-experimental-background" id="toc-the-data-and-experimental-background" class="nav-link" data-scroll-target="#the-data-and-experimental-background"><span class="header-section-number">18.5.1</span> The data and experimental background</a></li>
+  <li><a href="#getting-the-data" id="toc-getting-the-data" class="nav-link" data-scroll-target="#getting-the-data"><span class="header-section-number">18.5.2</span> Getting the data</a></li>
+  <li><a href="#preprocessing-keep-only-the-informative-genes" id="toc-preprocessing-keep-only-the-informative-genes" class="nav-link" data-scroll-target="#preprocessing-keep-only-the-informative-genes"><span class="header-section-number">18.5.3</span> Preprocessing: keep only the informative genes</a></li>
+  <li><a href="#clustering" id="toc-clustering" class="nav-link" data-scroll-target="#clustering"><span class="header-section-number">18.5.4</span> Clustering</a></li>
+  <li><a href="#reading-the-clusters-as-biology" id="toc-reading-the-clusters-as-biology" class="nav-link" data-scroll-target="#reading-the-clusters-as-biology"><span class="header-section-number">18.5.5</span> Reading the clusters as biology</a></li>
   </ul>
 </li>
-  <li><a href="#getting-data" id="toc-getting-data" class="nav-link" data-scroll-target="#getting-data"><span class="header-section-number">18.5</span> Getting data</a></li>
-  <li><a href="#preprocessing" id="toc-preprocessing" class="nav-link" data-scroll-target="#preprocessing"><span class="header-section-number">18.6</span> Preprocessing</a></li>
-  <li><a href="#clustering" id="toc-clustering" class="nav-link" data-scroll-target="#clustering"><span class="header-section-number">18.7</span> Clustering</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">18.8</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">18.6</span> Exercises</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">18.7</span> Summary</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/kmeans.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/kmeans.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -588,10 +591,19 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   
 
 
-</header><section id="history-of-the-k-means-algorithm" class="level2 page-columns page-full" data-number="18.1"><h2 data-number="18.1" class="anchored" data-anchor-id="history-of-the-k-means-algorithm">
-<span class="header-section-number">18.1</span> History of the k-means algorithm</h2>
-<p>The k-means clustering algorithm was first proposed by Stuart Lloyd in 1957 as a technique for pulse-code modulation. However, it was not published until 1982. In 1965, Edward W. Forgy published an essentially identical method, which became widely known as the k-means algorithm. Since then, k-means clustering has become one of the most popular unsupervised learning techniques in data analysis and machine learning.</p>
-<p>K-means clustering is a method for finding patterns or groups in a dataset. It is an unsupervised learning technique, meaning that it doesn’t rely on previously labeled data for training. Instead, it identifies structures or patterns directly from the data based on the similarity between data points (see <a href="#fig-kmeans-algorithm" class="quarto-xref">Figure&nbsp;<span>18.1</span></a>).</p>
+</header><p>When yeast cells run low on glucose, they flip their entire metabolic program — switching from fermentation to respiration in an event called the <strong>diauxic shift</strong>. <span class="citation" data-cites="derisi_exploring_1997">DeRisi et al. (<a href="references.html#ref-derisi_exploring_1997" role="doc-biblioref">1997</a>)</span> watched this happen by measuring the expression of roughly 6,400 genes at seven time points across the shift. That leaves you with a wall of numbers: 6,400 genes, each with its own little trajectory over time. Some genes ramp up as the cells switch fuels, some shut down, and most barely move at all. How do you find the <em>groups</em> of genes that rise and fall together — the ones that might be co-regulated, taking part in the same biological response?</p>
+<p>That is exactly the kind of question <strong>k-means clustering</strong> answers. It is an unsupervised method: you don’t tell it which genes belong together, you just ask it to sort the genes into a handful of groups so that genes with similar behavior land in the same group. In this chapter you’ll use k-means on the DeRisi yeast data — the same dataset you met in the SummarizedExperiment chapter — to pull out clusters of co-regulated genes and then read their temporal profiles back as biology.</p>
+<section id="what-youll-learn" class="level2" data-number="18.1"><h2 data-number="18.1" class="anchored" data-anchor-id="what-youll-learn">
+<span class="header-section-number">18.1</span> What you’ll learn</h2>
+<ul>
+<li>Explain in plain language what k-means clustering does and when it’s useful.</li>
+<li>Pull a public dataset from NCBI GEO with <code><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO()</a></code> and convert it to a <code>SummarizedExperiment</code>.</li>
+<li>Filter a gene-expression matrix down to its most variable (most informative) genes using the standard deviation.</li>
+<li>Run <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> on real data and make the result <strong>reproducible</strong> with <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code>.</li>
+<li>Plot each cluster’s expression profile and interpret what the clusters say about the diauxic shift.</li>
+</ul></section><section id="what-k-means-does" class="level2 page-columns page-full" data-number="18.2"><h2 data-number="18.2" class="anchored" data-anchor-id="what-k-means-does">
+<span class="header-section-number">18.2</span> What k-means does</h2>
+<p>K-means clustering is a method for finding groups in a dataset. It is an <em>unsupervised</em> learning technique: it doesn’t rely on previously labeled data. Instead, it finds structure directly from the data, based on how similar the data points are to one another (<a href="#fig-kmeans-algorithm" class="quarto-xref">Figure&nbsp;<span>18.1</span></a>).</p>
 <div id="fig-kmeans-algorithm" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-kmeans-algorithm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/kmeans.png" class="img-fluid figure-img">
@@ -600,93 +612,89 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 Figure&nbsp;18.1: K-means clustering takes a dataset and divides it into k clusters.
 </figcaption></figure>
 </div>
-<p>In simple terms, k-means clustering aims to divide a dataset into k distinct groups or clusters, where each data point belongs to the cluster with the nearest mean (average). The goal is to minimize the variability within each cluster while maximizing the differences between clusters. This helps to reveal hidden patterns or relationships in the data that might not be apparent otherwise.</p>
-</section><section id="the-k-means-algorithm" class="level2" data-number="18.2"><h2 data-number="18.2" class="anchored" data-anchor-id="the-k-means-algorithm">
-<span class="header-section-number">18.2</span> The k-means algorithm</h2>
-<p>The k-means algorithm follows these general steps:</p>
+<p>The idea is to split the data into <code>k</code> groups, called <strong>clusters</strong>, so that each point belongs to the cluster whose average it is closest to. The algorithm tries to make points within a cluster as similar as possible while keeping different clusters as distinct as possible. For our yeast data, a “point” is a single gene, and “similar” means <em>follows a similar expression pattern over the time course</em>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>An analogy for the algorithm
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Imagine <code>k</code> party hosts scattered around a room full of guests. Each guest walks to the nearest host (<strong>assignment</strong>). Each host then moves to the middle of their own group (<strong>update</strong>). Guests re-check who is now closest and move again, and the hosts re-center. Repeat until nobody needs to move. The final huddles are your clusters, and each host’s position is a <strong>centroid</strong> — the average of its group.</p>
+</div>
+</div>
+</section><section id="the-k-means-algorithm" class="level2" data-number="18.3"><h2 data-number="18.3" class="anchored" data-anchor-id="the-k-means-algorithm">
+<span class="header-section-number">18.3</span> The k-means algorithm</h2>
+<p>Spelled out, k-means follows these steps:</p>
 <ol type="1">
-<li>Choose the number of clusters k.</li>
-<li>Initialize the cluster centroids randomly by selecting k data points from the dataset.</li>
-<li>Assign each data point to the nearest centroid.</li>
-<li>Update the centroids by computing the mean of all the data points assigned to each centroid.</li>
-<li>Repeat steps 3 and 4 until the centroids no longer change or a certain stopping criterion is met (e.g., a maximum number of iterations).</li>
+<li>Choose the number of clusters, <code>k</code>.</li>
+<li>Place <code>k</code> centroids at random (often by picking <code>k</code> of the data points).</li>
+<li>
+<strong>Assign</strong> each data point to its nearest centroid.</li>
+<li>
+<strong>Update</strong> each centroid to the mean of the points assigned to it.</li>
+<li>Repeat steps 3 and 4 until the centroids stop moving (or a maximum number of iterations is reached).</li>
 </ol>
-<p>The algorithm converges when the centroids stabilize or no longer change significantly. The final clusters represent the underlying patterns or structures in the data. Advantages and disadvantages of k-means clustering</p>
-</section><section id="pros-and-cons-of-k-means-clustering" class="level2" data-number="18.3"><h2 data-number="18.3" class="anchored" data-anchor-id="pros-and-cons-of-k-means-clustering">
-<span class="header-section-number">18.3</span> Pros and cons of k-means clustering</h2>
+<p>When the centroids stabilize, the algorithm has <em>converged</em>, and the final clusters represent the patterns in the data.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>k-means is random — seed it
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Step 2 starts from a <strong>random</strong> placement of centroids, so two runs can give slightly different clusters (and the cluster <em>numbers</em> can be shuffled). Whenever you want a result you can reproduce — and a frozen figure that doesn’t change on every render — call <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code> before <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code>.</p>
+</div>
+</div>
+</section><section id="pros-and-cons-of-k-means-clustering" class="level2" data-number="18.4"><h2 data-number="18.4" class="anchored" data-anchor-id="pros-and-cons-of-k-means-clustering">
+<span class="header-section-number">18.4</span> Pros and cons of k-means clustering</h2>
 <p>Compared to other clustering algorithms, k-means has several advantages:</p>
 <ul>
-<li><dl>
-<dt>Simplicity and ease of implementation</dt>
-<dd>
-The k-means algorithm is relatively straightforward and can be easily implemented, even for large datasets.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Scalability</dt>
-<dd>
-The algorithm can be adapted for large datasets using various optimization techniques or parallel processing.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Speed</dt>
-<dd>
-K-means is generally faster than other clustering algorithms, especially when the number of clusters k is small.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Interpretability</dt>
-<dd>
-The results of k-means clustering are easy to understand, as the algorithm assigns each data point to a specific cluster based on its similarity to the cluster’s centroid.
-</dd>
-</dl></li>
+<li>
+<strong>Simplicity</strong> — the algorithm is straightforward and easy to implement, even on large datasets.</li>
+<li>
+<strong>Scalability</strong> — it adapts well to large datasets with optimization or parallel processing.</li>
+<li>
+<strong>Speed</strong> — it is generally fast, especially when <code>k</code> is small.</li>
+<li>
+<strong>Interpretability</strong> — the results are easy to read: every point gets a single cluster label.</li>
 </ul>
-<p>However, k-means clustering has several disadvantages as well:</p>
+<p>It also has real limitations:</p>
 <ul>
-<li><dl>
-<dt>Choice of k</dt>
-<dd>
-Selecting the appropriate number of clusters can be challenging and often requires domain knowledge or experimentation. A poor choice of k may yield poor results.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Sensitivity to initial conditions</dt>
-<dd>
-The algorithm’s results can vary depending on the initial placement of centroids. To overcome this issue, the algorithm can be run multiple times with different initializations and the best solution can be chosen based on a criterion (e.g., minimizing within-cluster variation).
-</dd>
-</dl></li>
-<li><dl>
-<dt>Assumes spherical clusters</dt>
-<dd>
-K-means assumes that clusters are spherical and evenly sized, which may not always be the case in real-world datasets. This can lead to poor performance if the underlying clusters have different shapes or densities.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Sensitivity to outliers</dt>
-<dd>
-The algorithm is sensitive to outliers, which can heavily influence the position of centroids and the final clustering result. Preprocessing the data to remove or mitigate the impact of outliers can help improve the performance of k-means clustering.
-</dd>
-</dl></li>
+<li>
+<strong>Choice of <code>k</code></strong> — you have to pick the number of clusters yourself, and a poor choice gives poor results. Domain knowledge and experimentation help.</li>
+<li>
+<strong>Sensitivity to initial conditions</strong> — different random starts can give different answers, which is why you seed and sometimes re-run.</li>
+<li>
+<strong>Assumes round, even clusters</strong> — k-means expects roughly spherical, similarly sized clusters, and struggles when the real groups have other shapes.</li>
+<li>
+<strong>Sensitivity to outliers</strong> — a few extreme points can drag a centroid around, so cleaning or filtering the data first helps.</li>
 </ul>
-<p>Despite limitations, k-means clustering remains a popular and widely used method for exploring and analyzing data, particularly in biological data analysis, where identifying patterns and relationships can provide valuable insights into complex systems and processes.</p>
-</section><section id="an-example-of-k-means-clustering" class="level2" data-number="18.4"><h2 data-number="18.4" class="anchored" data-anchor-id="an-example-of-k-means-clustering">
-<span class="header-section-number">18.4</span> An example of k-means clustering</h2>
-<section id="the-data-and-experimental-background" class="level3" data-number="18.4.1"><h3 data-number="18.4.1" class="anchored" data-anchor-id="the-data-and-experimental-background">
-<span class="header-section-number">18.4.1</span> The data and experimental background</h3>
-<p>The data we are going to use are from <span class="citation" data-cites="derisi_exploring_1997">DeRisi et al. (<a href="references.html#ref-derisi_exploring_1997" role="doc-biblioref">1997</a>)</span>. From their abstract:</p>
+<p>Despite these limits, k-means remains a popular, widely used tool for exploring data — and it is especially handy in biology, where spotting groups of co-behaving genes can hint at shared function or regulation.</p>
+</section><section id="a-worked-example-the-diauxic-shift" class="level2 page-columns page-full" data-number="18.5"><h2 data-number="18.5" class="anchored" data-anchor-id="a-worked-example-the-diauxic-shift">
+<span class="header-section-number">18.5</span> A worked example: the diauxic shift</h2>
+<section id="the-data-and-experimental-background" class="level3" data-number="18.5.1"><h3 data-number="18.5.1" class="anchored" data-anchor-id="the-data-and-experimental-background">
+<span class="header-section-number">18.5.1</span> The data and experimental background</h3>
+<p>The data come from <span class="citation" data-cites="derisi_exploring_1997">DeRisi et al. (<a href="references.html#ref-derisi_exploring_1997" role="doc-biblioref">1997</a>)</span>. From their abstract:</p>
 <blockquote class="blockquote">
-<p>DNA microarrays containing virtually every gene of Saccharomyces cerevisiae were used to carry out a comprehensive investigation of the temporal program of gene expression accompanying the metabolic shift from fermentation to respiration. The expression profiles observed for genes with known metabolic functions pointed to features of the metabolic reprogramming that occur during the diauxic shift, and the expression patterns of many previously uncharacterized genes provided clues to their possible functions.</p>
+<p>DNA microarrays containing virtually every gene of <em>Saccharomyces cerevisiae</em> were used to carry out a comprehensive investigation of the temporal program of gene expression accompanying the metabolic shift from fermentation to respiration. The expression profiles observed for genes with known metabolic functions pointed to features of the metabolic reprogramming that occur during the diauxic shift, and the expression patterns of many previously uncharacterized genes provided clues to their possible functions.</p>
 </blockquote>
 <p>These data are available from NCBI GEO as <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE28">GSE28</a>.</p>
-<p>In the case of the baker’s or brewer’s yeast Saccharomyces cerevisiae growing on glucose with plenty of aeration, the diauxic growth pattern is commonly observed in batch culture. During the first growth phase, when there is plenty of glucose and oxygen available, the yeast cells prefer glucose fermentation to aerobic respiration even though aerobic respiration is the more efficient pathway to grow on glucose. This experiment profiles gene expression for 6400 genes over a time course during which the cells are undergoing a <a href="https://en.wikipedia.org/wiki/Diauxie">diauxic shift</a>.</p>
-<p>The data in deRisi et al.&nbsp;have no replicates and are time course data. Sometimes, seeing how groups of genes behave can give biological insight into the experimental system or the function of individual genes. We can use clustering to group genes that have a similar expression pattern over time and then potentially look at the genes that do so.</p>
-<p>Our goal, then, is to use <code>kmeans</code> clustering to divide highly variable (informative) genes into groups and then to visualize those groups.</p>
-</section></section><section id="getting-data" class="level2" data-number="18.5"><h2 data-number="18.5" class="anchored" data-anchor-id="getting-data">
-<span class="header-section-number">18.5</span> Getting data</h2>
-<p>These data were deposited at NCBI GEO back in 2002. GEOquery can pull them out easily.</p>
+<p>Here is the biology in brief. When baker’s yeast grows on glucose with plenty of oxygen, it still <em>prefers</em> to ferment the glucose rather than respire it — even though respiration is more efficient. Once the glucose runs low, the cells switch metabolic gears to respiration. That switch is the <a href="https://en.wikipedia.org/wiki/Diauxie">diauxic shift</a>. This experiment profiles about 6,400 genes across a time course spanning the shift.</p>
+<p>These data have no replicates; they are a single time course. Watching how <em>groups</em> of genes behave across that course can reveal biology — both about the system and about individual genes. So we’ll use clustering to group genes with similar expression patterns over time, then look at those groups.</p>
+<p>Your goal: use <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> to divide the most variable (most informative) genes into a few groups, then visualize each group’s temporal profile.</p>
+</section><section id="getting-the-data" class="level3" data-number="18.5.2"><h3 data-number="18.5.2" class="anchored" data-anchor-id="getting-the-data">
+<span class="header-section-number">18.5.2</span> Getting the data</h3>
+<p>These data were deposited at NCBI GEO back in 2002. <code>GEOquery</code> can pull them out in one call.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span></span>
-<span><span class="va">gse</span> <span class="op">=</span> <span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE28"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">gse</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE28"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">gse</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "ExpressionSet"
@@ -694,10 +702,10 @@ attr(,"package")
 [1] "Biobase"</code></pre>
 </div>
 </div>
-<p>GEOquery is a little dated and was written before the SummarizedExperiment existed. However, Bioconductor makes a conversion from the old ExpressionSet that GEOquery uses to the SummarizedExperiment that we see so commonly used now.</p>
+<p><code>GEOquery</code> predates the <code>SummarizedExperiment</code> class, so it hands you an older <code>ExpressionSet</code>. Bioconductor can convert that into the <code>SummarizedExperiment</code> you already know how to work with.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment">SummarizedExperiment</a></span><span class="op">)</span></span>
-<span><span class="va">gse</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">gse</span>, <span class="st">"SummarizedExperiment"</span><span class="op">)</span></span>
+<span><span class="va">gse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">gse</span>, <span class="st">"SummarizedExperiment"</span><span class="op">)</span></span>
 <span><span class="va">gse</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: SummarizedExperiment 
@@ -711,7 +719,7 @@ colData names(33): title geo_accession ... supplementary_file
   data_row_count</code></pre>
 </div>
 </div>
-<p>Taking a quick look at the <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData()</a></code>, it might be that we want to reorder the columns a bit.</p>
+<p>A quick look at the sample descriptions in <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData()</a></code> suggests the columns aren’t in time order:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">gse</span><span class="op">)</span><span class="op">$</span><span class="va">title</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -721,19 +729,36 @@ colData names(33): title geo_accession ... supplementary_file
 [7] "diauxic shift timecourse: 20.5 hr"</code></pre>
 </div>
 </div>
-<p>So, we can reorder by hand to get the time course correct:</p>
+<p>So reorder them by hand so the columns run in time-course order:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gse</span> <span class="op">=</span> <span class="va">gse</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span>,<span class="fl">5</span>,<span class="fl">6</span>,<span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">7</span><span class="op">)</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gse</span> <span class="op">&lt;-</span> <span class="va">gse</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="preprocessing" class="level2 page-columns page-full" data-number="18.6"><h2 data-number="18.6" class="anchored" data-anchor-id="preprocessing">
-<span class="header-section-number">18.6</span> Preprocessing</h2>
-<p>In gene expression data analysis, the primary objective is often to identify genes that exhibit significant differences in expression levels across various conditions, such as diseased vs.&nbsp;healthy samples or different time points in a time-course experiment. However, gene expression datasets are typically large, noisy, and contain numerous genes that do not exhibit substantial changes in expression levels. Analyzing all genes in the dataset can be computationally intensive and may introduce noise or false positives in the results.</p>
-<p>One common approach to reduce the complexity of the dataset and focus on the most informative genes is to subset the genes based on their standard deviation in expression levels across the samples. The standard deviation is a measure of dispersion or variability in the data, and genes with high standard deviations have more variation in their expression levels across the samples.</p>
-<p>By selecting genes with high standard deviations, we focus on genes that show relatively large changes in expression levels across different conditions. These genes are more likely to be biologically relevant and involved in the underlying processes or pathways of interest. In contrast, genes with low standard deviations exhibit little or no change in expression levels and are less likely to be informative for the analysis. It turns out that applying filtering based on criteria such as standard deviation can also increase power and reduce false positives in the analysis <span class="citation" data-cites="bourgon_independent_2010">(<a href="references.html#ref-bourgon_independent_2010" role="doc-biblioref">Bourgon et al. 2010</a>)</span>.</p>
-<p>To subset the genes for analysis based on their standard deviation, the following steps can be followed: Calculate the standard deviation of each gene’s expression levels across all samples. Set a threshold for the standard deviation, which can be determined based on domain knowledge, data distribution, or a specific percentile of the standard deviation values (e.g., selecting the top 10% or 25% of genes with the highest standard deviations). Retain only the genes with a standard deviation above the chosen threshold for further analysis.</p>
-<p>By subsetting the genes based on their standard deviation, we can reduce the complexity of the dataset, speed up the subsequent analysis, and increase the likelihood of detecting biologically meaningful patterns and relationships in the gene expression data. The threshold for the standard deviation cutoff is rather arbitrary, so it may be beneficial to try a few to check for sensitivity of findings.</p>
+</section><section id="preprocessing-keep-only-the-informative-genes" class="level3 page-columns page-full" data-number="18.5.3"><h3 data-number="18.5.3" class="anchored" data-anchor-id="preprocessing-keep-only-the-informative-genes">
+<span class="header-section-number">18.5.3</span> Preprocessing: keep only the informative genes</h3>
+<p>Most of those 6,400 genes barely change across the time course. Feeding all of them to the clustering algorithm is slow and, worse, lets thousands of flat, noisy genes drown out the few hundred that actually respond to the diauxic shift.</p>
+<p>So before clustering, you <strong>filter</strong> down to the genes that carry signal. A simple, effective filter is the <strong>standard deviation</strong> of each gene across the samples: a gene whose expression swings widely over the time course has a high standard deviation, while a gene that stays flat has a low one.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Why filter on variability first
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Genes that change a lot across conditions are the ones most likely to be doing something biologically interesting. Dropping the flat, low-variance genes does two good things at once: it shrinks the dataset so clustering is faster, and it removes noise so real patterns stand out. Filtering on a gene-level statistic like the standard deviation — one that ignores the grouping you’ll later test — can also genuinely <em>increase statistical power</em> and reduce false positives <span class="citation" data-cites="bourgon_independent_2010">(<a href="references.html#ref-bourgon_independent_2010" role="doc-biblioref">Bourgon et al. 2010</a>)</span>.</p>
+</div>
+</div>
+<p>The recipe has three steps:</p>
+<ol type="1">
+<li>Compute each gene’s standard deviation across the samples.</li>
+<li>Pick a cutoff (this is somewhat arbitrary — try a few and see how sensitive your results are).</li>
+<li>Keep only the genes above the cutoff.</li>
+</ol>
+<p>Start with step 1 and look at the distribution of standard deviations:</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sds</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="va">sds</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-sds-derisi" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -741,31 +766,37 @@ colData names(33): title geo_accession ... supplementary_file
 <img src="kmeans_files/figure-html/fig-sds-derisi-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-sds-derisi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18.2: Histogram of standard deviations for all genes in the deRisi dataset.
+Figure&nbsp;18.2: Histogram of per-gene standard deviations across the time course. Most genes barely vary (the tall bars on the left); a long right tail marks the genes that change the most.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>Examining the plot, we can see that the most highly variable genes have an sd &gt; 0.8 or so (arbitrary). We can, for convenience, create a new <code>SummarizedExperiment</code> that contains only our most highly variable genes.</p>
+<p><a href="#fig-sds-derisi" class="quarto-xref">Figure&nbsp;<span>18.2</span></a> tells the story directly. The bulk of the genes pile up near zero — they hardly change across the time course and carry little information. A long tail stretches off to the right: these are the genes whose expression swings the most. A cutoff of about <code>sd &gt; 0.8</code> sits past the main pile and keeps that informative right tail. The exact value is a judgment call, which is why it’s worth re-running with a different cutoff later (one of the exercises does just that).</p>
+<p>Now apply the cutoff (step 3) and build a smaller <code>SummarizedExperiment</code> holding just the highly variable genes:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">idx</span> <span class="op">=</span> <span class="va">sds</span><span class="op">&gt;</span><span class="fl">0.8</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">sds</span><span class="op">)</span></span>
-<span><span class="va">gse_sub</span> <span class="op">=</span> <span class="va">gse</span><span class="op">[</span><span class="va">idx</span>,<span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="va">sds</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">sds</span><span class="op">)</span></span>
+<span><span class="va">gse_sub</span> <span class="op">&lt;-</span> <span class="va">gse</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 582</code></pre>
 </div>
-</section><section id="clustering" class="level2 page-columns page-full" data-number="18.7"><h2 data-number="18.7" class="anchored" data-anchor-id="clustering">
-<span class="header-section-number">18.7</span> Clustering</h2>
-<p>Now, <code>gse_sub</code> contains a subset of our data.</p>
-<p>The <code>kmeans</code> function takes a matrix and the number of clusters as arguments.</p>
+</div>
+<p>That trims thousands of genes down to a few hundred — a far more workable set.</p>
+</section><section id="clustering" class="level3 page-columns page-full" data-number="18.5.4"><h3 data-number="18.5.4" class="anchored" data-anchor-id="clustering">
+<span class="header-section-number">18.5.4</span> Clustering</h3>
+<p><code>gse_sub</code> now holds just the informative genes. The <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> function takes a matrix (rows = genes, columns = samples) and the number of clusters. Remember to seed first so the result is reproducible.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">k</span> <span class="op">=</span> <span class="fl">4</span></span>
-<span><span class="va">km</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, centers <span class="op">=</span> <span class="va">k</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The <code>km</code> kmeans result contains a vector, <code>km$cluster</code>, which gives the cluster associated with each gene. We can plot the genes for each cluster to see how these different genes behave.</p>
+<p>The result, <code>km</code>, carries a vector <code>km$cluster</code> that gives the cluster label (1 through <code>k</code>) for each gene. With four clusters, you can plot every cluster’s genes side by side and see how each group moves over time.</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">expression_values</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, mar<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">4</span>,<span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># this allows multiple plots per page</span></span>
-<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html">matplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">expression_values</span><span class="op">[</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">==</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span>, type<span class="op">=</span><span class="st">'l'</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>,<span class="fl">3</span><span class="op">)</span>,</span>
-<span>            ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"cluster"</span>, <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">expression_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>   <span class="co"># 2x2 grid of plots</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html">matplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">expression_values</span><span class="op">[</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span> <span class="op">==</span> <span class="va">i</span>, <span class="op">]</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span>,</span>
+<span>            ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"cluster"</span>, <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-kmeans-derisi" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -773,15 +804,178 @@ Figure&nbsp;18.2: Histogram of standard deviations for all genes in the deRisi d
 <img src="kmeans_files/figure-html/fig-kmeans-derisi-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-derisi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18.3: Gene expression profiles for the four clusters identified by k-means clustering. Each line represents a gene in the cluster, and each column represents a time point in the experiment. Each cluster shows a distinct trend where the genes in the cluster are potentially co-regulated.
+Figure&nbsp;18.3: Expression profiles for the four clusters found by k-means. Each line is one gene; the x-axis runs left to right across the time course, and the y-axis is the (standardized) expression level. Genes within a cluster share a trend, which suggests they may be co-regulated.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>Try this with different size k. Perhaps go back to choose more genes (using a smaller cutoff for sd).</p>
-</section><section id="summary" class="level2" data-number="18.8"><h2 data-number="18.8" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">18.8</span> Summary</h2>
-<p>In this lesson, we have learned how to use k-means clustering to identify groups of genes that behave similarly over time. We have also learned how to subset our data to focus on the most informative genes.</p>
+</section><section id="reading-the-clusters-as-biology" class="level3" data-number="18.5.5"><h3 data-number="18.5.5" class="anchored" data-anchor-id="reading-the-clusters-as-biology">
+<span class="header-section-number">18.5.5</span> Reading the clusters as biology</h3>
+<p>This is the step that the numbers were building toward. Each panel in <a href="#fig-kmeans-derisi" class="quarto-xref">Figure&nbsp;<span>18.3</span></a> is a group of genes that move <em>together</em> across the time course — and “together” is the whole point, because co-regulated genes are often part of the same pathway or controlled by the same switch.</p>
+<p>Look at the <em>shapes</em> rather than the exact lines:</p>
+<ul>
+<li>Some clusters <strong>rise</strong> toward the late time points. Those are genes that get switched <strong>on</strong> as the glucose runs out and the cells shift to respiration — candidate members of the respiratory and stress-response programs.</li>
+<li>Other clusters <strong>fall</strong> across the course. Those genes are being switched <strong>off</strong> during the shift — for example, the fermentation and growth machinery the cell no longer needs once glucose is scarce.</li>
+<li>The lines within each panel hug one another tightly, which is the visual signature of co-regulation: many genes responding in step to the same metabolic cue.</li>
+</ul>
+<p>That is the payoff of clustering. You started with 6,400 noisy trajectories and ended with a handful of clean, interpretable patterns — rising groups, falling groups — that map directly onto the biology of the diauxic shift. If you wanted to go further, you could pull the gene names out of each cluster (<code>rownames(gse_sub)[km$cluster == i]</code>) and ask whether the “rising” cluster is enriched for respiration genes.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why standardized expression?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The y-axis runs from about −3 to 3 because these microarray values are log-ratios centered near zero: positive means “higher than the reference,” negative means “lower.” Clustering on values like these groups genes by the <em>shape</em> of their response over time rather than by their absolute brightness, which is usually what you want.</p>
+</div>
+</div>
+</section></section><section id="exercises" class="level2" data-number="18.6"><h2 data-number="18.6" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">18.6</span> Exercises</h2>
+<p>For each exercise, reuse the <code>gse</code> and <code>gse_sub</code> objects you built above.</p>
+<ol type="1">
+<li>
+<p><strong>Try a different <code>k</code>.</strong> Re-run the clustering with <code>k &lt;- 6</code> instead of 4 and re-make the cluster plots. Do the extra clusters reveal new patterns, or do they mostly split the existing ones?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">k6</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">km6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, centers <span class="op">=</span> <span class="va">k6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">k6</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html">matplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">expression_values</span><span class="op">[</span><span class="va">km6</span><span class="op">$</span><span class="va">cluster</span> <span class="op">==</span> <span class="va">i</span>, <span class="op">]</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span>,</span>
+<span>            ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"cluster"</span>, <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="kmeans_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>With more clusters, the broad “rising” and “falling” groups tend to break into finer sub-patterns (e.g.&nbsp;early vs.&nbsp;late risers). There is no single correct <code>k</code>; the right number depends on how fine a distinction is biologically useful.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Try a different cutoff.</strong> Lower the standard-deviation cutoff to <code>0.5</code> so you keep <em>more</em> genes, rebuild the subset, and cluster again with <code>k = 4</code>. How many genes do you keep now, and do the cluster shapes get cleaner or noisier?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">idx2</span> <span class="op">&lt;-</span> <span class="va">sds</span> <span class="op">&gt;</span> <span class="fl">0.5</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">sds</span><span class="op">)</span></span>
+<span><span class="va">gse_sub2</span> <span class="op">&lt;-</span> <span class="va">gse</span><span class="op">[</span><span class="va">idx2</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">gse_sub2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1657</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">km2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub2</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, centers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A lower cutoff keeps many more genes, including less-variable ones. The extra genes are noisier, so the cluster profiles usually look a little messier. This is the sensitivity check the chapter warned about: the cutoff is a knob, and it’s worth turning it to see whether your conclusions hold.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>How big is each cluster?</strong> Using your original <code>km</code> result, count how many genes fall in each of the four clusters.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  1   2   3   4 
+ 98 102 203 179 </code></pre>
+</div>
+</div>
+<code><a href="https://rdrr.io/r/base/table.html">table()</a></code> tallies the cluster labels. Uneven cluster sizes are normal and fine — a cluster of co-regulated genes is just as real whether it has 30 members or
+<ol start="300" type="1">
+<li>
+</li></ol>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Reproducibility.</strong> Run <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> on <code>gse_sub</code> twice <em>without</em> calling <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code> first, and compare <code><a href="https://rdrr.io/r/base/table.html">table()</a></code> of the cluster labels between the two runs. What changes, and why does that matter for a printed result?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">km_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, centers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">km_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">gse_sub</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, centers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">km_a</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  1   2   3   4 
+ 91  88 165 238 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">km_b</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  1   2   3   4 
+165  91  88 238 </code></pre>
+</div>
+</div>
+<p>The two runs start from different random centroids, so the cluster <em>labels</em> (and sometimes the exact membership) differ. Seeding with <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code> pins the random start so anyone re-running your code sees the same clusters — which is exactly why we seeded the worked example.</p>
+</div>
+</div>
+</div>
+</li>
+</ol></section><section id="summary" class="level2" data-number="18.7"><h2 data-number="18.7" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">18.7</span> Summary</h2>
+<p>You set out to find groups of genes that behave alike across the yeast diauxic shift, and you did it with k-means. Looking back at the objectives:</p>
+<ul>
+<li>You can describe k-means as an <strong>unsupervised</strong> method that sorts points into <code>k</code> groups around moving <strong>centroids</strong>, and you know its main trade-offs (you pick <code>k</code>; it likes round, even clusters; it’s sensitive to outliers and to the random start).</li>
+<li>You pulled a real dataset from GEO with <code><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO()</a></code> and converted it to a <code>SummarizedExperiment</code>.</li>
+<li>You <strong>filtered</strong> the genes down to the high-variance, informative ones using their standard deviation, and you saw on <a href="#fig-sds-derisi" class="quarto-xref">Figure&nbsp;<span>18.2</span></a> why a cutoff past the main pile makes sense.</li>
+<li>You ran <code><a href="https://rdrr.io/r/stats/kmeans.html">kmeans()</a></code> reproducibly with <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code> and plotted each cluster.</li>
+<li>You read <a href="#fig-kmeans-derisi" class="quarto-xref">Figure&nbsp;<span>18.3</span></a> as biology: clusters that <strong>rise</strong> are genes switched on for respiration as glucose runs out, and clusters that <strong>fall</strong> are the fermentation/growth machinery being switched off — co-regulated genes moving in step through the diauxic shift.</li>
+</ul>
+<p>That wraps up the statistics part of the book. Clustering is your first taste of unsupervised learning; the machine-learning chapters pick up that thread and build on it.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
