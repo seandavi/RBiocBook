@@ -29,6 +29,9 @@ pilots (`dataframes_intro` 3.3, `t-stats-and-tests` 2.4, `bioc-summarizedexperim
 | `atac-seq/atac-seq` | 1.6 | ~4.5 |
 | `geoquery` | 1.7 | ~4.4 |
 | `genomic_ranges_tutorial` | 2.1 | ~4.6 |
+| `machine_learning/intro` | 2.3 | ~4.5 |
+| `machine_learning/mlr3verse_intro` | 2.1 | ~4.9 |
+| `machine_learning/machine_learning_mlr3` | 2.9 | ~4.5 (split — see below) |
 
 ## Remaining — worst first
 
@@ -37,29 +40,29 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
 
 | Mean | Chapter | Centrality | Biggest problems |
 |:--:|---|:--:|---|
-| 2.1 | `machine_learning/mlr3verse_intro` | med | No frontmatter; Palmer Penguins (no biology); outputs uninterpreted |
 | 2.3 | `reading_and_writing` | high | No objectives/exercises; non-bio examples; `df` variable name |
-| 2.3 | `machine_learning/intro` | high | Biology motivation = 2 citations then generic spam/housing examples |
 | 2.3 | `310_microbiome` | med | Installs a GitHub-HEAD package (fragile); ends on a link dump |
 | 2.4 | `dplyr_intro_msleep` | high | msleep has no genomics motivation; duplicate objectives headers |
 | 2.4 | `ranges_exercises` | med | Global `results='hide'`; solutions are code-only |
 | 2.6 | `single_cell/setup` | high | Malformed callout `{.callout-tip)`; no objectives/exercises |
 | 2.7 | `ggplot2/intro` | high | Zero exercises in an all-worked-example chapter; title as `#` |
-| 2.9 | `machine_learning/machine_learning_mlr3` | high | Pervasive `=`; a truncated sentence; strong biology though |
 | 3.3 | `dataframes_intro` | high | Pilot — not yet harmonized, but has a ready-to-paste draft in `PILOT_REVIEWS.md` (**quick win**) |
 
 ## Natural batches
 
-- **ML part** — `mlr3verse_intro` (2.1), `ml/intro` (2.3),
-  `machine_learning_mlr3` (2.9): `models` (1.4) is now harmonized; the rest remain.
-  This is now the largest unharmonized cluster and the natural next batch.
+- **ML part — DONE.** All four chapters harmonized (`intro`, `models`,
+  `mlr3verse_intro`, plus the worked-examples capstone). The capstone
+  `machine_learning_mlr3.qmd` (992 lines after harmonization) was **split into
+  three self-contained worked-example chapters**: `ml_cancer.qmd` (cancer
+  classification from gene expression), `ml_methylation_age.qmd` (age from DNA
+  methylation), and `ml_expression.qmd` (expression from histone marks).
 - **Ranges / Bioc** — `ranges_exercises` (2.4) is the only one left;
   `ranges_and_signals`, `genomic_ranges_tutorial`, `atac-seq`, and `geoquery` are
   all harmonized.
-- **High-leverage singletons** — done: `intro`, `kmeans`, `eda_and_univariate_brfss`.
-  Remaining high-centrality targets: `reading_and_writing` (2.3),
+- **Remaining, by priority** — `reading_and_writing` (2.3, high), then
   `dplyr_intro_msleep` (2.4), `ggplot2/intro` (2.7), `single_cell/setup` (2.6),
-  and the quick-win pilot `dataframes_intro` (3.3, draft ready in `PILOT_REVIEWS.md`).
+  `ranges_exercises` (2.4), `310_microbiome` (2.3), and the quick-win pilot
+  `dataframes_intro` (3.3, draft ready in `PILOT_REVIEWS.md`).
 
 ## Process reminders (from `STYLE_GUIDE.md` / `PILOT_REVIEWS.md`)
 
