@@ -26,6 +26,9 @@ pilots (`dataframes_intro` 3.3, `t-stats-and-tests` 2.4, `bioc-summarizedexperim
 | `intro` | 1.9 | ~4.7 |
 | `kmeans` | 1.9 | ~4.5 |
 | `eda_and_univariate_brfss` | 2.0 | ~4.5 |
+| `atac-seq/atac-seq` | 1.6 | ~4.5 |
+| `geoquery` | 1.7 | ~4.4 |
+| `genomic_ranges_tutorial` | 2.1 | ~4.6 |
 
 ## Remaining — worst first
 
@@ -34,9 +37,6 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
 
 | Mean | Chapter | Centrality | Biggest problems |
 |:--:|---|:--:|---|
-| 1.6 | `atac-seq/atac-seq` | med | Broken `\@ref(fig:)` crossrefs; inline `*Exercise*` stubs; separate `atac.bib` |
-| 1.7 | `geoquery` | med | Opens with a pasted journal abstract; `=` everywhere; no frontmatter title |
-| 2.1 | `genomic_ranges_tutorial` | high | Blog-post register; no callouts; no exercises |
 | 2.1 | `machine_learning/mlr3verse_intro` | med | No frontmatter; Palmer Penguins (no biology); outputs uninterpreted |
 | 2.3 | `reading_and_writing` | high | No objectives/exercises; non-bio examples; `df` variable name |
 | 2.3 | `machine_learning/intro` | high | Biology motivation = 2 citations then generic spam/housing examples |
@@ -52,13 +52,14 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
 
 - **ML part** — `mlr3verse_intro` (2.1), `ml/intro` (2.3),
   `machine_learning_mlr3` (2.9): `models` (1.4) is now harmonized; the rest remain.
-- **Ranges / Bioc** — `genomic_ranges_tutorial` (2.1), `ranges_exercises` (2.4),
-  `atac-seq` (1.6); `ranges_and_signals` (1.6) is now harmonized.
-- **High-leverage singletons** — done: `intro` (the face of the book) and
-  `kmeans` (finished the stats part), alongside `eda_and_univariate_brfss`.
-  Remaining high-centrality, low-score targets cluster in the **Ranges/Bioc** and
-  **ML** batches above; `geoquery` (1.7) and `genomic_ranges_tutorial`/`atac-seq`
-  are the next-worst by mean.
+  This is now the largest unharmonized cluster and the natural next batch.
+- **Ranges / Bioc** — `ranges_exercises` (2.4) is the only one left;
+  `ranges_and_signals`, `genomic_ranges_tutorial`, `atac-seq`, and `geoquery` are
+  all harmonized.
+- **High-leverage singletons** — done: `intro`, `kmeans`, `eda_and_univariate_brfss`.
+  Remaining high-centrality targets: `reading_and_writing` (2.3),
+  `dplyr_intro_msleep` (2.4), `ggplot2/intro` (2.7), `single_cell/setup` (2.6),
+  and the quick-win pilot `dataframes_intro` (3.3, draft ready in `PILOT_REVIEWS.md`).
 
 ## Process reminders (from `STYLE_GUIDE.md` / `PILOT_REVIEWS.md`)
 
