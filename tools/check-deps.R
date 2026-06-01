@@ -64,13 +64,13 @@ ref <- lapply(chapters, function(f)
   tryCatch(pkgs_in_file(f), error = function(e) character()))
 names(ref) <- chapters
 
-# Chapters that render ONLY from committed _freeze: their packages do not build
-# on the CI runner (heavy Bioconductor source builds — e.g. scRNAseq pulls
-# alabaster.base, which fails to compile on macOS arm64), so their deps are
-# intentionally NOT declared/installed and the chapter must not be re-executed in
-# CI. Editing one of these needs a toolchain fix first (ubuntu+PPM binaries, or a
-# Bioconductor devcontainer). Add a chapter here only as a deliberate exception.
-freeze_only <- c("single_cell/setup.qmd")
+# Escape hatch for chapters that render ONLY from committed _freeze because a
+# real dependency cannot be installed on the CI runner. Currently EMPTY: the
+# Linux runner (ubuntu + PPM) installs every chapter's deps — including the
+# single-cell Bioconductor stack that failed to compile on macOS arm64 — so no
+# chapter is singled out. Add a path here only as a deliberate, documented
+# exception (a dep that genuinely will not build), never for convenience.
+freeze_only <- character(0)
 enforced <- setdiff(chapters, freeze_only)
 
 ## 3. Declared deps + base/recommended packages ------------------------------
