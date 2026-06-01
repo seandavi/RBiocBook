@@ -40,7 +40,7 @@ jobs:
             install.packages("BiocManager", repos="https://cloud.r-project.org")
             options(repos = BiocManager::repositories())
             deps <- read.dcf("DESCRIPTION")[1, "Depends"]
-            deps <- trimws(gsub("\\(.*?\\)", "", strsplit(deps, ",")[[1]]))
+            deps <- trimws(gsub("[(].*?[)]", "", strsplit(deps, ",")[[1]]))
             deps <- deps[deps != "" & deps != "R"]
             BiocManager::install(deps, update = TRUE, ask = FALSE)
           '
