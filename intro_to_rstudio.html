@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.30">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,6 +12,9 @@
 
 <title>2&nbsp; RStudio – The RBioc Book</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -41,10 +44,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-180dc90b24616f542b21b8b54fc3f545.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-8e563bccdeb7e5b4bf8f1d510bb78af9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5a15bea12966ac2249ff2e96cb8142e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-97604c93679f6a482383404e3cc15efb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -388,14 +391,14 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./310_microbiome.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span></a>
+  <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Storing experiments with SummarizedExperiment</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
+  <a href="./310_microbiome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -537,7 +540,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 6, 2025</p>
+      <p class="date-modified">June 1, 2026</p>
     </div>
   </div>
     
@@ -563,7 +566,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-R versions
+<span class="screen-reader-only">Note</span>R versions
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -617,7 +620,7 @@ Figure&nbsp;2.1: The RStudio interface. In this layout, the <strong>source</stro
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Do I need to use RStudio?
+<span class="screen-reader-only">Note</span>Do I need to use RStudio?
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -630,7 +633,7 @@ Do I need to use RStudio?
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Customizing the RStudio Interface
+<span class="screen-reader-only">Tip</span>Customizing the RStudio Interface
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -657,7 +660,7 @@ Figure&nbsp;2.2: Dealing with limited screen real estate can be a challenge, par
 </ol>
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
-<p><img src="https://www.iunera.com/wp-content/uploads/image-352.png" class="img-fluid figure-img"></p>
+<p><img src="images/jupyter_interface.png" class="img-fluid figure-img"></p>
 <figcaption class="margin-caption">Jupyter Notebook interface. This is an interactive environment for writing and executing R code, along with rich text support for documentation.</figcaption>
 </figure>
 </div>
@@ -739,13 +742,14 @@ Figure&nbsp;2.2: Dealing with limited screen real estate can be a challenge, par
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.30">
+<meta name="generator" content="quarto-1.9.38">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>24&nbsp; Microbiome analysis – The RBioc Book</title>
+<title>25&nbsp; Microbiome analysis – The RBioc Book</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -64,18 +67,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./bioc-summarizedexperiment.html" rel="next">
-<link href="./geoquery.html" rel="prev">
+<link href="./genomic_ranges_tutorial.html" rel="next">
+<link href="./bioc-summarizedexperiment.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-180dc90b24616f542b21b8b54fc3f545.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-8e563bccdeb7e5b4bf8f1d510bb78af9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5a15bea12966ac2249ff2e96cb8142e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-97604c93679f6a482383404e3cc15efb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -108,7 +111,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </script><style>html{ scroll-behavior: smooth; }</style>
-<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
 const typesetMath = (el) => {
   if (window.MathJax) {
     // MathJax Typeset
@@ -119,7 +122,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -187,13 +190,13 @@ window.Quarto = {
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-1">
 <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
               <i class="bi bi-twitter pe-1"></i>
             Twitter
             </a>
           </li>
           <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
               <i class="bi bi-facebook pe-1"></i>
             Facebook
             </a>
@@ -211,7 +214,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./310_microbiome.html"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./310_microbiome.html"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -429,14 +432,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./310_microbiome.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span></a>
+  <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Storing experiments with SummarizedExperiment</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
+  <a href="./310_microbiome.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -532,47 +535,47 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#getting-started" id="toc-getting-started" class="nav-link active" data-scroll-target="#getting-started"><span class="header-section-number">24.1</span> Getting started</a></li>
-  <li><a href="#accessing-microbiome-datasets" id="toc-accessing-microbiome-datasets" class="nav-link" data-scroll-target="#accessing-microbiome-datasets"><span class="header-section-number">24.2</span> Accessing microbiome datasets</a></li>
-  <li><a href="#data-containers" id="toc-data-containers" class="nav-link" data-scroll-target="#data-containers"><span class="header-section-number">24.3</span> Data containers</a></li>
+<li><a href="#getting-started" id="toc-getting-started" class="nav-link active" data-scroll-target="#getting-started"><span class="header-section-number">25.1</span> Getting started</a></li>
+  <li><a href="#accessing-microbiome-datasets" id="toc-accessing-microbiome-datasets" class="nav-link" data-scroll-target="#accessing-microbiome-datasets"><span class="header-section-number">25.2</span> Accessing microbiome datasets</a></li>
+  <li><a href="#data-containers" id="toc-data-containers" class="nav-link" data-scroll-target="#data-containers"><span class="header-section-number">25.3</span> Data containers</a></li>
   <li>
-<a href="#loading-a-microbiome-dataset" id="toc-loading-a-microbiome-dataset" class="nav-link" data-scroll-target="#loading-a-microbiome-dataset"><span class="header-section-number">24.4</span> Loading a microbiome dataset</a>
+<a href="#loading-a-microbiome-dataset" id="toc-loading-a-microbiome-dataset" class="nav-link" data-scroll-target="#loading-a-microbiome-dataset"><span class="header-section-number">25.4</span> Loading a microbiome dataset</a>
   <ul class="collapse">
-<li><a href="#experimental-measurements-assays" id="toc-experimental-measurements-assays" class="nav-link" data-scroll-target="#experimental-measurements-assays"><span class="header-section-number">24.4.1</span> Experimental measurements: <code>assays</code></a></li>
-  <li><a href="#sample-information-coldata" id="toc-sample-information-coldata" class="nav-link" data-scroll-target="#sample-information-coldata"><span class="header-section-number">24.4.2</span> Sample information: <code>colData</code></a></li>
-  <li><a href="#measured-feature-information-rowdata" id="toc-measured-feature-information-rowdata" class="nav-link" data-scroll-target="#measured-feature-information-rowdata"><span class="header-section-number">24.4.3</span> Measured feature information: <code>rowData</code></a></li>
-  <li><a href="#rowtree" id="toc-rowtree" class="nav-link" data-scroll-target="#rowtree"><span class="header-section-number">24.4.4</span> rowTree</a></li>
+<li><a href="#experimental-measurements-assays" id="toc-experimental-measurements-assays" class="nav-link" data-scroll-target="#experimental-measurements-assays"><span class="header-section-number">25.4.1</span> Experimental measurements: <code>assays</code></a></li>
+  <li><a href="#sample-information-coldata" id="toc-sample-information-coldata" class="nav-link" data-scroll-target="#sample-information-coldata"><span class="header-section-number">25.4.2</span> Sample information: <code>colData</code></a></li>
+  <li><a href="#measured-feature-information-rowdata" id="toc-measured-feature-information-rowdata" class="nav-link" data-scroll-target="#measured-feature-information-rowdata"><span class="header-section-number">25.4.3</span> Measured feature information: <code>rowData</code></a></li>
+  <li><a href="#rowtree" id="toc-rowtree" class="nav-link" data-scroll-target="#rowtree"><span class="header-section-number">25.4.4</span> rowTree</a></li>
   </ul>
 </li>
   <li>
-<a href="#wrangling-and-subsetting" id="toc-wrangling-and-subsetting" class="nav-link" data-scroll-target="#wrangling-and-subsetting"><span class="header-section-number">24.5</span> Wrangling and subsetting</a>
+<a href="#wrangling-and-subsetting" id="toc-wrangling-and-subsetting" class="nav-link" data-scroll-target="#wrangling-and-subsetting"><span class="header-section-number">25.5</span> Wrangling and subsetting</a>
   <ul class="collapse">
-<li><a href="#subsetting-samples" id="toc-subsetting-samples" class="nav-link" data-scroll-target="#subsetting-samples"><span class="header-section-number">24.5.1</span> Subsetting samples</a></li>
-  <li><a href="#agglomerating-data" id="toc-agglomerating-data" class="nav-link" data-scroll-target="#agglomerating-data"><span class="header-section-number">24.5.2</span> Agglomerating data</a></li>
+<li><a href="#subsetting-samples" id="toc-subsetting-samples" class="nav-link" data-scroll-target="#subsetting-samples"><span class="header-section-number">25.5.1</span> Subsetting samples</a></li>
+  <li><a href="#agglomerating-data" id="toc-agglomerating-data" class="nav-link" data-scroll-target="#agglomerating-data"><span class="header-section-number">25.5.2</span> Agglomerating data</a></li>
   </ul>
 </li>
   <li>
-<a href="#community-indices" id="toc-community-indices" class="nav-link" data-scroll-target="#community-indices"><span class="header-section-number">24.6</span> Community indices</a>
+<a href="#community-indices" id="toc-community-indices" class="nav-link" data-scroll-target="#community-indices"><span class="header-section-number">25.6</span> Community indices</a>
   <ul class="collapse">
-<li><a href="#alpha-diversity" id="toc-alpha-diversity" class="nav-link" data-scroll-target="#alpha-diversity"><span class="header-section-number">24.6.1</span> Alpha diversity</a></li>
-  <li><a href="#beta-diversity" id="toc-beta-diversity" class="nav-link" data-scroll-target="#beta-diversity"><span class="header-section-number">24.6.2</span> Beta diversity</a></li>
+<li><a href="#alpha-diversity" id="toc-alpha-diversity" class="nav-link" data-scroll-target="#alpha-diversity"><span class="header-section-number">25.6.1</span> Alpha diversity</a></li>
+  <li><a href="#beta-diversity" id="toc-beta-diversity" class="nav-link" data-scroll-target="#beta-diversity"><span class="header-section-number">25.6.2</span> Beta diversity</a></li>
   </ul>
 </li>
   <li>
-<a href="#microbial-composition" id="toc-microbial-composition" class="nav-link" data-scroll-target="#microbial-composition"><span class="header-section-number">24.7</span> Microbial composition</a>
+<a href="#microbial-composition" id="toc-microbial-composition" class="nav-link" data-scroll-target="#microbial-composition"><span class="header-section-number">25.7</span> Microbial composition</a>
   <ul class="collapse">
-<li><a href="#abundance" id="toc-abundance" class="nav-link" data-scroll-target="#abundance"><span class="header-section-number">24.7.1</span> Abundance</a></li>
-  <li><a href="#prevalence" id="toc-prevalence" class="nav-link" data-scroll-target="#prevalence"><span class="header-section-number">24.7.2</span> Prevalence</a></li>
+<li><a href="#abundance" id="toc-abundance" class="nav-link" data-scroll-target="#abundance"><span class="header-section-number">25.7.1</span> Abundance</a></li>
+  <li><a href="#prevalence" id="toc-prevalence" class="nav-link" data-scroll-target="#prevalence"><span class="header-section-number">25.7.2</span> Prevalence</a></li>
   </ul>
 </li>
-  <li><a href="#heatmaps" id="toc-heatmaps" class="nav-link" data-scroll-target="#heatmaps"><span class="header-section-number">24.8</span> Heatmaps</a></li>
-  <li><a href="#further-fun" id="toc-further-fun" class="nav-link" data-scroll-target="#further-fun"><span class="header-section-number">24.9</span> Further fun</a></li>
+  <li><a href="#heatmaps" id="toc-heatmaps" class="nav-link" data-scroll-target="#heatmaps"><span class="header-section-number">25.8</span> Heatmaps</a></li>
+  <li><a href="#further-fun" id="toc-further-fun" class="nav-link" data-scroll-target="#further-fun"><span class="header-section-number">25.9</span> Further fun</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/310_microbiome.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/310_microbiome.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./310_microbiome.html"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></a></li></ol></nav><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./geoquery.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="./310_microbiome.html"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Microbiome analysis</span>
+<span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/310_microbiome.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
@@ -606,7 +609,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">July 7, 2025</p>
+      <p class="date-modified">May 31, 2026</p>
     </div>
   </div>
     
@@ -617,13 +620,13 @@ window.Quarto = {
 </header><p>The human microbiome is a complex ecosystem of bacteria, viruses, fungi, and other microorganisms that live in and on the human body. These microorganisms play a crucial role in human health and disease, influencing everything from digestion and metabolism to immune function and mental health. Understanding the composition and function of the human microbiome is a rapidly growing area of research with implications for a wide range of fields, including medicine, agriculture, and environmental science.</p>
 <p>Microbiome analysis involves studying the microbial communities that inhabit different environments, such as the human gut, skin, mouth, and soil. The analysis of microbiome data typically involves quantifying the abundance of different microorganisms in a given sample and comparing the microbial communities across different samples or conditions. This can help researchers identify patterns, relationships, and associations between microbial communities and various factors, such as health status, diet, lifestyle, and environmental conditions.</p>
 <p>In this chapter, we will assume that the data has already been processed and cleaned, and we will focus on analyzing the microbiome data using R.</p>
-<section id="getting-started" class="level2" data-number="24.1"><h2 data-number="24.1" class="anchored" data-anchor-id="getting-started">
-<span class="header-section-number">24.1</span> Getting started</h2>
+<section id="getting-started" class="level2" data-number="25.1"><h2 data-number="25.1" class="anchored" data-anchor-id="getting-started">
+<span class="header-section-number">25.1</span> Getting started</h2>
 <p>We’ll be using the <code>mia</code> package for microbiome analysis in R. The <code>mia</code> package provides a suite of tools for analyzing microbiome data, including functions for loading, processing, and visualizing microbiome data. The package is designed to work with the <code>SummarizedExperiment</code> and <code>TreeSummarizedExperiment</code> classes, which are specialized data structures for storing microbiome data in R.</p>
 <p>To get started, you’ll need to install the <code>mia</code> package from GitHub using the <code>BiocManager</code> package. If you don’t already have the <code>BiocManager</code> package installed, you can install it using the following command:</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Install the mia package</span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">"microbiome/mia"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Install the mia package</span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">"microbiome/mia"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -640,23 +643,23 @@ Note
 </div>
 <p>Once the <code>mia</code> package is installed, you can load it into your R session using the following command:</p>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the mia package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the mia package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://microbiome.github.io/mia/">mia</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now that the <code>mia</code> package is loaded, we can load the microbiome dataset that we will be working with.</p>
-</section><section id="accessing-microbiome-datasets" class="level2" data-number="24.2"><h2 data-number="24.2" class="anchored" data-anchor-id="accessing-microbiome-datasets">
-<span class="header-section-number">24.2</span> Accessing microbiome datasets</h2>
+</section><section id="accessing-microbiome-datasets" class="level2" data-number="25.2"><h2 data-number="25.2" class="anchored" data-anchor-id="accessing-microbiome-datasets">
+<span class="header-section-number">25.2</span> Accessing microbiome datasets</h2>
 <p>There are many publicly available microbiome datasets that you can use for analysis. Bioconductor provides several packages that contain curated microbiome datasets that facilitate access to and loading microbiome data into R for analysis.</p>
 <p><a href="https://bioconductor.org/packages/curatedMetagenomicsData">curatedMetagenomicData</a> is a large collection of curated human microbiome datasets, provided as TreeSE objects (Pasolli et al.&nbsp;2017). The resource provides curated human microbiome data including gene families, marker abundance, marker presence, pathway abundance, pathway coverage, and relative abundance for samples from different body sites. See the package homepage for more details on data availability and access.</p>
 <p><a href="https://bioconductor.org/packages/microbiomeDataSets">The microbiomeDataSets package</a> provides a collection of curated microbiome datasets for teaching and research purposes. The package contains several example datasets that can be used to explore different aspects of microbiome analysis, such as alpha and beta diversity, differential abundance analysis, and visualization.</p>
 <p><a href="https://bioconductor.org/packages/mia">The mia package</a> and several other packages provide example datasets for learning and testing the functions in the package. These datasets are typically small and easy to work with, making them ideal for learning how to analyze microbiome data in R.</p>
-</section><section id="data-containers" class="level2" data-number="24.3"><h2 data-number="24.3" class="anchored" data-anchor-id="data-containers">
-<span class="header-section-number">24.3</span> Data containers</h2>
+</section><section id="data-containers" class="level2" data-number="25.3"><h2 data-number="25.3" class="anchored" data-anchor-id="data-containers">
+<span class="header-section-number">25.3</span> Data containers</h2>
 <p>Bioconductor provides several specialized data structures for storing and working with microbiome data in R. These data structures are designed to handle the complex and high-dimensional nature of microbiome data and provide a convenient and efficient way to store, manipulate, and analyze microbiome data in R.</p>
 <p><a href="https://bioconductor.org/packages/SummarizedExperiment">SummarizedExperiment (SE)</a> (Morgan et al.&nbsp;2020) is a generic and highly optimized container for complex data structures. It has become a common choice for analyzing various types of biomedical profiling data, such as RNAseq, ChIp-Seq, microarrays, flow cytometry, proteomics, and single-cell sequencing.</p>
 <p><a href="https://bioconductor.org/packages/TreeSummarizedExperiment">TreeSummarizedExperiment</a> (Huang 2020) was developed as an extension to incorporate hierarchical information (such as phylogenetic trees and sample hierarchies) and reference sequences.</p>
-</section><section id="loading-a-microbiome-dataset" class="level2 page-columns page-full" data-number="24.4"><h2 data-number="24.4" class="anchored" data-anchor-id="loading-a-microbiome-dataset">
-<span class="header-section-number">24.4</span> Loading a microbiome dataset</h2>
+</section><section id="loading-a-microbiome-dataset" class="level2 page-columns page-full" data-number="25.4"><h2 data-number="25.4" class="anchored" data-anchor-id="loading-a-microbiome-dataset">
+<span class="header-section-number">25.4</span> Loading a microbiome dataset</h2>
 <p>We will be using the <code>curatedMetagenomicData</code> package to load the <code>FengQ_2015</code> dataset. This dataset contains microbiome data from a study by <a href="https://pubmed.ncbi.nlm.nih.gov/25758642/">Feng et al.&nbsp;(2015)</a>. The curatedMetagenomicData package provides a convenient interface for accessing microbiome datasets that have been pre-processed and curated for analysis.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -672,16 +675,16 @@ Note
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Again, before using a package, we must install it</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Again, before using a package, we must install it</span></span>
 <span><span class="co"># just once.</span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">'curatedMetagenomicData'</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">'curatedMetagenomicData'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Once installed, we can use the package.</p>
 <p>Ignore the details of the next few lines of code for now, but suffice it to say that what the code will do for us is to load a dataset for downstream analysis.</p>
 <div class="cell">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the FengQ_2015 dataset</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the FengQ_2015 dataset</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/waldronlab/curatedMetagenomicData">curatedMetagenomicData</a></span><span class="op">)</span></span>
-<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/curatedMetagenomicData/man/curatedMetagenomicData.html">curatedMetagenomicData</a></span><span class="op">(</span><span class="st">"FengQ_2015.relative_abundance"</span>, dryrun <span class="op">=</span> <span class="cn">FALSE</span>, rownames <span class="op">=</span> <span class="st">"short"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/curatedMetagenomicData/man/curatedMetagenomicData.html">curatedMetagenomicData</a></span><span class="op">(</span><span class="st">"FengQ_2015.relative_abundance"</span>, dryrun <span class="op">=</span> <span class="cn">FALSE</span>, rownames <span class="op">=</span> <span class="st">"short"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
 $`2021-03-31.FengQ_2015.relative_abundance`
@@ -695,6 +698,9 @@ dropping rows without rowTree matches:
   k__Bacteria|p__Firmicutes|c__Erysipelotrichia|o__Erysipelotrichales|f__Erysipelotrichaceae|g__Bulleidia|s__Bulleidia_extructa
   k__Bacteria|p__Proteobacteria|c__Betaproteobacteria|o__Burkholderiales|f__Sutterellaceae|g__Sutterella|s__Sutterella_parvirubra
   k__Bacteria|p__Synergistetes|c__Synergistia|o__Synergistales|f__Synergistaceae|g__Cloacibacillus|s__Cloacibacillus_evryensis</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Duplicated labels were made unique.</code></pre>
 </div>
 </div>
 <p>This code goes out to the internet and downloads the dataset for you. The <code>tse</code> object is a <code>TreeSummarizedExperiment</code> object that contains the microbiome data from the Feng et al.&nbsp;(2015) study. The <code>TreeSummarizedExperiment</code> class is a specialized data structure for storing microbiome data in R, and it is used by the <code>mia</code> package for microbiome analysis.</p>
@@ -711,34 +717,35 @@ Tip
 <p>If you are working with your own microbiome data, you will often need to load it into R using functions like <code><a href="https://rdrr.io/r/utils/read.table.html">read.csv()</a></code> or <code><a href="https://rdrr.io/r/utils/read.table.html">read.table()</a></code> to read tabular data files. Make sure your data is properly formatted and cleaned before loading it into R for analysis.</p>
 </div>
 </div>
-<p>Once the data is loaded into R, we can start exploring the data to understand its structure and contents. The <code>tse</code> object is a <code>TreeSummarizedExperiment</code> object, which is a specialized data structure for storing microbiome data in R. It works quite like a data.frame in, but with many specialized structures for storing microbiome experiment data as shown in <a href="#fig-tse-anatomy" class="quarto-xref">Figure&nbsp;<span>24.1</span></a>. We can use various functions to explore the data stored in the <code>tse</code> object. See the <a href="https://bioconductor.org/packages/TreeSummarizedExperiment">TreeSummarizedExperiment</a> package for more details.</p>
+<p>Once the data is loaded into R, we can start exploring the data to understand its structure and contents. The <code>tse</code> object is a <code>TreeSummarizedExperiment</code> object, which is a specialized data structure for storing microbiome data in R. It works quite like a data.frame in, but with many specialized structures for storing microbiome experiment data as shown in <a href="#fig-tse-anatomy" class="quarto-xref">Figure&nbsp;<span>25.1</span></a>. We can use various functions to explore the data stored in the <code>tse</code> object. See the <a href="https://bioconductor.org/packages/TreeSummarizedExperiment">TreeSummarizedExperiment</a> package for more details.</p>
 <p>This section provides an introduction to these data containers. In microbiome data science, these containers link taxonomic abundance tables with rich side information on the features (microbes) and samples. Taxonomic abundance data can be obtained by 16S rRNA amplicon or metagenomic sequencing, phylogenetic microarrays, or by other means. Many microbiome experiments include multiple versions and types of data generated independently or derived from each other through transformation or agglomeration.</p>
 <div id="fig-tse-anatomy" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-tse-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/treesummarizedexperiment.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tse-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;24.1: Anatomy of a TreeSummarizedExperiment object. Compared to the SingleCellExperiment objects, TreeSummarizedExperiment has five additional slots. <strong>rowTree</strong>: the hierarchical structure on the rows of the assays. <strong>rowLinks</strong>: the link information between rows of the assays and the rowTree. <strong>colTree</strong>: the hierarchical structure on the columns of the assays. <strong>colLinks</strong>: the link information between columns of the assays and the colTree. <strong>referenceSeq</strong> (optional): the reference sequence data per feature (row).
+Figure&nbsp;25.1: Anatomy of a TreeSummarizedExperiment object. Compared to the SingleCellExperiment objects, TreeSummarizedExperiment has five additional slots. <strong>rowTree</strong>: the hierarchical structure on the rows of the assays. <strong>rowLinks</strong>: the link information between rows of the assays and the rowTree. <strong>colTree</strong>: the hierarchical structure on the columns of the assays. <strong>colLinks</strong>: the link information between columns of the assays and the colTree. <strong>referenceSeq</strong> (optional): the reference sequence data per feature (row).
 </figcaption></figure>
 </div>
 <p>To get an overview of the data, we can simply type the name of the object in the R console:</p>
 <div class="cell">
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Print the object</span></span>
-<span><span class="va">tse</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Print the object</span></span>
+<span><span class="va">tse</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: TreeSummarizedExperiment 
-dim: 601 154 
-metadata(1): agglomerated_by_rank
+dim: 606 154 
+metadata(0):
 assays(1): relative_abundance
-rownames(601): [Bacteroides] pectinophilus [Butyribacterium]
-  methylotrophicum ... Weissella cibaria Weissella viridescens
+rownames(606): species:Faecalibacterium prausnitzii
+  species:Streptococcus salivarius ... species:Lactobacillus
+  kullabergensis species:Lactobacillus kimbladii
 rowData names(7): superkingdom phylum ... genus species
 colnames(154): SID31004 SID31009 ... SID532832 SID532915
-colData names(28): study_name subject_id ... ldl hba1c
+colData names(28): study_name subject_id ... triglycerides hba1c
 reducedDimNames(0):
 mainExpName: NULL
 altExpNames(0):
-rowLinks: a LinkDataFrame (601 rows)
+rowLinks: a LinkDataFrame (606 rows)
 rowTree: 1 phylo tree(s) (10430 leaves)
 colLinks: NULL
 colTree: NULL</code></pre>
@@ -746,13 +753,13 @@ colTree: NULL</code></pre>
 </div>
 <p>Observe how the output of the <code>tse</code> object will show you the dimensions of the data, the metadata associated with the samples and features, etc. However, the data themselves are not printed to the console due to the large size of the dataset. The <code>TreeSummarizedExperiment</code> object is a complex data structure that contains multiple components, including the abundance data, sample information, feature information, and other metadata.</p>
 <p>Next, we’ll look at some of the key components of the <code>TreeSummarizedExperiment</code> object and how to access and manipulate them.</p>
-<section id="experimental-measurements-assays" class="level3" data-number="24.4.1"><h3 data-number="24.4.1" class="anchored" data-anchor-id="experimental-measurements-assays">
-<span class="header-section-number">24.4.1</span> Experimental measurements: <code>assays</code>
+<section id="experimental-measurements-assays" class="level3" data-number="25.4.1"><h3 data-number="25.4.1" class="anchored" data-anchor-id="experimental-measurements-assays">
+<span class="header-section-number">25.4.1</span> Experimental measurements: <code>assays</code>
 </h3>
 <p>When working with high-throughput biological data, the results of a workflow (often complex), is usually something resembling an Excel spreadsheet with samples as columns and features (genes, microbes, CpG sites, …) as rows. The quantitative information (the numbers) are called “assay” data since they result from running an “assay.” The microbiome is the collection of all microbes (such as bacteria, viruses, fungi, etc.) in the body. When studying these microbes, data is needed, and that’s where assays come in. An assay is a way of measuring the presence and abundance of different types of microbes in a sample. For example, if you want to know how many bacteria of a certain type are in your gut, you can use an assay to measure this. When storing assays, the original data is count-based. However, the original count-based taxonomic abundance tables may undergo different transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative abundance. These are typically stored in <strong>assays</strong>.</p>
 <p>The assays slot contains the experimental data as multiple count matrices. The result of assays is a list of matrices.</p>
 <div class="cell">
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of length 1
 names(1): relative_abundance</code></pre>
@@ -760,24 +767,30 @@ names(1): relative_abundance</code></pre>
 </div>
 <p>Individual assays can be accessed via <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay()</a></code> function. The result is a matrix. And recall that when we subset a matrix, we use <code>[]</code> and specify the <code>[&lt;rows&gt;, &lt;columns&gt;]</code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># just the first 5 rows and columns to make the results easier to see</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relative_abundance"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># just the first 5 rows and columns to make the results easier to see</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relative_abundance"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                                   SID31004 SID31009 SID31021 SID31030 SID31071
-[Bacteroides] pectinophilus               0  0.35998  0.00000  0.00000        0
-[Butyribacterium] methylotrophicum        0  0.00000  0.00000  0.00000        0
-[Clostridium] hylemonae                   0  0.00000  0.00000  0.00000        0
-[Clostridium] innocuum                    0  0.00371  0.00384  0.01735        0
-[Clostridium] leptum                      0  0.00723  0.03135  0.03833        0</code></pre>
+<pre><code>                                     SID31004 SID31009 SID31021 SID31030
+species:Faecalibacterium prausnitzii 13.58862  5.18307  6.09213  2.79834
+species:Streptococcus salivarius     11.00755  0.13897  0.17498  0.15692
+species:Anaerostipes hadrus           8.26264  7.55176  8.26219  1.07529
+species:Bacteroides stercoris         5.21961  0.00000  0.01189  0.59787
+species:Collinsella aerofaciens       4.58481  3.68522  2.67519  2.19600
+                                     SID31071
+species:Faecalibacterium prausnitzii 12.96581
+species:Streptococcus salivarius      0.26242
+species:Anaerostipes hadrus           3.07124
+species:Bacteroides stercoris         0.06529
+species:Collinsella aerofaciens       7.94793</code></pre>
 </div>
 </div>
 <p>You can, of course, choose a different number of rows or columns it you like.</p>
-</section><section id="sample-information-coldata" class="level3" data-number="24.4.2"><h3 data-number="24.4.2" class="anchored" data-anchor-id="sample-information-coldata">
-<span class="header-section-number">24.4.2</span> Sample information: <code>colData</code>
+</section><section id="sample-information-coldata" class="level3" data-number="25.4.2"><h3 data-number="25.4.2" class="anchored" data-anchor-id="sample-information-coldata">
+<span class="header-section-number">25.4.2</span> Sample information: <code>colData</code>
 </h3>
 <p>colData contains information about the samples used in the study. This information can include details such as the sample ID, the primers used in the analysis, the barcodes associated with the sample (truncated or complete), the type of sample (e.g.&nbsp;soil, fecal, mock) and a description of the sample. You can also add experimental details about samples as you see fit (eg., the sample preparation data, prep kit lot number, or anything else you might want to track).</p>
 <div class="cell">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 154 rows and 28 columns
            study_name  subject_id   body_site antibiotics_current_use
@@ -845,32 +858,32 @@ SID532802                  30                 96 ERR710429;ERR710420
 SID532826                  30                 97 ERR710430;ERR710421
 SID532832                  30                 96 ERR710431;ERR710422
 SID532915                  30                 96 ERR710432;ERR710423
-                         curator       BMI        diet disease_subtype
-                     &lt;character&gt; &lt;numeric&gt; &lt;character&gt;     &lt;character&gt;
-SID31004  Paolo_Manghi;Marisa_..     29.35  vegetarian       carcinoma
-SID31009  Paolo_Manghi;Marisa_..     32.00    omnivore              NA
-SID31021  Paolo_Manghi;Marisa_..     22.10    omnivore              NA
-SID31030  Paolo_Manghi;Marisa_..     34.11    omnivore advancedadenoma
-SID31071  Paolo_Manghi;Marisa_..     23.45    omnivore              NA
-...                          ...       ...         ...             ...
-SID532796 Paolo_Manghi;Marisa_..     26.56    omnivore              NA
-SID532802 Paolo_Manghi;Marisa_..     23.53    omnivore              NA
-SID532826 Paolo_Manghi;Marisa_..     31.22    omnivore              NA
-SID532832 Paolo_Manghi;Marisa_..     27.55    omnivore advancedadenoma
-SID532915 Paolo_Manghi;Marisa_..     22.65    omnivore              NA
-                  tnm triglycerides       hdl       ldl     hba1c
-          &lt;character&gt;     &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
-SID31004       t1n0m0           172        28        92       5.2
-SID31009           NA           101        50       157        NA
-SID31021           NA            53        60       122        NA
-SID31030           NA            89        74       146        NA
-SID31071           NA           258        40       231        NA
-...               ...           ...       ...       ...       ...
-SID532796          NA           100        61       114       5.4
-SID532802          NA            80        67       158       5.8
-SID532826          NA           212        32        90       6.9
-SID532832          NA           141        51       184       5.6
-SID532915          NA            51        80       132       5.1</code></pre>
+                         curator       BMI disease_subtype        diet
+                     &lt;character&gt; &lt;numeric&gt;     &lt;character&gt; &lt;character&gt;
+SID31004  Paolo_Manghi;Marisa_..     29.35       carcinoma  vegetarian
+SID31009  Paolo_Manghi;Marisa_..     32.00              NA    omnivore
+SID31021  Paolo_Manghi;Marisa_..     22.10              NA    omnivore
+SID31030  Paolo_Manghi;Marisa_..     34.11 advancedadenoma    omnivore
+SID31071  Paolo_Manghi;Marisa_..     23.45              NA    omnivore
+...                          ...       ...             ...         ...
+SID532796 Paolo_Manghi;Marisa_..     26.56              NA    omnivore
+SID532802 Paolo_Manghi;Marisa_..     23.53              NA    omnivore
+SID532826 Paolo_Manghi;Marisa_..     31.22              NA    omnivore
+SID532832 Paolo_Manghi;Marisa_..     27.55 advancedadenoma    omnivore
+SID532915 Paolo_Manghi;Marisa_..     22.65              NA    omnivore
+                hdl       ldl         tnm triglycerides     hba1c
+          &lt;numeric&gt; &lt;numeric&gt; &lt;character&gt;     &lt;numeric&gt; &lt;numeric&gt;
+SID31004         28        92      t1n0m0           172       5.2
+SID31009         50       157          NA           101        NA
+SID31021         60       122          NA            53        NA
+SID31030         74       146          NA            89        NA
+SID31071         40       231          NA           258        NA
+...             ...       ...         ...           ...       ...
+SID532796        61       114          NA           100       5.4
+SID532802        67       158          NA            80       5.8
+SID532826        32        90          NA           212       6.9
+SID532832        51       184          NA           141       5.6
+SID532915        80       132          NA            51       5.1</code></pre>
 </div>
 </div>
 <p>As you can see, there is a lot of information stored in the <code>colData</code> slot, including sample IDs, study conditions, and other metadata associated with the samples. This information is essential for understanding the context of the microbiome data and for performing downstream analyses.</p>
@@ -880,57 +893,49 @@ SID532915          NA            51        80       132       5.1</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Use sample colData as database of information about your samples.
+<span class="screen-reader-only">Tip</span>Use sample colData as database of information about your samples.
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>By keeping a relatively complete colData, you can answer questions about your findings without having to refer back to external Excel spreadsheets or lab notebooks.</p>
 </div>
 </div>
-</section><section id="measured-feature-information-rowdata" class="level3" data-number="24.4.3"><h3 data-number="24.4.3" class="anchored" data-anchor-id="measured-feature-information-rowdata">
-<span class="header-section-number">24.4.3</span> Measured feature information: <code>rowData</code>
+</section><section id="measured-feature-information-rowdata" class="level3" data-number="25.4.3"><h3 data-number="25.4.3" class="anchored" data-anchor-id="measured-feature-information-rowdata">
+<span class="header-section-number">25.4.3</span> Measured feature information: <code>rowData</code>
 </h3>
 <p>rowData contains data on the features of the analyzed samples. This is particularly important in the microbiome field for storing taxonomic information. This taxonomic information is extremely important for understanding the composition and diversity of the microbiome in each sample analyzed. It enables identification of the different types of microorganisms present in samples. It also allows you to explore the relationships between microbiome composition and various environmental or health factors.</p>
 <div class="cell">
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 6 rows and 7 columns
-                                   superkingdom      phylum            class
-                                    &lt;character&gt; &lt;character&gt;      &lt;character&gt;
-[Bacteroides] pectinophilus            Bacteria  Firmicutes       Clostridia
-[Butyribacterium] methylotrophicum     Bacteria  Firmicutes       Clostridia
-[Clostridium] hylemonae                Bacteria  Firmicutes       Clostridia
-[Clostridium] innocuum                 Bacteria  Firmicutes Erysipelotrichia
-[Clostridium] leptum                   Bacteria  Firmicutes       Clostridia
-[Clostridium] methylpentosum           Bacteria  Firmicutes       Clostridia
-                                                order              family
-                                          &lt;character&gt;         &lt;character&gt;
-[Bacteroides] pectinophilus             Eubacteriales                  NA
-[Butyribacterium] methylotrophicum      Eubacteriales      Clostridiaceae
-[Clostridium] hylemonae                 Eubacteriales     Lachnospiraceae
-[Clostridium] innocuum             Erysipelotrichales Erysipelotrichaceae
-[Clostridium] leptum                    Eubacteriales    Oscillospiraceae
-[Clostridium] methylpentosum            Eubacteriales    Oscillospiraceae
-                                                    genus
-                                              &lt;character&gt;
-[Bacteroides] pectinophilus                            NA
-[Butyribacterium] methylotrophicum            Clostridium
-[Clostridium] hylemonae                 Lachnoclostridium
-[Clostridium] innocuum             Erysipelatoclostridium
-[Clostridium] leptum                                   NA
-[Clostridium] methylpentosum                           NA
-                                                  species
-                                              &lt;character&gt;
-[Bacteroides] pectinophilus        [Bacteroides] pectin..
-[Butyribacterium] methylotrophicum [Butyribacterium] me..
-[Clostridium] hylemonae            [Clostridium] hylemo..
-[Clostridium] innocuum             [Clostridium] innocuum
-[Clostridium] leptum                 [Clostridium] leptum
-[Clostridium] methylpentosum       [Clostridium] methyl..</code></pre>
+                                     superkingdom         phylum          class
+                                      &lt;character&gt;    &lt;character&gt;    &lt;character&gt;
+species:Faecalibacterium prausnitzii     Bacteria     Firmicutes     Clostridia
+species:Streptococcus salivarius         Bacteria     Firmicutes        Bacilli
+species:Anaerostipes hadrus              Bacteria     Firmicutes     Clostridia
+species:Bacteroides stercoris            Bacteria   Bacteroidota    Bacteroidia
+species:Collinsella aerofaciens          Bacteria Actinobacteria Coriobacteriia
+species:Bifidobacterium longum           Bacteria Actinobacteria  Actinomycetia
+                                                 order             family
+                                           &lt;character&gt;        &lt;character&gt;
+species:Faecalibacterium prausnitzii     Eubacteriales   Oscillospiraceae
+species:Streptococcus salivarius       Lactobacillales   Streptococcaceae
+species:Anaerostipes hadrus              Eubacteriales    Lachnospiraceae
+species:Bacteroides stercoris            Bacteroidales     Bacteroidaceae
+species:Collinsella aerofaciens       Coriobacteriales  Coriobacteriaceae
+species:Bifidobacterium longum       Bifidobacteriales Bifidobacteriaceae
+                                                genus                species
+                                          &lt;character&gt;            &lt;character&gt;
+species:Faecalibacterium prausnitzii Faecalibacterium Faecalibacterium pra..
+species:Streptococcus salivarius        Streptococcus Streptococcus saliva..
+species:Anaerostipes hadrus              Anaerostipes    Anaerostipes hadrus
+species:Bacteroides stercoris             Bacteroides  Bacteroides stercoris
+species:Collinsella aerofaciens           Collinsella Collinsella aerofaci..
+species:Bifidobacterium longum        Bifidobacterium Bifidobacterium longum</code></pre>
 </div>
 </div>
-</section><section id="rowtree" class="level3" data-number="24.4.4"><h3 data-number="24.4.4" class="anchored" data-anchor-id="rowtree">
-<span class="header-section-number">24.4.4</span> rowTree</h3>
+</section><section id="rowtree" class="level3" data-number="25.4.4"><h3 data-number="25.4.4" class="anchored" data-anchor-id="rowtree">
+<span class="header-section-number">25.4.4</span> rowTree</h3>
 <p>Phylogenetic trees also play an important role in the microbiome field. The TreeSE class can keep track of features and node relations via two functions, rowTree and rowLinks.</p>
 <p>A tree can be accessed via <code><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowTree()</a></code> as <code>phylo</code> object.</p>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -939,7 +944,7 @@ Use sample colData as database of information about your samples.
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-What is this tree of which we speak?
+<span class="screen-reader-only">Note</span>What is this tree of which we speak?
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -949,7 +954,7 @@ What is this tree of which we speak?
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Phylogenetic tree with 10430 tips and 10429 internal nodes.
@@ -963,8 +968,8 @@ Rooted; includes branch length(s).</code></pre>
 <p>The <code>rowTree</code> slot contains information about the hierarchical structure of the data, such as the relationships between different microbial taxa based on their genetic sequences. This information can be used to explore the evolutionary relationships between different microbes and to visualize the diversity and relatedness of the microbial community in a sample.</p>
 <p>We can visualize the phylogenetic tree using the <code>ggtree</code> package in R. The <code>ggtree</code> package provides functions for visualizing phylogenetic trees in a variety of formats, including circular, rectangular, and radial layouts. Here, we’ll use the <code>ggtree</code> package to visualize the phylogenetic tree stored in the <code>rowTree</code> slot of the <code>TreeSummarizedExperiment</code> object.</p>
 <div class="cell">
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.amazon.com/Integration-Manipulation-Visualization-Phylogenetic-Computational-ebook/dp/B0B5NLZR1Z/">ggtree</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggtree.html">ggtree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.amazon.com/Integration-Manipulation-Visualization-Phylogenetic-Computational-ebook/dp/B0B5NLZR1Z/">ggtree</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggtree.html">ggtree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="310_microbiome_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
@@ -975,59 +980,59 @@ Rooted; includes branch length(s).</code></pre>
 <p>See the <a href="https://bioconductor.org/packages/ggtree">ggtree</a> package for more details on visualizing tree structures in R and, for more fun, the <a href="https://yulab-smu.top/treedata-book/">ggtree book</a>.</p>
 <p>The <code>rowLink</code> slot contains information about the relationships between the features and the tree structure. This information can be used to link the features in the data to the nodes in the tree and to explore the relationships between the features based on their abundance profiles.</p>
 <div class="cell">
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowLinks</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowLinks</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>LinkDataFrame with 601 rows and 5 columns
-                                                  nodeLab nodeLab_alias
-                                              &lt;character&gt;   &lt;character&gt;
-[Bacteroides] pectinophilus        k__Bacteria|p__Firmi..    alias_3706
-[Butyribacterium] methylotrophicum k__Bacteria|p__Firmi..    alias_3347
-[Clostridium] hylemonae            k__Bacteria|p__Firmi..    alias_3662
-[Clostridium] innocuum             k__Bacteria|p__Firmi..    alias_4453
-[Clostridium] leptum               k__Bacteria|p__Firmi..    alias_3525
-...                                                   ...           ...
-Veillonella sp. T11011-6           k__Bacteria|p__Firmi..    alias_3074
-Veillonella tobetsuensis           k__Bacteria|p__Firmi..    alias_3070
-Victivallis vadensis               k__Bacteria|p__Lenti..    alias_5062
-Weissella cibaria                  k__Bacteria|p__Firmi..    alias_4775
-Weissella viridescens              k__Bacteria|p__Firmi..    alias_4773
-                                     nodeNum    isLeaf   whichTree
-                                   &lt;integer&gt; &lt;logical&gt; &lt;character&gt;
-[Bacteroides] pectinophilus             3706      TRUE       phylo
-[Butyribacterium] methylotrophicum      3347      TRUE       phylo
-[Clostridium] hylemonae                 3662      TRUE       phylo
-[Clostridium] innocuum                  4453      TRUE       phylo
-[Clostridium] leptum                    3525      TRUE       phylo
-...                                      ...       ...         ...
-Veillonella sp. T11011-6                3074      TRUE       phylo
-Veillonella tobetsuensis                3070      TRUE       phylo
-Victivallis vadensis                    5062      TRUE       phylo
-Weissella cibaria                       4775      TRUE       phylo
-Weissella viridescens                   4773      TRUE       phylo</code></pre>
+<pre><code>LinkDataFrame with 606 rows and 5 columns
+                                                    nodeLab nodeLab_alias
+                                                &lt;character&gt;   &lt;character&gt;
+species:Faecalibacterium prausnitzii k__Bacteria|p__Firmi..    alias_3547
+species:Streptococcus salivarius     k__Bacteria|p__Firmi..    alias_4750
+species:Anaerostipes hadrus          k__Bacteria|p__Firmi..    alias_3579
+species:Bacteroides stercoris        k__Bacteria|p__Bacte..    alias_5690
+species:Collinsella aerofaciens      k__Bacteria|p__Actin..    alias_3019
+...                                                     ...           ...
+species:Streptococcus gallolyticus   k__Bacteria|p__Firmi..    alias_4745
+species:Lactobacillus apis           k__Bacteria|p__Firmi..    alias_4851
+species:Anaerostipes sp. 494a        k__Bacteria|p__Firmi..    alias_3580
+species:Lactobacillus kullabergensis k__Bacteria|p__Firmi..    alias_4855
+species:Lactobacillus kimbladii      k__Bacteria|p__Firmi..    alias_4854
+                                       nodeNum    isLeaf   whichTree
+                                     &lt;integer&gt; &lt;logical&gt; &lt;character&gt;
+species:Faecalibacterium prausnitzii      3547      TRUE       phylo
+species:Streptococcus salivarius          4750      TRUE       phylo
+species:Anaerostipes hadrus               3579      TRUE       phylo
+species:Bacteroides stercoris             5690      TRUE       phylo
+species:Collinsella aerofaciens           3019      TRUE       phylo
+...                                        ...       ...         ...
+species:Streptococcus gallolyticus        4745      TRUE       phylo
+species:Lactobacillus apis                4851      TRUE       phylo
+species:Anaerostipes sp. 494a             3580      TRUE       phylo
+species:Lactobacillus kullabergensis      4855      TRUE       phylo
+species:Lactobacillus kimbladii           4854      TRUE       phylo</code></pre>
 </div>
 </div>
 <p>Both <code>rowTree</code> and <code>rowLinks</code> are optional components of the <code>TreeSummarizedExperiment</code> object, but when present, they provide valuable information about the hierarchical structure of the data and the relationships between the features in the data.</p>
-</section></section><section id="wrangling-and-subsetting" class="level2" data-number="24.5"><h2 data-number="24.5" class="anchored" data-anchor-id="wrangling-and-subsetting">
-<span class="header-section-number">24.5</span> Wrangling and subsetting</h2>
+</section></section><section id="wrangling-and-subsetting" class="level2" data-number="25.5"><h2 data-number="25.5" class="anchored" data-anchor-id="wrangling-and-subsetting">
+<span class="header-section-number">25.5</span> Wrangling and subsetting</h2>
 <p>One of the huge advantages of using the <code>SummarizedExperiment</code> classes in R/Bioconductor is their ability to encapsulate all the information necessary to describe the samples (colData), measured features (rowData, rowTree), and the measurements themselves (assays). When we manipulate or subset these objects, all the associated information about samples, features, and assays are also subsetted.</p>
 <p>The <code>mia</code> package provides several functions for wrangling and subsetting microbiome data. These functions allow you to filter, transform, and manipulate the data to extract the information you need for analysis.</p>
-<section id="subsetting-samples" class="level3" data-number="24.5.1"><h3 data-number="24.5.1" class="anchored" data-anchor-id="subsetting-samples">
-<span class="header-section-number">24.5.1</span> Subsetting samples</h3>
+<section id="subsetting-samples" class="level3" data-number="25.5.1"><h3 data-number="25.5.1" class="anchored" data-anchor-id="subsetting-samples">
+<span class="header-section-number">25.5.1</span> Subsetting samples</h3>
 <p>You can subset the samples in a <code>TreeSummarizedExperiment</code> object similarly to how you would subset a <code>data.frame</code>. For example, to subset out data based on the age category of the samples, you can use the following code:</p>
 <div class="cell">
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 64 68 60 70 68 66</code></pre>
 </div>
 </div>
 <p>Since accessing the colData is such a common way of interacting with a <code>SummarizedExperiment</code>, we can also access the colData as if it were a data.frame.</p>
 <div class="cell">
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">tse</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">tse</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 64 68 60 70 68 66</code></pre>
 </div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># and get a summary of all patient ages</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">tse</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># and get a summary of all patient ages</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">tse</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   43.00   63.00   68.00   66.85   72.00   86.00 </code></pre>
@@ -1035,23 +1040,24 @@ Weissella viridescens                   4773      TRUE       phylo</code></pre>
 </div>
 <p>Age is a numeric variable. Let’s focus on older patients.</p>
 <div class="cell">
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Include all rows, but only columns (samples) who are older than 50</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Include all rows, but only columns (samples) who are older than 50</span></span>
 <span><span class="va">tse_subset_by_age</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span>, <span class="va">tse</span><span class="op">$</span><span class="va">age</span> <span class="op">&gt;</span> <span class="fl">50</span><span class="op">]</span></span>
-<span><span class="va">tse_subset_by_age</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">tse_subset_by_age</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: TreeSummarizedExperiment 
-dim: 601 146 
-metadata(1): agglomerated_by_rank
+dim: 606 146 
+metadata(0):
 assays(1): relative_abundance
-rownames(601): [Bacteroides] pectinophilus [Butyribacterium]
-  methylotrophicum ... Weissella cibaria Weissella viridescens
+rownames(606): species:Faecalibacterium prausnitzii
+  species:Streptococcus salivarius ... species:Lactobacillus
+  kullabergensis species:Lactobacillus kimbladii
 rowData names(7): superkingdom phylum ... genus species
 colnames(146): SID31004 SID31009 ... SID532826 SID532832
-colData names(28): study_name subject_id ... ldl hba1c
+colData names(28): study_name subject_id ... triglycerides hba1c
 reducedDimNames(0):
 mainExpName: NULL
 altExpNames(0):
-rowLinks: a LinkDataFrame (601 rows)
+rowLinks: a LinkDataFrame (606 rows)
 rowTree: 1 phylo tree(s) (10430 leaves)
 colLinks: NULL
 colTree: NULL</code></pre>
@@ -1059,25 +1065,20 @@ colTree: NULL</code></pre>
 </div>
 <p>The <code>tse_subset_by_age</code> is a copy of the original <code>tse</code>, but with only the 50+ year old patients. If you want to double-check, you can look at the ages in this new <code>tse_subset_by_age</code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">tse_subset_by_age</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">tse_subset_by_age</span><span class="op">$</span><span class="va">age</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   52.00   63.25   68.00   68.02   72.00   86.00 </code></pre>
 </div>
 </div>
-</section><section id="agglomerating-data" class="level3" data-number="24.5.2"><h3 data-number="24.5.2" class="anchored" data-anchor-id="agglomerating-data">
-<span class="header-section-number">24.5.2</span> Agglomerating data</h3>
+</section><section id="agglomerating-data" class="level3" data-number="25.5.2"><h3 data-number="25.5.2" class="anchored" data-anchor-id="agglomerating-data">
+<span class="header-section-number">25.5.2</span> Agglomerating data</h3>
 <p>The microbiome features (organisms) that are measured may be measured at different taxonomic levels. For example, the data may be available at the species, genus, family, or phylum level. Agglomerating data is the process of summarizing the data at a higher taxonomic level by combining the abundances of the lower-level taxa. This can be useful for simplifying the data and reducing the dimensionality of the data.</p>
 <p>The <code>agglomerateByRank</code> function in the <code>mia</code> package can be used to agglomerate the data at a specified taxonomic rank. For example, to agglomerate the data at the phylum level, you can use the following code:</p>
 <div class="cell">
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">new_tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"phylum"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: The following values are already present in `metadata` and will be
-overwritten: 'agglomerated_by_rank'. Consider using the 'name' argument to
-specify alternative names.</code></pre>
-</div>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># observe the new object, particularly the number of features (rows)</span></span>
-<span><span class="va">new_tse</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">new_tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://microbiome.github.io/mia/reference/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"phylum"</span><span class="op">)</span></span>
+<span><span class="co"># observe the new object, particularly the number of features (rows)</span></span>
+<span><span class="va">new_tse</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: TreeSummarizedExperiment 
 dim: 13 154 
@@ -1087,22 +1088,22 @@ rownames(13): Actinobacteria Ascomycota ... Synergistetes
   Verrucomicrobia
 rowData names(7): superkingdom phylum ... genus species
 colnames(154): SID31004 SID31009 ... SID532832 SID532915
-colData names(28): study_name subject_id ... ldl hba1c
+colData names(28): study_name subject_id ... triglycerides hba1c
 reducedDimNames(0):
 mainExpName: NULL
 altExpNames(0):
 rowLinks: a LinkDataFrame (13 rows)
-rowTree: 1 phylo tree(s) (10430 leaves)
+rowTree: 1 phylo tree(s) (13 leaves)
 colLinks: NULL
 colTree: NULL</code></pre>
 </div>
 </div>
 <p>The resulting <code>TreeSummarizedExperiment</code> object contains the data aggregated at the phylum level, with the abundances of the lower-level taxa combined to create a summary at the phylum level. This can make the data easier to work with and interpret, especially when dealing with large and complex microbiome datasets.</p>
-</section></section><section id="community-indices" class="level2" data-number="24.6"><h2 data-number="24.6" class="anchored" data-anchor-id="community-indices">
-<span class="header-section-number">24.6</span> Community indices</h2>
+</section></section><section id="community-indices" class="level2" data-number="25.6"><h2 data-number="25.6" class="anchored" data-anchor-id="community-indices">
+<span class="header-section-number">25.6</span> Community indices</h2>
 <p>In the field of microbiome ecology several indices to describe samples and community of samples are available. In this vignette we just want to give a very brief introduction.</p>
-<section id="alpha-diversity" class="level3" data-number="24.6.1"><h3 data-number="24.6.1" class="anchored" data-anchor-id="alpha-diversity">
-<span class="header-section-number">24.6.1</span> Alpha diversity</h3>
+<section id="alpha-diversity" class="level3" data-number="25.6.1"><h3 data-number="25.6.1" class="anchored" data-anchor-id="alpha-diversity">
+<span class="header-section-number">25.6.1</span> Alpha diversity</h3>
 <p>diversity in microbiology is measured by several indices:</p>
 <ul>
 <li>species richness (total number of species)</li>
@@ -1116,7 +1117,7 @@ colTree: NULL</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Why do we care about alpha diversity?
+<span class="screen-reader-only">Note</span>Why do we care about alpha diversity?
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -1125,9 +1126,9 @@ Why do we care about alpha diversity?
 </div>
 <p>In the code below we calculate the Shannon and observed diversity indices.</p>
 <div class="cell">
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/addAlpha.html">addAlpha</a></span><span class="op">(</span><span class="va">tse</span>, index <span class="op">=</span> <span class="st">"shannon"</span>, assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span><span class="op">)</span></span>
-<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/addAlpha.html">addAlpha</a></span><span class="op">(</span><span class="va">tse</span>, index <span class="op">=</span> <span class="st">"observed"</span>, assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://microbiome.github.io/mia/reference/addAlpha.html">addAlpha</a></span><span class="op">(</span><span class="va">tse</span>, index <span class="op">=</span> <span class="st">"shannon"</span>, assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://microbiome.github.io/mia/reference/addAlpha.html">addAlpha</a></span><span class="op">(</span><span class="va">tse</span>, index <span class="op">=</span> <span class="st">"observed"</span>, assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "study_name"              "subject_id"             
  [3] "body_site"               "antibiotics_current_use"
@@ -1139,17 +1140,17 @@ Why do we care about alpha diversity?
 [15] "number_reads"            "number_bases"           
 [17] "minimum_read_length"     "median_read_length"     
 [19] "NCBI_accession"          "curator"                
-[21] "BMI"                     "diet"                   
-[23] "disease_subtype"         "tnm"                    
-[25] "triglycerides"           "hdl"                    
-[27] "ldl"                     "hba1c"                  
+[21] "BMI"                     "disease_subtype"        
+[23] "diet"                    "hdl"                    
+[25] "ldl"                     "tnm"                    
+[27] "triglycerides"           "hba1c"                  
 [29] "shannon"                 "observed"               </code></pre>
 </div>
 </div>
 <p>The <code>observed</code> index is a simple count of the number of species present in a sample, while the <code>shannon</code> index takes into account both the number of species and their relative abundances. These indices provide information about the diversity and richness of the microbial community in each sample.</p>
 <p>And we can look at the resulting colData() which now contains the calculated alpha diversity indices.</p>
 <div class="cell">
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 154 rows and 30 columns
            study_name  subject_id   body_site antibiotics_current_use
@@ -1217,50 +1218,50 @@ SID532802                  30                 96 ERR710429;ERR710420
 SID532826                  30                 97 ERR710430;ERR710421
 SID532832                  30                 96 ERR710431;ERR710422
 SID532915                  30                 96 ERR710432;ERR710423
-                         curator       BMI        diet disease_subtype
-                     &lt;character&gt; &lt;numeric&gt; &lt;character&gt;     &lt;character&gt;
-SID31004  Paolo_Manghi;Marisa_..     29.35  vegetarian       carcinoma
-SID31009  Paolo_Manghi;Marisa_..     32.00    omnivore              NA
-SID31021  Paolo_Manghi;Marisa_..     22.10    omnivore              NA
-SID31030  Paolo_Manghi;Marisa_..     34.11    omnivore advancedadenoma
-SID31071  Paolo_Manghi;Marisa_..     23.45    omnivore              NA
-...                          ...       ...         ...             ...
-SID532796 Paolo_Manghi;Marisa_..     26.56    omnivore              NA
-SID532802 Paolo_Manghi;Marisa_..     23.53    omnivore              NA
-SID532826 Paolo_Manghi;Marisa_..     31.22    omnivore              NA
-SID532832 Paolo_Manghi;Marisa_..     27.55    omnivore advancedadenoma
-SID532915 Paolo_Manghi;Marisa_..     22.65    omnivore              NA
-                  tnm triglycerides       hdl       ldl     hba1c   shannon
-          &lt;character&gt;     &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
-SID31004       t1n0m0           172        28        92       5.2   3.28881
-SID31009           NA           101        50       157        NA   3.10400
-SID31021           NA            53        60       122        NA   3.37028
-SID31030           NA            89        74       146        NA   2.59465
-SID31071           NA           258        40       231        NA   3.14486
-...               ...           ...       ...       ...       ...       ...
-SID532796          NA           100        61       114       5.4   3.65802
-SID532802          NA            80        67       158       5.8   3.19414
-SID532826          NA           212        32        90       6.9   3.15717
-SID532832          NA           141        51       184       5.6   3.21046
-SID532915          NA            51        80       132       5.1   3.48644
+                         curator       BMI disease_subtype        diet
+                     &lt;character&gt; &lt;numeric&gt;     &lt;character&gt; &lt;character&gt;
+SID31004  Paolo_Manghi;Marisa_..     29.35       carcinoma  vegetarian
+SID31009  Paolo_Manghi;Marisa_..     32.00              NA    omnivore
+SID31021  Paolo_Manghi;Marisa_..     22.10              NA    omnivore
+SID31030  Paolo_Manghi;Marisa_..     34.11 advancedadenoma    omnivore
+SID31071  Paolo_Manghi;Marisa_..     23.45              NA    omnivore
+...                          ...       ...             ...         ...
+SID532796 Paolo_Manghi;Marisa_..     26.56              NA    omnivore
+SID532802 Paolo_Manghi;Marisa_..     23.53              NA    omnivore
+SID532826 Paolo_Manghi;Marisa_..     31.22              NA    omnivore
+SID532832 Paolo_Manghi;Marisa_..     27.55 advancedadenoma    omnivore
+SID532915 Paolo_Manghi;Marisa_..     22.65              NA    omnivore
+                hdl       ldl         tnm triglycerides     hba1c   shannon
+          &lt;numeric&gt; &lt;numeric&gt; &lt;character&gt;     &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+SID31004         28        92      t1n0m0           172       5.2   3.28935
+SID31009         50       157          NA           101        NA   3.11014
+SID31021         60       122          NA            53        NA   3.38207
+SID31030         74       146          NA            89        NA   2.60265
+SID31071         40       231          NA           258        NA   3.14500
+...             ...       ...         ...           ...       ...       ...
+SID532796        61       114          NA           100       5.4   3.66184
+SID532802        67       158          NA            80       5.8   3.19522
+SID532826        32        90          NA           212       6.9   3.16254
+SID532832        51       184          NA           141       5.6   3.21467
+SID532915        80       132          NA            51       5.1   3.48822
            observed
           &lt;numeric&gt;
-SID31004        100
-SID31009        105
-SID31021        115
-SID31030        105
-SID31071        112
+SID31004        101
+SID31009        106
+SID31021        116
+SID31030        107
+SID31071        113
 ...             ...
-SID532796       131
-SID532802       109
-SID532826       101
-SID532832        93
-SID532915       126</code></pre>
+SID532796       133
+SID532802       111
+SID532826       103
+SID532832        94
+SID532915       127</code></pre>
 </div>
 </div>
 <p>The <code>scater</code> package provides some convenient plotting functions that are designed to work with the <code>SummarizedExperiment</code> class.</p>
 <div class="cell" data-messasge="false">
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: scuttle</code></pre>
 </div>
@@ -1276,13 +1277,13 @@ Attaching package: 'scater'</code></pre>
 
     multiplot</code></pre>
 </div>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotColData.html">plotColData</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotColData.html">plotColData</a></span><span class="op">(</span><span class="va">tse</span>,</span>
 <span>    <span class="st">"observed"</span>,             <span class="co"># the y-axis value that we just calculated</span></span>
 <span>    <span class="st">"study_condition"</span>,      <span class="co"># The x-axis</span></span>
 <span>    colour_by <span class="op">=</span> <span class="st">"gender"</span>    <span class="co"># Color the points by gender</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">Richness</span><span class="op">[</span><span class="va">Observed</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>  <span class="co"># and give a meaningful label</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">Richness</span><span class="op">[</span><span class="va">Observed</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>  <span class="co"># and give a meaningful label</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="310_microbiome_files/figure-html/plotAlphaDiversity-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1290,8 +1291,8 @@ Attaching package: 'scater'</code></pre>
 </div>
 </div>
 </div>
-</section><section id="beta-diversity" class="level3" data-number="24.6.2"><h3 data-number="24.6.2" class="anchored" data-anchor-id="beta-diversity">
-<span class="header-section-number">24.6.2</span> Beta diversity</h3>
+</section><section id="beta-diversity" class="level3" data-number="25.6.2"><h3 data-number="25.6.2" class="anchored" data-anchor-id="beta-diversity">
+<span class="header-section-number">25.6.2</span> Beta diversity</h3>
 <p>Community similarity refers to the way microorganisms resemble each other in terms of their composition and abundance of different microbial taxa. This can help us understand to what degree different samples resemble each other and finding key information. In microbiome analysis however, it’s more common to measure the dissimilarity/Beta diversity between two samples A and B using the Bray-Curtis measure which is defined as follows:</p>
 <p><span class="math display">\[
 BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
@@ -1299,7 +1300,7 @@ BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
 <p>where <span class="math inline">\(A_{k}\)</span> and <span class="math inline">\(B_{k}\)</span> are the abundances of taxon <span class="math inline">\(k\)</span> in samples A and B, respectively. The Bray-Curtis dissimilarity ranges from 0 (identical communities) to 1 (completely different communities).</p>
 <p>The <code>mia</code> package provides functions for calculating beta diversity indices, such as the Bray-Curtis dissimilarity, Jaccard similarity, and UniFrac distance. These indices can be used to compare the microbial communities between different samples and to identify patterns and relationships between samples based on their microbial composition.</p>
 <div class="cell">
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Run PCoA on relabundance assay with Bray-Curtis distances</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Run PCoA on relabundance assay with Bray-Curtis distances</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://vegandevs.github.io/vegan/">vegan</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
@@ -1307,16 +1308,16 @@ BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
 <span>    method <span class="op">=</span> <span class="st">"bray"</span>,</span>
 <span>    assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span>,</span>
 <span>    name <span class="op">=</span> <span class="st">"MDS_bray"</span></span>
-<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This code is a bit to unpack. It calculates the Bray-Curtis dissimilarity between samples in the <code>tse</code> object using the <code>vegdist</code> function from the <code>vegan</code> package. The resulting dissimilarity matrix is then used to perform a Principal Coordinate Analysis (PCoA) using the <code>runMDS</code> function from the <code>scater</code> package. The PCoA is a dimensionality reduction technique that projects the high-dimensional Bray-Curtis dissimilarity matrix onto a lower-dimensional space while preserving the pairwise distances between samples.</p>
 <p>The resulting <code>TreeSummarizedExperiment</code> object now contains the Bray-Curtis dissimilarity matrix in the <code>MDS_bray</code> slot, which can be used to visualize the relationships between samples based on their microbial composition.</p>
 <p>We can visualize the results of the PCoA using the <code>plotReducedDim</code> function from the <code>scater</code> package. This function creates a plot of the reduced dimensions (PCoA) and colors the samples based on a specified variable, such as the study condition</p>
 <div class="cell">
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create ggplot object</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create ggplot object</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"MDS_bray"</span>, colour_by <span class="op">=</span> <span class="st">"study_condition"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="310_microbiome_files/figure-html/showPCoA-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1325,15 +1326,15 @@ BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
 </div>
 </div>
 <p>You can experiment with different variables to color the samples and explore the relationships between samples based on their microbial composition.</p>
-</section></section><section id="microbial-composition" class="level2" data-number="24.7"><h2 data-number="24.7" class="anchored" data-anchor-id="microbial-composition">
-<span class="header-section-number">24.7</span> Microbial composition</h2>
+</section></section><section id="microbial-composition" class="level2" data-number="25.7"><h2 data-number="25.7" class="anchored" data-anchor-id="microbial-composition">
+<span class="header-section-number">25.7</span> Microbial composition</h2>
 <p>Let’s now look at the microbial composition of the samples in the <code>tse</code> object. The microbial composition refers to the relative abundances of different microbial taxa in each sample. This information can provide insights into the diversity and structure of the microbial community in each sample and help identify patterns and relationships between samples based on their microbial composition.</p>
 <p>The <code>mia</code> package provides functions for visualizing the microbial composition of samples, such as bar plots, heatmaps, and stacked bar plots. These plots can help you explore the relative abundances of different microbial taxa in each sample and identify patterns and relationships between samples based on their microbial composition.</p>
-<section id="abundance" class="level3" data-number="24.7.1"><h3 data-number="24.7.1" class="anchored" data-anchor-id="abundance">
-<span class="header-section-number">24.7.1</span> Abundance</h3>
+<section id="abundance" class="level3" data-number="25.7.1"><h3 data-number="25.7.1" class="anchored" data-anchor-id="abundance">
+<span class="header-section-number">25.7.1</span> Abundance</h3>
 <p>We can start by creating a bar plot of the top 40 most abundant taxa in the dataset. This plot shows the relative abundances of the top 40 taxa in each sample, with the taxa sorted by abundance.</p>
 <div class="cell">
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">miaViz</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/miaViz">miaViz</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: ggraph</code></pre>
 </div>
@@ -1346,12 +1347,12 @@ Attaching package: 'miaViz'</code></pre>
 
     plotNMDS</code></pre>
 </div>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotAbundanceDensity.html">plotAbundanceDensity</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotAbundanceDensity.html">plotAbundanceDensity</a></span><span class="op">(</span><span class="va">tse</span>,</span>
 <span>    layout <span class="op">=</span> <span class="st">"jitter"</span>,</span>
 <span>    assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span>,</span>
 <span>    n <span class="op">=</span> <span class="fl">40</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html">percent</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html">percent</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in scale_x_log10(label = scales::percent): log-10 transformation
 introduced infinite values.</code></pre>
@@ -1365,12 +1366,12 @@ introduced infinite values.</code></pre>
 </div>
 <p>We can also look at the relative abundances of specific taxa in the dataset.</p>
 <div class="cell">
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotAbundanceDensity.html">plotAbundanceDensity</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotAbundanceDensity.html">plotAbundanceDensity</a></span><span class="op">(</span><span class="va">tse</span>,</span>
 <span>    layout <span class="op">=</span> <span class="st">"density"</span>,</span>
 <span>    assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span>,</span>
 <span>    n <span class="op">=</span> <span class="fl">5</span>, colour_by <span class="op">=</span> <span class="st">"study_condition"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in scale_x_log10(): log-10 transformation introduced infinite values.</code></pre>
 </div>
@@ -1385,24 +1386,19 @@ introduced infinite values.</code></pre>
 </div>
 </div>
 </div>
-</section><section id="prevalence" class="level3" data-number="24.7.2"><h3 data-number="24.7.2" class="anchored" data-anchor-id="prevalence">
-<span class="header-section-number">24.7.2</span> Prevalence</h3>
+</section><section id="prevalence" class="level3" data-number="25.7.2"><h3 data-number="25.7.2" class="anchored" data-anchor-id="prevalence">
+<span class="header-section-number">25.7.2</span> Prevalence</h3>
 <p>Prevalence refers to the proportion of samples in which a taxon is present. This information can help identify the most common and rare taxa in the dataset and provide insights into the distribution of different taxa across samples.</p>
 <p>Let’s agglomerate the data at the genus level and then plot the prevalence of the top 20 most prevalent genera in the dataset.</p>
 <div class="cell">
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse_genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"genus"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: The following values are already present in `metadata` and will be
-overwritten: 'agglomerated_by_rank'. Consider using the 'name' argument to
-specify alternative names.</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse_genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://microbiome.github.io/mia/reference/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"genus"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">getPrevalence</a></span><span class="op">(</span><span class="va">tse_genus</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://microbiome.github.io/mia/reference/getPrevalence.html">getPrevalence</a></span><span class="op">(</span><span class="va">tse_genus</span>,</span>
 <span>    detection <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">100</span>,</span>
 <span>    sort <span class="op">=</span> <span class="cn">TRUE</span>, assay.type <span class="op">=</span> <span class="st">"relative_abundance"</span>,</span>
 <span>    as.relative <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Bifidobacterium              Dorea   Faecalibacterium Mediterraneibacter 
          0.7857143          0.7662338          0.7337662          0.7272727 
@@ -1410,19 +1406,17 @@ specify alternative names.</code></pre>
          0.7272727          0.7077922 </code></pre>
 </div>
 </div>
-</section></section><section id="heatmaps" class="level2" data-number="24.8"><h2 data-number="24.8" class="anchored" data-anchor-id="heatmaps">
-<span class="header-section-number">24.8</span> Heatmaps</h2>
+</section></section><section id="heatmaps" class="level2" data-number="25.8"><h2 data-number="25.8" class="anchored" data-anchor-id="heatmaps">
+<span class="header-section-number">25.8</span> Heatmaps</h2>
 <p>Heatmaps are a common way to visualize microbiome data and can provide insights into the relative abundances of different microbial taxa in each sample. To keep things simple, we’ll create a heatmap of the relative abundances of the phyla in the dataset.</p>
 <p>We first agglomerate the data at the phylum level and then create a heatmap of the relative abundances of the phyla in the dataset.</p>
 <div class="cell">
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
-<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"phylum"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: The following values are already present in `metadata` and will be
-overwritten: 'agglomerated_by_rank'. Consider using the 'name' argument to
-specify alternative names.</code></pre>
-</div>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse_phylum</span>, <span class="st">"relative_abundance"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
+<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://microbiome.github.io/mia/reference/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"phylum"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse_phylum</span>, <span class="st">"relative_abundance"</span><span class="op">)</span>,</span>
+<span>    annotation_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_phylum</span><span class="op">)</span><span class="op">[</span>, <span class="st">"study_condition"</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="310_microbiome_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1430,8 +1424,8 @@ specify alternative names.</code></pre>
 </div>
 </div>
 </div>
-</section><section id="further-fun" class="level2" data-number="24.9"><h2 data-number="24.9" class="anchored" data-anchor-id="further-fun">
-<span class="header-section-number">24.9</span> Further fun</h2>
+</section><section id="further-fun" class="level2" data-number="25.9"><h2 data-number="25.9" class="anchored" data-anchor-id="further-fun">
+<span class="header-section-number">25.9</span> Further fun</h2>
 <p>The mia package folks have created a <a href="https://microbiome.github.io/OMA/docs/devel/">book on microbome analysis in R</a> that you can explore for more details on microbiome analysis in R. The book covers a wide range of topics related to microbiome analysis, including data loading, preprocessing, visualization, and statistical analysis. It provides detailed explanations and examples of how to work with microbiome data in R and is a valuable resource for anyone interested in learning more about microbiome analysis.</p>
 
 
@@ -1486,13 +1480,14 @@ specify alternative names.</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -1885,13 +1880,13 @@ specify alternative names.</code></pre>
     }
   });
   </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./geoquery.html" class="pagination-link" aria-label="Accessing and working with public omics data">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Accessing and working with public omics data</span></span>
+      <a href="./bioc-summarizedexperiment.html" class="pagination-link" aria-label="Storing experiments with SummarizedExperiment">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Storing experiments with SummarizedExperiment</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./bioc-summarizedexperiment.html" class="pagination-link" aria-label="Introduction to `SummarizedExperiment`">
-        <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./genomic_ranges_tutorial.html" class="pagination-link" aria-label="Genomic Ranges Introduction">
+        <span class="nav-page-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Genomic Ranges Introduction</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.30">
+<meta name="generator" content="quarto-1.9.38">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
 <title>26&nbsp; Genomic Ranges Introduction – The RBioc Book</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -65,17 +68,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./ranges_and_signals.html" rel="next">
-<link href="./bioc-summarizedexperiment.html" rel="prev">
+<link href="./310_microbiome.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-180dc90b24616f542b21b8b54fc3f545.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-8e563bccdeb7e5b4bf8f1d510bb78af9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5a15bea12966ac2249ff2e96cb8142e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-97604c93679f6a482383404e3cc15efb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -161,13 +164,13 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-1">
 <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
               <i class="bi bi-twitter pe-1"></i>
             Twitter
             </a>
           </li>
           <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
               <i class="bi bi-facebook pe-1"></i>
             Facebook
             </a>
@@ -403,14 +406,14 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./310_microbiome.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span></a>
+  <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Storing experiments with SummarizedExperiment</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span></a>
+  <a href="./310_microbiome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -657,24 +660,24 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </section></section><section id="loading-required-libraries" class="level2" data-number="26.4"><h2 data-number="26.4" class="anchored" data-anchor-id="loading-required-libraries">
 <span class="header-section-number">26.4</span> Loading Required Libraries</h2>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load required libraries</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load required libraries</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Set up plotting theme</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="loading-ctcf-chip-seq-data" class="level2" data-number="26.5"><h2 data-number="26.5" class="anchored" data-anchor-id="loading-ctcf-chip-seq-data">
 <span class="header-section-number">26.5</span> Loading CTCF ChIP-seq Data</h2>
 <p>We’ll work with CTCF ChIP-seq peak data from the ENCODE project. CTCF (CCCTC-binding factor) is a key architectural protein that helps organize chromatin structure.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># URL for the CTCF ChIP-seq BED file</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># URL for the CTCF ChIP-seq BED file</span></span>
 <span><span class="va">bed_url</span> <span class="op">&lt;-</span> <span class="st">"https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz"</span></span>
 <span></span>
 <span><span class="co"># Let's first load this file using readr::read_table to check its structure</span></span>
-<span><span class="va">ctcf_peaks_raw</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_table.html">read_table</a></span><span class="op">(</span><span class="va">bed_url</span>, col_names<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">ctcf_peaks_raw</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_table.html">read_table</a></span><span class="op">(</span><span class="va">bed_url</span>, col_names<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
 ── Column specification ────────────────────────────────────────────────────────
@@ -691,8 +694,8 @@ cols(
   X10 = col_double()
 )</code></pre>
 </div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Display the first few rows of the raw data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ctcf_peaks_raw</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Display the first few rows of the raw data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ctcf_peaks_raw</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 10
   X1           X2        X3 X4       X5 X6       X7    X8    X9   X10
@@ -707,12 +710,12 @@ cols(
 </div>
 <p>Bioconductor’s <code>rtracklayer</code> package provides a convenient way to import BED files directly into R as <code>GRanges</code> objects, which are optimized for genomic range operations. We’ll use this package to load the CTCF peaks data.</p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the BED file using rtracklayer</span></span>
-<span><span class="va">ctcf_peaks</span> <span class="op">&lt;-</span> <span class="fu">rtracklayer</span><span class="fu">::</span><span class="fu">import</span><span class="op">(</span><span class="va">bed_url</span>, format<span class="op">=</span><span class="st">"narrowPeak"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the BED file using rtracklayer</span></span>
+<span><span class="va">ctcf_peaks</span> <span class="op">&lt;-</span> <span class="fu">rtracklayer</span><span class="fu">::</span><span class="fu">import</span><span class="op">(</span><span class="va">bed_url</span>, format<span class="op">=</span><span class="st">"narrowPeak"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Let’s take a look at the loaded CTCF peaks data. The <code>ctcf_peaks</code> object is a <code>GRanges</code> object that contains genomic ranges representing the CTCF ChIP-seq peaks.</p>
 <div class="cell">
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ctcf_peaks</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ctcf_peaks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 43865 ranges and 6 metadata columns:
           seqnames              ranges strand |        name     score
@@ -748,37 +751,37 @@ cols(
 <p>The <code>ctcf_peaks</code> object now contains the genomic ranges of CTCF peaks, including chromosome names, start and end positions, and additional metadata such as peak scores and strand information.</p>
 </section><section id="understanding-granges-objects" class="level2 page-columns page-full" data-number="26.6"><h2 data-number="26.6" class="anchored" data-anchor-id="understanding-granges-objects">
 <span class="header-section-number">26.6</span> Understanding GRanges Objects</h2>
-<p>To get information from a <code>GRanges</code> object, we can use various accessor functions. For example, <code><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html">seqnames()</a></code> retrieves the chromosome names, <code><a href="https://rdrr.io/r/stats/start.html">start()</a></code> and <code><a href="https://rdrr.io/r/stats/start.html">end()</a></code> get the start and end positions, and <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code> calculates the width of each peak.</p>
+<p>To get information from a <code>GRanges</code> object, we can use various accessor functions. For example, <code><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames()</a></code> retrieves the chromosome names, <code><a href="https://rdrr.io/r/stats/start.html">start()</a></code> and <code><a href="https://rdrr.io/r/stats/start.html">end()</a></code> get the start and end positions, and <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code> calculates the width of each peak.</p>
 <div class="cell">
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Accessing chromosome names, start, end, and width</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="co"># Total number of peaks</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Accessing chromosome names, start, end, and width</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="co"># Total number of peaks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 43865</code></pre>
 </div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="co"># Chromosome names (or contig names, etc.)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="co"># Chromosome names (or contig names, etc.)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>factor-Rle of length 43865 with 41566 runs
   Lengths:     1     1     1     1     1 ...     1     1     1     1     1
   Values : chr2  chr20 chr15 chr8  chr9  ... chr11 chr10 chr16 chr17 chr12
 Levels(26): chr2 chr20 chr15 ... chr1_KI270714v1_random chrUn_GL000219v1</code></pre>
 </div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="co"># Start positions (0-based)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="co"># Start positions (0-based)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 238305324  49982707  39921016   6708274 136645957  47669295</code></pre>
 </div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="co"># End positions (1-based)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="co"># End positions (1-based)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 238305539  49982922  39921231   6708489 136646172  47669510</code></pre>
 </div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="co"># equivalent to end(ctcf_peaks) - start(ctcf_peaks)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="co"># equivalent to end(ctcf_peaks) - start(ctcf_peaks)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 216 216 216 216 216 216</code></pre>
 </div>
 </div>
 <p>What is the distribution of peak widths? We can visualize this using a histogram.</p>
 <div class="cell page-columns page-full">
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a histogram of peak widths</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"CTCF Peak Widths"</span>, xlab<span class="op">=</span><span class="st">"Width (bp)"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a histogram of peak widths</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"CTCF Peak Widths"</span>, xlab<span class="op">=</span><span class="st">"Width (bp)"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full"><p><img src="genomic_ranges_tutorial_files/figure-html/peak-widths-1.png" class="img-fluid figure-img" width="672"></p>
@@ -788,7 +791,7 @@ Levels(26): chr2 chr20 chr15 ... chr1_KI270714v1_random chrUn_GL000219v1</code><
 </div>
 <p>The “metadata” part of a <code>GRanges</code> object can be accessed using the <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code> function, which returns a data frame-like structure containing additional information about each genomic range.</p>
 <div class="cell">
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 43865 rows and 6 columns
              name     score signalValue    pValue    qValue      peak
@@ -808,7 +811,7 @@ Levels(26): chr2 chr20 chr15 ... chr1_KI270714v1_random chrUn_GL000219v1</code><
 </div>
 <p>The <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code> function returns a data frame-like structure containing additional information about each genomic range, such as peak scores and strand orientation. This metadata can be useful for filtering or annotating peaks.</p>
 <div class="cell">
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 5 rows and 6 columns
          name     score signalValue    pValue    qValue      peak
@@ -819,11 +822,11 @@ Levels(26): chr2 chr20 chr15 ... chr1_KI270714v1_random chrUn_GL000219v1</code><
 4          NA       560     9.86234        -1   0.66189       108
 5          NA       584    10.15488        -1   0.75082       108</code></pre>
 </div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">$</span><span class="va">signalValue</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="co"># Accessing the score column directly</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">$</span><span class="va">signalValue</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="co"># Accessing the score column directly</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  7.70385  8.71626  9.07638  9.86234 10.15488</code></pre>
 </div>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">$</span><span class="va">signalValue</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"CTCF Peak Scores"</span>, xlab<span class="op">=</span><span class="st">"Score"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">$</span><span class="va">signalValue</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"CTCF Peak Scores"</span>, xlab<span class="op">=</span><span class="st">"Score"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="genomic_ranges_tutorial_files/figure-html/mcols-cols-1.png" class="img-fluid figure-img" width="672"></p>
@@ -837,38 +840,38 @@ Levels(26): chr2 chr20 chr15 ... chr1_KI270714v1_random chrUn_GL000219v1</code><
 <span class="header-section-number">26.7.1</span> Basic Peak Statistics</h3>
 <p>How many peaks do we have? What chromosomes are represented? What is the range of peak widths? Let’s calculate some basic statistics about the CTCF peaks.</p>
 <div class="cell">
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate basic statistics</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== CTCF Peak Statistics ===\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate basic statistics</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== CTCF Peak Statistics ===\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== CTCF Peak Statistics ===</code></pre>
 </div>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Total number of peaks:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Total number of peaks:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Total number of peaks: 43865 </code></pre>
 </div>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Number of chromosomes represented:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Number of chromosomes represented:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Number of chromosomes represented: 26 </code></pre>
 </div>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Peak width range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="st">"bp\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Peak width range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="st">"-"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="st">"bp\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Peak width range: 54 - 442 bp</code></pre>
 </div>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Median peak width:"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="st">"bp\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Median peak width:"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="st">"bp\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Median peak width: 216 bp</code></pre>
 </div>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Mean peak width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"bp\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Mean peak width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"bp\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Mean peak width: 181.1 bp</code></pre>
 </div>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Show chromosome names</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"\nChromosomes present:\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Show chromosome names</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"\nChromosomes present:\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Chromosomes present:</code></pre>
 </div>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "chr1"                    "chr1_KI270714v1_random" 
  [3] "chr10"                   "chr11"                  
@@ -888,10 +891,10 @@ Chromosomes present:</code></pre>
 </section><section id="peaks-per-chromosome" class="level3" data-number="26.7.2"><h3 data-number="26.7.2" class="anchored" data-anchor-id="peaks-per-chromosome">
 <span class="header-section-number">26.7.2</span> Peaks Per Chromosome</h3>
 <div class="cell">
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Count peaks per chromosome</span></span>
-<span><span class="va">peaks_per_chr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Count peaks per chromosome</span></span>
+<span><span class="va">peaks_per_chr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">peaks_per_chr_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">peaks_per_chr</span><span class="op">)</span></span>
-<span><span class="va">peaks_per_chr_df</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">peaks_per_chr_df</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                      Var1 Freq
 1                     chr2 3332
@@ -927,22 +930,22 @@ Chromosomes present:</code></pre>
 <section id="finding-starts-and-ends" class="level3" data-number="26.8.1"><h3 data-number="26.8.1" class="anchored" data-anchor-id="finding-starts-and-ends">
 <span class="header-section-number">26.8.1</span> Finding Starts and Ends</h3>
 <div class="cell">
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract start and end coordinates</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract start and end coordinates</span></span>
 <span><span class="va">peak_starts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span></span>
 <span><span class="va">peak_ends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span></span>
 <span><span class="va">peak_centers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_starts</span>, <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_starts</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 238305324  49982707  39921016   6708274 136645957  47669295 136784479
  [8] 139453373 122421409 102583856</code></pre>
 </div>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_ends</span>, <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_ends</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 238305539  49982922  39921231   6708489 136646172  47669510 136784694
  [8] 139453588 122421624 102584071</code></pre>
 </div>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_centers</span>, <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_centers</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 238305432  49982815  39921124   6708382 136646065  47669403 136784587
  [8] 139453481 122421517 102583964</code></pre>
@@ -954,41 +957,41 @@ Chromosomes present:</code></pre>
 <span class="header-section-number">26.9.1</span> Shifting Peaks</h3>
 <p>Shifting peaks is useful for various analyses, such as creating flanking regions or adjusting peak positions.</p>
 <div class="cell">
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Shift peaks by different amounts</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Shift peaks by different amounts</span></span>
 <span><span class="va">peaks_shifted_100bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, <span class="fl">100</span><span class="op">)</span>  <span class="co"># Shift right by 100bp</span></span>
 <span><span class="va">peaks_shifted_neg50bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, <span class="op">-</span><span class="fl">50</span><span class="op">)</span>  <span class="co"># Shift left by 50bp</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== Peak Shifting Examples ===\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== Peak Shifting Examples ===\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== Peak Shifting Examples ===</code></pre>
 </div>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original peak 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original peak 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Original peak 1: chr2:238305324-238305539 </code></pre>
 </div>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted +100bp:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_shifted_100bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted +100bp:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_shifted_100bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Shifted +100bp: chr2:238305424-238305639 </code></pre>
 </div>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted -50bp:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_shifted_neg50bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted -50bp:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_shifted_neg50bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Shifted -50bp: chr2:238305274-238305489 </code></pre>
 </div>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Demonstrate that width is preserved during shifting</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"\nWidths after shifting (should be unchanged):\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Demonstrate that width is preserved during shifting</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"\nWidths after shifting (should be unchanged):\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Widths after shifting (should be unchanged):</code></pre>
 </div>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original width:"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original width:"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Original width: 216 </code></pre>
 </div>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted +100bp width:"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_shifted_100bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted +100bp width:"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_shifted_100bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Shifted +100bp width: 216 </code></pre>
 </div>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted -50bp width:"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_shifted_neg50bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Shifted -50bp width:"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_shifted_neg50bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Shifted -50bp width: 216 </code></pre>
 </div>
@@ -997,7 +1000,7 @@ Widths after shifting (should be unchanged):</code></pre>
 <span class="header-section-number">26.9.2</span> Setting Peak Widths</h3>
 <p>Resizing peaks is common when standardizing peak sizes or creating fixed-width windows around peak centers.</p>
 <div class="cell">
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resize peaks to fixed width (200bp) centered on original peak center</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resize peaks to fixed width (200bp) centered on original peak center</span></span>
 <span><span class="va">peaks_200bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, width <span class="op">=</span> <span class="fl">200</span>, fix <span class="op">=</span> <span class="st">"center"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Resize peaks to 500bp, keeping the start position fixed</span></span>
@@ -1006,41 +1009,41 @@ Widths after shifting (should be unchanged):</code></pre>
 <span><span class="co"># Resize peaks to 300bp, keeping the end position fixed</span></span>
 <span><span class="va">peaks_300bp_end</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, width <span class="op">=</span> <span class="fl">300</span>, fix <span class="op">=</span> <span class="st">"end"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== Peak Resizing Examples ===\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== Peak Resizing Examples ===\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== Peak Resizing Examples ===</code></pre>
 </div>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original peak 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original peak 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Original peak 1: chr2:238305324-238305539 </code></pre>
 </div>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Resized to 200bp (center):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_200bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Resized to 200bp (center):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_200bp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Resized to 200bp (center): chr2:238305332-238305531 </code></pre>
 </div>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Resized to 500bp (start fixed):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_500bp_start</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Resized to 500bp (start fixed):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_500bp_start</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Resized to 500bp (start fixed): chr2:238305324-238305823 </code></pre>
 </div>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Resized to 300bp (end fixed):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_300bp_end</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Resized to 300bp (end fixed):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">peaks_300bp_end</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Resized to 300bp (end fixed): chr2:238305240-238305539 </code></pre>
 </div>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Verify that all peaks now have the specified width</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"\nWidth verification:\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Verify that all peaks now have the specified width</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"\nWidth verification:\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Width verification:</code></pre>
 </div>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"200bp resize - all widths 200?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_200bp</span><span class="op">)</span> <span class="op">==</span> <span class="fl">200</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"200bp resize - all widths 200?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_200bp</span><span class="op">)</span> <span class="op">==</span> <span class="fl">200</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>200bp resize - all widths 200? TRUE </code></pre>
 </div>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"500bp resize - all widths 500?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_500bp_start</span><span class="op">)</span> <span class="op">==</span> <span class="fl">500</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"500bp resize - all widths 500?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_500bp_start</span><span class="op">)</span> <span class="op">==</span> <span class="fl">500</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>500bp resize - all widths 500? TRUE </code></pre>
 </div>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"300bp resize - all widths 300?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_300bp_end</span><span class="op">)</span> <span class="op">==</span> <span class="fl">300</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"300bp resize - all widths 300?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">peaks_300bp_end</span><span class="op">)</span> <span class="op">==</span> <span class="fl">300</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>300bp resize - all widths 300? TRUE </code></pre>
 </div>
@@ -1048,30 +1051,30 @@ Width verification:</code></pre>
 </section><section id="creating-flanking-regions" class="level3" data-number="26.9.3"><h3 data-number="26.9.3" class="anchored" data-anchor-id="creating-flanking-regions">
 <span class="header-section-number">26.9.3</span> Creating Flanking Regions</h3>
 <div class="cell">
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create flanking regions around peaks</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create flanking regions around peaks</span></span>
 <span><span class="va">upstream_1kb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, width <span class="op">=</span> <span class="fl">1000</span>, start <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">downstream_1kb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, width <span class="op">=</span> <span class="fl">1000</span>, start <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create regions extending in both directions</span></span>
 <span><span class="va">extended_peaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize</a></span><span class="op">(</span><span class="va">ctcf_peaks</span>, width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2000</span>, fix <span class="op">=</span> <span class="st">"center"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== Flanking Region Examples ===\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"=== Flanking Region Examples ===\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== Flanking Region Examples ===</code></pre>
 </div>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original peak 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Original peak 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Original peak 1: chr2:238305324-238305539 </code></pre>
 </div>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"1kb upstream:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">upstream_1kb</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"1kb upstream:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">upstream_1kb</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>1kb upstream: chr2:238304324-238305323 </code></pre>
 </div>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"1kb downstream:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">downstream_1kb</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"1kb downstream:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">downstream_1kb</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>1kb downstream: chr2:238305540-238306539 </code></pre>
 </div>
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Extended ±1kb:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">extended_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb94"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Extended ±1kb:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">extended_peaks</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Extended ±1kb: chr2:238304324-238306539 </code></pre>
 </div>
@@ -1081,7 +1084,7 @@ Width verification:</code></pre>
 <p>Coverage refers to the number of times a genomic region is covered by ranges on a chromosome. A common use case is calculating coverage from ChIP-seq data, where we want to know how many reads overlap with each peak or for doing “peak calling” analysis.</p>
 <p>We can make a toy example by simulating random reads of length 50 bp across a chromosome and then calculating coverage.</p>
 <div class="cell">
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Simulate random reads on chromosome 1</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Simulate random reads on chromosome 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>  <span class="co"># For reproducibility</span></span>
 <span><span class="va">chrom_length</span> <span class="op">&lt;-</span> <span class="fl">1000000</span>  <span class="co"># Length of chromosome 1</span></span>
 <span><span class="va">num_reads</span> <span class="op">&lt;-</span> <span class="fl">100000</span></span>
@@ -1089,7 +1092,7 @@ Width verification:</code></pre>
 <span><span class="va">random_starts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="va">chrom_length</span> <span class="op">-</span> <span class="va">read_length</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">num_reads</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">random_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span>seqnames <span class="op">=</span> <span class="st">"chr1"</span>,</span>
 <span>                         ranges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span>start <span class="op">=</span> <span class="va">random_starts</span>, end <span class="op">=</span> <span class="va">random_starts</span> <span class="op">+</span> <span class="va">read_length</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">random_reads</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">random_reads</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 100000 ranges and 0 metadata columns:
            seqnames        ranges strand
@@ -1111,8 +1114,8 @@ Width verification:</code></pre>
 </div>
 <p>We are now ready to calculate the coverage of these random reads across the chromosome. The <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> function from the <code>GenomicRanges</code> package computes the coverage of ranges in a <code>GRanges</code> object.</p>
 <div class="cell">
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">random_coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">random_reads</span>, width <span class="op">=</span> <span class="va">chrom_length</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">random_coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">random_reads</span>, width <span class="op">=</span> <span class="va">chrom_length</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>RleList of length 1
 $chr1
@@ -1123,7 +1126,7 @@ integer-Rle of length 1000000 with 173047 runs
 </div>
 <p>We can visualize the coverage of the random reads on chromosome 1. The <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> function returns a <code>Rle</code> object, which is a run-length encoding of the coverage values.</p>
 <div class="cell">
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10000</span><span class="op">]</span>, main<span class="op">=</span><span class="st">"Coverage of Random Reads on Chromosome 1"</span>, xlab<span class="op">=</span><span class="st">"Position"</span>, ylab<span class="op">=</span><span class="st">"Coverage"</span>, type<span class="op">=</span><span class="st">"h"</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10000</span><span class="op">]</span>, main<span class="op">=</span><span class="st">"Coverage of Random Reads on Chromosome 1"</span>, xlab<span class="op">=</span><span class="st">"Position"</span>, ylab<span class="op">=</span><span class="st">"Coverage"</span>, type<span class="op">=</span><span class="st">"h"</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="genomic_ranges_tutorial_files/figure-html/coverage-plot-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1133,8 +1136,8 @@ integer-Rle of length 1000000 with 173047 runs
 </div>
 <p>This plot shows the coverage of random reads across the first 10,000 bases of chromosome 1. The y-axis represents the number of reads covering each position, while the x-axis represents the genomic positions.</p>
 <div class="cell">
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate coverage density</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main<span class="op">=</span><span class="st">"Coverage Density"</span>, xlab<span class="op">=</span><span class="st">"Coverage"</span>, ylab<span class="op">=</span><span class="st">"Frequency"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb101"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate coverage density</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">random_coverage</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main<span class="op">=</span><span class="st">"Coverage Density"</span>, xlab<span class="op">=</span><span class="st">"Coverage"</span>, ylab<span class="op">=</span><span class="st">"Frequency"</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="genomic_ranges_tutorial_files/figure-html/coverage-density-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1235,13 +1238,14 @@ integer-Rle of length 1000000 with 173047 runs
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -1634,8 +1638,8 @@ integer-Rle of length 1000000 with 173047 runs
     }
   });
   </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./bioc-summarizedexperiment.html" class="pagination-link" aria-label="Introduction to `SummarizedExperiment`">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Introduction to <code>SummarizedExperiment</code></span></span>
+      <a href="./310_microbiome.html" class="pagination-link" aria-label="Microbiome analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Microbiome analysis</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
