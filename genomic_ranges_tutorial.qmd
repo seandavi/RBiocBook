@@ -1,316 +1,409 @@
-# Genomic Ranges Introduction
+---
+title: "Genomic ranges with real ChIP-seq peaks"
+---
 
-## Introduction
+CTCF is one of the most important architectural proteins in the human genome. It
+binds thousands of sites across the chromosomes, where it helps fold DNA into
+loops and marks the boundaries between active and silent regions. So a natural
+question for a biologist is: **where does CTCF actually bind?**
 
-Genomic ranges are fundamental data structures in bioinformatics that represent intervals on chromosomes. They are essential for analyzing ChIP-seq peaks, gene annotations, regulatory elements, and other genomic features. In this tutorial, we'll explore the BED file format and demonstrate practical genomic range operations using R's rtracklayer package.
+A ChIP-seq experiment answers that question by handing you a list of genomic
+intervals — the *peaks* where the protein was detected. In this chapter you'll
+take a real CTCF peak set from the ENCODE project, load it into R, and learn the
+tools you need to explore it: how genomic coordinates are stored on disk, how to
+import them, and how to ask questions like "how wide are these peaks?" and "where
+exactly is the center of each one?"
 
-This tutorial will cover:
+This chapter focuses on the **real-data workflow** — file formats, importing, and
+exploring. For the full catalog of range operations (set operations, overlaps,
+nearest-feature searches, gene models), see the *Genomic ranges and features*
+chapter, which builds `GRanges` objects by hand and works through those methods
+systematically. Here we keep our hands on a real dataset.
 
-- Understanding the BED file format
-- Loading genomic ranges from BED files
-- Basic exploration of genomic ranges
-- Accessing and manipulating genomic coordinates
+## What you'll learn
 
-## The dataset
+- Read the BED / narrowPeak file format and explain its coordinate system.
+- Import a peak file from a URL into a `GRanges` object with `rtracklayer`.
+- Use the accessor functions (`seqnames()`, `start()`, `width()`, `mcols()`) to
+  pull information out of a `GRanges`.
+- Interpret the distribution of peak widths and what it tells you about the peak
+  caller.
+- Manipulate ranges with `shift()`, `resize()`, and `flank()` to build the
+  windows downstream analyses need.
+- Compute and visualize read coverage along a chromosome.
 
-We'll use CTCF ChIP-seq peak data from the ENCODE project. CTCF (CCCTC-binding factor) is a key architectural protein that helps organize chromatin structure. The data is available in BED format, which we will load and analyze. Each peak represents the results of a ChIP-seq experiment, indicating regions where CTCF binds to DNA. The sample was sequenced, aligned, and peaks were called using standard ChIP-seq analysis pipelines. The peaks are stored in a BED file, which we will import into R for analysis.
+## The BED file format
 
-## The BED File Format
+Genomic intervals are most often stored in **BED** (Browser Extensible Data)
+format: a tab-delimited text file where each line is one feature. The first three
+columns are required and define the interval itself:
 
-The Browser Extensible Data (BED) format is a standard way to represent genomic intervals. BED files are tab-delimited text files where each line represents a genomic feature.
+- **chrom** — chromosome name (e.g. `chr1`, `chrX`).
+- **chromStart** — start position.
+- **chromEnd** — end position.
 
-### BED Format Structure
+Optional columns can follow: a feature `name`, a `score`, the `strand`, and
+several more. Peak callers extend BED with extra columns (signal values,
+p-values); that flavor is called **narrowPeak**, and it's what our ENCODE file
+uses.
 
-The BED format has several required and optional fields:
+::: {.callout-warning}
+## BED is 0-based; R is 1-based
 
-**Required fields (BED3):**
+This is the single most common source of off-by-one bugs in genomics, so it is
+worth burning into memory. BED files use a **0-based, half-open** coordinate
+system: counting starts at 0, the start is *included*, and the end is *excluded*.
+R — and the `GRanges` objects you'll build from these files — use a **1-based,
+fully-closed** system: counting starts at 1 and both ends are included.
 
-- **chrom**: Chromosome name (e.g., chr1, chr2, chrX)
-- **chromStart**: Start position (0-based, inclusive)
-- **chromEnd**: End position (0-based, exclusive)
+Take the BED line `chr1  1000  2000`. In BED that means the 1000 bases spanning
+the interval `[1000, 2000)`. When `rtracklayer` imports it, the start becomes
+**1001** (shifted up by one) and the end stays **2000**, giving the same 1000
+bases but now written as `1001-2000` in 1-based coordinates. The width is
+identical (`2000 - 1000 = 1000`); only the *numbering* differs. The good news:
+`rtracklayer` does this conversion for you. The trap is doing the arithmetic
+yourself on the raw file and being off by one.
+:::
 
-**Optional fields:**
-
-- **name**: Feature name/identifier
-- **score**: Score (0-1000)
-- **strand**: Strand (+ or - OR '*')
-- **thickStart**: Start of thick drawing
-- **thickEnd**: End of thick drawing
-- **itemRgb**: RGB color values
-- **blockCount**: Number of blocks
-- **blockSizes**: Block sizes
-- **blockStarts**: Block start positions
-
-### Key Concepts
-
-- **0-based coordinate system**: BED uses 0-based coordinates where the first base is position 0
-- **Half-open intervals**: chromStart is inclusive, chromEnd is exclusive
-- **Width calculation**: Width = chromEnd - chromStart
-
-Example BED entry:
-```
-chr1    1000    2000    peak1    500    +
-```
-This represents a feature named "peak1" on chromosome 1, from position 1000 to 1999 (width = 1000 bp).
-
-## Loading Required Libraries
+## Loading the libraries
 
 ```{r setup, message=FALSE, warning=FALSE}
-# Load required libraries
 library(rtracklayer)
 library(GenomicRanges)
 library(ggplot2)
 library(dplyr)
 
-# Set up plotting theme
 theme_set(theme_minimal())
 ```
 
+## Importing the CTCF peaks
 
-## Loading CTCF ChIP-seq Data
+We'll use a CTCF ChIP-seq peak file from ENCODE. It lives at a URL, and
+`rtracklayer::import()` can read straight from that URL — no need to download it
+by hand first.
 
-We'll work with CTCF ChIP-seq peak data from the ENCODE project. CTCF (CCCTC-binding factor) is a key architectural protein that helps organize chromatin structure. 
+Before we use the convenient importer, let's peek at the raw file so you can see
+that it really is just a table of numbers and text:
 
 ```{r load-data}
-# URL for the CTCF ChIP-seq BED file
 bed_url <- "https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz"
 
-# Let's first load this file using readr::read_table to check its structure
-ctcf_peaks_raw <- readr::read_table(bed_url, col_names=FALSE)
-
-# Display the first few rows of the raw data
+# Read the raw file as a plain table just to see its shape
+ctcf_peaks_raw <- readr::read_table(bed_url, col_names = FALSE)
 head(ctcf_peaks_raw)
 ```
 
-Bioconductor's `rtracklayer` package provides a convenient way to import BED files directly into R as `GRanges` objects, which are optimized for genomic range operations. We'll use this package to load the CTCF peaks data.
+Each row is one peak, and you can see the chromosome, start, and end in the first
+three columns followed by the narrowPeak extras. Now let's import it properly into
+a `GRanges` object, which is the data structure built for genomic intervals:
 
-
-```{r}
-# Load the BED file using rtracklayer
-ctcf_peaks <- rtracklayer::import(bed_url, format="narrowPeak")
-```
-
-Let's take a look at the loaded CTCF peaks data. The `ctcf_peaks` object is a `GRanges` object that contains genomic ranges representing the CTCF ChIP-seq peaks.
-
-```{r}
+```{r import-peaks}
+ctcf_peaks <- rtracklayer::import(bed_url, format = "narrowPeak")
 ctcf_peaks
 ```
 
-The `ctcf_peaks` object now contains the genomic ranges of CTCF peaks, including chromosome names, start and end positions, and additional metadata such as peak scores and strand information. 
+::: {.callout-note}
+## What `format = "narrowPeak"` gives you
 
-## Understanding GRanges Objects
+Telling `import()` that the file is `narrowPeak` does two helpful things. First,
+it applies the 0-based-to-1-based conversion described above, so the `start`,
+`end`, and `width` you see are already in R's coordinate system. Second, it parses
+the peak-caller columns into named metadata: `signalValue`, `pValue`, `qValue`,
+and `peak` (the offset of the summit within the peak). Those land in the metadata
+columns of the `GRanges`, where you can reach them with `$`.
+:::
 
-To get information from a `GRanges` object, we can use various accessor functions. For example, `seqnames()` retrieves the chromosome names, `start()` and `end()` get the start and end positions, and `width()` calculates the width of each peak.
+## Looking inside a GRanges
 
+A `GRanges` keeps the *ranges* (chromosome, start, end, strand) separate from the
+*metadata* (everything else). You pull each part out with an accessor function.
 
 ```{r granges-accessors}
-# Accessing chromosome names, start, end, and width
-length(ctcf_peaks) # Total number of peaks
-seqnames(ctcf_peaks) # Chromosome names (or contig names, etc.)
-head(start(ctcf_peaks)) # Start positions (0-based)
-head(end(ctcf_peaks)) # End positions (1-based)
-head(width(ctcf_peaks)) # equivalent to end(ctcf_peaks) - start(ctcf_peaks)
+length(ctcf_peaks)         # how many peaks?
+head(seqnames(ctcf_peaks)) # which chromosomes
+head(start(ctcf_peaks))    # start positions (1-based, after import)
+head(end(ctcf_peaks))      # end positions
+head(width(ctcf_peaks))    # width = end - start + 1
 ```
 
-What is the distribution of peak widths? We can visualize this using a histogram.
+So this file contains `r length(ctcf_peaks)` CTCF peaks. The widths vary, but
+let's look at the whole distribution rather than the first six values:
+
 ```{r peak-widths}
-#| fig-cap: "Histogram of CTCF Peak Widths. Why is there a large peak at around 200 bp?"
-# Create a histogram of peak widths
-hist(width(ctcf_peaks), breaks=50, main="CTCF Peak Widths", xlab="Width (bp)", col="lightblue")
+#| label: fig-peak-widths
+#| fig-cap: "Distribution of CTCF peak widths. The sharp spike reflects the peak caller's fixed-width output."
+hist(width(ctcf_peaks), breaks = 50,
+     main = "CTCF peak widths", xlab = "Width (bp)", col = "lightblue")
 ```
 
+@fig-peak-widths has a striking feature: a tall spike at one particular width
+rather than a smooth spread. That's not biology — it's the peak caller. Many
+ChIP-seq pipelines report peaks at a **fixed width** (here around 200 bp) centered
+on the detected summit, so the same number shows up over and over. When you see a
+histogram like this, read it as a signature of how the data were processed, not as
+a property of CTCF itself.
 
-The "metadata" part of a `GRanges` object can be accessed using the `mcols()` function, which returns a data frame-like structure containing additional information about each genomic range.
+The metadata sits in a separate table you reach with `mcols()`:
 
 ```{r granges-metadata}
-mcols(ctcf_peaks)
+head(mcols(ctcf_peaks))
 ```
 
-The `mcols()` function returns a data frame-like structure containing additional information about each genomic range, such as peak scores and strand orientation. This metadata can be useful for filtering or annotating peaks.
+These are the narrowPeak columns. You can pull one out directly with `$` — for
+example the `signalValue`, which measures how strong the binding signal was at
+each peak:
 
-```{r mcols-cols}
-mcols(ctcf_peaks)[1:5, ]
-mcols(ctcf_peaks)$signalValue[1:5]  # Accessing the score column directly
-hist(mcols(ctcf_peaks)$signalValue, breaks=50, main="CTCF Peak Scores", xlab="Score", col="lightblue")
+```{r signal-hist}
+#| label: fig-signal
+#| fig-cap: "Distribution of CTCF peak signal values. Most peaks are weak; a long tail of strong sites stretches to the right."
+hist(mcols(ctcf_peaks)$signalValue, breaks = 50,
+     main = "CTCF peak signal values", xlab = "Signal value", col = "lightblue")
 ```
 
+@fig-signal is **right-skewed**: most peaks carry a modest signal, with a long
+tail of much stronger binding sites. That shape is typical of ChIP-seq — a handful
+of high-confidence sites and many weaker ones — and it's why people often filter
+on `signalValue` before downstream work.
 
-## Exploring Peak Characteristics
+## Some quick summaries
 
-### Basic Peak Statistics
-
-How many peaks do we have? What chromosomes are represented? What is the range of peak widths? Let's calculate some basic statistics about the CTCF peaks.
+How many peaks, on how many chromosomes, and how wide? A few small expressions
+answer this more clearly than a wall of printed text:
 
 ```{r basic-stats}
-# Calculate basic statistics
-cat("=== CTCF Peak Statistics ===\n")
-cat("Total number of peaks:", length(ctcf_peaks), "\n")
-cat("Number of chromosomes represented:", length(unique(seqnames(ctcf_peaks))), "\n")
-cat("Peak width range:", min(width(ctcf_peaks)), "-", max(width(ctcf_peaks)), "bp\n")
-cat("Median peak width:", median(width(ctcf_peaks)), "bp\n")
-cat("Mean peak width:", round(mean(width(ctcf_peaks)), 1), "bp\n")
-
-# Show chromosome names
-cat("\nChromosomes present:\n")
-print(sort(unique(as.character(seqnames(ctcf_peaks)))))
+length(ctcf_peaks)                      # total peaks
+length(unique(seqnames(ctcf_peaks)))    # chromosomes represented
+range(width(ctcf_peaks))                # narrowest and widest peak
+median(width(ctcf_peaks))               # typical peak width
 ```
 
-### Peaks Per Chromosome
+The median width sits right at the spike we saw in @fig-peak-widths, confirming
+that most peaks share the caller's fixed width. We can also count peaks per
+chromosome:
 
 ```{r peaks-per-chromosome}
-# Count peaks per chromosome
 peaks_per_chr <- table(seqnames(ctcf_peaks))
-peaks_per_chr_df <- as.data.frame(peaks_per_chr)
-peaks_per_chr_df
+head(as.data.frame(peaks_per_chr), 10)
 ```
 
+Larger chromosomes generally carry more peaks, which makes sense: more DNA means
+more potential binding sites.
 
-## Accessing Peak Coordinates
+## Where is each peak?
 
-### Finding Starts and Ends
+Three quantities you'll reach for constantly are the start, the end, and the
+**center** of each peak. The center is especially useful — motif analyses and
+fixed-width windows are usually built around it.
 
 ```{r starts-ends}
-# Extract start and end coordinates
-peak_starts <- start(ctcf_peaks)
-peak_ends <- end(ctcf_peaks)
-peak_centers <- start(ctcf_peaks) + (width(ctcf_peaks)/2)
+peak_starts  <- start(ctcf_peaks)
+peak_ends    <- end(ctcf_peaks)
+peak_centers <- start(ctcf_peaks) + width(ctcf_peaks) / 2
 
-head(peak_starts, 10)
-
-head(peak_ends, 10)
-
-head(peak_centers, 10)
+head(peak_centers, 5)
 ```
 
-## Manipulating Peak Ranges
+`peak_centers` now holds the midpoint of every peak, ready to anchor a window.
 
-### Shifting Peaks
+## Reshaping ranges
 
-Shifting peaks is useful for various analyses, such as creating flanking regions or adjusting peak positions.
+Three functions cover most of the range-reshaping you'll do on a peak set:
+`shift()` slides a range, `resize()` changes its width, and `flank()` builds a
+neighbouring region. They all return a new `GRanges` and leave the original
+untouched.
+
+### Shifting
+
+`shift()` moves every range by a fixed number of bases without changing its width:
 
 ```{r shifting-peaks}
-# Shift peaks by different amounts
-peaks_shifted_100bp <- shift(ctcf_peaks, 100)  # Shift right by 100bp
-peaks_shifted_neg50bp <- shift(ctcf_peaks, -50)  # Shift left by 50bp
+peaks_shifted <- shift(ctcf_peaks, 100)   # slide right by 100 bp
 
-cat("=== Peak Shifting Examples ===\n")
-cat("Original peak 1:", as.character(ctcf_peaks[1]), "\n")
-cat("Shifted +100bp:", as.character(peaks_shifted_100bp[1]), "\n")
-cat("Shifted -50bp:", as.character(peaks_shifted_neg50bp[1]), "\n")
-
-# Demonstrate that width is preserved during shifting
-cat("\nWidths after shifting (should be unchanged):\n")
-cat("Original width:", width(ctcf_peaks[1]), "\n")
-cat("Shifted +100bp width:", width(peaks_shifted_100bp[1]), "\n")
-cat("Shifted -50bp width:", width(peaks_shifted_neg50bp[1]), "\n")
+ctcf_peaks[1]
+peaks_shifted[1]
 ```
 
-### Setting Peak Widths
+The start and end of the first peak both moved up by 100, and the width is
+unchanged — exactly what "shift" should do.
 
-Resizing peaks is common when standardizing peak sizes or creating fixed-width windows around peak centers.
+### Resizing
+
+`resize()` sets every range to a chosen width. The `fix` argument says which point
+to hold still while the width changes. Resizing all peaks to a common width is the
+standard way to build comparable windows:
 
 ```{r setting-widths}
-# Resize peaks to fixed width (200bp) centered on original peak center
 peaks_200bp <- resize(ctcf_peaks, width = 200, fix = "center")
 
-# Resize peaks to 500bp, keeping the start position fixed
-peaks_500bp_start <- resize(ctcf_peaks, width = 500, fix = "start")
-
-# Resize peaks to 300bp, keeping the end position fixed
-peaks_300bp_end <- resize(ctcf_peaks, width = 300, fix = "end")
-
-cat("=== Peak Resizing Examples ===\n")
-cat("Original peak 1:", as.character(ctcf_peaks[1]), "\n")
-cat("Resized to 200bp (center):", as.character(peaks_200bp[1]), "\n")
-cat("Resized to 500bp (start fixed):", as.character(peaks_500bp_start[1]), "\n")
-cat("Resized to 300bp (end fixed):", as.character(peaks_300bp_end[1]), "\n")
-
-# Verify that all peaks now have the specified width
-cat("\nWidth verification:\n")
-cat("200bp resize - all widths 200?", all(width(peaks_200bp) == 200), "\n")
-cat("500bp resize - all widths 500?", all(width(peaks_500bp_start) == 500), "\n")
-cat("300bp resize - all widths 300?", all(width(peaks_300bp_end) == 300), "\n")
+peaks_200bp[1]
+all(width(peaks_200bp) == 200)   # every peak is now exactly 200 bp
 ```
 
-### Creating Flanking Regions
+Fixing on `"center"` keeps each peak's midpoint in place and grows or shrinks it
+symmetrically — so a downstream tool sees uniform 200 bp windows centered on the
+binding sites.
+
+### Flanking
+
+`flank()` returns the region *beside* a range — useful for grabbing the DNA just
+upstream or downstream of a peak:
 
 ```{r flanking-regions}
-# Create flanking regions around peaks
 upstream_1kb <- flank(ctcf_peaks, width = 1000, start = TRUE)
-downstream_1kb <- flank(ctcf_peaks, width = 1000, start = FALSE)
 
-# Create regions extending in both directions
-extended_peaks <- resize(ctcf_peaks, width = width(ctcf_peaks) + 2000, fix = "center")
-
-cat("=== Flanking Region Examples ===\n")
-cat("Original peak 1:", as.character(ctcf_peaks[1]), "\n")
-cat("1kb upstream:", as.character(upstream_1kb[1]), "\n")
-cat("1kb downstream:", as.character(downstream_1kb[1]), "\n")
-cat("Extended ±1kb:", as.character(extended_peaks[1]), "\n")
+ctcf_peaks[1]
+upstream_1kb[1]
 ```
 
+The flanking range is the 1000 bp sitting immediately before the start of the
+first peak — the kind of window you might scan for a neighbouring promoter.
+
+::: {.callout-note}
+## Overlaps and grouped operations live next door
+
+Once you have peaks and other features (genes, promoters, other peak sets), the
+next question is usually *which ones overlap?* The `findOverlaps()` and
+`nearest()` functions, set operations like `intersect()`, and grouped operations
+over a `GRangesList` are covered in depth in the *Genomic ranges and features*
+chapter. We don't repeat them here so we can stay focused on the real-data import
+workflow.
+:::
 
 ## Coverage
 
-Coverage refers to the number of times a genomic region is covered by ranges on a chromosome. A common use case is calculating coverage from ChIP-seq data, where we want to know how many reads overlap with each peak or for doing "peak calling" analysis.
-
-We can make a toy example by simulating random reads of length 50 bp across a chromosome and then calculating coverage.
+**Coverage** counts how many ranges overlap each position along a chromosome. It's
+the foundation of peak calling: pile up sequencing reads, and the tall stacks are
+where the protein bound. Let's build a toy example by scattering random reads
+across a one-megabase stretch and counting the pile-up.
 
 ```{r coverage-example}
-# Simulate random reads on chromosome 1
-set.seed(42)  # For reproducibility
-chrom_length <- 1000000  # Length of chromosome 1
-num_reads <- 100000
-read_length <- 50  # Length of each read
-random_starts <- sample(seq_len(chrom_length - read_length + 1), num_reads, replace = TRUE)
-random_reads <- GRanges(seqnames = "chr1",
-                         ranges = IRanges(start = random_starts, end = random_starts + read_length-1))
+set.seed(42)   # reproducible random reads
+chrom_length <- 1000000
+num_reads    <- 100000
+read_length  <- 50
+
+random_starts <- sample(seq_len(chrom_length - read_length + 1),
+                         num_reads, replace = TRUE)
+random_reads  <- GRanges(seqnames = "chr1",
+                         ranges = IRanges(start = random_starts,
+                                          end = random_starts + read_length - 1))
 random_reads
 ```
 
-We are now ready to calculate the coverage of these random reads across the chromosome. The `coverage()` function from the `GenomicRanges` package computes the coverage of ranges in a `GRanges` object.
+The `coverage()` function turns those reads into a per-base count. It returns an
+`Rle` (run-length encoded) object — a compact way to store long stretches of
+repeated values:
 
 ```{r coverage-calculation}
 random_coverage <- coverage(random_reads, width = chrom_length)
 head(random_coverage)
 ```
-We can visualize the coverage of the random reads on chromosome 1. The `coverage()` function returns a `Rle` object, which is a run-length encoding of the coverage values.
+
+Let's look at the coverage across the first 10,000 bases:
+
 ```{r coverage-plot}
-plot(random_coverage[[1]][1:10000], main="Coverage of Random Reads on Chromosome 1", xlab="Position", ylab="Coverage", type="h", col="blue")
+#| label: fig-coverage
+#| fig-cap: "Per-base coverage from randomly placed reads across the first 10,000 bases of a simulated chromosome."
+plot(random_coverage[[1]][1:10000], type = "h", col = "blue",
+     main = "Coverage of random reads", xlab = "Position", ylab = "Coverage")
 ```
 
-This plot shows the coverage of random reads across the first 10,000 bases of chromosome 1. The y-axis represents the number of reads covering each position, while the x-axis represents the genomic positions.
+@fig-coverage looks like noise, and that's the point: because we placed the reads
+*at random*, the coverage hovers around a constant average with no real peaks.
+Real ChIP-seq data would show tall, localized spikes where the protein bound —
+those spikes are what a peak caller hunts for, and their absence here is exactly
+what "no signal" should look like.
+
+We can also ask how the coverage is distributed across all positions:
 
 ```{r coverage-density}
-# Calculate coverage density
-hist(as.numeric(random_coverage[[1]]), main="Coverage Density", xlab="Coverage", ylab="Frequency", col="lightblue")
+#| label: fig-coverage-density
+#| fig-cap: "How often each coverage depth occurs across the simulated chromosome."
+hist(as.numeric(random_coverage[[1]]),
+     main = "Coverage distribution", xlab = "Coverage", ylab = "Frequency",
+     col = "lightblue")
 ```
 
-## Key Takeaways
+@fig-coverage-density is a tidy bell-ish hump centered on the average depth. With
+`r format(num_reads, big.mark = ",")` reads of length `r read_length` spread over
+`r format(chrom_length, big.mark = ",")` bases, the expected coverage is about
+`r round(num_reads * read_length / chrom_length, 1)`x — right where the hump sits.
+Random reads give random, evenly-spread coverage; biological signal is what makes
+that distribution lumpy.
 
-This tutorial demonstrated several important concepts:
+## Exercises
 
-1. **BED file format**: Understanding the structure and coordinate system of BED files
-2. **Loading genomic data**: Using rtracklayer to import BED files into R
-3. **Basic exploration**: Counting features, examining distributions, and summarizing data
-4. **Coordinate manipulation**: Accessing starts, ends, and performing coordinate arithmetic
-5. **Range operations**: Shifting, resizing, and creating flanking regions
-6. **Advanced analysis**: Finding overlaps and performing grouped operations
+Use the `ctcf_peaks` object you imported above. Each solution names the accessor
+or function that does the job.
 
-### Common Use Cases
+1. **Wide peaks.** How many CTCF peaks are wider than 250 bp?
 
-- **Peak calling analysis**: Examining ChIP-seq peaks, ATAC-seq peaks, etc.
-- **Annotation overlap**: Finding genes or regulatory elements near peaks
-- **Comparative analysis**: Comparing peak sets between conditions or samples
-- **Motif analysis**: Creating sequences around peak centers for motif discovery
-- **Visualization**: Preparing data for genome browser tracks or custom plots
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r ex-wide, eval=FALSE}
+   sum(width(ctcf_peaks) > 250)
+   ```
+   `width()` returns a numeric vector, `> 250` turns it into TRUE/FALSE, and
+   `sum()` counts the TRUEs. Most peaks sit at the caller's fixed width, so only a
+   minority exceed 250 bp.
+   :::
 
-### Best Practices
+2. **Fixed-width windows.** Build a new `GRanges` of 500 bp windows centered on
+   each peak, and confirm every window is exactly 500 bp wide.
 
-1. Always check coordinate systems (0-based vs 1-based)
-2. Verify chromosome naming conventions match your reference genome
-3. Consider peak width distributions when setting analysis parameters
-4. Use appropriate genome builds for all analyses
-5. Document coordinate transformations and filtering steps
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r ex-resize, eval=FALSE}
+   windows_500 <- resize(ctcf_peaks, width = 500, fix = "center")
+   all(width(windows_500) == 500)
+   ```
+   `fix = "center"` keeps each peak's midpoint fixed while the width grows to 500,
+   giving uniform windows for a downstream analysis.
+   :::
 
-This foundation in genomic ranges and BED file manipulation will serve as a basis for more advanced genomic analyses in R.
+3. **Peak centers.** Compute the center position of every peak and report the
+   median center.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r ex-centers, eval=FALSE}
+   centers <- start(ctcf_peaks) + width(ctcf_peaks) / 2
+   median(centers)
+   ```
+   The center is the start plus half the width. (You could also use
+   `start(resize(ctcf_peaks, width = 1, fix = "center"))` to let `GRanges` do the
+   arithmetic.)
+   :::
+
+4. **Fraction on chr1.** What fraction of all CTCF peaks fall on `chr1`?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r ex-chr1, eval=FALSE}
+   mean(seqnames(ctcf_peaks) == "chr1")
+   ```
+   Comparing `seqnames()` to `"chr1"` gives a TRUE/FALSE vector; `mean()` of a
+   logical vector is the *proportion* that are TRUE — a handy idiom for "what
+   fraction satisfy this condition?"
+   :::
+
+## Summary
+
+You can now take a real peak set from file to insight:
+
+- **Read a BED/narrowPeak file** and explain its 0-based, half-open coordinate
+  system — and why R's 1-based coordinates differ.
+- **Import peaks into a `GRanges`** straight from a URL with
+  `rtracklayer::import(..., format = "narrowPeak")`, which handles the coordinate
+  conversion and parses the metadata columns.
+- **Explore the object** with `seqnames()`, `start()`, `end()`, `width()`, and
+  `mcols()`, and read its width and signal distributions as fingerprints of the
+  peak caller and the biology.
+- **Reshape ranges** with `shift()`, `resize()`, and `flank()` to build the
+  windows downstream tools expect.
+- **Compute coverage** and recognize that random reads give flat coverage, while
+  biological signal makes it lumpy.
+
+For overlaps, nearest-feature searches, set operations, and gene models, continue
+to the *Genomic ranges and features* chapter, which treats those operations in
+full.
