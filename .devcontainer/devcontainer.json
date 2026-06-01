@@ -2,32 +2,27 @@
   "name": "RBiocBook",
 
   // The exact image CI renders with: R 4.6 + every Bioc/CRAN dependency + Quarto
-  // + TinyTeX + quartobot. Nothing to install on your machine. The package must
-  // be pullable: make it public (GHCR package settings → Change visibility →
-  // Public) or run `docker login ghcr.io` first.
+  // + TinyTeX + quartobot. Nothing to install on your machine. The GHCR package
+  // is public, so it pulls without auth.
   "image": "ghcr.io/seandavi/rbiocbook:latest",
 
-  // Node, so Claude Code (and other Node tooling) can run inside the container.
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {}
-  },
+  // The image is linux/amd64 only (Bioconductor publishes Linux binaries for
+  // amd64). On Apple Silicon, run it under emulation. NOTE: don't add `features`
+  // here — features trigger a buildx step that can't resolve an arm64 base and
+  // fails with "no match for platform"; install extra tooling via
+  // postCreateCommand instead.
+  "runArgs": ["--platform=linux/amd64"],
 
   "customizations": {
     "vscode": {
       "extensions": [
         "quarto.quarto",
-        "REditorSupport.r",
-        "anthropic.claude-code"
+        "REditorSupport.r"
       ]
     }
   },
 
-  // Runs once when the container is created: install the Claude Code CLI, and the
-  // project-local titlepage extension that the PDF format needs (it lives in the
-  // gitignored _extensions/, so it isn't baked into the image).
-  "postCreateCommand": "npm install -g @anthropic-ai/claude-code && quarto install extension --no-prompt nmfs-opensci/quarto_titlepages"
-
-  // To keep your Claude Code login across container rebuilds, mount your host
-  // ~/.claude into the container (the image runs as root):
-  //   "mounts": ["source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind"]
+  // Project-local titlepage extension (needed for the PDF format; _extensions/
+  // is gitignored, so it isn't baked into the image).
+  "postCreateCommand": "quarto install extension --no-prompt nmfs-opensci/quarto_titlepages"
 }
