@@ -1,5 +1,7 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# Render the book inside the prebuilt container image (ghcr.io/seandavi/rbiocbook),
+# which already has R + all Bioconductor/CRAN deps + Quarto + TinyTeX + quartobot +
+# rsvg-convert. No per-run package install, so render starts in seconds. The image
+# is produced by build-image.yml; rebuild it there when DESCRIPTION changes.
 on:
   push:
     branches: [main, master]
@@ -13,63 +15,42 @@ permissions: read-all
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/seandavi/rbiocbook:latest
+      # GITHUB_TOKEN can pull the repo's own (private) package; make the package
+      # public for external/Orchestra use.
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: write
+      packages: read
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      # Quarto reads GH_TOKEN (not GITHUB_PAT) to authenticate its GitHub API
-      # calls; without it, `quarto install tinytex` and the titlepages extension
-      # install hit the API unauthenticated and get a 403 (rate limit).
+      # Quarto reads GH_TOKEN to authenticate GitHub API calls (the titlepages
+      # extension install) and the gh-pages publish uses GITHUB_TOKEN.
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # The gh-pages publish step authenticates its git push with GITHUB_TOKEN.
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Check dependency completeness
-        # Fast fail (seconds) BEFORE the slow install + render if any chapter
-        # uses a package not declared in DESCRIPTION. The book renders by reusing
-        # committed _freeze, so an undeclared dep stays hidden until a chapter is
-        # edited and re-executes — this catches that at lint time. See
-        # tools/check-deps.R.
+        # Fast fail if a chapter uses a package not declared in DESCRIPTION (the
+        # image is built from DESCRIPTION, so this also guards image drift).
         run: Rscript tools/check-deps.R
 
-      # Install every DESCRIPTION dependency (CRAN + Bioconductor) via pak, which
-      # also resolves and apt-installs the required system libraries and caches
-      # the R library between runs. This replaces the old hand-rolled BiocManager
-      # step. On Linux the heavy Bioconductor packages build/install reliably —
-      # the macOS arm64 source compiles (e.g. alabaster.base, pulled by scRNAseq)
-      # failed to link — so every chapter can be treated uniformly with no
-      # freeze-only exemptions.
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
-
-      - name: setup-quarto
-        uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          tinytex: true
-      - name: install quarto titlepages
+      - name: Install quarto titlepages extension
+        # Project-local extension (_extensions/ is gitignored), installed per run.
         run: quarto install extension --no-prompt nmfs-opensci/quarto_titlepages
-      - name: install quartobot
-        # `quarto render` below runs the `quartobot resolve` pre-render hook
-        # declared in _quarto.yml; quartobot must be on PATH or render fails.
-        run: pipx install quartobot
-      - name: Install rsvg-convert
-        # The mlr3 workflow figure is an SVG; for PDF output Quarto converts SVG
-        # to PDF with rsvg-convert (from librsvg2-bin), which isn't on the runner
-        # by default. (The planned Bioconductor Docker image will bake this in.)
-        run: sudo apt-get update -qq && sudo apt-get install -y librsvg2-bin
-      - uses: quarto-dev/quarto-actions/render@v2
+
+      - name: Render
+        run: quarto render
+
       - uses: quarto-dev/quarto-actions/publish@v2
-        # Only publish to gh-pages on a push to main, never on a PR — so PRs run
-        # the full install + render as a check without touching the live site.
+        # Only publish to gh-pages on a push to main, never on a PR.
         if: github.event_name == 'push'
         with:
           target: gh-pages
