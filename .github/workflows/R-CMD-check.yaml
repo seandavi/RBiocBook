@@ -21,6 +21,8 @@ jobs:
       # calls; without it, `quarto install tinytex` and the titlepages extension
       # install hit the API unauthenticated and get a 403 (rate limit).
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # The gh-pages publish step authenticates its git push with GITHUB_TOKEN.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
     steps:
       - uses: actions/checkout@v4
@@ -61,3 +63,10 @@ jobs:
         run: pipx install quartobot
       - uses: quarto-dev/quarto-actions/render@v2
       - uses: quarto-dev/quarto-actions/publish@v2
+        # Pin the provider: without `target`, `quarto publish` can't choose
+        # among recorded publishes and errors ("Multiple previous publishes
+        # exist"). `render: false` reuses the _book/ output from the render
+        # step above instead of rendering the whole book a second time.
+        with:
+          target: gh-pages
+          render: false
