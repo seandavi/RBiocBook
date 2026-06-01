@@ -17,6 +17,10 @@ jobs:
       contents: write
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Quarto reads GH_TOKEN (not GITHUB_PAT) to authenticate its GitHub API
+      # calls; without it, `quarto install tinytex` and the titlepages extension
+      # install hit the API unauthenticated and get a 403 (rate limit).
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
     steps:
       - uses: actions/checkout@v4
