@@ -1,189 +1,556 @@
-# Self-Guided Data Visualization in R
+---
+title: "A self-guided tour of data visualization in R"
+---
 
-Data visualization is a critical skill in the data scientist's toolkit. It's the bridge between raw data and human understanding. Effective visualizations can reveal patterns, trends, and outliers that might be missed in a table of numbers. In the R programming language, the `ggplot2` package stands as the gold standard for creating beautiful, flexible, and powerful graphics.
-
-This document will guide you through the principles of effective data visualization and show you how to apply them using `ggplot2`. We'll cover best practices, common plot types, and the "grammar of graphics" methodology that makes `ggplot2` so intuitive.
-
-Before diving in, though, there are a some truly amazing online resources that showcase
-what can be done with R graphics and also stimulate your imagination. Two of the best are:
-
-- [The R Graph Gallery](https://r-graph-gallery.com/): A comprehensive collection of R graphics examples, covering a wide range of plot types and customization options.
-- [From Data to Viz](https://data-to-viz.com/): A guide that helps you choose the right type of visualization for your data and provides examples in R.
-
-After walking through this document, go back to these resources and explore the examples. You'll see how the principles we discuss here are applied in real-world scenarios, and you'll gain inspiration for your own visualizations.
-
-## Getting Started with ggplot2
-
-To get started, we need to load the `ggplot2` package, which is part of the `tidyverse`.
-
-```{r}
-#| label: load-packages
-#| message: false
-#| warning: false
-
-# Load the necessary R packages for data visualization
-library(ggplot2)
-library(dplyr)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
- 
 
-## Core Principles of Effective Data Visualization
+Imagine you have just finished an experiment. You have a spreadsheet with a
+thousand rows of penguin measurements, or a matrix of gene-expression values
+across dozens of samples, and you need to *see* what is going on. Which species
+are bigger? Are two genes switched on together? Staring at a wall of numbers
+will not tell you — but the right picture will. Data visualization is the bridge
+between raw measurements and human understanding, and it is one of the most
+useful skills a biologist can own.
 
-Before we start plotting, it's essential to understand what makes a visualization effective. Two key principles are maximizing the data-ink ratio and using clear labels.
+This chapter is a guided tour. We start with two ideas that make *any* plot
+better, then build up `ggplot2` — R's standard plotting system — one layer at a
+time so you understand *why* the code looks the way it does. From there we tour a
+few specialized plot types you'll meet in genomics: UpSet plots for set
+overlaps, heatmaps for expression matrices, and a pointer to genome-track
+visualization. The companion chapter [Exploring data with
+ggplot2](ggplot2/intro.qmd) walks a single dataset end to end; here we focus on
+the *grammar* and on the wider toolbox.
 
-### The "Least Ink" Principle
+## What you'll learn
 
-Coined by the statistician Edward Tufte, the **data-ink ratio** is the proportion of a graphic's ink devoted to the non-redundant display of data information. The goal is to maximize this ratio. In simpler terms, **every single pixel should have a reason to be there.**
+- Apply two design principles — the data-ink ratio and clear labeling — to make
+  any plot more readable.
+- Read a `ggplot2` call as a stack of **layers**: data → aesthetics (`aes()`) →
+  geoms → scales → facets → themes.
+- Build a plot incrementally, adding one layer at a time and interpreting each
+  result.
+- Choose a colorblind-safe palette with `RColorBrewer`.
+- Reach for the right specialized plot — an UpSet plot for many sets, a heatmap
+  for a data matrix — and produce a runnable example of each.
 
-![Edward Tufte's landmark book, "The Visual Display of Quantitative Information," emphasizes the importance of maximizing the data-ink ratio.](images/tufte-visual-display.jpg){#fig-tufte-book}
+## Two principles that make any plot better {#sec-principles}
 
-Avoid chart junk like:
+Before we touch a single `ggplot()` call, it helps to know what we are aiming
+for. Two ideas carry most of the weight.
 
-* Redundant grid lines
-* Unnecessary backgrounds or colors
-* 3D effects on 2D plots
-* Shadows and other decorative elements
+### Maximize the data-ink ratio
 
-Let's look at an example. The first plot has a lot of "chart junk," while the second one is cleaner and focuses on the data.
+The statistician Edward Tufte coined the term **data-ink ratio**: the proportion
+of a graphic's ink that is actually showing your data, rather than decoration. The
+goal is to keep that ratio high. Put simply, **every mark on the plot should earn
+its place.**
+
+![Edward Tufte's landmark book, *The Visual Display of Quantitative Information*, popularized the data-ink ratio.](images/tufte-visual-display.jpg){#fig-tufte-book}
+
+Common "chart junk" to delete:
+
+- Redundant or heavy grid lines
+- Busy backgrounds or unnecessary fill colors
+- 3D effects on what is really 2D data
+- Drop shadows and other decoration
+
+Let's see the difference. We'll use R's built-in `mpg` dataset (fuel-economy
+records for various car models) — the relationship is generic, but the lesson
+about ink transfers directly to a scatterplot of, say, gene length versus
+expression. First, a cluttered version:
 
 ```{r}
 #| label: fig-bad-plot
-#| fig-cap: "A cluttered plot with low data-ink ratio. The gray background, heavy gridlines, and legend title are all unnecessary."
+#| fig-cap: "A cluttered plot with a low data-ink ratio. The gray background and heavy gridlines are decoration, not information."
+library(ggplot2)
 
-# Using the built-in 'mpg' dataset
 ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
   geom_point() +
-  theme_gray() + # A theme with a lot of non-data ink
-  labs(title = "Fuel Efficiency vs. Engine Displacement",
+  theme_gray() +
+  labs(title = "Fuel efficiency vs. engine displacement",
        subtitle = "This is a very busy plot",
-       x = "Engine Displacement (Liters)",
-       y = "Highway Miles per Gallon",
-       color = "Vehicle Class")
+       x = "Engine displacement (litres)",
+       y = "Highway miles per gallon",
+       color = "Vehicle class")
 ```
 
-Here's a cleaner version of the same plot that follows the "least ink" principle. Notice how it removes unnecessary elements while still conveying the same information.
+Now the same data with the decoration stripped away:
 
 ```{r}
 #| label: fig-good-plot
-#| fig-cap: "A clean, minimalist plot that follows the 'least ink' principle. The focus is entirely on the relationship between the data points."
-
+#| fig-cap: "The same data with a high data-ink ratio. The eye goes straight to the points."
 ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
   geom_point() +
-  theme_minimal() + # A cleaner theme
-  labs(title = "Fuel Efficiency vs. Engine Displacement",
-       x = "Engine Displacement (Liters)",
-       y = "Highway Miles per Gallon",
-       color = "Class") # Simpler legend title
+  theme_minimal() +
+  labs(title = "Fuel efficiency vs. engine displacement",
+       x = "Engine displacement (litres)",
+       y = "Highway miles per gallon",
+       color = "Class")
 ```
 
-While this is a subjective topic, the goal is to make your plots as clear and informative as possible. The "least ink" principle is a guideline, not a rule, but it can help you create more effective visualizations.
+The only change between @fig-bad-plot and @fig-good-plot is the theme, yet the
+second reads more easily: the trend (bigger engines get worse mileage) jumps out
+because nothing competes with it. This is a guideline, not a law — a faint
+gridline can genuinely help a reader estimate values — but "could I delete this?"
+is always worth asking.
 
-### The Importance of Clear Labeling
+### Label everything
 
-A plot without labels is just a picture. To be a useful piece of analysis, it needs to communicate context. Always ensure your plots have:
+A plot without labels is just a picture. To be analysis, it has to carry its
+context with it. Every finished plot should have:
 
-* A clear and descriptive title.
-* Labeled axes with units ($e.g.$, "Temperature (°C)").
-* An informative legend if you're using color, shape, or size to encode data.
+- A clear, descriptive title.
+- Axis labels *with units* (e.g., "Body mass (g)").
+- A legend whenever color, shape, or size encodes a variable.
 
-### Color and Contrast
+::: {.callout-tip}
+## Labels are for future-you
 
-Color is a powerful tool in data visualization, but it can also be misused. R provides several built-in color palettes, and you can also use packages like `RColorBrewer` for more options. Think in terms of colorblind-friendly palettes, and avoid using too many colors in a single plot. 
+The most common audience for your plot is yourself, three months later, trying
+to remember what it showed. Spelling out units and a title costs seconds now and
+saves an embarrassing email later.
+:::
 
-Color palettes can be roughly categorized into:
+### Use color deliberately
 
-* Sequential palettes (first list of colors), which are suited to ordered data that progress from low to high (gradient). 
-* Qualitative palettes (second list of colors), which are best suited to represent nominal or categorical data. They not imply magnitude differences between groups. 
-* Diverging palettes (third list of colors), which put equal emphasis on mid-range critical values and extremes at both ends of the data range. 
+Color is powerful and easy to overuse. Two rules of thumb: don't use more colors
+than you have meaningful groups, and pick palettes that survive printing and
+colorblindness. The `RColorBrewer` package ships curated palettes in three
+families:
+
+- **Sequential** palettes run light → dark and suit ordered data (a gradient
+  from low to high expression).
+- **Qualitative** palettes use distinct hues for *categories* with no order
+  (species, treatment group).
+- **Diverging** palettes emphasize a meaningful midpoint with two contrasting
+  directions (log-fold-changes around zero).
 
 ```{r}
 #| label: fig-color-palettes
-#| fig-cap: "Examples of color palettes in R. The first row shows sequential palettes, the second row shows qualitative palettes, and the third row shows diverging palettes."
-#| fig-height: 6
+#| fig-cap: "RColorBrewer palettes, grouped into sequential (top), qualitative (middle), and diverging (bottom) families."
+#| fig-height: 8
 library(RColorBrewer)
 
 display.brewer.all()
 ```
 
-It is also important to consider colorblindness when choosing colors for your plots. The most common types of color blindness are red-green and blue-yellow. You can use tools like the `colorspace` package to check how your plots will look to people with different types of color vision deficiencies.
+@fig-color-palettes is a menu: pick a palette name (like `"Set2"` or `"RdBu"`)
+and hand it to a `scale_color_brewer()` or `scale_fill_brewer()` layer.
+
+::: {.callout-warning}
+## Roughly 1 in 12 men is red-green colorblind
+
+A red/green scheme that looks fine to you can be unreadable to a chunk of your
+audience. `RColorBrewer` can show only the palettes that stay distinguishable
+under common color-vision deficiencies — restrict yourself to these when color
+carries meaning.
+:::
 
 ```{r}
 #| label: fig-colorblind-friendly
-#| fig-cap: "A colorblind-friendly palette from the 'colorspace' package. This palette is designed to be distinguishable for people with various types of color vision deficiencies."
-#| fig-height: 6
-display.brewer.all(colorblindFriendly=TRUE)
+#| fig-cap: "The subset of RColorBrewer palettes that remain distinguishable for viewers with common color-vision deficiencies."
+#| fig-height: 8
+display.brewer.all(colorblindFriendly = TRUE)
 ```
 
+The palettes in @fig-colorblind-friendly are the safe default set. When in doubt,
+choose from here.
 
+## The grammar of graphics, layer by layer {#sec-grammar}
 
+`ggplot2` is built on an idea called the **grammar of graphics**: every plot is
+assembled from a small set of independent parts, the way a sentence is built from
+nouns, verbs, and adjectives. Once you know the parts, you can describe an
+enormous variety of plots with the same handful of "words." The parts are:
 
-## Introduction to ggplot2: The Grammar of Graphics
+1. **Data** — the data frame you're plotting.
+2. **Aesthetics** (`aes()`) — which *variable* maps to which *visual channel*
+   (x position, y position, color, size, shape).
+3. **Geoms** — the geometric shapes that actually get drawn (points, lines, bars).
+4. **Scales** — how data values translate into pixels and colors (axis ranges,
+   color palettes).
+5. **Facets** — splitting one plot into small multiples by a grouping variable.
+6. **Themes** — the non-data styling (fonts, background, gridlines).
 
-Rather than reproducing excellent online resources, for this section, pick any or all of the following resources to learn about the grammar of graphics and how to use `ggplot2`:
+Think of it like ordering a coffee: the **data** is the beans, the **aesthetics**
+say what goes in which cup, the **geom** is whether you get it as espresso or
+latte, and the **theme** is the mug it's served in. We'll build one plot up
+through these layers, adding exactly one new idea per step.
 
-- [R for Data Science: Data Visualization](https://r4ds.had.co.nz/data-visualisation.html)
-- [ggplot2 documentation](https://ggplot2.tidyverse.org/)
-- [Modern Data Visualization with R](https://rkabacoff.github.io/datavis/)
+We'll use the `palmerpenguins` dataset — body measurements for three penguin
+species (*Adelie*, *Chinstrap*, *Gentoo*) recorded near Palmer Station,
+Antarctica. It's real organismal biology and small enough to reason about.
 
-## Sets and Intersections: UpSet Plots
+```{r}
+#| label: peek-penguins
+library(palmerpenguins)
+library(dplyr)
 
-When dealing with multiple sets, visualizing their intersections can be challenging. Traditional Venn diagrams become cluttered and hard to read with more than three sets.
-An **UpSet plot** is a powerful alternative for visualizing the intersections of multiple sets. It consists of two main parts: a matrix that shows which sets are part of an intersection, and a bar chart that shows the size of each intersection. This makes it far more scalable and easier to interpret than a complex Venn diagram.
+# drop the few rows with missing measurements so plots don't warn
+penguins <- na.omit(penguins)
+glimpse(penguins)
+```
 
-To create an UpSet plot, we use the `UpSetR` package. It takes a specific input format where 0s and 1s indicate the absence or presence of an element in a set.
+`glimpse()` shows each penguin has a species, an island, bill and flipper
+measurements, a body mass, and a sex. We'll ask a biological question: **how do
+the species differ in body size?**
+
+### Step 1: data and aesthetics
+
+We start by telling `ggplot()` *what data* to use and *which variables map to
+which axes*. Here, flipper length on x and body mass on y:
+
+```{r}
+#| label: fig-grammar-blank
+#| fig-cap: "Data plus aesthetics, but no geom: ggplot() sets up the axes but draws nothing yet."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g))
+```
+
+@fig-grammar-blank looks empty — and that's the point. We've declared the axes
+(`aes()` mapped `flipper_length_mm` to x and `body_mass_g` to y), but we haven't
+said *what shape* to draw. A plot with no geom has nothing to show.
+
+### Step 2: add a geom
+
+A **geom** is the layer that draws something. We add layers with `+`. For two
+continuous variables, points make a scatterplot:
+
+```{r}
+#| label: fig-grammar-points
+#| fig-cap: "Adding geom_point() draws one point per penguin."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+Now @fig-grammar-points tells a story: heavier penguins tend to have longer
+flippers, a clear positive relationship. But the points seem to fall into a
+couple of clusters. Could that be the species?
+
+### Step 3: map a third variable to color
+
+Aesthetics aren't limited to x and y. We can map a *categorical* variable onto
+**color** to encode a third dimension on the same flat plot:
+
+```{r}
+#| label: fig-grammar-color
+#| fig-cap: "Mapping species to the color aesthetic reveals three clusters."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+```
+
+The clusters in @fig-grammar-color resolve cleanly: Gentoo penguins are the large
+ones (long flippers, heavy), while Adelie and Chinstrap overlap at the smaller
+end. We answered our biological question by adding *one word* to `aes()`.
+
+::: {.callout-note}
+## Inside `aes()` vs. outside it
+
+Put a setting **inside** `aes()` when it should vary *with the data*
+(`color = species`). Put it **outside** `aes()`, in the geom, when it's a fixed
+constant (`geom_point(color = "blue")` makes every point blue). Mixing these up
+is the single most common `ggplot2` confusion.
+:::
+
+### Step 4: layer on a second geom
+
+Layers stack. We can keep the points and add a `geom_smooth()` trend line on top.
+Because `color = species` is set in the shared `aes()`, we get one line per
+species for free:
+
+```{r}
+#| label: fig-grammar-smooth
+#| fig-cap: "A second geom (a linear trend line) layered over the points, one line per species."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+@fig-grammar-smooth adds three regression lines (`method = "lm"`). All three
+slope upward, confirming the flipper-mass relationship holds *within* each
+species, not just across the pooled cloud. We also set `alpha = 0.6` (outside
+`aes()`, so it's constant) to make overlapping points semi-transparent.
+
+### Step 5: control scales
+
+**Scales** govern the translation from data to pixels and colors. Let's swap in a
+colorblind-safe Brewer palette and label the axis ticks with units:
+
+```{r}
+#| label: fig-grammar-scales
+#| fig-cap: "A Brewer qualitative palette via scale_color_brewer() and tidy axis breaks."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Set2") +
+  scale_y_continuous(breaks = seq(3000, 6000, 1000))
+```
+
+In @fig-grammar-scales the colors come from the qualitative `"Set2"` palette
+(safe under color blindness, per @sec-principles), and `scale_y_continuous()`
+sets even gridline breaks. Scales are where you take control of *how* the mapping
+looks without changing *what* is mapped.
+
+### Step 6: facet into small multiples
+
+**Faceting** splits one plot into a grid of panels, one per group — often clearer
+than cramming everything together. `facet_wrap(~ species)` gives each species its
+own panel:
+
+```{r}
+#| label: fig-grammar-facet
+#| fig-cap: "Faceting by species puts each species in its own panel for side-by-side comparison."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Set2") +
+  facet_wrap(~ species)
+```
+
+@fig-grammar-facet makes the per-species spread easy to compare: Gentoo not only
+sit higher and to the right, they also span a wider range of body mass than the
+other two.
+
+### Step 7: labels and theme
+
+Finally, the **theme** controls non-data styling, and `labs()` supplies the human
+context from @sec-principles. Putting it together:
+
+```{r}
+#| label: fig-grammar-final
+#| fig-cap: "The finished plot: data, aesthetics, two geoms, a scale, facets, labels, and a clean theme."
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Set2") +
+  facet_wrap(~ species) +
+  labs(title = "Body mass increases with flipper length in all three species",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Species") +
+  theme_minimal()
+```
+
+@fig-grammar-final is publication-grade, and you built it one layer at a time. Read
+the call top to bottom and you can *name* every part: data, the `aes()` mapping,
+two geoms, a color scale, facets, labels, and a minimal theme. That is the whole
+grammar of graphics — every `ggplot2` plot you ever write is some combination of
+these same pieces.
+
+::: {.callout-tip}
+## Combining whole plots: `patchwork`
+
+Faceting splits *one* plot by a variable. To place *different* plots side by side,
+the `patchwork` package lets you add them with `+` or stack them with `/`, e.g.
+`plot_a + plot_b`. It's the easiest way to assemble multi-panel figures.
+:::
+
+## Specialized plots for biology
+
+`ggplot2` covers most everyday needs, but a few questions call for purpose-built
+plots. Here are two you'll meet often in genomics.
+
+### Sets and intersections: UpSet plots
+
+Suppose you have several gene lists — genes up in treatment A, up in treatment B,
+bound by a transcription factor — and you want to know which genes are shared. The
+classic tool is a Venn diagram, but Venn diagrams become unreadable past three
+sets. An **UpSet plot** scales to many sets: a bar chart shows the size of each
+intersection, and a dot matrix beneath it shows *which* sets each bar combines.
+
+`UpSetR` takes a data frame of 0s and 1s — one row per element, one column per
+set, a 1 marking membership. We'll use the `movies` dataset bundled with the
+package (already in that binary format) as a stand-in for "genes × gene-lists":
 
 ```{r}
 #| label: fig-upset-plot
-#| fig-cap: "An UpSet plot visualizing movie genres. The main bar chart shows the size of intersections (e.g., how many movies are both 'Comedy' and 'Romance'). The bottom-left matrix indicates which genres are part of each intersection. This is much clearer than a 5-set Venn diagram."
-#| warning: false
-#| message: false
-
-# install.packages("UpSetR")
+#| fig-cap: "An UpSet plot of movie genres. Each bar is the size of one intersection; the dots below say which genres it combines. Read it as a scalable Venn diagram."
 library(UpSetR)
-movies <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"), 
-    header = T, sep = ";")
 
-# Use the 'movies' dataset that comes with UpSetR
-# This dataset is already in the correct binary format
-upset(movies, 
-      nsets = 5, # Show the 5 most frequent genres
+movies <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"),
+                   header = TRUE, sep = ";")
+
+upset(movies,
+      nsets = 5,
       order.by = "freq",
-      mainbar.y.label = "Intersection Size",
-      sets.x.label = "Total Movies in Genre")
+      mainbar.y.label = "Intersection size",
+      sets.x.label = "Total movies in genre")
 ```
 
-The UpSet plot clearly shows us, for instance, the number of movies that are exclusively "Drama" versus those that are a combination of "Drama," "Comedy," and "Romance." This level of detail is difficult to achieve with a Venn diagram.
+@fig-upset-plot reads left to right by decreasing intersection size. The tallest
+bars with a single filled dot are the "only this set" groups; bars over two or
+more filled dots are the overlaps. You can see at a glance, for example, how many
+movies are *both* Drama and Comedy versus Drama alone — a comparison that a
+five-circle Venn diagram simply cannot show clearly. Swap the movie genres for
+your gene lists and the reading is identical.
 
-## Complex Heatmaps
+### Heatmaps for data matrices
 
-Heatmaps are a powerful way to visualize complex data matrices, especially when dealing with large datasets. They allow you to see patterns and relationships in the data at a glance. 
-
-What is a heatmap? It's a graphical representation of data where individual values are represented as colors. The color intensity indicates the magnitude of the value, making it easy to spot trends and outliers. The underlying data is typically a matrix of numbers.
+A **heatmap** turns a matrix of numbers into a grid of colored tiles, so the eye
+can pick out blocks and patterns that a table hides. In genomics, the rows are
+typically genes, the columns are samples, and the color is expression level.
+Heatmaps also usually *cluster* similar rows and columns together, so co-behaving
+genes and similar samples sit next to each other.
 
 ::: {.callout-note}
-A matrix is a two-dimensional array of numbers, where each element is identified by its row and column indices. Matrices can include only ONE data type.
+## What is a matrix?
+
+A matrix is a two-dimensional grid of values addressed by row and column, and —
+unlike a data frame — every entry must be the *same* type (here, all numbers).
+Heatmap functions expect a numeric matrix, not a data frame.
 :::
 
-There are many ways to create heatmaps in R including the base R `heatmap()` function, the `ggplot2` package, and specialized packages like `ComplexHeatmap`.
+Let's make a runnable example with `pheatmap` ("pretty heatmap"). We'll use the
+`mtcars` data as a numeric matrix — treat the cars as "samples" and the
+measurements as "features," exactly as you would genes and samples. The catch:
+the columns are on wildly different scales (horsepower in the hundreds, number of
+cylinders in single digits), so we **scale each column** to comparable units
+first. Scaling is routine for expression data too.
 
-Feel free to explore the following resources for some of the most popular heatmap packages in R:
+```{r}
+#| label: fig-pheatmap
+#| fig-cap: "A clustered heatmap of scaled car measurements. Rows (cars) and columns (features) are reordered so similar profiles sit together; the color shows how far above (red) or below (blue) average each value is."
+#| fig-height: 7
+library(pheatmap)
 
-- [ggplot2 Heatmaps](https://ggplot2.tidyverse.org/reference/geom_tile.html) allows you to create basic heatmaps using the `geom_tile()` function. This is a good starting point for simple heatmaps.
-- [The heatmap() function](https://www.rdocumentation.org/packages/stats/topics/heatmap) in base R is a simple way to create heatmaps. It automatically scales the data and provides options for clustering rows and columns.
-- [The pheatmamp package](https://biostatsquid.com/step-by-step-heatmap-tutorial-with-pheatmap/) is a popular package for creating heatmaps with more customization options. It allows you to add annotations, customize colors, and control clustering.
-- [Complex Heatmaps](https://jokergoo.github.io/ComplexHeatmap-reference/book/) is a powerful R package for creating complex heatmaps. It allows you to visualize data matrices with multiple annotations, making it ideal for genomic data analysis.
-- [Interactive Complex Heatmaps](https://bioconductor.org/packages/release/bioc/html/InteractiveComplexHeatmap.html) is an extension of the Complex Heatmaps package that allows you to create interactive heatmaps. This can be useful for exploring large datasets and identifying patterns.
+# build a numeric matrix and scale each column to mean 0, sd 1
+car_matrix <- scale(as.matrix(mtcars))
 
-## Genome and Genomic Data Visualization
+pheatmap(car_matrix,
+         main = "Scaled car measurements",
+         color = colorRampPalette(rev(brewer.pal(7, "RdBu")))(100))
+```
 
+@fig-pheatmap clusters the rows and columns automatically. The tree diagrams
+(**dendrograms**) on the top and left show how cars and features were grouped. You
+can read off blocks: the fuel-efficiency feature (`mpg`) sits opposite the
+power/weight features, and the cars split into a heavy-and-powerful block versus a
+light-and-efficient one. Read genes for cars and samples for features, and this is
+exactly how an expression heatmap is interpreted.
 
-The [`Gviz` package](https://www.bioconductor.org/packages/Gviz/) is a powerful tool for visualizing genomic data in R. It allows you to create publication-quality plots of genomic features, such as gene annotations, sequence alignments, and expression data.
+For richer needs — multiple annotation bars, split heatmaps, precise control over
+legends — Bioconductor's `ComplexHeatmap` is the standard. It uses the same
+mental model (a matrix plus optional row/column annotations) with far more knobs;
+its [reference book](https://jokergoo.github.io/ComplexHeatmap-reference/book/) is
+the place to go when `pheatmap` runs out of room.
 
-The [GenomicDistributions package](https://www.bioconductor.org/packages/GenomicDistributions/) is another useful package for visualizing genomic data. It provides functions for creating distribution plots of genomic features, such as coverage, chip-seq or atac-seq distributions relative to genomic features, etc. 
+### Visualizing the genome (further exploration)
 
-## Conclusion
+The plots above are general-purpose. Some genomic questions need a view organized
+along **genomic coordinates** — gene models, read coverage, and peaks lined up
+against a chromosome. This is a heavier topic that leans on Bioconductor, so we
+flag it as further exploration rather than cover it in depth here:
 
-This document has provided a comprehensive foundation for creating effective data visualizations in R with `ggplot2`. We've covered the core principles of good design, explored a wide range of common plot types including heatmaps, and seen how `ggplot2`'s layered grammar allows for the creation of complex, insightful graphics by mapping multiple data dimensions to aesthetics. We also discussed why certain plots like Venn diagrams can be problematic and introduced powerful alternatives like UpSet plots.
+- The [`Gviz` package](https://www.bioconductor.org/packages/Gviz/) builds
+  publication-quality, multi-track genome browser views — stacking gene
+  annotations, alignments, and quantitative data over a coordinate axis.
+- The [`GenomicDistributions`
+  package](https://www.bioconductor.org/packages/GenomicDistributions/) summarizes
+  *where* a set of genomic regions falls — for example, how ChIP-seq or ATAC-seq
+  peaks distribute relative to transcription start sites.
 
-The key to mastering data visualization is practice. Experiment with different datasets, try new `geoms`, and always think critically about the story your plot is telling and the best way to tell it.
+When you reach a project that needs these, start from their vignettes; the
+grammar-of-graphics intuition from @sec-grammar still helps you read the layered
+tracks they produce.
 
+## Exercises
+
+Use the cleaned `penguins` data frame from @sec-grammar for the first three
+exercises (`library(palmerpenguins); library(ggplot2); penguins <- na.omit(penguins)`).
+
+1. **A different geom.** Make a scatterplot of bill length (`bill_length_mm`, x)
+   versus bill depth (`bill_depth_mm`, y), colored by species. What do you notice?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   #| label: fig-ex-bill
+   #| fig-cap: "Bill length vs. depth, colored by species."
+   ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+     geom_point() +
+     theme_minimal()
+   ```
+   Within each species, deeper bills go with longer bills, but the three species
+   sit in clearly separated regions — bill shape is a good species fingerprint.
+   :::
+
+2. **A distribution, not a relationship.** Use `geom_boxplot()` to compare body
+   mass across the three species (species on x, `body_mass_g` on y). Which species
+   is heaviest?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   #| label: fig-ex-box
+   #| fig-cap: "Body-mass distribution by species."
+   ggplot(penguins, aes(x = species, y = body_mass_g, fill = species)) +
+     geom_boxplot() +
+     theme_minimal()
+   ```
+   Gentoo penguins are clearly the heaviest; Adelie and Chinstrap have similar,
+   lower body masses. A boxplot summarizes a *distribution* (median, spread,
+   outliers) rather than a point-to-point relationship.
+   :::
+
+3. **Add the labels.** Take your boxplot from Exercise 2 and give it a title and
+   properly-labeled axes with units, following @sec-principles.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   #| label: fig-ex-labels
+   #| fig-cap: "The boxplot, now properly labeled."
+   ggplot(penguins, aes(x = species, y = body_mass_g, fill = species)) +
+     geom_boxplot() +
+     labs(title = "Gentoo penguins are the heaviest of the three species",
+          x = "Species",
+          y = "Body mass (g)",
+          fill = "Species") +
+     theme_minimal()
+   ```
+   The title states the *finding*, not just the variables — a good title does the
+   reader's work for them.
+   :::
+
+4. **Pick the right palette family.** You're plotting log-fold-changes that range
+   from strongly negative to strongly positive, with zero as the meaningful
+   midpoint. Which `RColorBrewer` palette *family* should you use, and why?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   A **diverging** palette (such as `"RdBu"`). Diverging palettes give two
+   contrasting colors that meet at a neutral midpoint, so zero reads as "no change"
+   and the two directions of change are immediately distinguishable. A sequential
+   palette would hide the sign of the change.
+   :::
+
+## Summary
+
+You now have both the principles and the toolbox for visualizing data in R:
+
+- You can make any plot more readable by **maximizing the data-ink ratio**
+  (deleting decoration) and **labeling everything** with a clear title and units.
+- You can read and write a `ggplot2` call as a stack of **layers** — data,
+  aesthetics, geoms, scales, facets, themes — and you built one up one layer at a
+  time on real penguin data.
+- You can map extra variables onto **color** and other aesthetics, and you know to
+  put data-driven settings *inside* `aes()` and constants *outside* it.
+- You can choose a **colorblind-safe palette** from `RColorBrewer`.
+- You can reach for a specialized plot when you need one: an **UpSet plot** for
+  intersections of many sets, and a clustered **heatmap** for an expression-style
+  matrix.
+
+The grammar of graphics is the throughline: once a plot is just data plus a stack
+of layers, the way to build *any* new plot is to ask which layer you need to add
+next. For more depth on a single dataset, see [Exploring data with
+ggplot2](ggplot2/intro.qmd); for inspiration, browse the
+[R Graph Gallery](https://r-graph-gallery.com/) and
+[From Data to Viz](https://data-to-viz.com/).
