@@ -22,7 +22,7 @@ For single-chapter iteration, **always pass `--to html`**. The bare `quarto rend
 
 - **`_quarto.yml`** is the single source of truth for book structure. The `chapters:` and `appendices:` lists control which `.qmd` files are part of the book **and their order** — a `.qmd` at the repo root that is not listed there is excluded (many such orphan/draft `.qmd` files exist). When adding a chapter, create the `.qmd` and register it here.
 - **Each chapter is one `.qmd` file** at the repo root (or in a subfolder like `ggplot2/`, `machine_learning/`, `atac-seq/`, `single_cell/`). Chapters set their title via YAML frontmatter (`title: "..."`).
-- **`bibliography.bib`** is the bibliography (set in `_quarto.yml`); cite with `@key`. `references.qmd` renders the reference list.
+- **`references.bib`** is the bibliography (set in `_quarto.yml`); cite with `@key`. `references.qmd` renders the reference list. Auto-resolved persistent-identifier citations land in `references.resolved.bib` (written by the `quartobot resolve` pre-render hook).
 - **Three output formats** are configured: html (cosmo theme), pdf (`scrbook` via the `nmfs-opensci` titlepage extension in `_extensions/`), and epub. Changes should render cleanly in all three since CI publishes all of them.
 
 ## The `_freeze/` directory matters
