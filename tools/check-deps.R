@@ -63,7 +63,15 @@ pkgs_in_file <- function(path) {
 ref <- lapply(chapters, function(f)
   tryCatch(pkgs_in_file(f), error = function(e) character()))
 names(ref) <- chapters
-all_ref <- sort(unique(unlist(ref)))
+
+# Chapters that render ONLY from committed _freeze: their packages do not build
+# on the CI runner (heavy Bioconductor source builds — e.g. scRNAseq pulls
+# alabaster.base, which fails to compile on macOS arm64), so their deps are
+# intentionally NOT declared/installed and the chapter must not be re-executed in
+# CI. Editing one of these needs a toolchain fix first (ubuntu+PPM binaries, or a
+# Bioconductor devcontainer). Add a chapter here only as a deliberate exception.
+freeze_only <- c("single_cell/setup.qmd")
+enforced <- setdiff(chapters, freeze_only)
 
 ## 3. Declared deps + base/recommended packages ------------------------------
 dep_field <- read.dcf(description)[1, "Depends"]
@@ -72,11 +80,18 @@ declared  <- declared[declared != "" & declared != "R"]
 standard  <- rownames(installed.packages(priority = c("base", "recommended")))
 
 ## 4. Gap + report -----------------------------------------------------------
-missing <- sort(setdiff(all_ref, c(declared, standard)))
+required <- sort(unique(unlist(ref[enforced])))
+missing  <- sort(setdiff(required, c(declared, standard)))
+
+skipped <- intersect(freeze_only, chapters)
+if (length(skipped)) {
+  cat(sprintf("note: %d freeze-only chapter(s) exempted: %s\n",
+              length(skipped), paste(skipped, collapse = ", ")))
+}
 
 if (!length(missing)) {
-  cat(sprintf("OK  dep-completeness: all %d packages used across %d chapters are declared.\n",
-              length(all_ref), length(chapters)))
+  cat(sprintf("OK  dep-completeness: all %d enforced packages across %d chapters are declared.\n",
+              length(required), length(enforced)))
   quit(status = 0)
 }
 
