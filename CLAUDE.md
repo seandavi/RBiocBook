@@ -10,11 +10,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 quarto render            # render all formats (html, pdf, epub) into _book/
-quarto render <file>.qmd # render a single chapter (fast iteration)
+quarto render <file>.qmd --to html  # single chapter, fast iteration → _book/<file>.html
 quarto preview           # live-reload server while editing
 ```
 
 The rendering engine is `knitr`, so rendering executes the R in each chapter — a working R install with the packages from `DESCRIPTION` (`Depends:`) is required. View output by opening `_book/index.html`.
+
+For single-chapter iteration, **always pass `--to html`**. The bare `quarto render <file>.qmd` (no `--to`) renders every configured format and writes per-chapter `*.html`, `*_files/`, and `site_libs/` artifacts to the repo root (not `_book/`) — a mess to clean up. The `--to html` form writes only `_book/<file>.html` and updates that chapter's `_freeze/<file>/execute-results/html.json`; CI re-executes the pdf/epub freeze on its own when source changes, so an html-only local render is enough to verify a prose/code edit. Bioconductor chapters self-install missing packages (e.g. `airway`) via `BiocManager` on first render, matching what `DESCRIPTION` declares.
 
 ## Architecture
 
