@@ -1,236 +1,397 @@
-# K-means clustering
+---
+title: "K-means clustering"
+---
 
-## History of the k-means algorithm
- 
-The k-means clustering algorithm was first proposed by Stuart Lloyd in 1957 as
-a technique for pulse-code modulation. However, it was not published until
-1982. In 1965, Edward W. Forgy published an essentially identical method, which
-became widely known as the k-means algorithm. Since then, k-means clustering
-has become one of the most popular unsupervised learning techniques in data
-analysis and machine learning. 
- 
-K-means clustering is a method for finding patterns or groups in a dataset. It
-is an unsupervised learning technique, meaning that it doesn't rely on
-previously labeled data for training. Instead, it identifies structures or
-patterns directly from the data based on the similarity between data points (see [@fig-kmeans-algorithm]).
+When yeast cells run low on glucose, they flip their entire metabolic program —
+switching from fermentation to respiration in an event called the **diauxic
+shift**. @derisi_exploring_1997 watched this happen by measuring the expression
+of roughly 6,400 genes at seven time points across the shift. That leaves you
+with a wall of numbers: 6,400 genes, each with its own little trajectory over
+time. Some genes ramp up as the cells switch fuels, some shut down, and most
+barely move at all. How do you find the *groups* of genes that rise and fall
+together — the ones that might be co-regulated, taking part in the same
+biological response?
+
+That is exactly the kind of question **k-means clustering** answers. It is an
+unsupervised method: you don't tell it which genes belong together, you just ask
+it to sort the genes into a handful of groups so that genes with similar
+behavior land in the same group. In this chapter you'll use k-means on the
+DeRisi yeast data — the same dataset you met in the SummarizedExperiment
+chapter — to pull out clusters of co-regulated genes and then read their
+temporal profiles back as biology.
+
+## What you'll learn
+
+- Explain in plain language what k-means clustering does and when it's useful.
+- Pull a public dataset from NCBI GEO with `getGEO()` and convert it to a
+  `SummarizedExperiment`.
+- Filter a gene-expression matrix down to its most variable (most informative)
+  genes using the standard deviation.
+- Run `kmeans()` on real data and make the result **reproducible** with
+  `set.seed()`.
+- Plot each cluster's expression profile and interpret what the clusters say
+  about the diauxic shift.
+
+## What k-means does
+
+K-means clustering is a method for finding groups in a dataset. It is an
+*unsupervised* learning technique: it doesn't rely on previously labeled data.
+Instead, it finds structure directly from the data, based on how similar the
+data points are to one another (@fig-kmeans-algorithm).
 
 ![K-means clustering takes a dataset and divides it into k clusters.](images/kmeans.png){#fig-kmeans-algorithm}
 
-In simple terms, k-means clustering aims to divide a dataset into k distinct
-groups or clusters, where each data point belongs to the cluster with the
-nearest mean (average). The goal is to minimize the variability within each
-cluster while maximizing the differences between clusters. This helps to reveal
-hidden patterns or relationships in the data that might not be apparent
-otherwise.
+The idea is to split the data into `k` groups, called **clusters**, so that each
+point belongs to the cluster whose average it is closest to. The algorithm tries
+to make points within a cluster as similar as possible while keeping different
+clusters as distinct as possible. For our yeast data, a "point" is a single
+gene, and "similar" means *follows a similar expression pattern over the time
+course*.
+
+::: {.callout-tip}
+## An analogy for the algorithm
+
+Imagine `k` party hosts scattered around a room full of guests. Each guest walks
+to the nearest host (**assignment**). Each host then moves to the middle of their
+own group (**update**). Guests re-check who is now closest and move again, and
+the hosts re-center. Repeat until nobody needs to move. The final huddles are
+your clusters, and each host's position is a **centroid** — the average of its
+group.
+:::
 
 ## The k-means algorithm
- 
-The k-means algorithm follows these general steps:
 
-1. Choose the number of clusters k.
-2. Initialize the cluster centroids randomly by selecting k data points from
-   the dataset.
-3. Assign each data point to the nearest centroid.
-4. Update the centroids by computing the mean of all the data points assigned
-   to each centroid.
-5. Repeat steps 3 and 4 until the centroids no longer change or a certain
-   stopping criterion is met (e.g., a maximum number of iterations).
+Spelled out, k-means follows these steps:
 
-The algorithm converges when the centroids stabilize or no longer change
-significantly. The final clusters represent the underlying patterns or
-structures in the data. Advantages and disadvantages of k-means clustering
- 
+1. Choose the number of clusters, `k`.
+2. Place `k` centroids at random (often by picking `k` of the data points).
+3. **Assign** each data point to its nearest centroid.
+4. **Update** each centroid to the mean of the points assigned to it.
+5. Repeat steps 3 and 4 until the centroids stop moving (or a maximum number of
+   iterations is reached).
+
+When the centroids stabilize, the algorithm has *converged*, and the final
+clusters represent the patterns in the data.
+
+::: {.callout-warning}
+## k-means is random — seed it
+
+Step 2 starts from a **random** placement of centroids, so two runs can give
+slightly different clusters (and the cluster *numbers* can be shuffled). Whenever
+you want a result you can reproduce — and a frozen figure that doesn't change on
+every render — call `set.seed()` before `kmeans()`.
+:::
+
 ## Pros and cons of k-means clustering
 
 Compared to other clustering algorithms, k-means has several advantages:
 
-* Simplicity and ease of implementation 
-  : The k-means algorithm is relatively
-  straightforward and can be easily implemented, even for large datasets.
-* Scalability
-  : The algorithm can be adapted for large datasets using various optimization
-  techniques or parallel processing.
-* Speed
-  : K-means is generally faster than other clustering algorithms, especially
-  when the number of clusters k is small.
-* Interpretability
-  : The results of k-means clustering are easy to understand, as the algorithm
-  assigns each data point to a specific cluster based on its similarity to the
-  cluster's centroid.
+* **Simplicity** — the algorithm is straightforward and easy to implement, even
+  on large datasets.
+* **Scalability** — it adapts well to large datasets with optimization or
+  parallel processing.
+* **Speed** — it is generally fast, especially when `k` is small.
+* **Interpretability** — the results are easy to read: every point gets a single
+  cluster label.
 
-However, k-means clustering has several disadvantages as well:
+It also has real limitations:
 
-* Choice of k
-  : Selecting the appropriate number of clusters can be challenging
-  and often requires domain knowledge or experimentation. A poor choice of k
-  may yield poor results.
-* Sensitivity to initial conditions
-  : The algorithm's results can vary depending on the initial placement of
-  centroids. To overcome this issue, the algorithm can be run multiple times
-  with different initializations and the best solution can be chosen based on a
-  criterion (e.g., minimizing within-cluster variation).
-* Assumes spherical clusters
-  : K-means assumes that clusters are spherical and evenly sized, which may not
-  always be the case in real-world datasets. This can lead to poor performance
-  if the underlying clusters have different shapes or densities.
-* Sensitivity to outliers
-  : The algorithm is sensitive to outliers, which can heavily influence the
-  position of centroids and the final clustering result. Preprocessing the data
-  to remove or mitigate the impact of outliers can help improve the performance
-  of k-means clustering.
+* **Choice of `k`** — you have to pick the number of clusters yourself, and a
+  poor choice gives poor results. Domain knowledge and experimentation help.
+* **Sensitivity to initial conditions** — different random starts can give
+  different answers, which is why you seed and sometimes re-run.
+* **Assumes round, even clusters** — k-means expects roughly spherical,
+  similarly sized clusters, and struggles when the real groups have other
+  shapes.
+* **Sensitivity to outliers** — a few extreme points can drag a centroid around,
+  so cleaning or filtering the data first helps.
 
-Despite limitations, k-means clustering remains a popular and widely used
-method for exploring and analyzing data, particularly in biological data
-analysis, where identifying patterns and relationships can provide valuable
-insights into complex systems and processes.
+Despite these limits, k-means remains a popular, widely used tool for exploring
+data — and it is especially handy in biology, where spotting groups of
+co-behaving genes can hint at shared function or regulation.
 
-
-
-## An example of k-means clustering
+## A worked example: the diauxic shift
 
 ### The data and experimental background
 
-The data we are going to use are from @derisi_exploring_1997. From 
-their abstract:
+The data come from @derisi_exploring_1997. From their abstract:
 
-> DNA microarrays containing virtually every gene of Saccharomyces cerevisiae were used to carry out a comprehensive investigation of the temporal program of gene expression accompanying the metabolic shift from fermentation to respiration. The expression profiles observed for genes with known metabolic functions pointed to features of the metabolic reprogramming that occur during the diauxic shift, and the expression patterns of many previously uncharacterized genes provided clues to their possible functions. 
+> DNA microarrays containing virtually every gene of *Saccharomyces cerevisiae*
+> were used to carry out a comprehensive investigation of the temporal program of
+> gene expression accompanying the metabolic shift from fermentation to
+> respiration. The expression profiles observed for genes with known metabolic
+> functions pointed to features of the metabolic reprogramming that occur during
+> the diauxic shift, and the expression patterns of many previously
+> uncharacterized genes provided clues to their possible functions.
 
+These data are available from NCBI GEO as
+[GSE28](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE28).
 
-These data are available from NCBI GEO as [GSE28](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE28).
+Here is the biology in brief. When baker's yeast grows on glucose with plenty of
+oxygen, it still *prefers* to ferment the glucose rather than respire it — even
+though respiration is more efficient. Once the glucose runs low, the cells switch
+metabolic gears to respiration. That switch is the
+[diauxic shift](https://en.wikipedia.org/wiki/Diauxie). This experiment profiles
+about 6,400 genes across a time course spanning the shift.
 
-In the case of the baker's or brewer's yeast Saccharomyces cerevisiae growing on glucose with plenty of aeration, the diauxic growth pattern is commonly observed in batch culture. During the first growth phase, when there is plenty of glucose and oxygen available, the yeast cells prefer glucose fermentation to aerobic respiration even though aerobic respiration is the more efficient pathway to grow on glucose. This experiment 
-profiles gene expression for 6400 genes over a time course during which the cells are undergoing
-a [diauxic shift](https://en.wikipedia.org/wiki/Diauxie).
+These data have no replicates; they are a single time course. Watching how
+*groups* of genes behave across that course can reveal biology — both about the
+system and about individual genes. So we'll use clustering to group genes with
+similar expression patterns over time, then look at those groups.
 
-The data in deRisi et al. have no replicates and are time course data. Sometimes, seeing how groups 
-of genes behave can give biological insight into the experimental system or the function of individual
-genes. We can use clustering to group genes that have a similar expression pattern over time and then
-potentially look at the genes that do so. 
+Your goal: use `kmeans()` to divide the most variable (most informative) genes
+into a few groups, then visualize each group's temporal profile.
 
-Our goal, then, is to use `kmeans` clustering to divide highly variable (informative) genes into groups
-and then to visualize those groups.
+### Getting the data
 
-## Getting data
-
-These data were deposited at NCBI GEO back in 2002. GEOquery can pull them out easily.
+These data were deposited at NCBI GEO back in 2002. `GEOquery` can pull them out
+in one call.
 
 ```{r message=FALSE}
 library(GEOquery)
-gse = getGEO("GSE28")[[1]]
+gse <- getGEO("GSE28")[[1]]
 class(gse)
 ```
 
-GEOquery is a little dated and was written before the SummarizedExperiment existed. However, Bioconductor makes
-a conversion from the old ExpressionSet that GEOquery uses to the SummarizedExperiment that we see
-so commonly used now.
+`GEOquery` predates the `SummarizedExperiment` class, so it hands you an older
+`ExpressionSet`. Bioconductor can convert that into the `SummarizedExperiment`
+you already know how to work with.
 
 ```{r message=FALSE}
 library(SummarizedExperiment)
-gse = as(gse, "SummarizedExperiment")
+gse <- as(gse, "SummarizedExperiment")
 gse
 ```
 
-Taking a quick look at the `colData()`, it might be that we want to reorder the columns a bit.
+A quick look at the sample descriptions in `colData()` suggests the columns
+aren't in time order:
 
 ```{r}
 colData(gse)$title
 ```
 
-So, we can reorder by hand to get the time course correct:
+So reorder them by hand so the columns run in time-course order:
 
 ```{r}
-gse = gse[, c(2,4,5,6,1,3,7)]
+gse <- gse[, c(2, 4, 5, 6, 1, 3, 7)]
 ```
 
-## Preprocessing
+### Preprocessing: keep only the informative genes
 
-In gene expression data analysis, the primary objective is often to identify
-genes that exhibit significant differences in expression levels across various
-conditions, such as diseased vs. healthy samples or different time points in a
-time-course experiment. However, gene expression datasets are typically large,
-noisy, and contain numerous genes that do not exhibit substantial changes in
-expression levels. Analyzing all genes in the dataset can be computationally
-intensive and may introduce noise or false positives in the results.
+Most of those 6,400 genes barely change across the time course. Feeding all of
+them to the clustering algorithm is slow and, worse, lets thousands of flat,
+noisy genes drown out the few hundred that actually respond to the diauxic shift.
 
-One common approach to reduce the complexity of the dataset and focus on the
-most informative genes is to subset the genes based on their standard deviation
-in expression levels across the samples. The standard deviation is a measure of
-dispersion or variability in the data, and genes with high standard deviations
-have more variation in their expression levels across the samples.
+So before clustering, you **filter** down to the genes that carry signal. A
+simple, effective filter is the **standard deviation** of each gene across the
+samples: a gene whose expression swings widely over the time course has a high
+standard deviation, while a gene that stays flat has a low one.
 
-By selecting genes with high standard deviations, we focus on genes that show
-relatively large changes in expression levels across different conditions.
-These genes are more likely to be biologically relevant and involved in the
-underlying processes or pathways of interest. In contrast, genes with low
-standard deviations exhibit little or no change in expression levels and are
-less likely to be informative for the analysis. It turns out that applying
-filtering based on criteria such as standard deviation can also increase power
-and reduce false positives in the analysis [@bourgon_independent_2010].
+::: {.callout-important}
+## Why filter on variability first
 
-To subset the genes for analysis based on their standard deviation, the
-following steps can be followed: Calculate the standard deviation of each
-gene's expression levels across all samples. Set a threshold for the standard
-deviation, which can be determined based on domain knowledge, data
-distribution, or a specific percentile of the standard deviation values (e.g.,
-selecting the top 10% or 25% of genes with the highest standard deviations).
-Retain only the genes with a standard deviation above the chosen threshold for
-further analysis.
+Genes that change a lot across conditions are the ones most likely to be doing
+something biologically interesting. Dropping the flat, low-variance genes does
+two good things at once: it shrinks the dataset so clustering is faster, and it
+removes noise so real patterns stand out. Filtering on a gene-level statistic
+like the standard deviation — one that ignores the grouping you'll later test —
+can also genuinely *increase statistical power* and reduce false positives
+[@bourgon_independent_2010].
+:::
 
-By subsetting the genes based on their standard deviation, we can reduce the
-complexity of the dataset, speed up the subsequent analysis, and increase the
-likelihood of detecting biologically meaningful patterns and relationships in
-the gene expression data. The threshold for the standard deviation cutoff is
-rather arbitrary, so it may be beneficial to try a few to check for sensitivity
-of findings. 
+The recipe has three steps:
 
-```{r #fig-sds-derisi, fig.cap="Histogram of standard deviations for all genes in the deRisi dataset."}
-sds = apply(assays(gse)[[1]], 1, sd)
+1. Compute each gene's standard deviation across the samples.
+2. Pick a cutoff (this is somewhat arbitrary — try a few and see how sensitive
+   your results are).
+3. Keep only the genes above the cutoff.
+
+Start with step 1 and look at the distribution of standard deviations:
+
+```{r}
+#| label: fig-sds-derisi
+#| fig-cap: "Histogram of per-gene standard deviations across the time course. Most genes barely vary (the tall bars on the left); a long right tail marks the genes that change the most."
+sds <- apply(assays(gse)[[1]], 1, sd)
 hist(sds)
 ```
 
-Examining the plot, we can see that the most highly variable genes have an sd >
-0.8 or so (arbitrary). We can, for convenience, create a new
-`SummarizedExperiment` that contains only our most highly variable genes.
+@fig-sds-derisi tells the story directly. The bulk of the genes pile up near
+zero — they hardly change across the time course and carry little information.
+A long tail stretches off to the right: these are the genes whose expression
+swings the most. A cutoff of about `sd > 0.8` sits past the main pile and keeps
+that informative right tail. The exact value is a judgment call, which is why
+it's worth re-running with a different cutoff later (one of the exercises does
+just that).
+
+Now apply the cutoff (step 3) and build a smaller `SummarizedExperiment` holding
+just the highly variable genes:
 
 ```{r}
-idx = sds>0.8 & !is.na(sds)
-gse_sub = gse[idx,]
+idx <- sds > 0.8 & !is.na(sds)
+gse_sub <- gse[idx, ]
+nrow(gse_sub)
 ```
 
-## Clustering
+That trims thousands of genes down to a few hundred — a far more workable set.
 
-Now, `gse_sub` contains a subset of our data. 
+### Clustering
 
-The `kmeans` function takes a matrix and the number
-of clusters as arguments. 
+`gse_sub` now holds just the informative genes. The `kmeans()` function takes a
+matrix (rows = genes, columns = samples) and the number of clusters. Remember to
+seed first so the result is reproducible.
 
 ```{r}
-k = 4
-km = kmeans(assays(gse_sub)[[1]], 4)
+k <- 4
+set.seed(42)
+km <- kmeans(assays(gse_sub)[[1]], centers = k)
 ```
 
-The `km` kmeans result contains a vector, `km$cluster`, which gives the cluster
-associated with each gene. We can plot the genes for each cluster to see how
-these different genes behave.
+The result, `km`, carries a vector `km$cluster` that gives the cluster label
+(1 through `k`) for each gene. With four clusters, you can plot every cluster's
+genes side by side and see how each group moves over time.
 
-```{r #fig-kmeans-derisi, fig.cap="Gene expression profiles for the four clusters identified by k-means clustering. Each line represents a gene in the cluster, and each column represents a time point in the experiment. Each cluster shows a distinct trend where the genes in the cluster are potentially co-regulated. "}
-expression_values = assays(gse_sub)[[1]]
-par(mfrow=c(2,2), mar=c(3,4,1,2)) # this allows multiple plots per page
-for(i in 1:k) {
-    matplot(t(expression_values[km$cluster==i, ]), type='l', ylim=c(-3,3),
-            ylab = paste("cluster", i))
+```{r}
+#| label: fig-kmeans-derisi
+#| fig-cap: "Expression profiles for the four clusters found by k-means. Each line is one gene; the x-axis runs left to right across the time course, and the y-axis is the (standardized) expression level. Genes within a cluster share a trend, which suggests they may be co-regulated."
+expression_values <- assays(gse_sub)[[1]]
+par(mfrow = c(2, 2), mar = c(3, 4, 1, 2))   # 2x2 grid of plots
+for (i in 1:k) {
+    matplot(t(expression_values[km$cluster == i, ]), type = "l",
+            ylim = c(-3, 3), ylab = paste("cluster", i))
 }
 ```
 
+### Reading the clusters as biology
 
-Try this with different size k. Perhaps go back to choose more genes (using a
-smaller cutoff for sd).
+This is the step that the numbers were building toward. Each panel in
+@fig-kmeans-derisi is a group of genes that move *together* across the time
+course — and "together" is the whole point, because co-regulated genes are often
+part of the same pathway or controlled by the same switch.
+
+Look at the *shapes* rather than the exact lines:
+
+- Some clusters **rise** toward the late time points. Those are genes that get
+  switched **on** as the glucose runs out and the cells shift to respiration —
+  candidate members of the respiratory and stress-response programs.
+- Other clusters **fall** across the course. Those genes are being switched
+  **off** during the shift — for example, the fermentation and growth machinery
+  the cell no longer needs once glucose is scarce.
+- The lines within each panel hug one another tightly, which is the visual
+  signature of co-regulation: many genes responding in step to the same
+  metabolic cue.
+
+That is the payoff of clustering. You started with 6,400 noisy trajectories and
+ended with a handful of clean, interpretable patterns — rising groups, falling
+groups — that map directly onto the biology of the diauxic shift. If you wanted
+to go further, you could pull the gene names out of each cluster
+(`rownames(gse_sub)[km$cluster == i]`) and ask whether the "rising" cluster is
+enriched for respiration genes.
+
+::: {.callout-note}
+## Why standardized expression?
+
+The y-axis runs from about −3 to 3 because these microarray values are
+log-ratios centered near zero: positive means "higher than the reference,"
+negative means "lower." Clustering on values like these groups genes by the
+*shape* of their response over time rather than by their absolute brightness,
+which is usually what you want.
+:::
+
+## Exercises
+
+For each exercise, reuse the `gse` and `gse_sub` objects you built above.
+
+1. **Try a different `k`.** Re-run the clustering with `k <- 6` instead of 4 and
+   re-make the cluster plots. Do the extra clusters reveal new patterns, or do
+   they mostly split the existing ones?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   k6 <- 6
+   set.seed(42)
+   km6 <- kmeans(assays(gse_sub)[[1]], centers = k6)
+   par(mfrow = c(2, 3), mar = c(3, 4, 1, 2))
+   for (i in 1:k6) {
+       matplot(t(expression_values[km6$cluster == i, ]), type = "l",
+               ylim = c(-3, 3), ylab = paste("cluster", i))
+   }
+   ```
+   With more clusters, the broad "rising" and "falling" groups tend to break into
+   finer sub-patterns (e.g. early vs. late risers). There is no single correct
+   `k`; the right number depends on how fine a distinction is biologically useful.
+   :::
+
+2. **Try a different cutoff.** Lower the standard-deviation cutoff to `0.5` so
+   you keep *more* genes, rebuild the subset, and cluster again with `k = 4`. How
+   many genes do you keep now, and do the cluster shapes get cleaner or noisier?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   idx2 <- sds > 0.5 & !is.na(sds)
+   gse_sub2 <- gse[idx2, ]
+   nrow(gse_sub2)
+   set.seed(42)
+   km2 <- kmeans(assays(gse_sub2)[[1]], centers = 4)
+   ```
+   A lower cutoff keeps many more genes, including less-variable ones. The extra
+   genes are noisier, so the cluster profiles usually look a little messier. This
+   is the sensitivity check the chapter warned about: the cutoff is a knob, and
+   it's worth turning it to see whether your conclusions hold.
+   :::
+
+3. **How big is each cluster?** Using your original `km` result, count how many
+   genes fall in each of the four clusters.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   table(km$cluster)
+   ```
+   `table()` tallies the cluster labels. Uneven cluster sizes are normal and fine
+   — a cluster of co-regulated genes is just as real whether it has 30 members or
+   300.
+   :::
+
+4. **Reproducibility.** Run `kmeans()` on `gse_sub` twice *without* calling
+   `set.seed()` first, and compare `table()` of the cluster labels between the two
+   runs. What changes, and why does that matter for a printed result?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   km_a <- kmeans(assays(gse_sub)[[1]], centers = 4)
+   km_b <- kmeans(assays(gse_sub)[[1]], centers = 4)
+   table(km_a$cluster)
+   table(km_b$cluster)
+   ```
+   The two runs start from different random centroids, so the cluster *labels*
+   (and sometimes the exact membership) differ. Seeding with `set.seed()` pins
+   the random start so anyone re-running your code sees the same clusters — which
+   is exactly why we seeded the worked example.
+   :::
 
 ## Summary
 
-In this lesson, we have learned how to use k-means clustering to identify 
-groups of genes that behave similarly over time. We have also learned how to
-subset our data to focus on the most informative genes.
+You set out to find groups of genes that behave alike across the yeast diauxic
+shift, and you did it with k-means. Looking back at the objectives:
 
+- You can describe k-means as an **unsupervised** method that sorts points into
+  `k` groups around moving **centroids**, and you know its main trade-offs
+  (you pick `k`; it likes round, even clusters; it's sensitive to outliers and to
+  the random start).
+- You pulled a real dataset from GEO with `getGEO()` and converted it to a
+  `SummarizedExperiment`.
+- You **filtered** the genes down to the high-variance, informative ones using
+  their standard deviation, and you saw on @fig-sds-derisi why a cutoff past the
+  main pile makes sense.
+- You ran `kmeans()` reproducibly with `set.seed()` and plotted each cluster.
+- You read @fig-kmeans-derisi as biology: clusters that **rise** are genes
+  switched on for respiration as glucose runs out, and clusters that **fall** are
+  the fermentation/growth machinery being switched off — co-regulated genes
+  moving in step through the diauxic shift.
 
-
+That wraps up the statistics part of the book. Clustering is your first taste of
+unsupervised learning; the machine-learning chapters pick up that thread and
+build on it.
