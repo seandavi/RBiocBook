@@ -61,6 +61,11 @@ jobs:
         # `quarto render` below runs the `quartobot resolve` pre-render hook
         # declared in _quarto.yml; quartobot must be on PATH or render fails.
         run: pipx install quartobot
+      - name: Install rsvg-convert
+        # The mlr3 workflow figure is an SVG; for PDF output Quarto converts SVG
+        # to PDF with rsvg-convert (from librsvg2-bin), which isn't on the runner
+        # by default. (The planned Bioconductor Docker image will bake this in.)
+        run: sudo apt-get update -qq && sudo apt-get install -y librsvg2-bin
       - uses: quarto-dev/quarto-actions/render@v2
       - uses: quarto-dev/quarto-actions/publish@v2
         # Only publish to gh-pages on a push to main, never on a PR — so PRs run
