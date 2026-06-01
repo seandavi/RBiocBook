@@ -43,5 +43,11 @@ RUN Rscript -e 'install.packages("tinytex", repos = "https://cloud.r-project.org
 ENV PATH="/opt/TinyTeX/bin/x86_64-linux:${PATH}"
 RUN pip3 install --no-cache-dir --break-system-packages quartobot
 
+# Node.js + npm (apt 18.x) so the devcontainer can install in-container agent
+# tooling (Claude Code) at postCreate time. Appended last as its own layer so it
+# doesn't invalidate the heavy dependency layers above. Not used by CI render or
+# Orchestra.
+RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
+
 # The nmfs-opensci titlepage extension is project-local (_extensions/, gitignored)
 # and installed at render time, so it is intentionally not baked in here.
