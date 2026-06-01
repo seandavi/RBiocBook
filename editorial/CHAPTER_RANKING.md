@@ -20,6 +20,9 @@ pilots (`dataframes_intro` 3.3, `t-stats-and-tests` 2.4, `bioc-summarizedexperim
 | `vectors` | 2.4 | ~4.5 |
 | `matrices` | 2.4 | ~4.4 |
 | `lists` | 3.1 | ~4.4 |
+| `machine_learning/models` | 1.4 | ~4.7 |
+| `visualization_guide` | 1.6 | ~4.7 |
+| `ranges_and_signals` | 1.6 | ~4.3 |
 
 ## Remaining — worst first
 
@@ -28,9 +31,6 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
 
 | Mean | Chapter | Centrality | Biggest problems |
 |:--:|---|:--:|---|
-| 1.4 | `machine_learning/models` | high | Wikipedia paste incl. a literal "[citation needed]"; no code/biology; Elastic Net is a stub. **Worst in the book.** |
-| 1.6 | `visualization_guide` | med | Core grammar-of-graphics section is just a list of external links |
-| 1.6 | `ranges_and_signals` | high | 7-paragraph textbook wall; legacy `output: html_document` YAML; `=` throughout |
 | 1.6 | `atac-seq/atac-seq` | med | Broken `\@ref(fig:)` crossrefs; inline `*Exercise*` stubs; separate `atac.bib` |
 | 1.7 | `geoquery` | med | Opens with a pasted journal abstract; `=` everywhere; no frontmatter title |
 | 1.9 | `intro` | high | Book's **first** chapter; dry marketing register; no objectives/exercises/summary — sets the wrong tone (high leverage) |
@@ -50,12 +50,14 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
 
 ## Natural batches
 
-- **ML part** — `models` (1.4), `mlr3verse_intro` (2.1), `ml/intro` (2.3),
-  `machine_learning_mlr3` (2.9): uniformly weak, contains the worst chapter.
-- **Ranges / Bioc** — `ranges_and_signals` (1.6), `genomic_ranges_tutorial` (2.1),
-  `ranges_exercises` (2.4), `atac-seq` (1.6).
-- **High-leverage singletons** — `intro` (the face of the book) and `kmeans`
-  (finishes the stats part).
+- **ML part** — `mlr3verse_intro` (2.1), `ml/intro` (2.3),
+  `machine_learning_mlr3` (2.9): `models` (1.4) is now harmonized; the rest remain.
+- **Ranges / Bioc** — `genomic_ranges_tutorial` (2.1), `ranges_exercises` (2.4),
+  `atac-seq` (1.6); `ranges_and_signals` (1.6) is now harmonized.
+- **High-leverage singletons** — `intro` (the face of the book, 1.9) and `kmeans`
+  (1.9, finishes the stats part). With the top three (`models`,
+  `visualization_guide`, `ranges_and_signals`) done, `intro` and `kmeans` are the
+  highest-leverage next picks.
 
 ## Process reminders (from `STYLE_GUIDE.md` / `PILOT_REVIEWS.md`)
 
