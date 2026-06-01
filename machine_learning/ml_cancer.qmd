@@ -16,6 +16,37 @@ expression from histone marks — and because it comes first, it also lays down 
 habits the others reuse: how to set up an `mlr3` analysis, how to split the data,
 how to select features, and how to read the results without fooling yourself.
 
+Three ideas from the [introduction](intro.qmd) do the heavy lifting in every one
+of these examples, so it is worth stating them plainly here, in the concrete terms
+of gene-expression classification:
+
+- **Feature selection.** A tumour profile measures tens of thousands of genes, but
+  most of them barely change from one sample to the next. A gene that stays flat
+  across every tumour cannot help tell cancer types apart — it is noise. So we
+  *select* the genes that vary the most and discard the rest, shrinking the problem
+  to the handful of features that actually carry signal.
+- **The train/test split.** We hold back a slice of tumours that the model never
+  sees while it learns. Scoring it on those unseen tumours is the only honest
+  estimate of how it will classify a *new* patient's biopsy — the thing we actually
+  care about.
+- **Overfitting.** A model given too much freedom — a decision tree grown too deep,
+  say — can memorize the exact training tumours instead of learning a rule that
+  generalizes. We catch this by watching the gap between the training score and the
+  test score.
+
+The next two chapters revisit all three from different biological angles; this is
+where we meet them as first principles.
+
+::: {.callout-note}
+## The through-line for all three worked examples
+
+Feature selection, an honest train/test split, and vigilance against overfitting
+are the spine of every worked example. Here they take their plainest form: keep the
+most variable genes, hold out some tumours, and distrust a model that aces the
+training set but stumbles on the test set. Hold on to this picture — the
+methylation and histone-mark chapters return to each idea and add a new twist.
+:::
+
 ## What you'll learn
 
 - Turn a real genomics dataset into an `mlr3` **task** with `as_task_classif()`.
