@@ -18,6 +18,38 @@ tasks, learners, measures, and the train/test split, see
 [cancer example](ml_cancer.qmd) for the general workflow. Here we keep our eyes on
 the biology and on how regression differs from classification.
 
+The three core ideas from the cancer chapter all return, but each takes on a new
+shade once the goal is an epigenetic clock rather than a cancer label:
+
+- **The split is about *validity*, not just accuracy.** A clock that predicts age
+  beautifully on the very people it was trained on is worthless as a biomarker — of
+  course it fits them, it learned them. The whole point of an epigenetic clock is to
+  estimate the age of *someone new*, so the held-out test set is not a nicety here;
+  it is the only thing that tells you whether you have built a real biomarker or an
+  elaborate lookup table.
+- **Feature selection is forced on you.** A methylation array measures hundreds of
+  thousands of CpG sites, but a study has only dozens or hundreds of people. Far
+  more features than samples — the *p* ≫ *n* regime — is the normal state of affairs
+  in genomics, and it means selecting or limiting features is not an optional tidy-up
+  but a requirement (see the warning below).
+- **The yardstick changes.** Classification used accuracy and a confusion matrix.
+  Regression has no "correct/incorrect" — instead we measure how far off the
+  predictions are, with **RMSE** (typical error, in years) and **R²** (the fraction
+  of the variation in age the model explains).
+
+::: {.callout-warning}
+## More features than samples: the *p* ≫ *n* problem
+
+When the number of features *p* dwarfs the number of samples *n*, a flexible model
+can find some combination of CpG sites that fits the training ages *perfectly* by
+chance alone — pure memorization dressed up as signal. This is overfitting in its
+most dangerous form, because the training score looks fantastic. The defences are
+the same ones you already know: limit the features (keep only the CpG sites most
+associated with age), prefer simpler models, and *always* judge on the held-out
+test set. The next chapter shows a second defence — letting the model shrink its
+own coefficients.
+:::
+
 ## What you'll learn
 
 - Build a **regression** task from a real methylation dataset with
@@ -25,8 +57,11 @@ the biology and on how regression differs from classification.
 - Fit and compare three regression learners — **linear regression**, a
   **regression tree**, and a **random forest** — through the same `mlr3` calls.
 - Read **regression diagnostic plots** and a **truth-versus-prediction** scatter.
-- Interpret **R²** as the fraction of variation explained, and spot overfitting
-  when the test R² falls below the training R².
+- Interpret **R²** as the fraction of variation explained (and **RMSE** as the
+  typical error in years), and spot overfitting when the test R² falls below the
+  training R².
+- Explain why having far more CpG features than people (the *p* ≫ *n* problem)
+  makes feature selection and an honest test set non-negotiable for a biomarker.
 
 ## Setup
 

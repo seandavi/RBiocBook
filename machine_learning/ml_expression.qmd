@@ -19,13 +19,46 @@ workflow see the [cancer example](ml_cancer.qmd). Here the new idea is
 **penalized regression** with cross-validation, and a peek under the hood at how R²
 is actually computed.
 
+This chapter views the same three ideas through the lens of **regularization**:
+
+- **Feature selection, done automatically.** In the cancer chapter you hand-picked
+  features — you ranked genes by variance and kept the top 200. Penalized regression
+  flips that around: instead of you choosing which features to drop, the model's
+  **L1 (lasso) penalty** shrinks the coefficients of useless features all the way to
+  zero, selecting features *for* you as a side effect of fitting. Same goal —
+  fewer, more useful features — but the work moves from your hands into the
+  algorithm.
+- **Cross-validation, inside the training set.** A penalty has a strength, λ, and
+  we have to choose it. The trick is to choose it by **cross-validation** *within
+  the training data* — carving the training set into folds, never touching the test
+  set. This is a fresh facet of the same golden rule from the cancer and methylation
+  chapters: the test set stays sealed until the very end.
+- **Overfitting, as a tunable knob.** Regularization reframes overfitting as
+  something you can dial. The penalty λ is a knob that trades a tighter fit on the
+  training data for better generalization to new genes: turn it up and the model
+  gets simpler and steadier; turn it down and it bends closer to the training
+  points, at the risk of memorizing noise.
+
+::: {.callout-note}
+## From a manual filter to an automatic penalty
+
+The cancer chapter selected features by hand (keep the most variable genes); this
+chapter lets the model do it. A lasso penalty is, in effect, automatic feature
+selection baked into the fit — and cross-validation, run *only* on the training
+data, is how we pick how aggressive that penalty should be. The held-out test set
+is never consulted while we tune; it is saved for the single honest score at the
+end.
+:::
+
 ## What you'll learn
 
 - Center and scale features, and visualize them with boxplots and a heatmap.
 - Build a regression task and split it with `mlr3`'s `partition()` helper.
 - Fit **penalized regression** (ridge) with `regr.cv_glmnet`, and explain how
-  **cross-validation** chooses the penalty.
-- Read a penalized model's **coefficients**, and contrast ridge with lasso.
+  **cross-validation** *within the training set* chooses the penalty strength λ.
+- Read a penalized model's **coefficients**, contrast ridge with lasso, and see how
+  the lasso penalty performs **automatic feature selection** — the job you did by
+  hand in the cancer chapter.
 - Compute **R² by hand** and confirm it matches the `regr.rsq` measure.
 
 ## Setup
