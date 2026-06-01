@@ -23,6 +23,9 @@ pilots (`dataframes_intro` 3.3, `t-stats-and-tests` 2.4, `bioc-summarizedexperim
 | `machine_learning/models` | 1.4 | ~4.7 |
 | `visualization_guide` | 1.6 | ~4.7 |
 | `ranges_and_signals` | 1.6 | ~4.3 |
+| `intro` | 1.9 | ~4.7 |
+| `kmeans` | 1.9 | ~4.5 |
+| `eda_and_univariate_brfss` | 2.0 | ~4.5 |
 
 ## Remaining — worst first
 
@@ -33,9 +36,6 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
 |:--:|---|:--:|---|
 | 1.6 | `atac-seq/atac-seq` | med | Broken `\@ref(fig:)` crossrefs; inline `*Exercise*` stubs; separate `atac.bib` |
 | 1.7 | `geoquery` | med | Opens with a pasted journal abstract; `=` everywhere; no frontmatter title |
-| 1.9 | `intro` | high | Book's **first** chapter; dry marketing register; no objectives/exercises/summary — sets the wrong tone (high leverage) |
-| 1.9 | `kmeans` | high | `=` + forbidden `{r #fig-}` labels; preprocessing wall-of-text; results never interpreted (last stats-part chapter) |
-| 2.0 | `eda_and_univariate_brfss` | high | Splits into a polished half + an unscaffolded slide-outline half; hidden `path` var |
 | 2.1 | `genomic_ranges_tutorial` | high | Blog-post register; no callouts; no exercises |
 | 2.1 | `machine_learning/mlr3verse_intro` | med | No frontmatter; Palmer Penguins (no biology); outputs uninterpreted |
 | 2.3 | `reading_and_writing` | high | No objectives/exercises; non-bio examples; `df` variable name |
@@ -54,10 +54,11 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
   `machine_learning_mlr3` (2.9): `models` (1.4) is now harmonized; the rest remain.
 - **Ranges / Bioc** — `genomic_ranges_tutorial` (2.1), `ranges_exercises` (2.4),
   `atac-seq` (1.6); `ranges_and_signals` (1.6) is now harmonized.
-- **High-leverage singletons** — `intro` (the face of the book, 1.9) and `kmeans`
-  (1.9, finishes the stats part). With the top three (`models`,
-  `visualization_guide`, `ranges_and_signals`) done, `intro` and `kmeans` are the
-  highest-leverage next picks.
+- **High-leverage singletons** — done: `intro` (the face of the book) and
+  `kmeans` (finished the stats part), alongside `eda_and_univariate_brfss`.
+  Remaining high-centrality, low-score targets cluster in the **Ranges/Bioc** and
+  **ML** batches above; `geoquery` (1.7) and `genomic_ranges_tutorial`/`atac-seq`
+  are the next-worst by mean.
 
 ## Process reminders (from `STYLE_GUIDE.md` / `PILOT_REVIEWS.md`)
 
