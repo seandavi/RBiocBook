@@ -1,46 +1,90 @@
+---
+title: "Working with distribution functions"
+---
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(ggplot2)
-library(ggfortify)
-library(ggthemes)
-library(gridExtra)
 ```
 
-# Working with distribution functions
+Heights, blood pressures, measurement errors, log-transformed gene-expression
+values — measure enough of almost anything in biology and the values tend to pile
+up into the same bell-shaped curve: the **normal distribution**. Once your data
+follow that curve, you'll want to ask questions of it. *What fraction of samples
+fall below some cutoff? Which value marks the top 5%? Give me twenty random draws
+to simulate an experiment.* R answers each of those with a different function.
 
-Which values do pnorm, dnorm, qnorm, and rnorm return? How do I remember the difference between these?
+The catch is remembering which function does which job. This chapter is a
+**visual guide**: for every function we pair the R call with a picture of exactly
+what it measures on the bell curve, because the difference between a *probability*,
+a *density*, and a *quantile* is far easier to see than to memorize. It's genuinely
+hard to reason about these functions without a shape to point at — so a shape is
+what we'll build for each one.
 
-I find it helpful to have visual representations of distributions as pictures. It is difficult for me to think of distributions, or differences between probability, density, and quantiles without visualizing the shape of the distribution. So I figured it would be helpful to have a visual guide to pnorm, dnorm, qnorm, and rnorm.
+## What you'll learn
 
+- Use `pnorm()` to turn a value into a probability (the area under the curve to its
+  left).
+- Use `dnorm()` to get the height (density) of the curve at a value.
+- Use `qnorm()` to go the other direction — from a probability back to a value.
+- Use `rnorm()` to draw random samples from a normal distribution.
+- Combine these functions to answer real questions about normally distributed
+  data, such as IQ scores.
+
+::: {.callout-tip}
+## One naming rule for *every* distribution
+
+R builds these names from a one-letter prefix plus the distribution: **d** for
+density, **p** for probability, **q** for quantile, **r** for random. Learn it once
+and it transfers everywhere — `dbinom`/`pbinom`/`qbinom`/`rbinom` for the binomial,
+`dt`/`pt`/`qt`/`rt` for the t-distribution we meet in the next chapter,
+`dpois`/`ppois`/… for the Poisson. Here we use the `…norm` family for the normal.
+:::
 
 ```{r echo=FALSE}
 # Prep the distribution data
 x <- seq(-3, 3, 0.005)
 y <- dnorm(x)
-normal <- as.data.frame(cbind(x,y))
+normal <- as.data.frame(cbind(x, y))
 ```
+
+The four functions, at a glance:
 
 | Function | Input | Output |
 |----------|-------|--------|
-| pnorm    | x     | P(X < x) |
-| dnorm    | x     | f(x), or the height of the density curve at x   |
-| qnorm    | q, a quantile from 0 to 1    | x such that P(X < x) = q |
-| rnorm    | n     | n random samples from the distribution |
+| `pnorm`  | a value `q` | P(X < q): area under the curve to the **left** of `q` |
+| `dnorm`  | a value `x` | the **height** of the density curve at `x` |
+| `qnorm`  | a probability from 0 to 1 | the value `x` where P(X < x) equals that probability |
+| `rnorm`  | a count `n` | `n` random samples from the distribution |
 
-: Table 1.1: Functions for the normal distribution
+: Functions for the normal distribution {#tbl-norm-funcs}
 
-What is the relationship between these functions? The pnorm function gives the area under the curve to the left of a given point, while dnorm gives the height of the curve at that point. The qnorm function is the inverse of pnorm, returning the x value for a given probability. Finally, rnorm generates random samples from the normal distribution.
+In one sentence each: `pnorm` gives the area to the left of a point, `dnorm` gives
+the height of the curve at a point, `qnorm` is the inverse of `pnorm` (probability
+back to value), and `rnorm` generates random samples. The rest of the chapter
+unpacks them one at a time.
 
 ## pnorm
 
-This function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal. @fig-pnorm-1
-
+`pnorm` answers the question "what fraction of the distribution lies to the
+**left** of this value?" If you don't supply a mean and standard deviation, R
+assumes the *standard normal* (mean 0, standard deviation 1). The help page gives
+this template:
 
 ```{r eval=FALSE}
 pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 ```
 
-The R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.
+You hand it `q`, a value on the x-axis, and it returns the area under the curve to
+the left of that point. The mean sits dead centre and splits the curve in half, so:
+
+```{r}
+pnorm(0)    # half the distribution is below the mean
+pnorm(1)    # ~84% is below one standard deviation above the mean
+pnorm(-1)   # ~16% is below one standard deviation below it
+```
+
+The figures below show each of those as a shaded area.
 ```{r echo=FALSE}
 # pnorm plot 1
 # pnorm(0)
@@ -137,14 +181,6 @@ p3 <- ggplot(mapping = aes(x, y), data = normal) +
      theme(plot.subtitle = element_text(face = "italic", hjust = 0.5))
 ```
 
-This function gives the probability function for a normal distribution. If you do not specify the mean and standard deviation, R defaults to standard normal.
-
-pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
-The R help file for pnorm provides the template above. The value you input for q is a value on the x-axis, and the returned value is the area under the distribution curve to the left of that point.
-
-The option lower.tail = TRUE tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to lower.tail = FALSE, or simply calculate 1-pnorm() instead. This is demonstrated below.
-
-
 ```{r echo=FALSE}
 #| label: fig-pnorm
 #| fig-cap: "The pnorm function takes a quantile (value on the x-axis) and returns the area under the curve to the left of that value."
@@ -155,13 +191,32 @@ print(p2)
 print(p3)
 ```
 
-The option `lower.tail = TRUE` tells R to use the area to the left of the given point. This is the default, so will remain true even without entering it. In order to compute the area to the right of the given point, you can either switch to `lower.tail = FALSE`, or simply calculate `1-pnorm()` instead.
+The option `lower.tail = TRUE` tells R to use the area to the *left* of the given
+point — the default. To get the area to the **right** instead, either switch to
+`lower.tail = FALSE` or subtract from 1:
+
+```{r}
+pnorm(1, lower.tail = FALSE)   # area to the RIGHT of 1
+1 - pnorm(1)                   # exactly the same thing
+```
 
 
 
 ## dnorm
 
-This function calculates the probability density function (PDF) for the normal distribution. It gives the probability density (height of the curve) at a specified value (x).
+`dnorm` gives the **height** of the bell curve at a value — the probability
+*density*. The curve is tallest at the mean and falls off symmetrically on either
+side. Unlike `pnorm`, the result is not a probability you can read as a percentage;
+it's the height of the curve, used mainly for *drawing* the distribution or in
+likelihood calculations.
+
+```{r}
+dnorm(0)    # the peak of the standard normal
+dnorm(1)    # lower, one SD out...
+dnorm(-1)   # ...and the same height on the other side, by symmetry
+```
+
+The figures below mark each of these heights on the curve.
 
 ```{r echo=FALSE}
 # dnorm plot 1
@@ -234,7 +289,17 @@ print(d3)
 
 ## qnorm
 
-This function calculates the quantiles of the normal distribution. It returns the value (x) corresponding to a specified probability (p). It is the inverse of the`pnorm` function. 
+`qnorm` runs `pnorm` in reverse: hand it a probability and it returns the value
+with that much area to its left. Since `pnorm(1)` is about 0.84, `qnorm(0.84)` is
+about 1 — the two functions undo each other. This is how you find **percentiles**.
+
+```{r}
+qnorm(0.5)     # the median: half the area lies to its left
+qnorm(0.25)    # the first quartile
+qnorm(0.975)   # the value cutting off the top 2.5% — the famous 1.96
+```
+
+The figures below show several quantiles as shaded areas.
 
 ```{r echo=FALSE}
 # qnorm plot 1
@@ -374,6 +439,28 @@ print(q5)
 
 ## rnorm
 
+`rnorm` draws random samples from the distribution — the workhorse for *simulating*
+data (we leaned on it heavily in the t-distribution chapter). Give it a count `n`
+and it hands back that many random values:
+
+```{r}
+rnorm(5)
+```
+
+Run that again and you'll get five *different* numbers. To make a simulation
+reproducible — so you and a reader see the same "random" draws — set a seed first:
+
+```{r}
+set.seed(42)
+rnorm(5)
+```
+
+And just like the other functions, `mean` and `sd` shift and scale the draws:
+
+```{r}
+rnorm(5, mean = 100, sd = 15)   # e.g. five simulated IQ scores
+```
+
 ```{r echo=FALSE}
 # rnorm plot
 # rnorm(5)
@@ -407,46 +494,95 @@ print(r1)
 ```
 
 
-## IQ scores
+## Worked example: IQ scores
 
-Normal Distribution and its Application with IQ
+The normal distribution (also called the Gaussian distribution) is defined by two
+numbers: the **mean** (µ), which sets the centre, and the **standard deviation**
+(σ), which sets the spread. IQ scores are deliberately built to be normal with a
+**mean of 100** and a **standard deviation of 15**, which makes them a perfect
+playground for the four functions.
 
-The normal distribution, also known as the Gaussian distribution, is a continuous probability distribution characterized by its bell-shaped curve. It is defined by two parameters: the mean (µ) and the standard deviation (σ). The mean represents the central tendency of the distribution, while the standard deviation represents the dispersion or spread of the data.
+A handy rule of thumb — the "68–95–99.7 rule" — says about 68% of values fall
+within one standard deviation of the mean (here, 85 to 115) and about 95% within
+two (70 to 130). Let's check the 68% with `pnorm`. The area *between* 85 and 115 is
+the area below 115 minus the area below 85:
 
-The IQ scores are an excellent example of the normal distribution, as they are designed to follow this distribution pattern. The mean IQ score is set at 100, and the standard deviation is set at 15. This means that the majority of the population (about 68%) have an IQ score between 85 and 115, while 95% of the population have an IQ score between 70 and 130.
+```{r}
+pnorm(115, mean = 100, sd = 15) - pnorm(85, mean = 100, sd = 15)
+```
 
-*   What is the probability of having an IQ score between 85 and 115?
+About 0.68 — exactly what the rule promises. Notice the pattern: a "between"
+question becomes one `pnorm` minus another.
 
-    ```{r eval=FALSE}
-    #| code-fold: true
-    #| code-summary: "Show answer"
-    pnorm(115, mean = 100, sd = 15) - pnorm(85, mean = 100, sd = 15)
-    ```
+## Exercises
 
-*   What is the 90th percentile of the IQ scores?
+Use the IQ distribution (mean 100, sd 15) for each. Each solution names *which* of
+the four functions fits the question — that choice is the real skill.
 
-    ```{r eval=FALSE}
-    #| code-fold: true
-    #| code-summary: "Show answer"
-    qnorm(0.9, mean = 100, sd = 15)
-    ```
+1. **Top 10%.** Which IQ score marks the 90th percentile — the cutoff above which
+   only the top 10% fall?
 
-*   What is the probability of having an IQ score above 130?
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   qnorm(0.9, mean = 100, sd = 15)
+   ```
+   We want a *value* from a *probability*, so this is a `qnorm` job. About 119.
+   :::
 
-    ```{r eval=FALSE}
-    #| code-fold: true
-    #| code-summary: "Show answer"
-    1 - pnorm(130, mean = 100, sd = 15)
-    ```
+2. **Above 130.** What fraction of people have an IQ above 130 (two standard
+   deviations up)?
 
-*   What is the probability of having an IQ score below 70?
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   1 - pnorm(130, mean = 100, sd = 15)
+   # or, equivalently:
+   pnorm(130, mean = 100, sd = 15, lower.tail = FALSE)
+   ```
+   About 2.3% — consistent with the 95% rule leaving roughly 2.5% in each tail.
+   :::
 
-    ```{r eval=FALSE}
-    #| code-fold: true
-    #| code-summary: "Show answer"
-    pnorm(70, mean = 100, sd = 15)
-    ```
+3. **Below 70.** What fraction have an IQ below 70?
 
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   pnorm(70, mean = 100, sd = 15)
+   ```
+   Also about 2.3%. The curve is symmetric, so the lower tail past 70 mirrors the
+   upper tail past 130.
+   :::
 
+4. **Simulate a classroom.** Draw 30 random IQ scores and count how many land above
+   115. (Set a seed so your answer is reproducible.)
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   set.seed(1)
+   scores <- rnorm(30, mean = 100, sd = 15)
+   sum(scores > 115)
+   ```
+   Theory predicts about 16% above 115 — roughly 5 of 30 — but any single small
+   sample wobbles around that. Re-run with a different seed to feel the sampling
+   variability for yourself.
+   :::
+
+## Summary
+
+You now have the four-function toolkit for the normal distribution — and, thanks to
+R's naming rule, the blueprint for every other distribution too:
+
+- `pnorm(x)` — area to the **left** of `x` (a probability). Use `lower.tail = FALSE`
+  or `1 - pnorm(x)` for the right tail, and one `pnorm` minus another for a range.
+- `dnorm(x)` — the **height** of the curve at `x` (a density).
+- `qnorm(p)` — the **value** at probability `p` (the inverse of `pnorm`); your tool
+  for percentiles.
+- `rnorm(n)` — `n` random **draws**; pair it with `set.seed()` for reproducible
+  simulations.
+
+Keep the pictures in mind: `pnorm` is an area, `dnorm` is a height, `qnorm` reads
+the area axis backwards to a value, and `rnorm` scatters points along the curve.
 
     
