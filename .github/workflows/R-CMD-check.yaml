@@ -31,6 +31,14 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Check dependency completeness
+        # Fast fail (seconds) BEFORE the slow install + render if any chapter
+        # uses a package not declared in DESCRIPTION. The book renders by reusing
+        # committed _freeze, so an undeclared dep stays hidden until a chapter is
+        # edited and re-executes — this catches that at lint time. See
+        # tools/check-deps.R.
+        run: Rscript tools/check-deps.R
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
