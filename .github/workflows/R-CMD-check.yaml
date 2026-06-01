@@ -12,7 +12,7 @@ permissions: read-all
 
 jobs:
   R-CMD-check:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
@@ -39,25 +39,17 @@ jobs:
         # tools/check-deps.R.
         run: Rscript tools/check-deps.R
 
+      # Install every DESCRIPTION dependency (CRAN + Bioconductor) via pak, which
+      # also resolves and apt-installs the required system libraries and caches
+      # the R library between runs. This replaces the old hand-rolled BiocManager
+      # step. On Linux the heavy Bioconductor packages build/install reliably —
+      # the macOS arm64 source compiles (e.g. alabaster.base, pulled by scRNAseq)
+      # failed to link — so every chapter can be treated uniformly with no
+      # freeze-only exemptions.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-
-      - name: Install R package dependencies
-        # Install the DESCRIPTION Depends: via BiocManager so CRAN + Bioconductor
-        # packages resolve together. (The old devtools::install_deps() path now
-        # fails on current devtools: install_deps() is deprecated and errors with
-        # "The package remotes is required".)
-        run: |
-          Rscript -e '
-            install.packages("BiocManager", repos="https://cloud.r-project.org")
-            options(repos = BiocManager::repositories())
-            deps <- read.dcf("DESCRIPTION")[1, "Depends"]
-            deps <- trimws(gsub("[(].*?[)]", "", strsplit(deps, ",")[[1]]))
-            deps <- deps[deps != "" & deps != "R"]
-            BiocManager::install(deps, update = TRUE, ask = FALSE)
-          '
 
       - name: setup-quarto
         uses: quarto-dev/quarto-actions/setup@v2
@@ -71,10 +63,9 @@ jobs:
         run: pipx install quartobot
       - uses: quarto-dev/quarto-actions/render@v2
       - uses: quarto-dev/quarto-actions/publish@v2
-        # Pin the provider: without `target`, `quarto publish` can't choose
-        # among recorded publishes and errors ("Multiple previous publishes
-        # exist"). `render: false` reuses the _book/ output from the render
-        # step above instead of rendering the whole book a second time.
+        # Only publish to gh-pages on a push to main, never on a PR — so PRs run
+        # the full install + render as a check without touching the live site.
+        if: github.event_name == 'push'
         with:
           target: gh-pages
           render: false
