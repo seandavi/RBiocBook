@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Sean Davis">
+<meta name="dcterms.date" content="2024-06-01">
+<meta name="description" content="A collection of chapters more than a book, but….">
+<title>22&nbsp; Worked example: classifying cancer types from gene expression – The RBioc Book</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../machine_learning/ml_methylation_age.html" rel="next">
+<link href="../machine_learning/mlr3verse_intro.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-709e903f7486fc15c5f7f9cf283d35df.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-46df607154daf1b1b2e9309a2fd6a7db.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-KLLV1GCF4E"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
+</script><style>html{ scroll-behavior: smooth; }</style>
+</head>
+<body class="nav-sidebar floating nav-fixed slimcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">The RBioc Book</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../intro.html"> 
+<span class="menu-text">Introduction</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../data_structures_overview.html"> 
+<span class="menu-text">Data Structures</span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <a href="https://github.com/seandavi/RBiocBook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+<li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="../The-RBioc-Book.pdf">
+              <i class="bi bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="../The-RBioc-Book.epub">
+              <i class="bi bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+</div>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-1">
+<li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+              <i class="bi bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+      </ul>
+</div>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../machine_learning/intro.html">Machine Learning</a></li><li class="breadcrumb-item"><a href="../machine_learning/ml_cancer.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Worked example: classifying cancer types from gene expression</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">About R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_rstudio.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">RStudio</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../r_intro_mechanics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R mechanics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../r_basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Up and Running with R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../packages_and_dice.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Packages and more dice</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reading_and_writing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../data_structures_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">R Data Structures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vectors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Vectors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lists.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Lists: a catch-all container</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dataframes_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Data Frames</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../factors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Factors</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../eda_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda_and_univariate_brfss.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Case Study: Behavioral Risk Factor Surveillance System</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ggplot2/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exploring data with ggplot2</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../norm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Working with distribution functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../t-stats-and-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">The t-statistic and t-distribution</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../kmeans.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">K-means clustering</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Machine Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Introduction to machine learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Supervised Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/mlr3verse_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The mlr3verse framework</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/ml_cancer.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Worked example: classifying cancer types from gene expression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/ml_methylation_age.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Worked example: predicting age from DNA methylation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/ml_expression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Worked example: predicting gene expression from histone marks</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Bioconductor</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../geoquery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Accessing public omics data with GEOquery</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Storing experiments with SummarizedExperiment</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../310_microbiome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Analyzing microbiome data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../genomic_ranges_tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Genomic ranges with real ChIP-seq peaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ranges_and_signals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Genomic ranges and features</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ranges_exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../atac-seq/atac-seq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-seq</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../single_cell/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Single-cell RNA-seq analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Appendix</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../git_and_github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git and GitHub</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../additional_resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Additional resources</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ai_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dataviz.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../matrix_exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Matrix Exercises</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">22.1</span> What you’ll learn</a></li>
+  <li><a href="#a-quick-recap-of-the-mlr3-workflow" id="toc-a-quick-recap-of-the-mlr3-workflow" class="nav-link" data-scroll-target="#a-quick-recap-of-the-mlr3-workflow"><span class="header-section-number">22.2</span> A quick recap of the mlr3 workflow</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">22.3</span> Setup</a></li>
+  <li><a href="#understanding-the-problem" id="toc-understanding-the-problem" class="nav-link" data-scroll-target="#understanding-the-problem"><span class="header-section-number">22.4</span> Understanding the problem</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">22.5</span> Data preparation</a></li>
+  <li><a href="#feature-selection-and-data-cleaning" id="toc-feature-selection-and-data-cleaning" class="nav-link" data-scroll-target="#feature-selection-and-data-cleaning"><span class="header-section-number">22.6</span> Feature selection and data cleaning</a></li>
+  <li><a href="#creating-the-task" id="toc-creating-the-task" class="nav-link" data-scroll-target="#creating-the-task"><span class="header-section-number">22.7</span> Creating the task</a></li>
+  <li><a href="#splitting-the-data" id="toc-splitting-the-data" class="nav-link" data-scroll-target="#splitting-the-data"><span class="header-section-number">22.8</span> Splitting the data</a></li>
+  <li>
+<a href="#k-nearest-neighbours" id="toc-k-nearest-neighbours" class="nav-link" data-scroll-target="#k-nearest-neighbours"><span class="header-section-number">22.9</span> k-nearest-neighbours</a>
+  <ul class="collapse">
+<li><a href="#create-the-learner" id="toc-create-the-learner" class="nav-link" data-scroll-target="#create-the-learner"><span class="header-section-number">22.9.1</span> Create the learner</a></li>
+  <li><a href="#train" id="toc-train" class="nav-link" data-scroll-target="#train"><span class="header-section-number">22.9.2</span> Train</a></li>
+  <li><a href="#predict" id="toc-predict" class="nav-link" data-scroll-target="#predict"><span class="header-section-number">22.9.3</span> Predict</a></li>
+  <li><a href="#assess" id="toc-assess" class="nav-link" data-scroll-target="#assess"><span class="header-section-number">22.9.4</span> Assess</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#classification-tree" id="toc-classification-tree" class="nav-link" data-scroll-target="#classification-tree"><span class="header-section-number">22.10</span> Classification tree</a>
+  <ul class="collapse">
+<li><a href="#train-1" id="toc-train-1" class="nav-link" data-scroll-target="#train-1"><span class="header-section-number">22.10.1</span> Train</a></li>
+  <li><a href="#predict-1" id="toc-predict-1" class="nav-link" data-scroll-target="#predict-1"><span class="header-section-number">22.10.2</span> Predict</a></li>
+  <li><a href="#assess-1" id="toc-assess-1" class="nav-link" data-scroll-target="#assess-1"><span class="header-section-number">22.10.3</span> Assess</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest"><span class="header-section-number">22.11</span> Random forest</a>
+  <ul class="collapse">
+<li><a href="#train-2" id="toc-train-2" class="nav-link" data-scroll-target="#train-2"><span class="header-section-number">22.11.1</span> Train</a></li>
+  <li><a href="#predict-and-assess" id="toc-predict-and-assess" class="nav-link" data-scroll-target="#predict-and-assess"><span class="header-section-number">22.11.2</span> Predict and assess</a></li>
+  </ul>
+</li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">22.12</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">22.13</span> Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/machine_learning/ml_cancer.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/machine_learning/ml_cancer.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../machine_learning/intro.html">Machine Learning</a></li><li class="breadcrumb-item"><a href="../machine_learning/ml_cancer.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Worked example: classifying cancer types from gene expression</span></a></li></ol></nav><div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">
+<span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Worked example: classifying cancer types from gene expression</span>
+</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/machine_learning/ml_cancer.qmd"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://seandavi.github.io/">Sean Davis</a> <a href="mailto:seandavi@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://medschool.cuanschutz.edu/">
+            University of Colorado<br>Anschutz School of Medicine
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 1, 2024</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">June 2, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header><p>The earlier machine learning chapters introduced the <em>ideas</em>: the difference between supervised and unsupervised learning (<a href="../machine_learning/intro.html">Introduction</a>), the workhorse algorithms (<a href="../machine_learning/models.html">Supervised Learning</a>), and the <code>mlr3</code> framework that wraps all of them in one tidy interface (<a href="../machine_learning/mlr3verse_intro.html">The mlr3verse</a>). This is the first of three chapters where those ideas meet real data.</p>
+<p>Here we tackle a <strong>classification</strong> problem: given a tumour’s gene-expression profile, can we predict which <strong>cancer type</strong> it is? This is the first of three worked examples — the next two predict age from DNA methylation and gene expression from histone marks — and because it comes first, it also lays down the habits the others reuse: how to set up an <code>mlr3</code> analysis, how to split the data, how to select features, and how to read the results without fooling yourself.</p>
+<p>Three ideas from the <a href="../machine_learning/intro.html">introduction</a> do the heavy lifting in every one of these examples, so it is worth stating them plainly here, in the concrete terms of gene-expression classification:</p>
+<ul>
+<li>
+<strong>Feature selection.</strong> A tumour profile measures tens of thousands of genes, but most of them barely change from one sample to the next. A gene that stays flat across every tumour cannot help tell cancer types apart — it is noise. So we <em>select</em> the genes that vary the most and discard the rest, shrinking the problem to the handful of features that actually carry signal.</li>
+<li>
+<strong>The train/test split.</strong> We hold back a slice of tumours that the model never sees while it learns. Scoring it on those unseen tumours is the only honest estimate of how it will classify a <em>new</em> patient’s biopsy — the thing we actually care about.</li>
+<li>
+<strong>Overfitting.</strong> A model given too much freedom — a decision tree grown too deep, say — can memorize the exact training tumours instead of learning a rule that generalizes. We catch this by watching the gap between the training score and the test score.</li>
+</ul>
+<p>The next two chapters revisit all three from different biological angles; this is where we meet them as first principles.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The through-line for all three worked examples
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Feature selection, an honest train/test split, and vigilance against overfitting are the spine of every worked example. Here they take their plainest form: keep the most variable genes, hold out some tumours, and distrust a model that aces the training set but stumbles on the test set. Hold on to this picture — the methylation and histone-mark chapters return to each idea and add a new twist.</p>
+</div>
+</div>
+<section id="what-youll-learn" class="level2" data-number="22.1"><h2 data-number="22.1" class="anchored" data-anchor-id="what-youll-learn">
+<span class="header-section-number">22.1</span> What you’ll learn</h2>
+<ul>
+<li>Turn a real genomics dataset into an <code>mlr3</code> <strong>task</strong> with <code><a href="https://mlr3.mlr-org.com/reference/as_task_classif.html">as_task_classif()</a></code>.</li>
+<li>
+<strong>Split</strong> data into training and test sets, and explain why that split protects you from fooling yourself.</li>
+<li>
+<strong>Select features</strong> by variance, and say why selection must happen on the training data only.</li>
+<li>
+<strong>Train and predict</strong> with several learners — kNN, a classification tree, and a random forest — using the same handful of <code>mlr3</code> calls.</li>
+<li>
+<strong>Interpret</strong> a confusion matrix and an accuracy, and recognize overfitting when the test score falls below the training score.</li>
+</ul></section><section id="a-quick-recap-of-the-mlr3-workflow" class="level2 page-columns page-full" data-number="22.2"><h2 data-number="22.2" class="anchored" data-anchor-id="a-quick-recap-of-the-mlr3-workflow">
+<span class="header-section-number">22.2</span> A quick recap of the mlr3 workflow</h2>
+<p>You met the <code>mlr3</code> building blocks in <a href="../machine_learning/mlr3verse_intro.html">The mlr3verse</a>; here is the one-paragraph reminder so you can keep your eyes on the biology. Every analysis in these worked-example chapters follows the same four-step rhythm (<a href="#fig-mlr3-ecosystem" class="quarto-xref">Figure&nbsp;<span>22.1</span></a>):</p>
+<ol type="1">
+<li>
+<strong>Task</strong> — bundle your data with the name of the column you want to predict (the <em>target</em>). Classification tasks predict a category; regression tasks predict a number.</li>
+<li>
+<strong>Learner</strong> — pick an algorithm by name with <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn()</a></code>, e.g.&nbsp;<code>lrn("classif.kknn")</code>.</li>
+<li>
+<strong>Train and predict</strong> — call <code>learner$train(task, ...)</code> then <code>learner$predict(task, ...)</code>.</li>
+<li>
+<strong>Measure</strong> — score the predictions with <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs()</a></code>, e.g.&nbsp;accuracy for classification or R² for regression.</li>
+</ol>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-mlr3-ecosystem" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-mlr3-ecosystem-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/mlr3_ecosystem.png" class="img-fluid figure-img" width="536">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-mlr3-ecosystem-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.1: The mlr3 ecosystem. A consistent set of objects — tasks, learners, measures, and resampling strategies — that snap together the same way for every algorithm.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The power of <code>mlr3</code> is that this rhythm is <em>identical</em> no matter which algorithm you use. Swapping a k-nearest-neighbours model for a random forest is a one-line change to the <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn()</a></code> call; everything else stays the same. For the full tour of tasks, learners, measures, and resamplings, see <a href="../machine_learning/mlr3verse_intro.html">The mlr3verse</a>; the official <a href="https://mlr3book.mlr-org.com/">mlr3 book</a> is the deep reference.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>The single most important habit: split your data
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A model that is <em>tested</em> on the same data it was <em>trained</em> on will look far better than it really is — it can simply memorize the answers. We always hold out a <strong>test set</strong> that the model never sees during training, and we report performance from that held-out set. This is the only honest estimate of how the model will behave on new patients or new genes.</p>
+</div>
+</div>
+</section><section id="setup" class="level2" data-number="22.3"><h2 data-number="22.3" class="anchored" data-anchor-id="setup">
+<span class="header-section-number">22.3</span> Setup</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr3verse.mlr-org.com">mlr3verse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr3learners.mlr-org.com">mlr3learners</a></span><span class="op">)</span> <span class="co"># for knn</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://imbs-hl.github.io/ranger/">ranger</a></span><span class="op">)</span>       <span class="co"># for random forests</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">789</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="understanding-the-problem" class="level2" data-number="22.4"><h2 data-number="22.4" class="anchored" data-anchor-id="understanding-the-problem">
+<span class="header-section-number">22.4</span> Understanding the problem</h2>
+<p>In this example we classify <strong>cancer types</strong> from gene-expression data. The data come from <span class="citation" data-cites="brouwer-visser_regulatory_2018">Brouwer-Visser et al. (<a href="../references.html#ref-brouwer-visser_regulatory_2018" role="doc-biblioref">2018</a>)</span>, available through the Gene Expression Omnibus (GEO), a public repository of functional-genomics data. The study profiled gene expression in tumours of several types, and our question is: <strong>given a tumour’s expression profile, can we predict which cancer type it is?</strong></p>
+<p>Before building anything, it pays to answer four questions about the task:</p>
+<ul>
+<li>
+<strong>What are the features?</strong> The expression level of each gene.</li>
+<li>
+<strong>What is the target?</strong> The cancer type (a category).</li>
+<li>
+<strong>What kind of task is this?</strong> Classification — we are predicting a label, not a number.</li>
+<li>
+<strong>What is the goal?</strong> A model that assigns the correct cancer type to a tumour it has never seen.</li>
+</ul></section><section id="data-preparation" class="level2" data-number="22.5"><h2 data-number="22.5" class="anchored" data-anchor-id="data-preparation">
+<span class="header-section-number">22.5</span> Data preparation</h2>
+<p>We use the <code>GEOquery</code> package to fetch dataset <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103512">GSE103512</a>. This downloads over the network, so give it a moment.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gse</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE103512"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>GEOquery</code> was written in 2007 and returns an older Bioconductor structure, the <code>ExpressionSet</code>. As a first housekeeping step we convert it to the modern <code>SummarizedExperiment</code> (covered in the <a href="../bioc-summarizedexperiment.html">SummarizedExperiment chapter</a>).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment">SummarizedExperiment</a></span><span class="op">)</span></span>
+<span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">gse</span>, <span class="st">"SummarizedExperiment"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Let’s look at two variables of interest: the cancer type and whether each sample is tumour or normal tissue.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">`cancer.type.ch1`</span>, <span class="va">`normal.ch1`</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               normal.ch1
+cancer.type.ch1 no yes
+          BC    65  10
+          CRC   57  12
+          NSCLC 60   9
+          PCA   60   7</code></pre>
+</div>
+</div>
+<p>This table tells us how many samples we have of each cancer type, split by tumour versus normal status. Most samples are tumours (<code>normal: no</code>), with a smaller set of matched normal tissues. We’ll keep only the tumour samples for classification.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Always explore before you model
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Missing values, outliers, and unexpected categories can quietly break a machine learning model. Plots, summaries, PCA, and clustering all help you understand the data first. Time spent here saves time later — and saves you from confidently reporting a result that was an artifact all along.</p>
+</div>
+</div>
+</section><section id="feature-selection-and-data-cleaning" class="level2" data-number="22.6"><h2 data-number="22.6" class="anchored" data-anchor-id="feature-selection-and-data-cleaning">
+<span class="header-section-number">22.6</span> Feature selection and data cleaning</h2>
+<p>This dataset measures <em>thousands</em> of genes, but most of them barely change between samples and carry little signal. We will keep the 200 genes with the <strong>highest variance</strong> across samples, on the reasoning that a gene that never changes can’t help us tell cancer types apart. (Other selection strategies exist, such as ranking genes by their correlation with the outcome.)</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Select features on the training data only
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In a fully rigorous workflow, feature selection must use the <strong>training data only</strong> — never the test data. If you peek at the test data while choosing features, information leaks across the split and your test score is no longer honest. (For simplicity this example selects on the full matrix; in a real analysis, fold the selection step inside the training split.)</p>
+</div>
+</div>
+<p>The <code><a href="https://rdrr.io/r/base/apply.html">apply()</a></code> function applies a function to each row or column of a matrix. Here we apply <code><a href="https://rdrr.io/r/stats/sd.html">sd()</a></code> (standard deviation) to each row of the expression matrix to get a vector of per-gene variability, then keep the 200 most variable genes among the tumour samples.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">'exprs'</span><span class="op">)</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span>
+<span><span class="co">## keep the 200 most-variable genes, tumour samples only</span></span>
+<span><span class="va">se_small</span> <span class="op">&lt;-</span> <span class="va">se</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">sds</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span><span class="op">]</span>,</span>
+<span>               <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">$</span><span class="va">characteristics_ch1.1</span> <span class="op">==</span> <span class="st">'normal: no'</span><span class="op">]</span></span>
+<span><span class="co"># remove genes with no gene symbol</span></span>
+<span><span class="va">se_small</span> <span class="op">&lt;-</span> <span class="va">se_small</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">se_small</span><span class="op">)</span><span class="op">$</span><span class="va">Gene.Symbol</span> <span class="op">!=</span> <span class="st">''</span>, <span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To make the data easier to work with, we use one of the <code>rowData</code> columns (the gene symbol) as the row names. <code><a href="https://rdrr.io/r/base/make.names.html">make.names()</a></code> ensures those names are valid, unique R variable names.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## convert to a matrix for later use</span></span>
+<span><span class="va">expr_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se_small</span>, <span class="st">'exprs'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">expr_mat</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/make.names.html">make.names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">se_small</span><span class="op">)</span><span class="op">$</span><span class="va">Gene.Symbol</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>mlr3</code> expects samples in rows and features in columns, so we <strong>transpose</strong> the matrix and attach the cancer type as a column.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">feat_dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">expr_mat</span><span class="op">)</span></span>
+<span><span class="va">tumor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>tumor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se_small</span><span class="op">)</span><span class="op">$</span><span class="va">cancer.type.ch1</span>, <span class="va">feat_dat</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This is another good moment to check the data: confirm the dimensions, the column names, and the data types are what you expect before moving on.</p>
+</section><section id="creating-the-task" class="level2" data-number="22.7"><h2 data-number="22.7" class="anchored" data-anchor-id="creating-the-task">
+<span class="header-section-number">22.7</span> Creating the task</h2>
+<p>The first <code>mlr3</code> step is to create a <strong>task</strong> — a dataset paired with the name of the target column. Because the target (cancer type) is a category, this is a <em>classification</em> task, so we use <code><a href="https://mlr3.mlr-org.com/reference/as_task_classif.html">as_task_classif()</a></code>. The target must be a factor.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tumor</span><span class="op">$</span><span class="va">tumor_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">tumor</span><span class="op">$</span><span class="va">tumor_type</span><span class="op">)</span></span>
+<span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/as_task_classif.html">as_task_classif</a></span><span class="op">(</span><span class="va">tumor</span>, target <span class="op">=</span> <span class="st">'tumor_type'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="splitting-the-data" class="level2" data-number="22.8"><h2 data-number="22.8" class="anchored" data-anchor-id="splitting-the-data">
+<span class="header-section-number">22.8</span> Splitting the data</h2>
+<p>We randomly assign two-thirds of the samples to a <strong>training set</strong> and one-third to a <strong>test set</strong>. The model learns from the training set; we judge it on the test set it never saw. We seed the split so the result is reproducible.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
+<span><span class="va">train_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="fl">0.67</span> <span class="op">*</span> <span class="va">task</span><span class="op">$</span><span class="va">nrow</span><span class="op">)</span></span>
+<span><span class="va">test_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">setdiff</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In the next sections we train three different learners on this task — k-nearest-neighbours, a classification tree, and a random forest — and compare how each one does at predicting cancer type.</p>
+</section><section id="k-nearest-neighbours" class="level2" data-number="22.9"><h2 data-number="22.9" class="anchored" data-anchor-id="k-nearest-neighbours">
+<span class="header-section-number">22.9</span> k-nearest-neighbours</h2>
+<p>The first learner is <strong>k-nearest-neighbours</strong> (kNN). Its idea is simple: a new sample is classified by looking at the <em>k</em> most similar samples and taking a vote. The number of neighbours, <em>k</em>, is a tunable setting; we’ll use the default of 7. (<code>mlr3</code> can tune such settings automatically, but that’s beyond this chapter.)</p>
+<section id="create-the-learner" class="level3" data-number="22.9.1"><h3 data-number="22.9.1" class="anchored" data-anchor-id="create-the-learner">
+<span class="header-section-number">22.9.1</span> Create the learner</h3>
+<p>In <code>mlr3</code> an algorithm is a <strong>learner</strong>, created with <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn()</a></code> by name.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.kknn"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Calling <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn()</a></code> with no arguments lists every available learner.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;DictionaryLearner&gt; with 55 stored values
+Keys: classif.cv_glmnet, classif.debug, classif.featureless,
+  classif.glmnet, classif.kknn, classif.lda, classif.log_reg,
+  classif.multinom, classif.naive_bayes, classif.nnet, classif.qda,
+  classif.ranger, classif.rpart, classif.svm, classif.xgboost,
+  clust.agnes, clust.ap, clust.bico, clust.birch, clust.clara,
+  clust.cmeans, clust.cobweb, clust.dbscan, clust.dbscan_fpc,
+  clust.diana, clust.em, clust.fanny, clust.featureless, clust.ff,
+  clust.hclust, clust.hdbscan, clust.kkmeans, clust.kmeans,
+  clust.kproto, clust.MBatchKMeans, clust.mclust, clust.meanshift,
+  clust.optics, clust.pam, clust.protoclust, clust.SimpleKMeans,
+  clust.specc, clust.xmeans, regr.cv_glmnet, regr.debug,
+  regr.featureless, regr.glmnet, regr.kknn, regr.km, regr.lm,
+  regr.nnet, regr.ranger, regr.rpart, regr.svm, regr.xgboost</code></pre>
+</div>
+</div>
+</section><section id="train" class="level3" data-number="22.9.2"><h3 data-number="22.9.2" class="anchored" data-anchor-id="train">
+<span class="header-section-number">22.9.2</span> Train</h3>
+<p><code>learner$train()</code> takes the task and the row IDs of the training data.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We <em>could</em> inspect the trained model, but for kNN the printout is large, so this chunk is left for you to run on your own.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># output is large, so do this on your own</span></span>
+<span><span class="va">learner</span><span class="op">$</span><span class="va">model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="predict" class="level3" data-number="22.9.3"><h3 data-number="22.9.3" class="anchored" data-anchor-id="predict">
+<span class="header-section-number">22.9.3</span> Predict</h3>
+<p>Let’s first predict the classes of the <strong>training</strong> data. We already know those answers, but predicting on the training set gives us a baseline we can compare against the test set to detect overfitting.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>And now the <strong>test</strong> data — the honest evaluation:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="assess" class="level3" data-number="22.9.4"><h3 data-number="22.9.4" class="anchored" data-anchor-id="assess">
+<span class="header-section-number">22.9.4</span> Assess</h3>
+<p>A <strong>confusion matrix</strong> cross-tabulates the true class (rows) against the predicted class (columns). Correct predictions land on the diagonal; off-diagonal entries are mistakes.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span><span class="op">$</span><span class="va">confusion</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        truth
+response BC CRC NSCLC PCA
+   BC    42   0     0   0
+   CRC    0  40     0   0
+   NSCLC  1   0    44   0
+   PCA    0   0     0  35</code></pre>
+</div>
+</div>
+<p>On the training data, almost every sample falls on the diagonal — the model classifies the data it learned from very well, as expected.</p>
+<p>Accuracy summarizes this in one number: the fraction of samples classified correctly.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'classif.acc'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>classif.acc 
+  0.9938272 </code></pre>
+</div>
+</div>
+<p>Now the test set, which the model never saw during training:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="va">confusion</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        truth
+response BC CRC NSCLC PCA
+   BC    22   0     0   0
+   CRC    0  17     1   0
+   NSCLC  0   0    15   0
+   PCA    0   0     0  25</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>classif.acc 
+     0.9875 </code></pre>
+</div>
+</div>
+<p>The test accuracy is the number to trust. If it is noticeably lower than the training accuracy, the model has <em>overfit</em> — it memorized the training samples rather than learning a rule that generalizes. Compare the two numbers above: how big is the gap?</p>
+</section></section><section id="classification-tree" class="level2" data-number="22.10"><h2 data-number="22.10" class="anchored" data-anchor-id="classification-tree">
+<span class="header-section-number">22.10</span> Classification tree</h2>
+<p>A <strong>classification tree</strong> asks a series of yes/no questions about the features — for example, “is gene <em>X</em> expressed above some threshold?” — and follows the answers down branches to a predicted class. At each split it picks the feature that best separates the classes, and it keeps splitting until the groups are reasonably pure. Trees are appealing because you can <em>read</em> them.</p>
+<section id="train-1" class="level3" data-number="22.10.1"><h3 data-number="22.10.1" class="anchored" data-anchor-id="train-1">
+<span class="header-section-number">22.10.1</span> Train</h3>
+<p>We set <code>keep_model = TRUE</code> so we can inspect the fitted tree afterwards.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.rpart"</span>, keep_model <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Here is the trained model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="va">model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n= 162 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+ 1) root 162 118 NSCLC (0.26543210 0.24691358 0.27160494 0.21604938)  
+   2) CDHR5&gt;=5.101625 40   0 CRC (0.00000000 1.00000000 0.00000000 0.00000000) *
+   3) CDHR5&lt; 5.101625 122  78 NSCLC (0.35245902 0.00000000 0.36065574 0.28688525)  
+     6) ACPP&lt; 6.088431 87  43 NSCLC (0.49425287 0.00000000 0.50574713 0.00000000)  
+      12) GATA3&gt;=4.697803 41   1 BC (0.97560976 0.00000000 0.02439024 0.00000000) *
+      13) GATA3&lt; 4.697803 46   3 NSCLC (0.06521739 0.00000000 0.93478261 0.00000000) *
+     7) ACPP&gt;=6.088431 35   0 PCA (0.00000000 0.00000000 0.00000000 1.00000000) *</code></pre>
+</div>
+</div>
+<p>Trees are easy to visualize when they are small. This one has only a couple of splits, which makes the decision logic easy to follow.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr3viz.mlr-org.com">mlr3viz</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/martin-borkovec/ggparty">ggparty</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ggplot2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: partykit</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: grid</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: libcoin</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: mvtnorm</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'partykit'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:SummarizedExperiment':
+
+    width</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:GenomicRanges':
+
+    width</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:IRanges':
+
+    width</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:S4Vectors':
+
+    width</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:BiocGenerics':
+
+    width</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">learner</span>, type <span class="op">=</span> <span class="st">'ggparty'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in ggparty::geom_edge_label(): Ignoring unknown parameters:
+`label.size`</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ml_cancer_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="predict-1" class="level3" data-number="22.10.2"><h3 data-number="22.10.2" class="anchored" data-anchor-id="predict-1">
+<span class="header-section-number">22.10.2</span> Predict</h3>
+<p>As before, we predict on both the training and test sets.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
+<span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="assess-1" class="level3" data-number="22.10.3"><h3 data-number="22.10.3" class="anchored" data-anchor-id="assess-1">
+<span class="header-section-number">22.10.3</span> Assess</h3>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Performance should <strong>always</strong> be reported from an independent test set, never from the training set.</p>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span><span class="op">$</span><span class="va">confusion</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        truth
+response BC CRC NSCLC PCA
+   BC    40   0     1   0
+   CRC    0  40     0   0
+   NSCLC  3   0    43   0
+   PCA    0   0     0  35</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'classif.acc'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>classif.acc 
+  0.9753086 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="va">confusion</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        truth
+response BC CRC NSCLC PCA
+   BC    20   0     1   0
+   CRC    0  17     3   0
+   NSCLC  2   0    12   0
+   PCA    0   0     0  25</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>classif.acc 
+      0.925 </code></pre>
+</div>
+</div>
+<p>A single tree is a simple model, so it often classifies the training data less perfectly than kNN did, but it may <em>generalize</em> about as well to the test set. Look at the test accuracy and the test confusion matrix: which cancer types does the tree confuse with each other?</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Overfitting
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When the test score is much worse than the training score, the model is likely <strong>overfit</strong> — it has learned the training data’s quirks rather than a general rule. How you fix overfitting depends on the model (simpler trees, more regularization, more data), but a large train/test gap is always a signal to look more carefully at model choice and settings.</p>
+</div>
+</div>
+</section></section><section id="random-forest" class="level2" data-number="22.11"><h2 data-number="22.11" class="anchored" data-anchor-id="random-forest">
+<span class="header-section-number">22.11</span> Random forest</h2>
+<p>A <strong>random forest</strong> grows many decision trees, each on a random subset of the data and features, and averages their votes. Because the trees disagree in different ways, their combined prediction is usually more accurate and more stable than any single tree. We set <code>importance = "impurity"</code> so the model also reports how useful each gene was.</p>
+<section id="train-2" class="level3" data-number="22.11.1"><h3 data-number="22.11.1" class="anchored" data-anchor-id="train-2">
+<span class="header-section-number">22.11.1</span> Train</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">789</span><span class="op">)</span></span>
+<span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.ranger"</span>, importance <span class="op">=</span> <span class="st">"impurity"</span><span class="op">)</span></span>
+<span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can look at the fitted forest:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="va">model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Ranger result
+
+Call:
+ ranger::ranger(dependent.variable.name = task$target_names, data = task$data(),      probability = self$predict_type == "prob", importance = "impurity",      num.threads = 1L) 
+
+Type:                             Classification 
+Number of trees:                  500 
+Sample size:                      162 
+Number of independent variables:  192 
+Mtry:                             13 
+Target node size:                 1 
+Variable importance mode:         impurity 
+Splitrule:                        gini 
+OOB prediction error:             0.00 % </code></pre>
+</div>
+</div>
+<p>The printout reports an <strong>OOB (out-of-bag) error</strong>. Because each tree is trained on a bootstrap sample, the samples it <em>didn’t</em> see act as a free held-out set; the OOB error estimates test performance without needing a separate split. A low OOB error is a good sign.</p>
+<p>Random forests also give us a <strong>variable importance</strong> score — roughly, how often and how usefully each gene was used across the trees.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">learner</span><span class="op">$</span><span class="fu">importance</span><span class="op">(</span><span class="op">)</span>, <span class="fl">15</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    CDHR5     FABP1     KRT20     GATA3    LGALS4     TRPS1   SFTPB.1     EFHD1 
+ 4.668165  4.042106  3.722492  3.470107  3.271688  3.047672  2.925743  2.895864 
+   EPS8L3   TRPS1.1   GATA3.1 SLC45A3.1    TSPAN8    KLK3.1     AZGP1 
+ 2.894204  2.442827  2.432394  2.242252  2.163998  2.134062  2.119718 </code></pre>
+</div>
+</div>
+<p>The most important genes here are the ones the forest leaned on most heavily to separate the cancer types. It’s worth looking a few of them up to see whether they make biological sense — and comparing them to the gene the single tree split on.</p>
+</section><section id="predict-and-assess" class="level3" data-number="22.11.2"><h3 data-number="22.11.2" class="anchored" data-anchor-id="predict-and-assess">
+<span class="header-section-number">22.11.2</span> Predict and assess</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
+<span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span><span class="op">$</span><span class="va">confusion</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        truth
+response BC CRC NSCLC PCA
+   BC    43   0     0   0
+   CRC    0  40     0   0
+   NSCLC  0   0    44   0
+   PCA    0   0     0  35</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'classif.acc'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>classif.acc 
+          1 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="va">confusion</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        truth
+response BC CRC NSCLC PCA
+   BC    22   0     0   0
+   CRC    0  17     0   0
+   NSCLC  0   0    16   0
+   PCA    0   0     0  25</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>classif.acc 
+          1 </code></pre>
+</div>
+</div>
+<p>Compare all three test accuracies — kNN, the single tree, and the random forest. On most genomics classification problems the random forest is the strongest of the three, and it gives you the importance ranking as a bonus.</p>
+</section></section><section id="summary" class="level2" data-number="22.12"><h2 data-number="22.12" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">22.12</span> Summary</h2>
+<p>You have now run a complete classification analysis on real gene-expression data, all through the <code>mlr3</code> workflow:</p>
+<ul>
+<li>You turned a GEO dataset into an <code>mlr3</code> classification <strong>task</strong>, <strong>split</strong> it into training and test sets, and <strong>selected</strong> the 200 most-variable genes as features.</li>
+<li>You trained three learners — kNN, a single classification tree, and a random forest — and read each one’s <strong>confusion matrix</strong> and <strong>accuracy</strong>.</li>
+<li>On most genomics classification problems the random forest is the strongest of the three, and it hands you a gene-importance ranking for free.</li>
+</ul>
+<p>The disciplines you practised here recur in every analysis: <strong>split</strong> the data, <strong>select features</strong> thoughtfully, <strong>train then predict</strong>, and judge every model by its <strong>test-set</strong> score. That last habit — never trusting the training score — is the single most important thing to carry forward to the next two chapters.</p>
+</section><section id="exercises" class="level2" data-number="22.13"><h2 data-number="22.13" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">22.13</span> Exercises</h2>
+<p>Each exercise reuses objects you already built, so the solutions are quick to run.</p>
+<ol type="1">
+<li>
+<p><strong>Swap a learner.</strong> The random forest above used impurity-based importance. Train a <strong>support vector machine</strong> instead and compare its test accuracy to the random forest. (You may need <code><a href="https://rdrr.io/r/base/library.html">library(e1071)</a></code>; if it isn’t installed, fall back to comparing kNN with a different <code>k</code>.)</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">svm_learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.svm"</span><span class="op">)</span></span>
+<span><span class="va">svm_learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
+<span><span class="va">svm_pred</span> <span class="op">&lt;-</span> <span class="va">svm_learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span>
+<span><span class="va">svm_pred</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'classif.acc'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The point is that swapping algorithms is a one-line change to <code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn()</a></code> — everything else in the workflow is identical. Compare the test accuracy to the forest’s; on this small, high-variance dataset the ranking can shift, which is why you always judge on the held-out test set.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Change the feature-selection cutoff.</strong> We kept the 200 most-variable genes. Conceptually, what would you expect to happen to the random forest’s test accuracy if you kept only the top 50, or the top 1000?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Too few features (top 50) may discard genes that help separate the rarer cancer types, lowering accuracy. Too many (top 1000) reintroduces low-variance, low-signal genes that add noise and computation without much benefit — and they raise the risk of overfitting. The “right” cutoff is a balance, best chosen by comparing test-set performance across a few values rather than guessing.</p>
+</div>
+</div>
+</div>
+</li>
+</ol>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-brouwer-visser_regulatory_2018" class="csl-entry" role="listitem">
+Brouwer-Visser, Jurriaan, Wei-Yi Cheng, Anna Bauer-Mehren, et al. 2018. <span>“Regulatory <span>T</span>-Cell <span>Genes</span> <span>Drive</span> <span>Altered</span> <span>Immune</span> <span>Microenvironment</span> in <span>Adult</span> <span>Solid</span> <span>Cancers</span> and <span>Allow</span> for <span>Immune</span> <span>Contextual</span> <span>Patient</span> <span>Subtyping</span>.”</span> <em>Cancer Epidemiology, Biomarkers &amp; Prevention</em> 27 (1): 103–12. <a href="https://doi.org/10.1158/1055-9965.EPI-17-0461">https://doi.org/10.1158/1055-9965.EPI-17-0461</a>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../machine_learning/mlr3verse_intro.html" class="pagination-link" aria-label="The mlr3verse framework">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The mlr3verse framework</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../machine_learning/ml_methylation_age.html" class="pagination-link" aria-label="Worked example: predicting age from DNA methylation">
+        <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Worked example: predicting age from DNA methylation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+<li class="nav-item">
+    <a class="nav-link" href="../license.html">
+<p>License</p>
+</a>
+  </li>  
+</ul>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/machine_learning/ml_cancer.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/machine_learning/ml_cancer.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
