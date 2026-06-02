@@ -32,21 +32,21 @@ pilots (`dataframes_intro` 3.3, `t-stats-and-tests` 2.4, `bioc-summarizedexperim
 | `machine_learning/intro` | 2.3 | ~4.5 |
 | `machine_learning/mlr3verse_intro` | 2.1 | ~4.9 |
 | `machine_learning/machine_learning_mlr3` | 2.9 | ~4.5 (split — see below) |
+| `dataframes_intro` | 3.3 | ~4.7 |
+| `reading_and_writing` | 2.3 | ~4.7 |
+| `dplyr_intro_msleep` | 2.4 | ~4.7 |
+| `ggplot2/intro` | 2.7 | ~4.7 |
+| `310_microbiome` | 2.3 | ~4.7 |
+| `single_cell/setup` | 2.6 | ~4.3 |
+| `ranges_exercises` | 2.4 | ~4.9 |
 
 ## Remaining — worst first
 
-Centrality = teaching centrality (how core to the learning path). Priority ≈
-`(5 − mean) × centrality`.
-
-| Mean | Chapter | Centrality | Biggest problems |
-|:--:|---|:--:|---|
-| 2.3 | `reading_and_writing` | high | No objectives/exercises; non-bio examples; `df` variable name |
-| 2.3 | `310_microbiome` | med | Installs a GitHub-HEAD package (fragile); ends on a link dump |
-| 2.4 | `dplyr_intro_msleep` | high | msleep has no genomics motivation; duplicate objectives headers |
-| 2.4 | `ranges_exercises` | med | Global `results='hide'`; solutions are code-only |
-| 2.6 | `single_cell/setup` | high | Malformed callout `{.callout-tip)`; no objectives/exercises |
-| 2.7 | `ggplot2/intro` | high | Zero exercises in an all-worked-example chapter; title as `#` |
-| 3.3 | `dataframes_intro` | high | Pilot — not yet harmonized, but has a ready-to-paste draft in `PILOT_REVIEWS.md` (**quick win**) |
+**None — the harmonization sweep is complete.** All instructional chapters tracked
+here have been raised to the house style (motivating open, single objectives
+block, callout taxonomy, exercises with collapsible solutions, summary, `<-`
+throughout). Re-score if chapters change substantially, or fold in any chapters
+not previously tracked.
 
 ## Natural batches
 
@@ -56,13 +56,13 @@ Centrality = teaching centrality (how core to the learning path). Priority ≈
   three self-contained worked-example chapters**: `ml_cancer.qmd` (cancer
   classification from gene expression), `ml_methylation_age.qmd` (age from DNA
   methylation), and `ml_expression.qmd` (expression from histone marks).
-- **Ranges / Bioc** — `ranges_exercises` (2.4) is the only one left;
-  `ranges_and_signals`, `genomic_ranges_tutorial`, `atac-seq`, and `geoquery` are
-  all harmonized.
-- **Remaining, by priority** — `reading_and_writing` (2.3, high), then
-  `dplyr_intro_msleep` (2.4), `ggplot2/intro` (2.7), `single_cell/setup` (2.6),
-  `ranges_exercises` (2.4), `310_microbiome` (2.3), and the quick-win pilot
-  `dataframes_intro` (3.3, draft ready in `PILOT_REVIEWS.md`).
+- **Ranges / Bioc — DONE.** `ranges_exercises`, `ranges_and_signals`,
+  `genomic_ranges_tutorial`, `atac-seq`, and `geoquery` are all harmonized.
+- **Final sweep — DONE.** `dataframes_intro`, `reading_and_writing`,
+  `dplyr_intro_msleep`, `ggplot2/intro`, `310_microbiome`, `single_cell/setup`,
+  and `ranges_exercises` were harmonized together (one author per chapter,
+  parallel across chapters) and each rendered cleanly to HTML with its
+  `_freeze/` regenerated.
 
 ## Process reminders (from `STYLE_GUIDE.md` / `PILOT_REVIEWS.md`)
 
