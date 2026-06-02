@@ -90,8 +90,10 @@ jobs:
       - name: Add noindex header
         # Keep ephemeral preview copies out of search results so they never compete
         # with the canonical gh-pages book. Netlify honors a _headers file at the
-        # root of a prebuilt deploy directory.
-        run: printf '/*\n  X-Robots-Tag: noindex\n' > _book/_headers
+        # root of a prebuilt deploy directory. Block scalar (|) so the embedded
+        # "Tag: noindex" colon-space isn't parsed as YAML mapping syntax.
+        run: |
+          printf '/*\n  X-Robots-Tag: noindex\n' > _book/_headers
 
       - uses: actions/upload-artifact@v4
         with:
