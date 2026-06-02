@@ -522,38 +522,26 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../appendix.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Appendix</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../git_and_github.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git and GitHub</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Git and GitHub</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../additional_resources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Additional resources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Further reading, cheat sheets, and datasets</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ai_tools.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../dataviz.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../matrix_exercises.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Matrix Exercises</span></span></a>
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Matrix Exercises</span></span></a>
   </div>
 </li>
       </ul>
@@ -622,7 +610,7 @@ window.Quarto = {
 
 </header><p>Suppose you have gene-expression profiles from a hundred tumour biopsies and a hundred matched normal tissues, and a new, unlabelled sample arrives. Can you tell whether it is tumour or normal from its expression pattern alone? Or imagine you have DNA-methylation measurements from thousands of people of known age, and you want to estimate the biological age of someone new. These are not problems you can solve by sitting down and writing an explicit rule — there is no single gene, no simple <code>if</code> statement, that separates tumour from normal across every patient. The signal is spread across thousands of features in ways that are too subtle to codify by hand.</p>
 <p><strong>Machine learning</strong> is the set of tools for exactly this situation: instead of programming the rule yourself, you let an algorithm <em>learn</em> the rule from labelled examples, then apply it to new cases it has never seen. That last part — performing well on <em>new</em> data, not just the data you trained on — is the whole point. It is called <strong>generalization</strong>, and most of this chapter is really about how to get it and how to avoid fooling yourself into thinking you have it.</p>
-<p>Machine learning in biology is a broad and fast-moving field. <span class="citation" data-cites="greener_guide_2022">Greener et al. (<a href="../references.html#ref-greener_guide_2022" role="doc-biblioref">2022</a>)</span> give an approachable overview of the methods used in biology, and <span class="citation" data-cites="libbrecht_machine_2015">Libbrecht and Noble (<a href="../references.html#ref-libbrecht_machine_2015" role="doc-biblioref">2015</a>)</span> review their early use in genetics and genomics. This chapter is the conceptual on-ramp: what machine learning is, the three families of problems it solves, the workflow you follow, and the single most important pitfall (overfitting) to watch for. The chapters that follow put these ideas to work — a <a href="../machine_learning/models.html">tour of supervised algorithms</a> on a shared dataset, the <a href="../machine_learning/mlr3verse_intro.html">mlr3verse framework</a> for running them cleanly, and <a href="machine_learning_mlr3.qmd">worked biological examples</a> including the tumour-classification and age-from-methylation problems we just sketched.</p>
+<p>Machine learning in biology is a broad and fast-moving field. <span class="citation" data-cites="greener_guide_2022">Greener et al. (<a href="../references.html#ref-greener_guide_2022" role="doc-biblioref">2022</a>)</span> give an approachable overview of the methods used in biology, and <span class="citation" data-cites="libbrecht_machine_2015">Libbrecht and Noble (<a href="../references.html#ref-libbrecht_machine_2015" role="doc-biblioref">2015</a>)</span> review their early use in genetics and genomics. This chapter is the conceptual on-ramp: what machine learning is, the three families of problems it solves, the workflow you follow, and the single most important pitfall (overfitting) to watch for. The chapters that follow put these ideas to work — a <a href="../machine_learning/models.html">tour of supervised algorithms</a> on a shared dataset, the <a href="../machine_learning/mlr3verse_intro.html">mlr3verse framework</a> for running them cleanly, and worked biological examples — including the <a href="../machine_learning/ml_cancer.html">tumour-classification</a> and <a href="../machine_learning/ml_methylation_age.html">age-from-methylation</a> problems we just sketched.</p>
 <section id="what-youll-learn" class="level2" data-number="19.1"><h2 data-number="19.1" class="anchored" data-anchor-id="what-youll-learn">
 <span class="header-section-number">19.1</span> What you’ll learn</h2>
 <ul>
@@ -641,7 +629,7 @@ window.Quarto = {
 <li>
 <strong>Regression</strong> predicts a number. <em>What is this patient’s age? What is the expression level of this gene?</em> The answer is a continuous value.</li>
 </ul>
-<p><strong>Unsupervised learning</strong> applies when you have the features but <em>no</em> labels — you do not have a known answer to predict. Instead, the algorithm looks for structure hidden in the data itself. <strong>Clustering</strong> groups similar samples together; you might cluster single cells by their expression profiles to discover cell types nobody labelled in advance. <strong>Dimensionality reduction</strong> (like PCA) finds the few underlying factors that explain most of the variation across thousands of genes. These methods are often the first thing you reach for when you want to <em>explore</em> a new dataset before you commit to a specific prediction.</p>
+<p><strong>Unsupervised learning</strong> applies when you have the features but <em>no</em> labels — you do not have a known answer to predict. Instead, the algorithm looks for structure hidden in the data itself. <strong>Clustering</strong> groups similar samples together; you might cluster single cells by their expression profiles to discover cell types nobody labelled in advance. The <a href="../kmeans.html">k-means clustering chapter</a> works through a complete clustering example on real yeast gene-expression data. <strong>Dimensionality reduction</strong> (like PCA) finds the few underlying factors that explain most of the variation across thousands of genes. These methods are often the first thing you reach for when you want to <em>explore</em> a new dataset before you commit to a specific prediction.</p>
 <p><strong>Reinforcement learning</strong> is a different shape of problem altogether. Rather than learning from a fixed pile of examples, an agent takes actions in an environment and receives rewards or penalties, improving its decisions through trial and error. It powers game-playing systems and robotics, and is appearing in areas like experimental design and molecule generation, but it needs specialized techniques and a lot of compute. We mention it for completeness; the rest of this part of the book focuses on supervised and unsupervised learning, which cover the great majority of everyday biological data analysis.</p>
 <table class="table">
 <colgroup>
