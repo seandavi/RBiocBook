@@ -55,3 +55,74 @@ jobs:
         with:
           target: gh-pages
           render: false
+
+  # Fast HTML-only Netlify deploy preview for PRs. Runs alongside (not instead of)
+  # the full R-CMD-check job, so pdf/epub breakage is still caught on the PR.
+  preview-render:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/seandavi/rbiocbook:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: read
+      packages: read
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install quarto titlepages extension
+        run: quarto install extension --no-prompt nmfs-opensci/quarto_titlepages
+
+      - name: Render (HTML only)
+        # Committed _freeze/ means only changed chapters re-execute; the rest reuse
+        # frozen results, so previews stay fast.
+        run: quarto render --to html
+
+      - name: Add noindex header
+        # Keep ephemeral preview copies out of search results so they never compete
+        # with the canonical gh-pages book. Netlify honors a _headers file at the
+        # root of a prebuilt deploy directory.
+        run: printf '/*\n  X-Robots-Tag: noindex\n' > _book/_headers
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: book-html
+          path: _book
+
+  # Deploy job runs on a stock runner (not the R container) because the Netlify
+  # action is a Node action and the render image has no Node.
+  preview-deploy:
+    if: github.event_name == 'pull_request'
+    needs: preview-render
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # post the preview URL as a PR comment
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: book-html
+          path: _book
+
+      - name: Deploy preview to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: _book
+          production-deploy: false
+          deploy-message: "PR #${{ github.event.number }} preview"
+          enable-pull-request-comment: true
+          enable-commit-comment: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5
