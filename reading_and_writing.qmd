@@ -2,40 +2,59 @@
 title: "Reading and writing data files"
 ---
 
-## Introduction
+Almost no analysis starts inside R. Your data lives somewhere else first — an
+expression matrix exported from an instrument, a sample sheet a collaborator
+typed into Excel, a public dataset posted on a government website. Before you can
+do anything useful, you have to get that tabular data *into* R, and once you've
+cleaned or summarized it, you'll often need to get it back *out* to share with
+someone who does not use R.
 
-In this chapter, we will discuss how to read and write data files in R. Data files are essential for storing and sharing data across different platforms and applications. R provides a variety of functions and packages to read and write data files in different formats, such as text files, CSV files, Excel files. By mastering these functions, you can efficiently import and export data in R, enabling you to perform data analysis and visualization tasks effectively.
+This chapter is about that round trip. You'll write a small table of genes and
+their expression values to disk, read it back, pull a real dataset straight from
+a URL, and do the same with Excel files. None of it is hard once you know which
+function to reach for — and knowing that is most of the battle.
 
-## RStudio Projects: Organizing Your Work
+## What you'll learn
 
-Before diving into reading and writing files, it's essential to understand how to organize your work effectively. RStudio Projects provide a powerful way to keep your files, scripts, and data organized in a self-contained workspace.
+- Organize an analysis in an RStudio Project so your file paths stay portable.
+- Write a data frame to a CSV file with `write_csv()` and read it back with
+  `read_csv()`.
+- Read a CSV directly from a URL, without downloading it by hand.
+- Read and write Excel files with `read_excel()` and `write_xlsx()`.
+- Recognize when other formats (Google Sheets, JSON, databases) need a different
+  package.
 
-### What are RStudio Projects?
+## Organizing your work with RStudio Projects {#sec-rstudio-projects}
 
-An RStudio Project is a special folder that contains all the files associated with a particular analysis or research project. When you create a project, RStudio creates a `.Rproj` file that serves as the anchor for your project workspace. This approach offers several key benefits:
+Before you read or write a single file, it helps to decide *where* those files
+live. An RStudio Project is a folder that holds everything for one analysis —
+scripts, data, and outputs — together in one place. When you create a project,
+RStudio drops a `.Rproj` file into the folder, and that file anchors your
+workspace.
 
-- **Consistent working directory**: The project folder automatically becomes your working directory
-- **File organization**: All related files (scripts, data, outputs) are kept together
-- **Reproducibility**: Others can easily run your code without worrying about file paths
-- **Version control integration**: Projects work seamlessly with Git and GitHub
+Working in a project buys you a few things:
 
-### Creating an RStudio Project
+- **A consistent working directory.** Open the project and your working
+  directory is automatically the project folder. No more guessing where R thinks
+  it is.
+- **Everything in one place.** Scripts, data, and outputs travel together.
+- **Reproducibility.** A collaborator can open your project and run your code
+  without rewriting any paths.
+- **Version control.** Projects work cleanly with Git and GitHub.
 
-You can create a new RStudio Project in several ways:
+### Creating a project
 
-1. **File menu**: Go to `File > New Project...`
-2. **Project dropdown**: Click the project dropdown in the top-right corner and select "New Project"
-3. **Choose New Directory**: Create a project in a new folder.
+You can make a new project from **File > New Project...**, or from the project
+dropdown in the top-right corner of RStudio. You'll be offered three choices:
 
-When creating a project, you have three main options:
+- **New Directory** — start a fresh project folder.
+- **Existing Directory** — turn a folder you already have into a project.
+- **Version Control** — clone a repository from GitHub.
 
-- **New Directory**: Create a fresh project folder
-- **Existing Directory**: Turn an existing folder into a project
-- **Version Control**: Clone a repository from GitHub or other version control systems
+### A sensible project layout
 
-### Project Structure Best Practices
-
-A well-organized project typically follows a consistent structure (that YOU define). Here's a common structure that you might consider:
+A good project has a predictable shape — one that *you* define and then stick to.
+A common starting point:
 
 ```
 my_analysis_project/
@@ -52,194 +71,314 @@ my_analysis_project/
 └── .gitignore
 ```
 
-This structure separates raw data from processed data, keeps scripts organized, and provides clear locations for outputs.
+This keeps raw data separate from processed data, scripts in one place, and
+outputs where you can find them later.
 
-### Working Directories and File Paths
+### Why this fixes file paths
 
-One of the most significant advantages of using RStudio Projects is that they solve the common problem of file path management. When you open a project, RStudio automatically sets the working directory to the project folder. This means:
+The biggest practical payoff is path management. When you open a project,
+RStudio sets the working directory to the project folder, so you can refer to
+files *relative* to that folder instead of spelling out the full path from the
+root of your hard drive.
 
 ```{r eval=FALSE}
-# Instead of using absolute paths like this:
-df <- read.csv("/Users/username/Documents/my_analysis/data/dataset.csv")
+# An absolute path is tied to one machine and one user:
+expr <- read.csv("/Users/username/Documents/my_analysis/data/dataset.csv")
 
-# You can use relative paths like this:
-df <- read.csv("data/dataset.csv")
+# A relative path works for anyone who opens the project:
+expr <- read.csv("data/dataset.csv")
 ```
 
-Relative paths make your code portable—anyone who opens your project will be able to run your scripts without modifying file paths.
+::: {.callout-warning}
+## Absolute paths break reproducibility
 
-### The `here` Package for Robust File Paths [optional]
+An absolute path like `/Users/username/Documents/...` only exists on *your*
+computer. Email that script to a colleague and the very first line fails for
+them. Relative paths (`data/dataset.csv`), anchored by a project, are the habit
+that keeps your code portable.
+:::
 
-For even more robust file path management, especially in complex projects or when using R Markdown documents, the `here` package is invaluable:
+::: {.callout-tip}
+## The `here` package for robust paths
+
+In larger projects — especially ones with notebooks tucked into subfolders — the
+`here` package makes paths bulletproof. `here()` always resolves from the project
+root (the folder with the `.Rproj` file), no matter which subfolder your script
+sits in:
 
 ```{r eval=FALSE}
 install.packages("here")
 library(here)
 
-# The here() function always refers to the project root
-df <- read.csv(here("data", "dataset.csv"))
+expr <- read.csv(here("data", "dataset.csv"))
 ```
+:::
 
-The `here` package works by finding the `.Rproj` file and treating that location as the project root, regardless of where your current script is located within the project hierarchy.
+When you share a project folder (or push it to GitHub), a collaborator can clone
+it, open the `.Rproj` file, and run your scripts with no path edits at all. That
+seamless hand-off is what makes an analysis credible and repeatable.
 
-### Projects and Reproducibility
-
-RStudio Projects can play a key (but optional) role in creating reproducible analyses. When you share a project folder (or push it to GitHub), collaborators can:
-
-1. Download/clone the entire project
-2. Open the `.Rproj` file
-3. Run your scripts without any setup or path modifications
-
-This seamless workflow is essential for collaborative research and makes your work more credible and verifiable.
-
-Now that we understand how to organize our work with RStudio Projects, let's explore how to read and write the data files that will live within these organized project structures.
+Now that you have a place to put files, let's read and write some.
 
 ## CSV files
 
-Comma-Separated Values (CSV) files are a common file format for storing tabular data. They consist of rows and columns, with each row representing a record and each column representing a variable or attribute. CSV files are widely used for data storage and exchange due to their simplicity and compatibility with various software applications. In R, you can read and write CSV files using the `read.csv()` and `write.csv()` functions, respectively. A commonly used alternative is to use the `readr` package, which provides faster and more user-friendly functions for reading and writing CSV files.
+A CSV ("comma-separated values") file is the lingua franca of tabular data:
+plain text, one row per line, columns separated by commas. Nearly every tool —
+Excel, Python, databases, sequencing pipelines — can read and write CSV, which is
+exactly why it's so useful for moving data around.
 
-### Writing a CSV file
-
-Since we are going to use the `readr` package, we need to install it first. You can install the `readr` package using the following command:
+Base R reads and writes CSV with `read.csv()` and `write.csv()`. We'll use the
+`readr` package instead, which provides `read_csv()` and `write_csv()`. They are
+faster, give cleaner output, and guess column types more sensibly. Install it
+once:
 
 ```{r eval=FALSE}
 install.packages("readr")
 ```
 
-Once the package is installed, you can load it into your R session using the `library()` function:
+Then load it at the start of your session:
 
 ```{r}
 library(readr)
 ```
 
-Since we don't have a CSV file sitting around, let's create a simple data frame to write to a CSV file. Here's an example data frame:
+### Writing a CSV file
+
+We need something to write, so let's build a small biological data frame: a
+handful of genes, each with a symbol and a measured expression value.
 
 ```{r}
-df <- data.frame(
-  id = c(1, 2, 3, 4, 5),
-  name = c("Alice", "Bob", "Charlie", "David", "Eve"),
-  age = c(25, 30, 35, 40, 45)
+expr <- data.frame(
+  gene_id    = c("YAL001C", "YAL002W", "YAL003W", "YAL005C", "YAL007C"),
+  symbol     = c("TFC3", "VPS8", "EFB1", "SSA1", "ERP2"),
+  expression = c(8.2, 5.1, 11.7, 9.4, 6.8)
 )
+expr
 ```
 
-Now, you can write this data frame to a CSV file using the `write_csv()` function from the `readr` package. Here's how you can do it:
+Each row is one gene; the columns mix text (`gene_id`, `symbol`) and numbers
+(`expression`), which is the everyday shape of real expression data. Now write it
+to disk with `write_csv()`:
 
 ```{r}
-write_csv(df, "data.csv")
+write_csv(expr, "data.csv")
 ```
 
-You can check the current working directory to see if the CSV file was created successfully. If you want to specify a different directory or file path, you can provide the full path in the `write_csv()` function. If you have created an RStudio Project, the file will be saved in the project directory by default.
+That call created a file named `data.csv` in your working directory. You can
+confirm it landed where you expect:
 
 ```{r}
-# see what the current working directory is
+# Where am I working right now?
 getwd()
-# and check to see that the file was created
+# Did the file get created?
 dir(pattern = "data.csv")
 ```
 
+If you wanted the file somewhere else, you'd pass a fuller path (for example
+`"outputs/tables/data.csv"`). Inside an RStudio Project, that path is relative to
+the project folder.
+
 ### Reading a CSV file
 
-Now that we have a CSV file, let's read it back into R using the `read_csv()` function from the `readr` package. Here's how you can do it:
+Reading the file back is the mirror image — `read_csv()`:
 
 ```{r}
-df2 <- read_csv("data.csv")
+expr_in <- read_csv("data.csv")
 ```
 
-You can check the structure of the data frame `df2` to verify that the data was read correctly:
+Notice the message `readr` prints: it tells you how it guessed each column's
+type (text vs. number). Let's look at what came back:
 
 ```{r}
-df2
+expr_in
 ```
 
-The `readr` package can read CSV files with various delimiters, headers, and data types, making it a versatile tool for handling tabular data in R. It can also read CSV files _directly from web locations_ like so:
+The genes and their expression values round-tripped intact. The
+`gene_id` and `symbol` columns came back as character, `expression` as a number
+(`dbl`) — `readr` inferred all of that automatically.
+
+### Reading a CSV straight from the web
+
+`read_csv()` is not limited to files on your own disk. Hand it a URL and it will
+fetch and parse the file in one step. This matters because a great deal of useful
+data lives on public websites, and reading it directly — rather than downloading
+by hand — keeps your analysis reproducible: anyone who runs your script pulls the
+same data from the same place.
+
+As an example, the `palmerpenguins` project publishes its penguin body
+measurements as a public CSV on GitHub:
 
 ```{r}
-df3 <- read_csv("https://data.cdc.gov/resource/pwn4-m3yp.csv")
+penguins <- read_csv("https://raw.githubusercontent.com/allisonhorst/palmerpenguins/main/inst/extdata/penguins.csv")
+penguins
 ```
 
-The dataset that you just downloaded is described here: [Covid-19 data from CDC](https://data.cdc.gov/Case-Surveillance/Weekly-United-States-COVID-19-Cases-and-Deaths-by-/pwn4-m3yp/about_data). As you can see, the `read_csv()` function automatically detects the structure of the CSV file and imports it into a data frame in R. 
-Using this approach, you can easily read CSV files from various sources, including local files and online datasets.
-Particularly for analysis of public datasets, this method is very useful as it allows you to access and analyze data without needing to download it manually and provides a high degree of reproducibility in your analyses.
+The dataset — bill and flipper measurements for three penguin species — is
+documented [here](https://allisonhorst.github.io/palmerpenguins/). The point is
+not the penguins themselves: it's that `read_csv()` detected the file's structure
+over the network and handed you a data frame, exactly as it did for your local
+file. Any public CSV, biological or otherwise, comes in the same way.
 
 ## Excel files
 
-Microsoft Excel files are another common file format for storing tabular data. Excel files can contain multiple sheets, formulas, and formatting options, making them a popular choice for data storage and analysis. In R, you can read and write Excel files using the `readxl` package. This package provides functions to import and export data from Excel files, enabling you to work with Excel data in R.
+Excel spreadsheets (`.xlsx`) are everywhere in biology — sample sheets, plate
+layouts, hand-curated gene lists. Unlike CSV, an Excel file can hold multiple
+sheets, formulas, and formatting, so it needs a dedicated package. Reading is
+handled by `readxl`; writing by `writexl`.
 
 ### Reading an Excel file
 
-To read an Excel file in R, you need to install and load the `readxl` package. You can install the `readxl` package using the following command:
+Install and load `readxl`:
 
 ```{r eval=FALSE}
 install.packages("readxl")
 ```
 
-Once the package is installed, you can load it into your R session using the `library()` function:
-
 ```{r}
 library(readxl)
 ```
 
-Now, you can read an Excel file using the `read_excel()` function from the `readxl` package. We don't have an excel file available, so let's download one from the internet. Unlike with CSV riles, R needs to download the file first before reading it. Here's an example of how to use R to download an Excel file:
+We don't have an Excel file lying around, and — unlike `read_csv()` — `readxl`
+can't read straight from a URL. So we first *download* the file, then read it from
+disk. Here's a small public example spreadsheet:
 
 ```{r}
-download.file('https://www.w3resource.com/python-exercises/pandas/excel/SaleData.xlsx', 'SaleData.xlsx')
+download.file(
+  "https://www.w3resource.com/python-exercises/pandas/excel/SaleData.xlsx",
+  "SaleData.xlsx",
+  mode = "wb"
+)
 ```
 
-You can check the current working directory to see if the Excel file was downloaded successfully:
+The `mode = "wb"` ("write binary") matters for non-text files like `.xlsx`;
+without it, the download can be corrupted on some platforms. Confirm it arrived:
 
 ```{r}
-dir('.')
+dir(pattern = "SaleData.xlsx")
 ```
 
-Now, you can read the Excel file into R using the `read_excel()` function:
+Now read it with `read_excel()`:
 
 ```{r}
-df_excel <- read_excel("SaleData.xlsx")
+sales <- read_excel("SaleData.xlsx")
+sales
 ```
 
-You can check the structure of the data frame `df_excel` to verify that the data was read correctly:
-
-```{r}
-df_excel
-```
-
-The `readxl` package provides various options to read Excel files with multiple sheets, specific ranges, and data types, making it a versatile tool for handling Excel data in R.
+`read_excel()` has options for choosing a specific sheet (`sheet =`), a cell range
+(`range =`), or how column types are guessed — handy when a spreadsheet has more
+than one tab or some messy header rows.
 
 ### Writing an Excel file
 
-To write an Excel file in R, you can use the `write_xlsx()` function from the `writexl` package. You can install the `writexl` package using the following command:
+To go the other direction, use `write_xlsx()` from `writexl`. Install and load it:
 
 ```{r eval=FALSE}
 install.packages("writexl")
 ```
 
-Once the package is installed, you can load it into your R session using the `library()` function:
-
 ```{r}
 library(writexl)
 ```
 
-The `write_xlsx()` function allows you to write a data frame to an Excel file. Here's an example:
+Then write our gene expression data frame to an `.xlsx` file:
 
 ```{r}
-write_xlsx(df, "data.xlsx")
+write_xlsx(expr, "data.xlsx")
 ```
 
-You can check the current working directory to see if the Excel file was created successfully. If you want to specify a different directory or file path, you can provide the full path in the `write_xlsx()` function.
+And confirm it was created:
 
 ```{r}
-# see what the current working directory is
 getwd()
-# and check to see that the file was created
 dir(pattern = "data.xlsx")
 ```
 
-And, of course, if you find the file on your computer, you can open it in Excel to verify that the data was written correctly.
+If you open `data.xlsx` in Excel, you'll see the same five genes and their
+expression values you started with.
 
-## Additional options
+## Additional formats
 
-- Google Sheets: You can read and write data from Google Sheets using the `googlesheets4` package. This package provides functions to interact with Google Sheets, enabling you to import and export data from Google Sheets to R.
-- JSON files: You can read and write JSON files using the `jsonlite` package. This package provides functions to convert R objects to JSON format and vice versa, enabling you to work with JSON data in R.
-- Database files: You can read and write data from database files using the `DBI` and `RSQLite` packages. These packages provide functions to interact with various database systems, enabling you to import and export data from databases to R.
+CSV and Excel cover most of what you'll meet, but R reads and writes many other
+formats too. When you hit one, reach for the matching package:
 
+- **Google Sheets** — `googlesheets4` reads and writes sheets directly from your
+  Google account.
+- **JSON** — `jsonlite` converts between R objects and JSON, common for data
+  pulled from web APIs.
+- **Databases** — `DBI` together with a backend like `RSQLite` lets you query a
+  database and pull results straight into a data frame.
 
+The pattern is always the same: find the package for the format, then look for its
+`read_*` and `write_*` functions.
+
+## Exercises
+
+Use the `expr` data frame from this chapter (five yeast genes with a `symbol` and
+an `expression` value) unless a problem says otherwise.
+
+1. **Round-trip a CSV.** Write `expr` to a file called `genes.csv`, then read it
+   into a new object called `genes_in`. Confirm the file exists with `dir()`.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   write_csv(expr, "genes.csv")
+   genes_in <- read_csv("genes.csv")
+   dir(pattern = "genes.csv")
+   ```
+   `write_csv()` saves it; `read_csv()` brings it back. The file name is just a
+   string, so you can call it anything you like.
+   :::
+
+2. **Read a column back.** From `genes_in`, print just the `symbol` column.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   genes_in$symbol
+   ```
+   The `$` operator pulls one column out of a data frame as a vector — the same
+   trick you used in the data frames chapter.
+   :::
+
+3. **Save to Excel.** Write `expr` to `genes.xlsx` and confirm it was created.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   write_xlsx(expr, "genes.xlsx")
+   dir(pattern = "genes.xlsx")
+   ```
+   `write_xlsx()` from `writexl` writes a `.xlsx` file with no need for Excel to
+   be installed.
+   :::
+
+4. **Why a relative path?** A colleague sends you a script whose first line is
+   `read.csv("/Users/dana/project/data/counts.csv")`. It fails on your machine.
+   Why, and what would you change it to?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   That absolute path points to a folder on Dana's computer that doesn't exist on
+   yours. Inside an RStudio Project, a relative path like
+   `read.csv("data/counts.csv")` works for anyone who opens the project, because
+   the working directory is the project folder.
+   :::
+
+## Summary
+
+You can now move tabular data in and out of R in both directions:
+
+- **Organize first.** An RStudio Project gives you a stable working directory so
+  relative paths (`data/file.csv`) stay portable; absolute paths do not.
+- **CSV** — `write_csv()` saves a data frame, `read_csv()` reads it back, and
+  `read_csv()` will even read straight from a URL for reproducible access to
+  public data.
+- **Excel** — `read_excel()` reads `.xlsx` (download first; it can't read a URL),
+  and `write_xlsx()` writes one.
+- **Other formats** — Google Sheets, JSON, and databases each have a package
+  (`googlesheets4`, `jsonlite`, `DBI`/`RSQLite`) that follows the same
+  `read_*`/`write_*` pattern.
+
+With data flowing freely in and out, you're ready to spend your time on the part
+that matters: the analysis.
