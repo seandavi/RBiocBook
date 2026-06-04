@@ -1,117 +1,277 @@
+---
+title: "Accessing public omics data with GEOquery"
+---
 
-# Accessing and working with public omics data
+Someone has already run the experiment you need. Thousands of expression
+studies — microarray and RNA-seq, across nearly every tissue and disease — sit
+in a public archive called the **Gene Expression Omnibus (GEO)**, free to
+download and reanalyze. Suppose you read a paper comparing tumor and normal
+tissue across several cancers and you want to *see the data for yourself*:
+pull it down, check how the samples group, and ask whether tumor and normal
+really separate. That is exactly the kind of reuse GEO exists for.
 
-## Background
+In this chapter you'll do that end to end. You'll fetch a real published
+dataset with the `GEOquery` package, load it into a `SummarizedExperiment` (the
+container from the previous chapter), keep the most variable genes, and run a
+**principal component analysis (PCA)** to visualize how the samples relate. The
+data come from a study of immune gene expression in matched normal and tumor
+tissue [@brouwer-visser_regulatory_2018], deposited as accession
+[GSE103512][GSE103512].
 
-The data we are going to access are from [this paper](https://doi.org/10.1158/1055-9965.EPI-17-0461). 
+## What you'll learn
 
-> Background: The tumor microenvironment is an important factor in cancer immunotherapy response. To further understand how a tumor affects the local immune system, we analyzed immune gene expression differences between matching normal and tumor tissue.Methods: We analyzed public and new gene expression data from solid cancers and isolated immune cell populations. We also determined the correlation between CD8, FoxP3 IHC, and our gene signatures.Results: We observed that regulatory T cells (Tregs) were one of the main drivers of immune gene expression differences between normal and tumor tissue. A tumor-specific CD8 signature was slightly lower in tumor tissue compared with normal of most (12 of 16) cancers, whereas a Treg signature was higher in tumor tissue of all cancers except liver. Clustering by Treg signature found two groups in colorectal cancer datasets. The high Treg cluster had more samples that were consensus molecular subtype 1/4, right-sided, and microsatellite-instable, compared with the low Treg cluster. Finally, we found that the correlation between signature and IHC was low in our small dataset, but samples in the high Treg cluster had significantly more CD8+ and FoxP3+ cells compared with the low Treg cluster.Conclusions: Treg gene expression is highly indicative of the overall tumor immune environment.Impact: In comparison with the consensus molecular subtype and microsatellite status, the Treg signature identifies more colorectal tumors with high immune activation that may benefit from cancer immunotherapy. 
+By the end of this chapter you will be able to:
 
-In this little exercise, we will:
+- Download a published dataset from GEO with `getGEO()`.
+- Convert the result into a `SummarizedExperiment` and inspect its parts.
+- Summarize sample annotations with `table()`.
+- Filter an expression matrix down to its most variable genes.
+- Run PCA with `prcomp()` and plot the samples to see how they group.
 
-1. Access public omics data using the GEOquery package
-2. Get an opportunity to work with another SummarizedExperiment object.
-3. Perform a simple unsupervised analysis to visualize these public data.
+This chapter builds directly on the `SummarizedExperiment` chapter. If the words
+`assay()`, `colData()`, or "rows are genes, columns are samples" don't feel
+familiar yet, read that chapter first — here we'll lean on it rather than
+re-explain the object's anatomy.
 
-## GEOquery to PCA
+::: {.callout-tip}
+## Installing GEOquery
 
-The first step is to install the [R] package [GEOquery]. This package allows us to access data from the Gene Expression Omnibus (GEO) database. GEO is a public repository of omics data. 
+`GEOquery` is a Bioconductor package. Install it once with `BiocManager`; you
+won't need to run this again:
 
 ```{r geoquery00, eval=FALSE}
 BiocManager::install("GEOquery")
 ```
+:::
 
-GEOquery has only one commonly used function, `getGEO()` which takes a GEO accession number as an argument. The GEO accession number is a unique identifier for a dataset. 
+## Fetching a dataset from GEO
 
-
-Use the [GEOquery] package to fetch data about [GSE103512].
-
+`GEOquery` has essentially one function you'll reach for: `getGEO()`. You hand it
+a GEO **accession number** — the unique ID for a dataset, here `"GSE103512"` —
+and it downloads the data over the network.
 
 ```{r geoquery10, echo=TRUE, cache=TRUE, message=FALSE}
 library(GEOquery)
-gse = getGEO("GSE103512")[[1]]
+gse <- getGEO("GSE103512")[[1]]
 ```
 
-You might ask why we are using `[[1]]` at the end of the `getGEO()` function. The reason is that `getGEO()` returns a list of `GSE` objects. We are only interested in the first one (and in this case, the only one).
-We return a list of `GSE` objects because in the early days, it was not unusual to have a single GEO accession number represent multiple datasets. While uncommon now, we've kept the convention since lots of "older" data
-is still quite useful. 
+::: {.callout-note}
+## Why the `[[1]]` and the conversion later?
 
-Again, a historically-derived detail, is to convert from the older Bioconductor data structure (GEOquery was written in 2007), the `ExpressionSet`, to the newer `SummarizedExperiment`. 
+Two small historical quirks are worth a moment, because they trip up everyone
+the first time.
 
-```{r message=FALSE}
+First, `getGEO()` returns a **list** of datasets, not a single one. In the early
+days a single accession could bundle several datasets, so the function always
+returns a list. That's uncommon now, but the convention stayed because so much
+older data is still useful — hence the `[[1]]` to grab the first (and here,
+only) element.
+
+Second, `GEOquery` was written in 2007 and hands you data in the older
+Bioconductor container, the `ExpressionSet`. We'll convert it to the modern
+`SummarizedExperiment` in the next step so we can use the accessors you already
+know.
+:::
+
+Now convert the `ExpressionSet` into a `SummarizedExperiment` with `as()`:
+
+```{r convert, message=FALSE}
 library(SummarizedExperiment)
-se = as(gse, "SummarizedExperiment")
+se <- as(gse, "SummarizedExperiment")
+se
 ```
 
-Use some code to determine the answers to the following:
+Printing `se` confirms what you have: a `SummarizedExperiment` whose rows are
+genes (features) and whose columns are samples. The `assay()` holds the
+expression matrix, and `colData()` holds the per-sample annotations — the same
+three-part structure from the previous chapter.
 
-- What is the class of `se`?
-- What are the dimensions of `se`?
-- What are the dimensions of the `assay` slot of `se`?
-- What are the dimensions of the `colData` slot of `se`?
-- What variables are in the `colData` slot of `se`?
-
-
-Examine two variables of interest, cancer type and tumor/normal status. The `with` function is a convenience to allow us to access variables in a data frame by name (rather than having to do `dataframe$variable_name`. Recalling that the `table` function is a convenient way to summarize the counts of unique values in a vector, we can use `with` to access the variables of interest and `table` to summarize the counts of unique values. 
-
-```{r geoquery20,echo=TRUE,cache=TRUE}
-with(colData(se),table(`cancer.type.ch1`,`normal.ch1`))
+```{r dims, echo=TRUE}
+dim(se)
 ```
 
-- How many samples are there of each cancer type?
-- How many samples are there of each tumor/normal status?
+So this experiment has `r nrow(se)` genes measured across `r ncol(se)` samples.
+The expression values live in the assay named `"exprs"` (a leftover name from the
+`ExpressionSet` days), and you reach them with `assay(se, "exprs")`.
 
+## Summarizing the sample annotations
 
-When performing unsupervised analysis, it is common to filter genes by variance to find the most informative genes. It is common practice to filter genes by standard deviation or some other measure of variability and keep the top X percent of them when performing dimensionality reduction. There is not a single right answer to what percentage to use, so try a few to see what happens. In the example code, I chose to use the top 500 genes by standard deviation, but you can play with the threshold to see what happens.
+Before any analysis, look at what the samples *are*. The interesting variables
+here are the cancer type and whether each sample is tumor or normal tissue.
+They live in `colData(se)` under the names `cancer.type.ch1` and `normal.ch1`.
 
-Recall that the `assay` function is used to access the data matrix of the `SummarizedExperiment` object. 
+The `table()` function counts unique values, and `with()` lets you refer to
+those column names directly instead of typing `colData(se)$...` for each one:
 
-Think through the code below and then run it. 
-
-```{r sds,cache=TRUE,echo=TRUE}
-sds = apply(assay(se, 'exprs'),1,sd)
-dat = assay(se, 'exprs')[order(sds,decreasing = TRUE)[1:500],]
+```{r geoquery20, echo=TRUE, cache=TRUE}
+with(colData(se), table(`cancer.type.ch1`, `normal.ch1`))
 ```
 
-If you don't recognize the function `apply`, it is a function that applies a function to each row or column of a matrix. In this case, we are applying the `sd` function to each row of the data matrix. The `order` function is used to sort the standard deviations in decreasing order (when `decreasing=TRUE`). And the `[1:500]` is used to subset the data matrix to the top 500 genes by standard deviation. 
+Read this as a grid: each row is a cancer type, and the two columns split it
+into tumor (`no`, i.e. *not* normal) and normal samples. Most cancer types here
+have both tumor and matched normal tissue, with tumor samples outnumbering
+normals — exactly the design you'd want for a tumor-vs-normal comparison. A
+quick table like this is the cheapest possible sanity check that the dataset
+contains what the paper claimed.
 
-Perform PCA and prepare for plotting. We will be using ggplot2, so
-we need to make a data.frame before plotting.  
+## Keeping the most variable genes
 
-```{r mds,echo=TRUE,cache=TRUE}
+We want to see how the samples group. Most of the genes barely change from
+sample to sample, and those flat genes only add noise. A standard move before
+dimensionality reduction is to keep just the **most variable** genes — the ones
+actually carrying the signal that distinguishes samples.
+
+::: {.callout-note}
+## Why filter to high-variance genes before PCA?
+
+PCA looks for the directions in which your samples differ most. A gene whose
+expression is nearly constant everywhere contributes almost nothing to those
+differences — it's dead weight that dilutes the signal and slows the
+computation. Ranking genes by their **standard deviation** and keeping the top
+slice focuses PCA on the genes that vary, which usually makes the biological
+structure (tumor vs. normal, one cancer type vs. another) far easier to see.
+There's no single correct cutoff; 500 genes is a reasonable starting point, and
+you're encouraged to try others.
+:::
+
+Compute each gene's standard deviation with `apply()` (which applies a function
+across the rows or columns of a matrix — here, `sd` to each row, `1` meaning
+"by row"), then use `order()` to rank genes from most to least variable and keep
+the top 500:
+
+```{r sds, cache=TRUE, echo=TRUE}
+sds <- apply(assay(se, "exprs"), 1, sd)
+dat <- assay(se, "exprs")[order(sds, decreasing = TRUE)[1:500], ]
+```
+
+`order(sds, decreasing = TRUE)` returns the row positions sorted by standard
+deviation, largest first; `[1:500]` takes the top 500; and we use those to
+subset the expression matrix. `dat` is now a 500-gene by `r ncol(se)`-sample
+matrix.
+
+## Running and interpreting the PCA
+
+PCA finds new axes (principal components) that capture the largest patterns of
+variation in the data. `prcomp()` expects **samples as rows**, so we transpose
+the matrix with `t()` before handing it over:
+
+```{r pca, echo=TRUE, cache=TRUE}
 pca_results <- prcomp(t(dat))
-pca_df = as.data.frame(pca_results$x)
-pca_df$Type=factor(colData(se)[,'cancer.type.ch1'])
-pca_df$Normal = factor(colData(se)[,'normal.ch1'])
+pca_df <- as.data.frame(pca_results$x)
+pca_df$Type <- factor(colData(se)[, "cancer.type.ch1"])
+pca_df$Normal <- factor(colData(se)[, "normal.ch1"])
 ```
 
-We can take a look at the variance explained by each principal component as a plot.
+`pca_results$x` holds each sample's coordinates along every principal component.
+We pull those into a data frame and attach the cancer type and tumor/normal
+label so we can color and shape the plot.
 
-```{r pca_variance,echo=TRUE}
+How much of the variation does each component capture? Each component's variance
+is its squared standard deviation; divide by the total to get a fraction:
+
+```{r pca-variance, echo=TRUE}
+pca_var <- pca_results$sdev^2 / sum(pca_results$sdev^2)
+plot(pca_var, xlab = "Principal component", ylab = "Variance explained",
+     main = "Variance explained by each principal component", type = "b")
+```
+
+The curve drops off steeply: the first principal component (PC1) explains far
+more of the variation than any other, and after the first few components each
+one adds little. That steep drop is good news — it means a two-dimensional plot
+of PC1 and PC2 captures most of what's going on, so it's worth plotting.
+
+```{r pca-plot, echo=TRUE, fig.align='center'}
+#| label: fig-pca
+#| fig-cap: "Samples projected onto the first two principal components, colored by cancer type and shaped by tumor/normal status."
 library(ggplot2)
-pca_var <- pca_results$sdev^2 / sum(pca_results $sdev^2)
-plot(pca_var, xlab = "Principal Component", ylab = "Variance Explained", 
-     main = "Variance Explained by Principal Components", type = "b")
+ggplot(pca_df, aes(x = PC1, y = PC2, shape = Normal, color = Type)) +
+    geom_point(alpha = 0.6) +
+    theme(text = element_text(size = 18))
 ```
 
-Now, we are going to plot the results of the PCA, coloring the points by cancer type 
-and using different shapes for normal and tumor samples. 
+In @fig-pca the x-axis is PC1 and the y-axis is PC2, each point is one sample,
+color marks the cancer type, and the shape marks tumor versus normal. The
+dominant pattern is **cancer type**: samples of the same color cluster together,
+so PC1 and PC2 are mostly separating tissues of origin from one another. Within
+each cancer type, the tumor and normal shapes tend to occupy slightly different
+regions, reflecting the tumor-vs-normal expression differences the original
+study set out to characterize. In other words, a handful of unsupervised
+components, computed from just 500 genes, already recover biology you'd expect:
+different cancers look different, and within a cancer, tumor looks different from
+normal.
 
-```{r mdsplot,echo=TRUE,fig.align='center'}
-library(ggplot2)
-ggplot(pca_df, aes(x=PC1,y=PC2,shape=Normal,color=Type)) + 
-    geom_point( alpha=0.6) + theme(text=element_text(size = 18))
+## Summary
+
+You just reused a published dataset from start to finish. You:
+
+- Downloaded GSE103512 from GEO with `getGEO()` and grabbed the dataset with
+  `[[1]]`.
+- Converted the legacy `ExpressionSet` into a `SummarizedExperiment` and
+  inspected its dimensions and sample annotations.
+- Summarized the cancer-type-by-tumor/normal design with `table()`.
+- Filtered to the 500 most variable genes, ran PCA with `prcomp()`, and read
+  the variance-explained plot.
+- Plotted PC1 vs. PC2 and saw the samples separate by cancer type, with
+  tumor and normal differing within each type.
+
+The same recipe — fetch, load into a `SummarizedExperiment`, filter, reduce,
+plot — works for thousands of other GEO datasets.
+
+## Exercises
+
+::: {.callout-note collapse="true"}
+## 1. Inspect the object
+
+What is the class of `se`, and what are the dimensions of its `assay` and
+`colData`? Which variables are stored in `colData`?
+
+```{r ex1, eval=FALSE}
+class(se)
+dim(assay(se, "exprs"))   # genes x samples
+dim(colData(se))          # samples x annotation variables
+colnames(colData(se))     # the available sample variables
 ```
-In this case, the x-axis is the first principal component and the y-axis is the second principal component.
 
-- What do you see? 
-- What about additional principal components?
-- Bonus: Try using the `GGally` package to plot principal components (using the `ggpairs` function). 
-- Bonus: Calculate the variance explained by each principal component and plot the results. 
+`se` is a `SummarizedExperiment`. The assay has one row per gene and one column
+per sample; `colData` has one row per sample and one column per annotation
+variable, including `cancer.type.ch1` and `normal.ch1`.
+:::
+
+::: {.callout-note collapse="true"}
+## 2. Change the number of top genes
+
+Re-run the analysis keeping the top 100 genes, and again with the top 2000. Does
+the PC1-vs-PC2 plot change much?
+
+```{r ex2, eval=FALSE}
+dat100 <- assay(se, "exprs")[order(sds, decreasing = TRUE)[1:100], ]
+pca100 <- prcomp(t(dat100))
+plot(pca100$x[, 1], pca100$x[, 2], xlab = "PC1", ylab = "PC2")
+```
+
+The broad structure — samples separating by cancer type — is usually robust to
+the exact cutoff. Too few genes can lose finer distinctions; too many let
+low-variance noise creep back in. The stability of the big picture across
+cutoffs is itself reassuring.
+:::
+
+::: {.callout-note collapse="true"}
+## 3. Plot more components with `ggpairs()`
+
+Use the `GGally` package's `ggpairs()` to view the first few principal
+components together, colored by cancer type.
+
+```{r ex3, eval=FALSE}
+library(GGally)
+ggpairs(pca_df, columns = 1:4, mapping = aes(color = Type))
+```
+
+`ggpairs()` draws every pairwise combination of the chosen columns (here PC1–PC4)
+in a grid, so you can spot structure that PC1-vs-PC2 alone might hide — for
+example, a cancer type that only separates along PC3 or PC4.
+:::
 
 [R]: https://cran.r-project.org/
 [GEOquery]: https://bioconductor.org/packages/GEOquery
 [GSE103512]: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103512
 [multidimensional scaling]: https://en.wikipedia.org/wiki/Multidimensional_scaling
-
-

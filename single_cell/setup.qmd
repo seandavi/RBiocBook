@@ -1,14 +1,27 @@
-# Single Cell RNA-seq Analysis
+---
+title: "Single-cell RNA-seq analysis"
+---
 
-## Introduction
+Bulk RNA-seq hands you one expression profile per sample — the average over every cell in the tube. But a tissue is not one cell type. Mash a piece of brain into a single average and you blur neurons, glia, and blood vessels into one indistinct smear. Single-cell RNA sequencing (scRNA-seq) measures gene expression one cell at a time, so instead of an average you get a catalog: which cell types are present, how many of each, and what makes each one distinct. That shift is what lets you discover a rare cell population, trace a developmental trajectory, or spot the cells that change in disease.
 
-Single-cell RNA sequencing (scRNA-seq) is a powerful technique that allows us to measure gene expression in individual cells rather than bulk tissue samples. This capability has revolutionized our understanding of cellular heterogeneity, developmental processes, and disease mechanisms. Unlike traditional bulk RNA-seq, which provides an average expression profile across all cells in a sample, scRNA-seq reveals the unique molecular signatures of individual cells, enabling identification of distinct cell types, states, and trajectories.
+In this chapter you'll take a published mouse-brain dataset from raw counts to a labeled map of cell types, using the Bioconductor single-cell toolkit. Along the way you'll meet the standard workflow — load, normalize, pick informative genes, reduce dimensions, cluster, and find marker genes — that underlies essentially every scRNA-seq analysis.
 
-This tutorial will walk through a typical scRNA-seq analysis workflow using R and the Bioconductor ecosystem. We'll cover data loading, quality control, normalization, dimensionality reduction, clustering, and visualization - the fundamental steps that transform raw sequencing data into biological insights.
+The data container we'll use, the `SingleCellExperiment`, is built directly on the `SummarizedExperiment` class from the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd). If that chapter's three-linked-sheets picture (an assay matrix flanked by aligned row and column metadata) isn't fresh, skim it first — everything here assumes it.
 
-## Setup and Data Loading
+## What you'll learn
 
-### Loading Essential Libraries
+By the end of this chapter you will be able to:
+
+- Load a curated scRNA-seq dataset as a `SingleCellExperiment` object.
+- Log-normalize raw counts to correct for differences in sequencing depth.
+- Select the highly variable genes that carry the biological signal.
+- Run PCA and then t-SNE to reduce the data to a 2D map.
+- Cluster cells into groups and inspect how those groups line up with known cell types.
+- Find and visualize the marker genes that define each cluster.
+
+## Setup and data loading
+
+### Loading the libraries
 
 ```{r}
 #| label: setup-libraries
@@ -28,9 +41,9 @@ We start by loading three essential R packages for single-cell analysis:
 
 Single-cell data has unique characteristics (sparsity, high dimensionality, technical noise) that require specialized tools. These packages form the backbone of the Bioconductor single-cell analysis ecosystem and provide methods that account for the specific challenges of single-cell data.
 
-### Exploring Available Datasets
+### Exploring available datasets
 
-We are going to use the `scRNAseq` package to access a curated collection of single-cell datasets. This package provides a convenient way to load and explore publicly available datasets that have been processed and annotated. 
+We are going to use the `scRNAseq` package to access a curated collection of single-cell datasets. This package provides a convenient way to load and explore publicly available datasets that have been processed and annotated.
 
 ```{r}
 datasets <- scRNAseq::surveyDatasets()
@@ -49,7 +62,7 @@ head(datasets, 10)
 Each row represents a different study. The 'columns' field shows the number of cells, while 'rows' shows the number of genes. This helps you choose datasets appropriate for your computational resources and analysis goals. This little lightweight database is not the richest way to explore datasets, but it is a good starting point. In this tutorial, we will use the `ZeiselBrainData` dataset, which contains single-cell RNA-seq data from mouse brain tissue (@zeiselCellTypesMouse2015). 
 
 ::: {.callout-note}
-## Abstract: Zeisel Brain Dataset
+## Abstract: the Zeisel brain dataset
 
 The mammalian cerebral cortex supports cognitive functions such as sensorimotor integration, memory, and social behaviors. Normal brain function relies on a diverse set of differentiated cell types, including neurons, glia, and vasculature. Here, we have used large-scale single-cell RNA sequencing (RNA-seq) to classify cells in the mouse somatosensory cortex and hippocampal CA1 region. We found 47 molecularly distinct subclasses, comprising all known major cell types in the cortex. We identified numerous marker genes, which allowed alignment with known cell types, morphology, and location. We found a layer I interneuron expressing Pax6 and a distinct postmitotic oligodendrocyte subclass marked by Itpr2. Across the diversity of cortical cell types, transcription factors formed a complex, layered regulatory code, suggesting a mechanism for the maintenance of adult cell type identity.
 :::
@@ -59,7 +72,7 @@ The mammalian cerebral cortex supports cognitive functions such as sensorimotor 
 sce <- scRNAseq::ZeiselBrainData()
 ```
 
-What is the `sce` object? It is a `SingleCellExperiment` object, which is a data structure specifically designed for single-cell RNA-seq data. As with other Bioconductor data structures, it is built on top of the `SummarizedExperiment` class (see @fig-scRNAseq-sce), which allows us to store not only the count matrix but also metadata about cells and features (genes).
+What is the `sce` object? It is a `SingleCellExperiment` object, a data structure designed specifically for single-cell RNA-seq data. It is built directly on top of the `SummarizedExperiment` class you met in the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd) (see @fig-scRNAseq-sce), so the same mental model applies: an assay matrix of counts, with aligned metadata about the features (genes) down the rows and the cells across the columns. A `SingleCellExperiment` simply adds a few single-cell-specific extras on top, most importantly a slot for dimensionality reductions like PCA and t-SNE.
 
 ![The SingleCellExperiment object. ](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41592-019-0654-x/MediaObjects/41592_2019_654_Fig2_HTML.png){#fig-scRNAseq-sce fig-align="center"}
 
@@ -78,7 +91,7 @@ The `SingleCellExperiment` object contains:
 
 It **can** also contain additional information such as dimensionality reductions (e.g., PCA, t-SNE), clustering results, and quality control metrics.
 
-In fact, we are going to add some of these additional information in the next steps. First, we add a new assay with the log-normalized counts, which is a common preprocessing step in single-cell RNA-seq analysis. 
+In fact, we are going to add some of this additional information in the next steps. First, we add a new assay with the log-normalized counts, which is a common preprocessing step in single-cell RNA-seq analysis.
 
 ```{r}
 sce <- logNormCounts(sce)
@@ -86,7 +99,7 @@ sce <- logNormCounts(sce)
 
 The `logNormCounts()` function performs log-normalization of the count data. Raw count data from scRNA-seq experiments contains technical variation due to differences in sequencing depth between cells. Some cells might have been sequenced more deeply than others, leading to higher total counts that don't reflect true biological differences. Log-normalization addresses this by:
 
-1. **Size factor normalization**: Scaling each cell's counts by a size factor that accounts for differences in sequencing dept. There are several methods to calculate size factors, but the most common is the median of ratios method, which divides each cell's counts by the median count for each gene across all cells. This helps to adjust for differences in library size.
+1. **Size factor normalization**: Scaling each cell's counts by a size factor that accounts for differences in sequencing depth. There are several methods to calculate size factors, but the most common is the median of ratios method, which divides each cell's counts by the median count for each gene across all cells. This helps to adjust for differences in library size.
 2. **Log transformation**: Taking log(count + 1) to stabilize variance and make the data more normally distributed
 
 For each gene g in cell i, the log-normalized expression becomes:
@@ -99,7 +112,7 @@ This log transformation is useful because the next steps in the downstream analy
 
 Single-cell datasets are extremely high-dimensional - typically containing 15,000-30,000 genes per cell. This creates several challenges: computational complexity, noise dominance, and visualization difficulties. Dimensionality reduction techniques help us identify the most informative patterns in the data while reducing noise and computational burden.
 
-### Feature Selection: Identifying Highly Variable Genes
+### Feature selection: identifying highly variable genes
 
 Before applying dimensionality reduction, we need to identify the most informative genes. Highly variable genes (HVGs) are those that show significant variation across cells, indicating they may be biologically relevant. These genes are often more informative for downstream analyses like clustering and visualization.
 
@@ -164,33 +177,42 @@ reducedDimNames(sce)
 
 Note that we assign the output of `fixedPCA()` to the `sce` object. This function performs PCA on the highly variable genes we identified earlier, reducing the dimensionality of the dataset while retaining the most informative features. Because dimensionality reduction is a common step in single-cell RNA-seq analysis, we can store the PCA results in the `reducedDims` slot of the `SingleCellExperiment` object. This allows us to easily access and visualize the PCA coordinates later.
 
-### Non-linear Dimensionality Reduction with t-SNE
+### Non-linear dimensionality reduction with t-SNE
 
 After PCA, we can apply non-linear dimensionality reduction techniques like t-SNE (t-distributed Stochastic Neighbor Embedding) to visualize the data in 2D or 3D. t-SNE is particularly useful for revealing local structure and separating distinct cell populations.
 
-::: {.callout-tip)
-## Why t-SNE after PCA 
+::: {.callout-tip}
+## Why t-SNE after PCA
 
 This is a two-step approach:
-1. **PCA first**: Reduces noise and computational burden while preserving global structure
-2. **t-SNE second**: Reveals local neighborhood structure and separates distinct cell populations
+
+1. **PCA first**: reduces noise and computational burden while preserving global structure.
+2. **t-SNE second**: reveals local neighborhood structure and separates distinct cell populations.
 :::
+
+t-SNE involves a random initialization, so its output changes from run to run. We call `set.seed()` first so that the figure and the clusters below are reproducible — you'll see exactly the same map we do.
 
 ```{r}
 library(scater)
+set.seed(1234)
 sce <- runTSNE(sce, dimred="PCA")
 ```
 
-The `runTSNE()` function applies t-SNE to the PCA results, creating a 2D representation of the data. The `dimred="PCA"` argument specifies that we want to use the PCA coordinates as input for t-SNE. 
+The `runTSNE()` function applies t-SNE to the PCA results, creating a 2D representation of the data. The `dimred="PCA"` argument specifies that we want to use the PCA coordinates as input for t-SNE.
+
+Graph-based clustering is also stochastic, so we set a seed before clustering too.
 
 ```{r}
+set.seed(1234)
 nn.clusters <- clusterCells(sce, use.dimred = "TSNE")
 table(nn.clusters)
 ```
 
-The `clusterCells()` function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was [popularized by the Seurat package](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells). It builds a nearest-neighbor graph and then finds communities within this graph. The resulting clusters often correspond to distinct cell types or states. The `use.dimred = "TSNE"` argument specifies that we want to use the t-SNE coordinates for clustering. This is an important choide because t-SNE captures local structure and can reveal distinct cell populations that may not be apparent in the original high-dimensional space. There are other clustering methods available, such as k-means or hierarchical clustering, but graph-based clustering is particularly effective for single-cell data due to its ability to handle complex, non-linear relationships. 
+The `clusterCells()` function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was [popularized by the Seurat package](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells). It builds a nearest-neighbor graph and then finds communities within this graph. The resulting clusters often correspond to distinct cell types or states. The `use.dimred = "TSNE"` argument specifies that we want to use the t-SNE coordinates for clustering. This is an important choice because t-SNE captures local structure and can reveal distinct cell populations that may not be apparent in the original high-dimensional space. There are other clustering methods available, such as k-means or hierarchical clustering, but graph-based clustering is particularly effective for single-cell data due to its ability to handle complex, non-linear relationships.
 
-### Visualizing Cell Types and Clusters
+The table above is your first concrete result: each entry is the number of cells assigned to a cluster, so you can read off how many groups the algorithm found and roughly how balanced they are. A handful of large clusters plus several small ones is typical — the large ones are usually abundant cell types, the small ones rare populations.
+
+### Visualizing cell types and clusters
 
 In this particular dataset, we have pre-defined cell type annotations that we can use to color the t-SNE plot. The `level1class` and `level2class` columns in the metadata contain these annotations. We can use these annotations to color the t-SNE plot and visualize how well the clustering aligns with known cell types.
 
@@ -203,6 +225,8 @@ colLabels(sce) <- nn.clusters
 plotReducedDim(sce, "TSNE", colour_by="level1class")
 ```
 
+@fig-level1-class is the payoff of the whole workflow so far. Each point is a cell, placed by t-SNE so that similar cells sit close together, and colored by its known `level1class` cell type. Because cells of the same type fall into the same visual island, you can see at a glance that the unsupervised steps — normalization, HVG selection, PCA, t-SNE — recovered real biology: the broad cell types separate cleanly without ever being told what they were.
+
 We can also visualize the second level of cell type annotations.
 
 ```{r}
@@ -214,10 +238,10 @@ And add additional metadata such as tissue type to the plot. The `shape_by` argu
 
 ```{r}
 #| label: fig-level1-tissue
-plotReducedDim(sce, "TSNE", colour_by="level1class", shape_by="tissue", )
+plotReducedDim(sce, "TSNE", colour_by="level1class", shape_by="tissue")
 ```
 
-## Finding Marker Genes
+## Finding marker genes
 
 Marker genes are genes that are differentially expressed in a specific cell type or cluster compared to others. Identifying marker genes helps us understand the molecular characteristics of each cell type and can provide insights into their functions.
 
@@ -234,23 +258,26 @@ The `findMarkers()` function identifies genes that are significantly upregulated
 
 The `subset.row=top_var_genes` argument restricts the analysis to the highly variable genes we identified earlier, which are more likely to be informative for distinguishing cell types.
 
-The resulting `markers` object is a list where each element corresponds to a cluster and contains the differential expression results for that cluster. We can visualize the top marker genes for each cluster using a heatmap.
+The resulting `markers` object is a list where each element corresponds to a cluster and contains the differential expression results for that cluster. A compact way to see them all at once is a heatmap: take the top genes from every cluster, then plot their expression across all the cells.
 
-Take my word for it that we can visualize the top marker genes for each cluster using a heatmap. This allows us to see which genes are most strongly associated with each cluster and how they differ across clusters.
+The code below pulls the top 10 marker genes for each cluster, collapses them into one unique set, and draws a single heatmap of every cluster side by side. This lets us see which genes are most strongly associated with each cluster and how the clusters differ from one another.
 
 ```{r}
-# visualize the top marker gene for cluster 1 in a violin plot(
+#| label: fig-marker-heatmap
+# Heatmap of the top marker genes across all clusters
 library(scater)
-top_marker_genes_for_all_clusters = lapply(markers, function(x) {
+top_marker_genes_for_all_clusters <- lapply(markers, function(x) {
     return(head(rownames(x), 10))
 })
 plotHeatmap(sce, features=unique(unlist(top_marker_genes_for_all_clusters)),
     cluster_rows=TRUE, cluster_cols=TRUE, show_colnames=FALSE,
-    main="Top marker genes for cluster 1",
+    main="Top marker genes for all clusters",
     color_columns_by="level1class")
 ```
 
-## Interactive Visualization with iSEE
+In @fig-marker-heatmap the columns are cells (grouped and colored by cell type) and the rows are marker genes. The blocky structure is what you're after: each set of marker genes lights up in one band of cells and stays dim elsewhere, which is exactly what makes them useful as markers — they cleanly distinguish one population from the rest.
+
+## Interactive visualization with iSEE
 
 The [Interactive SummarizedExperiment Explorer (iSEE)](https://www.bioconductor.org/packages/release/bioc/html/iSEE.html) is a powerful tool for exploring single-cell data interactively. It allows us to visualize and interact with the data in real-time, making it easier to explore complex datasets and identify patterns. 
 
@@ -273,13 +300,65 @@ For cluster 1, the marker genes are:
 cat(paste(top_marker_genes_for_all_clusters[[1]],'\n'))
 ```
 
-See the 
+Try entering a couple of those gene names into the iSEE feature-expression panels to see how they vary across the clusters.
 
-## Bonus: Working with 10x Genomics Data
+## Exercises
 
-In the previous sections, we used a curated dataset from the `scRNAseq` package. However, many real-world single-cell RNA-seq datasets come from 10x Genomics platforms, which produce data in specific formats. In this section, we'll cover a hypothetical workflow for loading and processing raw 10x Genomics data using R. 
+These build directly on the `sce` object you created above. If you've closed your session, re-run the chapter up to the marker-gene step first.
 
-### Understanding 10x Genomics Output Formats
+1. **Read the cluster table.** How many clusters did `clusterCells()` find, and which is the largest? Which function's output answers this?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   table(nn.clusters)
+   length(unique(nn.clusters))   # number of clusters
+   which.max(table(nn.clusters)) # the most populous cluster
+   ```
+   `table()` counts cells per cluster; `length(unique(...))` turns that into the number of groups. The largest cluster is usually an abundant cell type rather than a rare one.
+   :::
+
+2. **Tune the number of variable genes.** Re-run `getTopHVGs()` asking for only 500 genes instead of 2000. Does the size of the gene set change which features you'd carry into PCA?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   top_500 <- getTopHVGs(sce, n=500)
+   length(top_500)
+   length(intersect(top_500, top_var_genes))  # overlap with the 2000-gene set
+   ```
+   The 500 genes are (almost entirely) a subset of the 2000 — they are simply the *most* variable ones. Picking fewer genes is faster and noisier; picking more keeps weaker signal at the cost of more noise. There is no single right answer, which is why it's a choice you make deliberately.
+   :::
+
+3. **Switch the coloring.** Redraw the t-SNE plot, but color the cells by their cluster label (`colour_by="label"`) instead of by the known cell type. How well do the data-driven clusters line up with the annotated cell types in @fig-level1-class?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   #| label: fig-tsne-by-cluster
+   plotReducedDim(sce, "TSNE", colour_by="label")
+   ```
+   Each cluster occupies its own island, and those islands correspond closely to the cell-type islands you saw earlier — evidence that the unsupervised clustering recovered the same structure as the curated annotations.
+   :::
+
+## Summary
+
+You took a published mouse-brain dataset all the way from raw counts to a labeled map of cell types, and in doing so walked the standard scRNA-seq workflow:
+
+- **Loaded** the data as a `SingleCellExperiment` — a `SummarizedExperiment` (the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd)) with single-cell extras like a reduced-dimensions slot.
+- **Log-normalized** the counts with `logNormCounts()` to correct for differences in sequencing depth between cells.
+- **Selected highly variable genes** with `getTopHVGs()`, focusing the analysis on the genes that carry biological signal.
+- **Reduced dimensions** with `fixedPCA()` and then `runTSNE()`, collapsing thousands of genes into a 2D map.
+- **Clustered** the cells with `clusterCells()` and read the cluster table to see how many groups emerged.
+- **Found and visualized marker genes** with `findMarkers()` and `plotHeatmap()`, confirming that each cluster has its own molecular fingerprint.
+
+The reassuring result was that the unsupervised steps recovered the known cell types: clusters and curated labels landed on the same islands of the t-SNE. From here you could annotate clusters, compare conditions, or hand the object to an interactive explorer like iSEE.
+
+## Bonus: working with 10x Genomics data
+
+The rest of the chapter is an optional appendix. Everything above used a curated dataset that arrives already cleaned and annotated. Real projects rarely start there: most droplet-based experiments come off a 10x Genomics platform as raw output that you must load and quality-control yourself. The code in this section is not executed (the files don't exist in this book), but it shows the shape of that early workflow so you'll recognize it when you meet it.
+
+### Understanding 10x Genomics output formats
 
 10x Genomics Cell Ranger produces several output formats:
 
@@ -287,7 +366,7 @@ In the previous sections, we used a curated dataset from the `scRNAseq` package.
 2. **HDF5 format** (`.h5` files): A single compressed file containing all the data
 3. **Filtered vs. unfiltered**: Cell Ranger provides both versions - filtered contains only cells that pass basic quality filters
 
-### Loading 10x Data from Matrix Market Files
+### Loading 10x data from Matrix Market files
 
 ```{r eval=FALSE}
 # Loading from standard 10x output directory
@@ -317,7 +396,7 @@ sce_10x <- read10xCounts("path/to/10x/output/", col.names = TRUE)
 - Handling ambient RNA contamination
 - Quality control specific to droplet-based methods
 
-### Loading from HDF5 Files
+### Loading from HDF5 files
 
 ```{r eval=FALSE}
 # For HDF5 format files
@@ -342,7 +421,7 @@ matrix_data <- h5read(h5_file, "matrix/data")
 - **Speed**: Often faster to read than multiple compressed files
 - **Storage**: More efficient storage, especially for large datasets
 
-### Essential Quality Control After Loading Raw Data
+### Essential quality control after loading raw data
 
 ```{r eval=FALSE}
 # Add mitochondrial gene information
@@ -373,7 +452,7 @@ colnames(colData(sce_10x))
 - **Doublets**: Droplets containing multiple cells
 - **Low-quality cells**: Cells with very few detected genes
 
-### Filtering Low-Quality Cells and Genes
+### Filtering low-quality cells and genes
 
 ```{r eval=FALSE}
 # Visualize QC metrics
@@ -414,7 +493,7 @@ dim(sce_filtered) # After filtering
 - **Visualization first**: Always plot your QC metrics before setting thresholds
 
 
-## Further Reading and Resources
+## Further reading and resources
 
 For more in-depth information on single-cell RNA-seq analysis, consider the following resources:
 

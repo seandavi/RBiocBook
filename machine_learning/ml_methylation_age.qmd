@@ -1,0 +1,336 @@
+---
+title: "Worked example: predicting age from DNA methylation"
+---
+
+How old is a tissue sample? Not the donor's age on a birthday cake, but the
+biological age written into the DNA itself. It turns out you can read it off the
+**DNA-methylation** pattern: at certain sites the methylation level drifts
+steadily with age, and a model trained on those sites becomes an **epigenetic
+clock**. This example builds one, following the work of [Naue et al.
+(2017)](https://www.sciencedirect.com/science/article/pii/S1872497317301643).
+
+This is the second of three worked examples. Unlike the
+[cancer-classification example](ml_cancer.qmd), where the target was a category,
+here the target — a person's age — is a *number*, so this is a **regression**
+problem. We use the same `mlr3` framework throughout; if you need the refresher on
+tasks, learners, measures, and the train/test split, see
+[The mlr3verse](mlr3verse_intro.qmd) and the
+[cancer example](ml_cancer.qmd) for the general workflow. Here we keep our eyes on
+the biology and on how regression differs from classification.
+
+The three core ideas from the cancer chapter all return, but each takes on a new
+shade once the goal is an epigenetic clock rather than a cancer label:
+
+- **The split is about *validity*, not just accuracy.** A clock that predicts age
+  beautifully on the very people it was trained on is worthless as a biomarker — of
+  course it fits them, it learned them. The whole point of an epigenetic clock is to
+  estimate the age of *someone new*, so the held-out test set is not a nicety here;
+  it is the only thing that tells you whether you have built a real biomarker or an
+  elaborate lookup table.
+- **Feature selection is forced on you.** A methylation array measures hundreds of
+  thousands of CpG sites, but a study has only dozens or hundreds of people. Far
+  more features than samples — the *p* ≫ *n* regime — is the normal state of affairs
+  in genomics, and it means selecting or limiting features is not an optional tidy-up
+  but a requirement (see the warning below).
+- **The yardstick changes.** Classification used accuracy and a confusion matrix.
+  Regression has no "correct/incorrect" — instead we measure how far off the
+  predictions are, with **RMSE** (typical error, in years) and **R²** (the fraction
+  of the variation in age the model explains).
+
+::: {.callout-warning}
+## More features than samples: the *p* ≫ *n* problem
+
+When the number of features *p* dwarfs the number of samples *n*, a flexible model
+can find some combination of CpG sites that fits the training ages *perfectly* by
+chance alone — pure memorization dressed up as signal. This is overfitting in its
+most dangerous form, because the training score looks fantastic. The defences are
+the same ones you already know: limit the features (keep only the CpG sites most
+associated with age), prefer simpler models, and *always* judge on the held-out
+test set. The next chapter shows a second defence — letting the model shrink its
+own coefficients.
+:::
+
+## What you'll learn
+
+- Build a **regression** task from a real methylation dataset with
+  `as_task_regr()`.
+- Fit and compare three regression learners — **linear regression**, a
+  **regression tree**, and a **random forest** — through the same `mlr3` calls.
+- Read **regression diagnostic plots** and a **truth-versus-prediction** scatter.
+- Interpret **R²** as the fraction of variation explained (and **RMSE** as the
+  typical error in years), and spot overfitting when the test R² falls below the
+  training R².
+- Explain why having far more CpG features than people (the *p* ≫ *n* problem)
+  makes feature selection and an honest test set non-negotiable for a biomarker.
+
+## Setup
+
+```{r message=FALSE}
+library(mlr3verse)
+library(ranger)       # for random forests
+library(data.table)
+library(ggplot2)
+set.seed(789)
+```
+
+## The data
+
+The biology behind it: within each individual, the level of
+[DNA methylation](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174260/) at
+certain sites changes steadily with age. The
+[CpG sites](https://en.wikipedia.org/wiki/CpG_site) whose methylation correlates
+most strongly with age make excellent **biomarkers** — and excellent features for
+a regression model. The data come from
+[this Galaxy tutorial](https://training.galaxyproject.org/training-material/topics/statistics/tutorials/regression_machinelearning/tutorial.html).
+
+```{r message=FALSE, warning=FALSE}
+meth_age <- rbind(
+    fread('https://zenodo.org/record/2545213/files/test_rows_labels.csv'),
+    fread('https://zenodo.org/record/2545213/files/train_rows.csv')
+)
+```
+
+A quick look at the data:
+
+```{r}
+head(meth_age)
+```
+
+Each row is a person, each `cg…` column is the methylation level at one CpG site,
+and `Age` is what we want to predict. Because the target is a *number*, this is a
+**regression** task — so we use `as_task_regr()`.
+
+```{r}
+task <- as_task_regr(meth_age, target = 'Age')
+```
+
+We split into training and test sets exactly as in the
+[cancer example](ml_cancer.qmd), seeding for reproducibility.
+
+```{r}
+set.seed(7)
+train_set <- sample(task$row_ids, 0.67 * task$nrow)
+test_set <- setdiff(task$row_ids, train_set)
+```
+
+## Linear regression
+
+We start with the simplest regression model: a straight-line fit relating
+methylation to age.
+
+```{r}
+learner <- lrn("regr.lm")
+```
+
+### Train
+
+```{r}
+learner$train(task, row_ids = train_set)
+```
+
+After fitting a linear model, the standard **diagnostic plots**
+(@fig-regression-diagnostic) help check whether the model's assumptions hold.
+
+```{r fig-regression-diagnostic, fig.cap="Regression diagnostic plots. Top left: residuals vs. fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs. leverage."}
+par(mfrow = c(2, 2))
+plot(learner$model)
+```
+
+### Predict
+
+```{r}
+pred_train <- learner$predict(task, row_ids = train_set)
+pred_test <- learner$predict(task, row_ids = test_set)
+```
+
+### Assess
+
+Printing a regression prediction shows the predicted (`response`) and true
+(`truth`) values side by side.
+
+```{r}
+pred_train
+```
+
+A scatter plot of truth versus prediction makes the fit visible: a perfect model
+would put every point on the diagonal.
+
+```{r}
+ggplot(pred_train, aes(x = truth, y = response)) +
+    geom_point() +
+    geom_smooth(method = 'lm')
+```
+
+We summarize the fit with **R²** (the fraction of variation in age the model
+explains; 1.0 is perfect, 0 is no better than guessing the mean).
+
+```{r}
+measures <- msrs(c('regr.rsq'))
+pred_train$score(measures)
+```
+
+```{r}
+pred_test
+pred_test$score(measures)
+```
+
+The training R² is high, but the **test R²** is the honest measure of how well
+the clock would predict the age of a new person. A drop from training to test is,
+again, the signature of overfitting.
+
+## Regression tree
+
+We can use a tree for regression too. Instead of voting on a class, each leaf of
+the tree reports a predicted *number*.
+
+```{r}
+learner <- lrn("regr.rpart", keep_model = TRUE)
+learner$train(task, row_ids = train_set)
+learner$model
+```
+
+Notice something odd: a single regression tree can only output a handful of
+**discrete** age values — one per leaf. It cannot predict, say, 43.7 if no leaf
+sits there.
+
+### Predict
+
+```{r}
+pred_train <- learner$predict(task, row_ids = train_set)
+pred_test <- learner$predict(task, row_ids = test_set)
+```
+
+### Assess
+
+```{r}
+pred_train
+```
+
+The discreteness is obvious in the scatter plot: predictions stack up into
+horizontal bands, one per leaf.
+
+```{r}
+ggplot(pred_train, aes(x = truth, y = response)) +
+    geom_point() +
+    geom_smooth(method = 'lm')
+```
+
+```{r}
+measures <- msrs(c('regr.rsq'))
+pred_train$score(measures)
+```
+
+```{r}
+pred_test
+pred_test$score(measures)
+```
+
+The R² differs noticeably from the linear model — the single tree's blocky
+predictions are a poor fit for a continuous quantity like age.
+
+## Random forest
+
+A random forest is also tree-based, but averaging over many trees smooths away
+the blocky, discrete behaviour of a single tree, giving genuinely continuous
+predictions.
+
+```{r}
+set.seed(789)
+learner <- lrn("regr.ranger", mtry = 2, min.node.size = 20)
+learner$train(task, row_ids = train_set)
+learner$model
+```
+
+### Predict
+
+```{r}
+pred_train <- learner$predict(task, row_ids = train_set)
+pred_test <- learner$predict(task, row_ids = test_set)
+```
+
+### Assess
+
+```{r}
+pred_train
+```
+
+```{r}
+ggplot(pred_train, aes(x = truth, y = response)) +
+    geom_point() +
+    geom_smooth(method = 'lm')
+```
+
+The points now scatter smoothly around the diagonal — no more horizontal bands.
+
+```{r}
+measures <- msrs(c('regr.rsq'))
+pred_train$score(measures)
+```
+
+```{r}
+pred_test
+pred_test$score(measures)
+```
+
+Compare the test R² across the three regression models. The forest typically
+predicts age more accurately than either the linear model or the single tree, and
+without the single tree's discrete artifacts.
+
+## Summary
+
+You have now built an epigenetic clock — a complete **regression** analysis on
+real methylation data, through the same `mlr3` workflow you used for cancer
+classification:
+
+- You turned the methylation table into an `mlr3` regression **task** with
+  `as_task_regr()` and split it into training and test sets.
+- You fit a **linear regression**, a **regression tree**, and a **random forest**,
+  and judged each with **R²** and a truth-versus-prediction scatter.
+- The single tree's predictions came in discrete bands — a poor fit for a
+  continuous target — while the random forest's smooth predictions typically beat
+  both the straight line and the single tree.
+
+The change from the cancer example was only the *kind* of target: a number instead
+of a category, so `as_task_regr()` instead of `as_task_classif()` and R² instead
+of accuracy. The discipline of trusting only the test-set score carries over
+unchanged.
+
+## Exercises
+
+Each exercise reuses objects you already built, so the solutions are quick to run.
+
+1. **Tune the forest.** The random forest used `mtry = 2` and
+   `min.node.size = 20`. Refit it with the defaults (drop both arguments) and
+   compare the test R². Did the hand-chosen settings help?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+
+   ```{r eval=FALSE}
+   rf_default <- lrn("regr.ranger")
+   rf_default$train(task, row_ids = train_set)
+   rf_default$predict(task, row_ids = test_set)$score(msrs(c('regr.rsq')))
+   ```
+
+   Changing `mtry` and `min.node.size` is a one-line edit to the `lrn()` call;
+   everything else is identical. On this dataset the defaults are usually close,
+   which is part of why random forests are a low-fuss default — but the honest
+   comparison is always the held-out test R².
+   :::
+
+2. **Add a second measure.** Alongside R², score the test predictions with
+   root-mean-squared error, `msr("regr.rmse")`, which reports the typical
+   prediction error in *years*. Which number is easier to explain to a biologist?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+
+   ```{r eval=FALSE}
+   pred_test$score(msrs(c('regr.rsq', 'regr.rmse')))
+   ```
+
+   R² is unitless and says what *fraction* of the variation in age the model
+   explains; RMSE is in the target's own units (years) and says how far off a
+   typical prediction is. For an audience that thinks in years, RMSE is often the
+   more intuitive headline number.
+   :::

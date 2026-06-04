@@ -1,5 +1,7 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# Render the book inside the prebuilt container image (ghcr.io/seandavi/rbiocbook),
+# which already has R + all Bioconductor/CRAN deps + Quarto + TinyTeX + quartobot +
+# rsvg-convert. No per-run package install, so render starts in seconds. The image
+# is produced by build-image.yml; rebuild it there when DESCRIPTION changes.
 on:
   push:
     branches: [main, master]
@@ -12,32 +14,117 @@ permissions: read-all
 
 jobs:
   R-CMD-check:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/seandavi/rbiocbook:latest
+      # GITHUB_TOKEN can pull the repo's own (private) package; make the package
+      # public for external/Orchestra use.
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: write
+      packages: read
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
+      # Quarto reads GH_TOKEN to authenticate GitHub API calls (the titlepages
+      # extension install) and the gh-pages publish uses GITHUB_TOKEN.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
+      - name: Check dependency completeness
+        # Fast fail if a chapter uses a package not declared in DESCRIPTION (the
+        # image is built from DESCRIPTION, so this also guards image drift).
+        run: Rscript tools/check-deps.R
 
-      - name: Install R package dependencies
-        run: Rscript -e "install.packages('devtools', repos='http://cran.us.r-project.org'); devtools::install_deps(dependencies=TRUE)"
-
-      - name: setup-quarto
-        uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          tinytex: true
-      - name: install quarto titlepages
+      - name: Install quarto titlepages extension
+        # Project-local extension (_extensions/ is gitignored), installed per run.
         run: quarto install extension --no-prompt nmfs-opensci/quarto_titlepages
-      - uses: quarto-dev/quarto-actions/render@v2
+
+      - name: Render
+        run: quarto render
+
       - uses: quarto-dev/quarto-actions/publish@v2
+        # Only publish to gh-pages on a push to main, never on a PR.
+        if: github.event_name == 'push'
+        with:
+          target: gh-pages
+          render: false
+
+  # Fast HTML-only Netlify deploy preview for PRs. Runs alongside (not instead of)
+  # the full R-CMD-check job, so pdf/epub breakage is still caught on the PR.
+  preview-render:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/seandavi/rbiocbook:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: read
+      packages: read
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install quarto titlepages extension
+        run: quarto install extension --no-prompt nmfs-opensci/quarto_titlepages
+
+      - name: Render (HTML only)
+        # Committed _freeze/ means only changed chapters re-execute; the rest reuse
+        # frozen results, so previews stay fast.
+        run: quarto render --to html
+
+      - name: Add noindex header
+        # Keep ephemeral preview copies out of search results so they never compete
+        # with the canonical gh-pages book. Netlify honors a _headers file at the
+        # root of a prebuilt deploy directory. Block scalar (|) so the embedded
+        # "Tag: noindex" colon-space isn't parsed as YAML mapping syntax.
+        run: |
+          printf '/*\n  X-Robots-Tag: noindex\n' > _book/_headers
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: book-html
+          path: _book
+
+  # Deploy job runs on a stock runner (not the R container) because the Netlify
+  # action is a Node action and the render image has no Node.
+  preview-deploy:
+    if: github.event_name == 'pull_request'
+    needs: preview-render
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # post the preview URL as a PR comment
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: book-html
+          path: _book
+
+      - name: Deploy preview to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: _book
+          production-deploy: false
+          deploy-message: "PR #${{ github.event.number }} preview"
+          enable-pull-request-comment: true
+          enable-commit-comment: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5

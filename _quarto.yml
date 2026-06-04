@@ -1,5 +1,10 @@
 project:
   type: book
+  # quartobot citation pipeline: resolves persistent-identifier cite keys
+  # (@doi:…, @pmid:…) via manubot into references.resolved.bib before render.
+  # Hand-curated keys in references.bib are left untouched. Requires the
+  # quartobot CLI on PATH (`uv tool install quartobot`).
+  pre-render: quartobot resolve --from-scan . --id-mode citation-key
 
 author:
   - name: Sean Davis
@@ -79,13 +84,15 @@ book:
         - machine_learning/intro.qmd
         - machine_learning/models.qmd
         - machine_learning/mlr3verse_intro.qmd
-        - machine_learning/machine_learning_mlr3.qmd
+        - machine_learning/ml_cancer.qmd
+        - machine_learning/ml_methylation_age.qmd
+        - machine_learning/ml_expression.qmd
 
     - part: "Bioconductor"
       chapters:
         - geoquery.qmd
-        - 310_microbiome.qmd
         - bioc-summarizedexperiment.qmd
+        - 310_microbiome.qmd
         - genomic_ranges_tutorial.qmd
         - ranges_and_signals.qmd
         - ranges_exercises.qmd
@@ -99,11 +106,9 @@ book:
     - references.qmd
 
   appendices:
-    - appendix.qmd
     - git_and_github.qmd
     - additional_resources.qmd
     - ai_tools.qmd
-    - dataviz.qmd
     - matrix_exercises.qmd
     #- part: "Bioconductor"
     #chapters:
@@ -114,8 +119,9 @@ book:
       - text: "License"
         href: license.qmd
 
-bibliography: 
-  - bibliography.bib
+bibliography:
+  - references.bib
+  - references.resolved.bib
 
 format:
   html:

@@ -2,267 +2,525 @@
 title: "Supervised Learning"
 ---
 
-In the previous chapter, we introduced the three main paradigms of machine learning: supervised, unsupervised, and reinforcement learning. We also highlighted the importance of a structured workflow, particularly the critical step of data splitting to prevent overfitting. Now, we'll dive deeper into the world of **supervised learning**, the most common and widely applied category of machine learning.
-
-This chapter provides a practical framework for understanding how different supervised learning algorithms work. Instead of viewing each algorithm as a completely separate entity, we'll see that they all share a common conceptual structure. By grasping this structure, you can more easily understand, compare, and select the right algorithm for your problem. We will then use this framework to explore some of the most fundamental and popular algorithms for both regression and classification tasks.
-
-## A Framework for Understanding Supervised Algorithms
-
-At a high level, every supervised learning algorithm can be understood as having three core components: the **hypothesis space**, the **objective function**, and the **learning algorithm**. Thinking about new algorithms in terms of these three parts can demystify how they operate and highlight their key differences.
-
-::: {.callout-note}
-### The Three Pillars of a Supervised Algorithm
-
-1.  **Hypothesis Space (The Model Family):** This is the set of all possible models the algorithm is allowed to consider. For example, in linear regression, the hypothesis space is the set of all possible straight lines. For a decision tree, it's the set of all possible branching rules. The choice of hypothesis space imposes a certain structure or *bias* on the solution.
-
-2.  **Objective Function (The Goal):** This function defines what a "good" model looks like. It measures how well a particular model from the hypothesis space fits the training data. For instance, in regression, a common objective function is the *Mean Squared Error (MSE)*, which penalizes models for making large prediction errors. The goal of learning is to find the model that minimizes this objective function.
-
-3.  **Learning Algorithm (The Optimizer):** This is the computational procedure used to search through the hypothesis space and find the model that best minimizes the objective function. This could be a straightforward mathematical formula (as in simple linear regression) or a complex iterative process (as in training neural networks).
-:::
-
-By framing algorithms in this way, we can see, for example, that Ridge and Lasso regression share the same hypothesis space and learning algorithm as linear regression but differ in their objective function, which includes a penalty for complexity. This small change in the objective function has profound effects on the final model, helping to prevent overfitting.
-
-## Supervised Learning
-
-### Linear regression
-
-In [statistics](https://en.wikipedia.org/wiki/Statistics "Statistics"), **linear regression** is a [linear](https://en.wikipedia.org/wiki/Linearity "Linearity") approach for modelling the relationship between a [scalar](https://en.wikipedia.org/wiki/Scalar_(mathematics) "Scalar (mathematics)") response and one or more explanatory variables (also known as [dependent and independent variables](https://en.wikipedia.org/wiki/Dependent_and_independent_variables "Dependent and independent variables")). The case of one explanatory variable is called _[simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression "Simple linear regression")_; for more than one, the process is called **multiple linear regression**. This term is distinct from [multivariate linear regression](https://en.wikipedia.org/wiki/Multivariate_linear_regression "Multivariate linear regression"), where multiple [correlated](https://en.wikipedia.org/wiki/Correlation_and_dependence "Correlation and dependence") dependent variables are predicted, rather than a single scalar variable.
-
-In linear regression, the relationships are modeled using [linear predictor functions](https://en.wikipedia.org/wiki/Linear_predictor_function "Linear predictor function") whose unknown model [parameters](https://en.wikipedia.org/wiki/Parameters "Parameters") are [estimated](https://en.wikipedia.org/wiki/Estimation_theory "Estimation theory") from the [data](https://en.wikipedia.org/wiki/Data "Data"). Such models are called [linear models](https://en.wikipedia.org/wiki/Linear_model "Linear model"). Most commonly, the [conditional mean](https://en.wikipedia.org/wiki/Conditional_expectation "Conditional expectation") of the response given the values of the explanatory variables (or predictors) is assumed to be an [affine function](https://en.wikipedia.org/wiki/Affine_transformation "Affine transformation") of those values; less commonly, the conditional [median](https://en.wikipedia.org/wiki/Median "Median") or some other [quantile](https://en.wikipedia.org/wiki/Quantile "Quantile") is used. Like all forms of [regression analysis](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis"), linear regression focuses on the [conditional probability distribution](https://en.wikipedia.org/wiki/Conditional_probability_distribution "Conditional probability distribution") of the response given the values of the predictors, rather than on the [joint probability distribution](https://en.wikipedia.org/wiki/Joint_probability_distribution "Joint probability distribution") of all of these variables, which is the domain of [multivariate analysis](https://en.wikipedia.org/wiki/Multivariate_analysis "Multivariate analysis").
-
-Linear regression was the first type of regression analysis to be studied rigorously, and to be used extensively in practical applications. This is because models which depend linearly on their unknown parameters are easier to fit than models which are non-linearly related to their parameters and because the statistical properties of the resulting estimators are easier to determine.
-
-### K-nearest Neighbor
-
-```{r echo=FALSE, fig.cap="**Figure**. The k-nearest neighbor algorithm can be used for regression or classification. "}
-knitr::include_graphics('https://www.kdnuggets.com/wp-content/uploads/rapidminer-knn-image1.jpg')
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
-The **_k_\-nearest neighbors algorithm** (**_k_\-NN**) is a [non-parametric](https://en.wikipedia.org/wiki/Non-parametric_statistics "Non-parametric statistics") [supervised learning](https://en.wikipedia.org/wiki/Supervised_learning "Supervised learning") method first developed by [Evelyn Fix](https://en.wikipedia.org/wiki/Evelyn_Fix "Evelyn Fix") and [Joseph Hodges](https://en.wikipedia.org/wiki/Joseph_Lawson_Hodges_Jr. "Joseph Lawson Hodges Jr.") in 1951, and later expanded by [Thomas Cover](https://en.wikipedia.org/wiki/Thomas_M._Cover "Thomas M. Cover"). It is used for [classification](https://en.wikipedia.org/wiki/Statistical_classification "Statistical classification") and [regression](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis"). In both cases, the input consists of the _k_ closest training examples in a [data set](https://en.wikipedia.org/wiki/Data_set "Data set"). 
+Imagine you have measured a few hundred penguins on a remote island — the length
+and depth of each bird's bill, the length of its flipper. Now a new bird shows up.
+Can you predict its **body mass** from those measurements alone? Or guess which
+**species** it belongs to? That is exactly the kind of question supervised learning
+answers: you have examples where you know the answer, and you want a rule that
+predicts the answer for a new case you haven't seen.
 
-The k-nearest neighbor (k-NN) algorithm is a simple, yet powerful, supervised
-machine learning method used for classification and regression tasks. It is an
-instance-based, non-parametric learning method that stores the entire training
-dataset and makes predictions based on the similarity between data points. The
-underlying principle of the k-NN algorithm is that similar data points (those
-that are close to each other in multidimensional space) are likely to have
-similar outcomes or belong to the same class.
+The same shape of problem shows up everywhere in biology. Predict a tumour's
+response to a drug from its gene-expression profile. Predict a patient's blood
+pressure from a panel of clinical measurements. Classify a cell as healthy or
+diseased from its morphology. In every case you have **features** (the inputs you
+measure) and a **target** (the answer you want to predict), and a pile of past
+examples to learn from.
 
-Here's a description of how the k-NN algorithm works:
+In the [previous chapter](intro.qmd) we met the three paradigms of machine
+learning and the all-important habit of splitting data to avoid fooling ourselves.
+This chapter is a guided tour of the workhorse **supervised** algorithms — linear
+regression, k-nearest neighbours, ridge/LASSO/elastic-net, decision trees, and
+random forests. For each one you'll get a plain-language intuition and a small,
+runnable example on a single shared dataset, so you can see the algorithms as
+variations on one theme rather than a zoo of unrelated tricks. (The later
+[mlr3verse chapter](mlr3verse_intro.qmd) shows how to run all of these through one
+tidy interface; here we stay close to base R so the moving parts stay visible.)
 
-1. Determine the value of k: The first step is to choose the number of nearest
-   neighbors (k) to consider when making predictions. The value of k is a
-   user-defined hyperparameter and can significantly impact the algorithm's
-   performance. A small value of k can lead to overfitting, while a large value
-   may result in underfitting.
-1. Compute distance: Calculate the distance between the new data point (query
-   point) and each data point in the training dataset. The most common distance
-   metrics used are Euclidean, Manhattan, and Minkowski distance. The choice of
-   distance metric depends on the problem and the nature of the data.
-1. Find k-nearest neighbors: Identify the k data points in the training dataset
-   that are closest to the query point, based on the chosen distance metric.
-1. Make predictions: Once the k-nearest neighbors are identified, the final
-   step is to make predictions. The prediction for the query point can be made
-   in two ways:
-    a. For classification, determine the class labels of the k-nearest
-    neighbors and assign the class label with the highest frequency (majority
-    vote) to the query point. In case of a tie, one can choose the class with
-    the smallest average distance to the query point or randomly select one
-    among the tied classes.
-    b. For regression tasks, the k-NN algorithm follows a similar process, but
-    instead of majority voting, it calculates the mean (or median) of the
-    target values of the k-nearest neighbors and assigns it as the prediction
-    for the query point.
+## What you'll learn
 
-The k-NN algorithm is known for its simplicity, ease of implementation, and
-ability to handle multi-class problems. However, it has some drawbacks, such as
-high computational cost (especially for large datasets), sensitivity to the
-choice of k and distance metric, and poor performance with high-dimensional or
-noisy data. Scaling and preprocessing the data, as well as using dimensionality
-reduction techniques, can help mitigate some of these issues.
+- Describe any supervised algorithm in terms of its **hypothesis space**,
+  **objective function**, and **learning algorithm**.
+- Fit and interpret a **linear regression** with `lm()`.
+- Make predictions with **k-nearest neighbours** using `class::knn()`, and explain
+  why feature scaling matters.
+- Fit **ridge**, **LASSO**, and **elastic-net** models with `glmnet()`, and read
+  off which features each one keeps.
+- Grow and read a **decision tree** with `rpart`, and a **random forest** with
+  `ranger`.
 
+## A framework for understanding supervised algorithms
 
+Every supervised algorithm in this chapter — and almost every one you'll meet
+elsewhere — can be taken apart into the same three pieces. Once you can name those
+three pieces for an algorithm, you understand most of what makes it tick, and you
+can compare any two algorithms cleanly.
 
-*  In _k-NN classification_, the output is a class membership. An object is
-  classified by a plurality vote of its neighbors, with the object being
-  assigned to the class most common among its _k_ nearest neighbors (_k_ is a
-  positive [integer](https://en.wikipedia.org/wiki/Integer "Integer"),
-  typically small). If _k_ = 1, then the object is simply assigned to the class
-  of that single nearest neighbor.
+::: {.callout-important}
+## The three pillars of a supervised algorithm
 
-*  In _k-NN regression_, the output is the property value for the object. This
-  value is the average of the values of _k_ nearest neighbors.
+1. **Hypothesis space (the model family).** The set of all candidate models the
+   algorithm is allowed to consider. For linear regression it's "all straight
+   lines"; for a decision tree it's "all branching yes/no rule sets." This choice
+   bakes in an assumption — a *bias* — about what the answer can look like.
 
-_k_\-NN is a type of
-[classification](https://en.wikipedia.org/wiki/Classification "Classification")
-where the function is only approximated locally and all computation is deferred
-until function evaluation. Since this algorithm relies on distance for
-classification, if the features represent different physical units or come in
-vastly different scales then
-[normalizing](https://en.wikipedia.org/wiki/Normalization_(statistics)
-"Normalization (statistics)") the training data can improve its accuracy
-dramatically.
+2. **Objective function (the goal).** A number that says how *good* a candidate
+   model is on the training data — usually how badly it errs, so smaller is
+   better. For regression that's often the *mean squared error*. Learning means
+   finding the model that makes this number as small as possible.
 
-Both for classification and regression, a useful technique can be to assign
-weights to the contributions of the neighbors, so that the nearer neighbors
-contribute more to the average than the more distant ones. For example, a
-common weighting scheme consists in giving each neighbor a weight of 1/_d_,
-where _d_ is the distance to the neighbor.
+3. **Learning algorithm (the optimiser).** The actual procedure that searches the
+   hypothesis space for the model with the best objective value. Sometimes it's a
+   one-shot formula (ordinary linear regression); sometimes it's a long iterative
+   grind (neural networks).
+:::
 
-The neighbors are taken from a set of objects for which the class (for _k_\-NN
-classification) or the object property value (for _k_\-NN regression) is known.
-This can be thought of as the training set for the algorithm, though no
-explicit training step is required.
+Here's the payoff of this framing. Ridge and LASSO regression, which we'll meet
+shortly, use the *same* hypothesis space and *same* style of optimiser as plain
+linear regression. The *only* thing they change is the objective function — they
+add a penalty for being too complicated. That one small change is what lets them
+avoid overfitting. Keep the three pillars in mind and each new algorithm becomes a
+small variation, not a whole new world.
+
+## Our shared dataset: Palmer penguins
+
+To keep the tour concrete, we'll use one small, friendly biological dataset
+throughout: measurements of penguins from three species on islands in the Palmer
+Archipelago, Antarctica. It lives in the `palmerpenguins` package.
+
+```{r}
+library(palmerpenguins)
+library(dplyr)
+
+penguins_clean <- penguins |>
+  na.omit()            # drop the handful of rows with missing measurements
+
+glimpse(penguins_clean)
+```
+
+Each row is one bird. We'll use two prediction problems throughout:
+
+- **Regression:** predict `body_mass_g` (a continuous number) from the body
+  measurements.
+- **Classification:** predict `species` (one of three categories) from the same
+  measurements.
+
+As we insisted in the previous chapter, we never judge a model on the same data we
+trained it on. So let's split once, here, into a **training** set and a **test**
+set, and reuse that split for every algorithm.
+
+```{r}
+set.seed(42)
+n <- nrow(penguins_clean)
+train_idx <- sample(seq_len(n), size = 0.7 * n)   # 70% for training
+train <- penguins_clean[train_idx, ]
+test  <- penguins_clean[-train_idx, ]
+c(train = nrow(train), test = nrow(test))
+```
+
+We now have `r nrow(train)` birds to learn from and `r nrow(test)` held back to
+test on honestly.
+
+## Linear regression
+
+**Plain-language intuition.** Linear regression draws the best straight-line
+relationship between your features and a continuous target. "Best" means the line
+that makes the total squared prediction error as small as possible. Each feature
+gets a *coefficient* — a slope — telling you how much the target changes when that
+feature goes up by one unit. It is the simplest, most interpretable model in the
+toolbox, and a sensible first thing to try.
+
+In the language of the three pillars: the hypothesis space is "all straight-line
+combinations of the features," the objective function is the sum of squared errors
+(@eq-sum-of-squares), and the learning algorithm is a tidy formula that R solves
+instantly.
+
+$$L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2$$ {#eq-sum-of-squares}
+
+Here $\hat{y}_i$ is the predicted value, $y_i$ is the true value, and $n$ is the
+number of observations. Let's predict penguin body mass from flipper length and
+bill dimensions:
+
+```{r}
+fit_lm <- lm(body_mass_g ~ flipper_length_mm + bill_length_mm + bill_depth_mm,
+             data = train)
+coef(fit_lm)
+```
+
+Read the coefficients as "holding the others fixed, one extra millimetre of flipper
+length is associated with about `r round(coef(fit_lm)["flipper_length_mm"])` grams
+more body mass." That is the chief virtue of linear regression: the model *is* its
+explanation.
+
+Now the honest test — how far off are the predictions on the held-out birds? We
+summarise that with the **root mean squared error** (RMSE), roughly the typical
+prediction error in grams:
+
+```{r}
+pred_lm <- predict(fit_lm, newdata = test)
+rmse <- function(actual, predicted) sqrt(mean((actual - predicted)^2))
+rmse(test$body_mass_g, pred_lm)
+```
+
+So the model's predictions are typically off by around that many grams — for birds
+weighing 3,000–6,000 g, not bad for three measurements and a straight line.
+
+## K-nearest neighbours
+
+**Plain-language intuition.** k-nearest neighbours (k-NN) is the "you are who your
+neighbours are" algorithm. To predict the answer for a new penguin, it finds the
+*k* most similar penguins in the training data — the ones closest to it in
+measurement space — and lets them vote. For classification, the new bird is
+assigned the most common species among its *k* neighbours. For regression, it gets
+the average of their values.
+
+k-NN is unusual: it has no real "training" step and no equation to fit. It just
+stores the data and measures distances at prediction time. Its one knob is *k*: a
+small *k* (say 1) follows every wiggle in the data and can overfit; a large *k*
+smooths things out and can underfit. *k* is a **hyperparameter** you tune, exactly
+like we discussed in the previous chapter.
+
+::: {.callout-warning}
+## Scale your features first
+
+k-NN decides "closeness" using distance, so a feature measured in large numbers
+will dominate one measured in small numbers — purely because of its units, not its
+importance. Flipper length (≈ 200 mm) would swamp bill depth (≈ 17 mm) if we left
+them as-is. The fix is to **standardise** every feature to a common scale before
+computing distances. Forgetting this is the single most common k-NN mistake.
+:::
+
+Let's classify penguin **species** from the three measurements. We standardise
+using the training set's mean and standard deviation, then apply the *same* shift
+and scale to the test set:
+
+```{r}
+library(class)
+
+features <- c("flipper_length_mm", "bill_length_mm", "bill_depth_mm")
+
+train_means <- colMeans(train[features])
+train_sds   <- apply(train[features], 2, sd)
+
+scale_with <- function(df) scale(df[features], center = train_means, scale = train_sds)
+train_x <- scale_with(train)
+test_x  <- scale_with(test)
+
+set.seed(42)
+knn_pred <- knn(train = train_x, test = test_x, cl = train$species, k = 5)
+
+mean(knn_pred == test$species)   # accuracy: fraction classified correctly
+```
+
+With `k = 5` neighbours, k-NN gets the species right for the large majority of
+held-out birds. The three penguin species really do cluster into distinct regions
+of measurement space, which is exactly the situation where "ask your neighbours"
+works beautifully.
 
 ## Penalized regression
 
-Adapted from http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/.
+*Some material in this section is adapted from the* [STHDA penalized-regression
+tutorial](http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/).
 
-Penalized regression is a type of regression analysis that introduces a penalty term to the loss function in order to prevent overfitting and improve the model's ability to generalize. Remember that in regression, the *loss* function is the sum of squares @eq-sum-of-squares.
+Plain linear regression has a weakness: when you have many features — especially
+more features than observations, the common situation in genomics — it can chase
+noise and overfit. **Penalized regression** fixes this by tweaking the *objective
+function* (pillar two). It keeps the squared-error term but adds a **penalty** that
+grows as the coefficients get large, gently pressuring the model to stay simple.
 
-$$L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2$$ {#eq-sum-of-squares}
+A single dial, **lambda** ($\lambda$), controls how hard that pressure pushes. When
+$\lambda = 0$ there's no penalty and you're back to ordinary linear regression. As
+$\lambda$ grows, coefficients are squeezed toward zero. The three methods below —
+ridge, LASSO, and elastic net — differ only in the *shape* of the penalty.
 
-In @eq-sum-of-squares, $\hat{y}_i$ is the predicted output, $y_i$ is the actual output, and n is the number of observations. The goal of regression is to minimize the loss function by finding the optimal values of the model parameters or coefficients. The model parameters are estimated using the training data. The model is then evaluated using the test data. If the model performs well on the training data but poorly on the test data, it is said to be overfit. Overfitting occurs when the model learns the training data too well, including the noise, and is not able to generalize well to new data. This is a common problem in machine learning, particularly when there are a large number of predictors compared to the number of observations, and can be addressed by penalized regression.
+We'll fit all three with the `glmnet` package. `glmnet` does not take a formula; it
+wants a numeric **matrix** of features `x` and a response vector `y`. The
+`model.matrix()` step below builds that matrix (and drops the intercept column with
+`[, -1]`):
 
+```{r}
+library(glmnet)
 
-The two most common types of penalized regression are Ridge Regression (L2 penalty) and LASSO Regression (L1 penalty). Both Ridge and LASSO help to reduce model complexity and prevent over-fitting which may result from simple linear regression. However, the choice between Ridge and LASSO depends on the situation and the dataset at hand. If feature selection is important for the interpretation of the model, LASSO might be preferred. If the goal is prediction accuracy and the model needs to retain all features, Ridge might be the better choice.
+x_train <- model.matrix(body_mass_g ~ flipper_length_mm + bill_length_mm +
+                           bill_depth_mm, data = train)[, -1]
+y_train <- train$body_mass_g
+
+x_test <- model.matrix(body_mass_g ~ flipper_length_mm + bill_length_mm +
+                          bill_depth_mm, data = test)[, -1]
+y_test <- test$body_mass_g
+```
 
 ### Ridge regression
 
-Ridge regression shrinks the regression coefficients, so that variables, with
-minor contribution to the outcome, have their coefficients close to zero. The
-shrinkage of the coefficients is achieved by penalizing the regression model
-with a penalty term called L2-norm, which is the sum of the squared
-coefficients. The amount of the penalty can be fine-tuned using a constant
-called lambda (λ). Selecting a good value for λ is critical. When λ=0, the
-penalty term has no effect, and ridge regression will produce the classical
-least square coefficients. However, as λ increases to infinite, the impact of
-the shrinkage penalty grows, and the ridge regression coefficients will get
-close zero. The loss function for Ridge Regression is:
+**Plain-language intuition.** Ridge adds an **L2 penalty**: the sum of the *squared*
+coefficients (@eq-ridge). This shrinks every coefficient toward zero but never
+quite *to* zero — so ridge keeps all your features, just turns down their volume.
+It's the right choice when you believe many features each contribute a little.
 
-$$L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=0}^{k} \beta_j^2$$ {#eq-ridge} 
+$$L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} \beta_j^2$$ {#eq-ridge}
 
-Here, $\hat{y}_i$ is the predicted output, $y_i$ is the actual output,
-${\beta_j}$ represents the model parameters or coefficients, and λ is the
-regularization parameter. The second term, λ∑βj^2, is the penalty term where
-all parameters are squared and summed. Ridge regression tends to shrink the
-coefficients but doesn't necessarily zero them.
+In `glmnet`, ridge is `alpha = 0`. We use `cv.glmnet()` to let cross-validation
+pick a good $\lambda$ automatically:
 
+```{r}
+set.seed(42)
+fit_ridge <- cv.glmnet(x_train, y_train, alpha = 0)
 
+coef(fit_ridge, s = "lambda.min")
+```
 
-Note that, in contrast to the ordinary least square regression, ridge
-regression is highly affected by the scale of the predictors. Therefore, it is
-better to standardize (i.e., scale) the predictors before applying the ridge
-regression (James et al. 2014), so that all the predictors are on the same
-scale. The standardization of a predictor x, can be achieved using the formula
-$x' = \frac{x}{sd(x)}$, where $sd(x)$ is the standard deviation of $x$. The consequence of
-this is that, all standardized predictors will have a standard deviation of one
-allowing the final fit to not depend on the scale on which the predictors are
-measured.
+Notice that all three coefficients are present and non-zero — ridge shrank them but
+kept them. Its test error:
 
-One important advantage of the ridge regression, is that it still performs
-well, compared to the ordinary least square method (see @eq-sum-of-squares), 
-in a situation where you have a large multivariate
-data with the number of predictors (p) larger than the number of observations
-(n). One disadvantage of the ridge regression is that, it will include all the
-predictors in the final model, unlike the stepwise regression methods, which
-will generally select models that involve a reduced set of variables. Ridge
-regression shrinks the coefficients towards zero, but it will not set any of
-them exactly to zero. The LASSO regression is an alternative that overcomes
-this drawback.
+```{r}
+pred_ridge <- predict(fit_ridge, newx = x_test, s = "lambda.min")
+rmse(y_test, pred_ridge)
+```
 
 ### LASSO regression
 
-LASSO stands for _Least Absolute Shrinkage and Selection Operator_. It shrinks
-the regression coefficients toward zero by penalizing the regression model with
-a penalty term called L1-norm, which is the sum of the absolute coefficients.
-In the case of LASSO regression, the penalty has the effect of forcing some of
-the coefficient estimates, with a minor contribution to the model, to be
-exactly equal to zero. This means that, LASSO can be also seen as an
-alternative to the subset selection methods for performing variable selection
-in order to reduce the complexity of the model. As in ridge regression,
-selecting a good value of $\lambda$ for the LASSO is critical. The loss function for
-LASSO Regression is:
+**Plain-language intuition.** LASSO (Least Absolute Shrinkage and Selection
+Operator) adds an **L1 penalty**: the sum of the *absolute* coefficients
+(@eq-lasso). The difference from ridge sounds small but matters a lot: the L1
+penalty can push a coefficient *exactly* to zero, effectively deleting that feature
+from the model. So LASSO does **automatic feature selection** — it hands you a
+simpler model that uses only the features that earn their keep.
 
-$$L = \sum_{i=0}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=0}^{k} |\beta_j|$$ {#eq-lasso}
+$$L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} |\beta_j|$$ {#eq-lasso}
 
-Similar to Ridge, ŷi is the predicted output, yi is the actual output, βj
-represents the model parameters or coefficients, and λ is the regularization
-parameter. The second term, λ∑|βj|, is the penalty term where the absolute
-values of all parameters are summed. LASSO regression tends to shrink the
-coefficients and can zero out some of them, effectively performing variable
-selection.
+LASSO is `alpha = 1` in `glmnet`:
 
+```{r}
+set.seed(42)
+fit_lasso <- cv.glmnet(x_train, y_train, alpha = 1)
 
-One obvious advantage of LASSO regression over ridge regression, is that it
-produces simpler and more interpretable models that incorporate only a reduced
-set of the predictors. However, neither ridge regression nor the LASSO will
-universally dominate the other. Generally, LASSO might perform better in a
-situation where some of the predictors have large coefficients, and the
-remaining predictors have very small coefficients. Ridge regression will
-perform better when the outcome is a function of many predictors, all with
-coefficients of roughly equal size (James et al. 2014).
+coef(fit_lasso, s = "lambda.min")
+```
 
-Cross-validation methods can be used for identifying which of these two
-techniques is better on a particular data set.
+Any coefficient shown as `.` has been zeroed out and dropped. With only three
+strong features here, LASSO may keep all of them — but on a genomics dataset with
+thousands of features, this is how you go from "20,000 genes" to "the handful that
+actually predict the outcome."
 
-### Elastic Net
+::: {.callout-tip}
+## Ridge or LASSO? Let the data decide
 
-Elastic Net produces a regression model that is penalized with both the L1-norm
-and L2-norm. The consequence of this is to effectively shrink coefficients
-(like in ridge regression) and to set some coefficients to zero (as in LASSO).
+Neither always wins. LASSO shines when a few features carry the signal and the rest
+are noise (so zeroing them helps). Ridge shines when *many* features each
+contribute a bit. When you're unsure — which is most of the time — fit both with
+cross-validation and compare their test error, exactly as we're doing here.
+:::
 
+### Elastic net
 
+**Plain-language intuition.** Why choose? Elastic net **blends** the L1 and L2
+penalties, so it can zero out useless features (the LASSO trick) *while* gracefully
+handling groups of correlated features (the ridge strength). When two features are
+highly correlated, pure LASSO tends to arbitrarily keep one and drop the other;
+elastic net is happier keeping both, which is common and useful in biology where
+genes in the same pathway move together.
 
+The mixing dial is `alpha`, between 0 and 1: `alpha = 0` is pure ridge, `alpha = 1`
+is pure LASSO, and anything in between is elastic net. Let's use a 50/50 blend,
+`alpha = 0.5`:
 
-### Classification and Regression Trees (CART)
+```{r}
+set.seed(42)
+fit_enet <- cv.glmnet(x_train, y_train, alpha = 0.5)
 
-[Decision Tree Learning](https://en.wikipedia.org/wiki/Decision_tree_learning) is supervised learning approach used in statistics, data mining and machine learning. In this formalism, a classification or regression decision tree is used as a predictive model to draw conclusions about a set of observations. Decision trees are a popular machine learning method used for both classification and regression tasks. They are hierarchical, tree-like structures that model the relationship between features and the target variable by recursively splitting the data into subsets based on the feature values. Each internal node in the tree represents a decision or test on a feature, and each branch represents the outcome of that test. The leaf nodes contain the final prediction, which is the majority class for classification tasks or the mean/median of the target values for regression tasks.
+coef(fit_enet, s = "lambda.min")
 
-![Graphical representation of a decision tree.](https://upload.wikimedia.org/wikipedia/commons/e/eb/Decision_Tree.jpg){#fig-decision-tree fig-align="center"}
+pred_enet <- predict(fit_enet, newx = x_test, s = "lambda.min")
+rmse(y_test, pred_enet)
+```
 
+Elastic net gives you a coefficient profile somewhere between ridge's "keep
+everything, shrunk" and LASSO's "keep a few." On this small three-feature problem
+all four regression models land in roughly the same place; the penalized methods
+earn their keep when features are many and correlated.
 
+## Classification and regression trees (CART)
 
+**Plain-language intuition.** A decision tree predicts by asking a series of simple
+yes/no questions about the features, like a flow chart or the game of Twenty
+Questions. "Is the flipper longer than 206 mm? If yes, is the bill deeper than 17
+mm?" Each question splits the data into purer and purer groups, until a final
+**leaf** gives the prediction — the majority species (for classification) or the
+average value (for regression).
 
+In three-pillar terms: the hypothesis space is "all such question trees," the
+objective at each split is to make the resulting groups as *pure* as possible
+(measured by the Gini index or entropy), and the learning algorithm greedily picks
+the best split at each step. Trees are prized because you can *read* them — they
+match how people naturally reason.
 
-Here's an overview of the decision tree learning process:
+We'll grow a classification tree for species with `rpart` (which ships with R):
 
-*  Select the best feature and split value: Start at the root node and choose the feature and split value that results in the maximum reduction of impurity (or increase in information gain) in the child nodes. For classification tasks, impurity measures like Gini index or entropy are commonly used, while for regression tasks, mean squared error (MSE) or mean absolute error (MAE) can be used.
-*  Split the data: Partition the dataset into subsets based on the chosen feature and split value.
-*  Recursion: Repeat steps 1 and 2 for each subset until a stopping criterion is met. Stopping criteria can include reaching a maximum tree depth, a minimum number of samples per leaf, or no further improvement in impurity.
-*  Prune the tree (optional): To reduce overfitting, decision trees can be pruned by removing branches that do not significantly improve the model's performance on the validation dataset. This can be done using techniques like reduced error pruning or cost-complexity pruning.
+```{r}
+library(rpart)
 
-Decision trees have several advantages, such as:
+set.seed(42)
+fit_tree <- rpart(species ~ flipper_length_mm + bill_length_mm + bill_depth_mm,
+                  data = train, method = "class")
 
-*  Interpretability
-  : They are easy to understand, visualize, and explain, even for non-experts.
-*  Minimal data preprocessing
-  : Decision trees can handle both numerical and categorical data, and they are robust to outliers and missing values.
-*  Non-linear relationships
-  : They can capture complex non-linear relationships between features and the target variable.
+tree_pred <- predict(fit_tree, newdata = test, type = "class")
+mean(tree_pred == test$species)   # test accuracy
+```
 
-However, decision trees also have some drawbacks:
+The tree learned a short list of measurement thresholds that separate the species,
+and it classifies the held-out birds with high accuracy. We can even print the
+learned rules:
 
-*  Overfitting
-  : They are prone to overfitting, especially when the tree is deep or has few samples per leaf. Pruning and setting stopping criteria can help mitigate this issue.
-*  Instability
-  : Small changes in the data can lead to different tree structures. This can be addressed by using ensemble methods like random forests or gradient boosting machines (GBMs).
-*  Greedy learning
-  : Decision tree algorithms use a greedy approach, meaning they make locally optimal choices at each node. This may not always result in a globally optimal tree.
+```{r}
+fit_tree
+```
 
-Despite these limitations, decision trees are widely used in various applications due to their simplicity, interpretability, and ability to handle diverse data types.
+@fig-decision-tree shows the same idea drawn out for a clinical example: each
+internal node tests one feature, and following the branches leads to a leaf with a
+predicted class.
 
-### RandomForest
+![A classification tree for a breast-cancer screening example. Each internal (blue) node tests one feature; following the branch that matches a sample leads, eventually, to a leaf (green/red) that gives the predicted class.](../images/decision_tree.png){#fig-decision-tree fig-align="center"}
 
-**Random forests** or **random decision forests** is an [ensemble learning](https://en.wikipedia.org/wiki/Ensemble_learning "Ensemble learning") method for [classification](https://en.wikipedia.org/wiki/Statistical_classification "Statistical classification"), [regression](https://en.wikipedia.org/wiki/Regression_analysis "Regression analysis") and other tasks that operates by constructing a multitude of [decision trees](https://en.wikipedia.org/wiki/Decision_tree_learning "Decision tree learning") at training time. For classification tasks, the output of the random forest is the class selected by most trees. For regression tasks, the mean or average prediction of the individual trees is returned. Random decision forests correct for decision trees' habit of [overfitting](https://en.wikipedia.org/wiki/Overfitting "Overfitting") to their [training set](https://en.wikipedia.org/wiki/Test_set "Test set"). Random forests generally outperform [decision trees](https://en.wikipedia.org/wiki/Decision_tree_learning "Decision tree learning"), but their accuracy is lower than gradient boosted trees\[_[citation needed](https://en.wikipedia.org/wiki/Wikipedia:Citation_needed "Wikipedia:Citation needed")_\]. However, data characteristics can affect their performance.
+::: {.callout-warning}
+## A single tree is twitchy
 
-The first algorithm for random decision forests was created in 1995 by [Tin Kam Ho](https://en.wikipedia.org/wiki/Tin_Kam_Ho "Tin Kam Ho") using the [random subspace method](https://en.wikipedia.org/wiki/Random_subspace_method "Random subspace method"), which, in Ho's formulation, is a way to implement the "stochastic discrimination" approach to classification proposed by Eugene Kleinberg.
+Decision trees have a real flaw: they're **unstable**. Change a few training rows
+and you can get a noticeably different tree. A single deep tree also overfits
+easily. The fix — averaging many trees together — is exactly the idea behind random
+forests, next.
+:::
 
-An extension of the algorithm was developed by [Leo Breiman](https://en.wikipedia.org/wiki/Leo_Breiman "Leo Breiman") and [Adele Cutler](https://en.wikipedia.org/wiki/Adele_Cutler "Adele Cutler"), who registered "Random Forests" as a [trademark](https://en.wikipedia.org/wiki/Trademark "Trademark") in 2006 (as of 2019[\[update\]](https://en.wikipedia.org/w/index.php?title=Random_forest&action=edit), owned by [Minitab, Inc.](https://en.wikipedia.org/wiki/Minitab "Minitab")). The extension combines Breiman's "[bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating "Bootstrap aggregating")" idea and random selection of features, introduced first by Ho and later independently by Amit and [Geman](https://en.wikipedia.org/wiki/Donald_Geman "Donald Geman") in order to construct a collection of decision trees with controlled variance.
+## Random forests
 
-Random forests are frequently used as "blackbox" models in businesses, as they generate reasonable predictions across a wide range of data while requiring little configuration.
+**Plain-language intuition.** If one decision tree is twitchy, build *hundreds* of
+them and let them vote. A **random forest** grows many trees, each on a random
+bootstrap sample of the data and each allowed to consider only a random subset of
+features at every split. That deliberate randomness makes the individual trees
+disagree in their mistakes — and when you average many imperfect-but-different
+predictions, the errors cancel out. The result is far more stable and accurate than
+any single tree, while needing very little tuning. @fig-random-forest sketches the
+idea: many trees, one combined vote.
 
+![Graphical representation of a random forest: many decision trees, each grown on a slightly different view of the data, combine their votes into one prediction.](../images/random-forest.png){#fig-random-forest fig-align="center"}
 
-![Graphical representation of random forests. ](https://miro.medium.com/v2/resize:fit:592/1*i0o8mjFfCn-uD79-F1Cqkw.png){#fig-random-forest fig-align="center"}
+We'll use the fast `ranger` package. Random forests are randomised, so we set a
+seed for a reproducible result:
 
+```{r}
+library(ranger)
 
+set.seed(42)
+fit_rf <- ranger(species ~ flipper_length_mm + bill_length_mm + bill_depth_mm,
+                 data = train)
+
+rf_pred <- predict(fit_rf, data = test)$predictions
+mean(rf_pred == test$species)   # test accuracy
+```
+
+The forest typically matches or beats the single tree on the held-out birds, with
+no manual tuning — which is exactly why random forests are such a popular,
+reliable default for tabular biological data.
+
+## Summary
+
+You now have a working map of the supervised-learning landscape, and you've run
+every algorithm on it with your own hands:
+
+- Every algorithm is a **hypothesis space** + an **objective function** + a
+  **learning algorithm**. Name those three and you understand it.
+- **Linear regression** (`lm()`) fits an interpretable straight-line model;
+  coefficients tell you how each feature moves the target.
+- **k-nearest neighbours** (`class::knn()`) predicts from the most similar training
+  examples — remember to **scale** your features first.
+- **Penalized regression** (`glmnet()`) adds a complexity penalty to fight
+  overfitting: **ridge** (`alpha = 0`) shrinks all coefficients, **LASSO**
+  (`alpha = 1`) zeroes some out for feature selection, and **elastic net**
+  (`0 < alpha < 1`) blends the two.
+- **Decision trees** (`rpart`) are readable flow charts but unstable on their own;
+  **random forests** (`ranger`) average many trees into a stable, accurate, low-fuss
+  predictor.
+
+In every case we trained on one split and judged on a held-out split — the habit
+that keeps you honest. The next chapters show how to run all of these through the
+unified `mlr3verse` interface, so swapping one algorithm for another becomes a
+one-line change.
+
+## Exercises
+
+1. **A simpler linear model.** Refit the linear regression for `body_mass_g` using
+   *only* `flipper_length_mm`. Compute its test RMSE and compare it to the
+   three-feature model. Did dropping two features hurt much?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   fit_simple <- lm(body_mass_g ~ flipper_length_mm, data = train)
+   pred_simple <- predict(fit_simple, newdata = test)
+   rmse(test$body_mass_g, pred_simple)
+   ```
+   Flipper length alone is a strong predictor of body mass, so the simpler model is
+   usually only a little worse. That's a useful reminder: more features are not
+   automatically better.
+   :::
+
+2. **Tuning k in k-NN.** Try `k = 1`, `k = 5`, and `k = 25` for the species
+   classifier. Which gives the best test accuracy? What goes wrong at the extremes?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   set.seed(42)
+   for (k in c(1, 5, 25)) {
+     pred_k <- knn(train = train_x, test = test_x, cl = train$species, k = k)
+     cat("k =", k, " accuracy =", round(mean(pred_k == test$species), 3), "\n")
+   }
+   ```
+   Very small `k` (like 1) follows noise and can overfit; very large `k` blurs the
+   class boundaries and underfits. A middle value usually wins — which is why `k`
+   is a hyperparameter worth tuning.
+   :::
+
+3. **Watch LASSO select.** Push the LASSO penalty up by using `lambda.1se` (a more
+   aggressive, simpler model) instead of `lambda.min`, and look at the
+   coefficients. Are any features dropped?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   coef(fit_lasso, s = "lambda.1se")
+   ```
+   `lambda.1se` is the largest penalty whose error is still within one standard
+   error of the best — a deliberately simpler model. Any coefficient printed as `.`
+   has been set to exactly zero and removed. With strong features here it may keep
+   them all, but the mechanism is the same one that prunes thousands of genes down
+   to a few.
+   :::
+
+4. **Feature importance from the forest.** Refit the random forest with
+   `importance = "impurity"` and print `fit_rf$variable.importance`. Which
+   measurement matters most for telling the species apart?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   set.seed(42)
+   fit_rf_imp <- ranger(species ~ flipper_length_mm + bill_length_mm + bill_depth_mm,
+                        data = train, importance = "impurity")
+   sort(fit_rf_imp$variable.importance, decreasing = TRUE)
+   ```
+   The feature with the largest importance score contributed most to splitting the
+   species apart across the forest's trees. Importance scores are one of the
+   friendliest things random forests give you — a ranked list of which measurements
+   carry the signal.
+   :::
+
+5. **Regression, three ways.** You have test RMSE for linear regression, ridge, and
+   elastic net. Compute it for LASSO too, then state which model you'd ship and why.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   pred_lasso <- predict(fit_lasso, newx = x_test, s = "lambda.min")
+   c(linear = rmse(y_test, pred_lm),
+     ridge  = rmse(y_test, pred_ridge),
+     lasso  = rmse(y_test, pred_lasso),
+     enet   = rmse(y_test, pred_enet))
+   ```
+   On this small, low-dimensional problem the four are nearly tied, so you'd pick
+   the simplest and most interpretable — plain linear regression. The penalized
+   methods pull ahead only when features are numerous and correlated, as in real
+   genomic data.
+   :::
