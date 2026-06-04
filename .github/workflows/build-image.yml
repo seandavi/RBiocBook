@@ -1,0 +1,41 @@
+# Build the book's container image and push it to GHCR.
+# Runs only when the environment changes (Dockerfile / DESCRIPTION) or on demand
+# — NOT on every content edit — so the image is a stable, reused environment.
+name: build-image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - DESCRIPTION
+      - .github/workflows/build-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/seandavi/rbiocbook:latest
+            ghcr.io/seandavi/rbiocbook:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1,0 +1,29 @@
+{
+  "name": "RBiocBook",
+
+  // The exact image CI renders with: R 4.6 + every Bioc/CRAN dependency + Quarto
+  // + TinyTeX + quartobot. Nothing to install on your machine. The GHCR package
+  // is public, so it pulls without auth.
+  "image": "ghcr.io/seandavi/rbiocbook:latest",
+
+  // The image is linux/amd64 only (Bioconductor publishes Linux binaries for
+  // amd64). On Apple Silicon, run it under emulation. NOTE: don't add `features`
+  // here — features trigger a buildx step that can't resolve an arm64 base and
+  // fails with "no match for platform"; install extra tooling via
+  // postCreateCommand instead.
+  "runArgs": ["--platform=linux/amd64"],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "quarto.quarto",
+        "REditorSupport.r",
+        "anthropic.claude-code"
+      ]
+    }
+  },
+
+  // Installs the titlepage extension + Claude Code (Node is in the image).
+  // See .devcontainer/post-create.sh.
+  "postCreateCommand": ".devcontainer/post-create.sh"
+}

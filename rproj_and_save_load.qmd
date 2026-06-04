@@ -1,0 +1,307 @@
+---
+title: "Organizing, saving, and loading your work"
+author:
+  - "Sean Davis"
+  - "Lori Kern"
+---
+
+Every analysis you do leaves a trail: scripts, data files, figures, and the
+objects you build up in your R session along the way. Where you put those files,
+and whether you can get your work *back* the next time you sit down, is the
+difference between an analysis you can rerun a year from now and one you can
+barely reconstruct tomorrow. This chapter is about keeping that trail tidy.
+
+Think of it the way you'd think of a **lab notebook**. A good notebook isn't just
+a place to scribble numbers — it's a record organized so that someone else, or
+*you* six months from now, can open it and follow exactly what was done, in what
+order, with which samples. The same discipline pays off at the keyboard. Loose
+files scattered across your Desktop, a Downloads folder, and three different
+project directories are the digital equivalent of notes on the backs of
+envelopes: fine in the moment, useless when you need to reconstruct what you did.
+
+The reader you should organize for is almost always **future you**. The
+collaborator who can't find the raw data, the reviewer who asks you to rerun the
+analysis a year later, the version of yourself coming back to a half-finished
+project after a conference — all of them are best served by work that is
+*self-contained* and *portable*. If a colleague can clone your project folder,
+open one file, and run your scripts with no edits, then sharing your analysis
+costs you nothing. If instead your code is laced with paths like
+`/Users/yourname/Desktop/...`, every hand-off becomes a debugging session. Good
+organization is what turns a private analysis into something you can share — and
+trust — without ceremony.
+
+There's one place the notebook analogy breaks down, and it's worth naming. A
+paper notebook is a *permanent, append-only* record: you never erase a page, and
+its value is precisely that it captures what you did, mistakes and all. The
+objects in an R session are the opposite — *transient* working state that
+vanishes when you quit, and saving them is a deliberate act. That difference is
+exactly why this chapter has two halves. First we make your *files* tidy and
+portable with **RStudio Projects** — the durable, notebook-like record of an
+analysis. Then we look at how to **save and load** the transient parts — your
+workspace, individual objects, and your command history — so you can pick up
+exactly where you left off.
+
+## What you'll learn
+
+- Organize an analysis in an RStudio Project so your file paths stay portable.
+- Lay out a project folder that separates raw data, scripts, and outputs.
+- Use relative paths (and the `here` package) instead of fragile absolute paths.
+- Save and restore your whole workspace with `save.image()` and `load()`.
+- Save and reload *selected* objects with `save()` and `load()`.
+- Save and replay your command history with `savehistory()` and `loadhistory()`.
+
+## Organizing your work with RStudio Projects {#sec-rstudio-projects}
+
+Before you read or write a single file, it helps to decide *where* those files
+live. An RStudio Project is a folder that holds everything for one analysis —
+scripts, data, and outputs — together in one place. When you create a project,
+RStudio drops a `.Rproj` file into the folder, and that file anchors your
+workspace.
+
+Working in a project buys you a few things:
+
+- **A consistent working directory.** Open the project and your working
+  directory is automatically the project folder. No more guessing where R thinks
+  it is.
+- **Everything in one place.** Scripts, data, and outputs travel together.
+- **Reproducibility.** A collaborator can open your project and run your code
+  without rewriting any paths.
+- **Version control.** Projects work cleanly with Git and GitHub.
+
+### Creating a project
+
+You can make a new project from **File > New Project...**, or from the project
+dropdown in the top-right corner of RStudio. You'll be offered three choices:
+
+- **New Directory** — start a fresh project folder.
+- **Existing Directory** — turn a folder you already have into a project.
+- **Version Control** — clone a repository from GitHub.
+
+### A sensible project layout
+
+A good project has a predictable shape — one that *you* define and then stick to.
+A common starting point:
+
+```
+my_analysis_project/
+├── my_analysis_project.Rproj
+├── data/
+│   ├── raw/
+│   └── processed/
+├── scripts/
+├── notebooks/
+├── outputs/
+│   ├── figures/
+│   └── tables/
+├── README.md
+└── .gitignore
+```
+
+This keeps raw data separate from processed data, scripts in one place, and
+outputs where you can find them later.
+
+### Why this fixes file paths
+
+The biggest practical payoff is path management. When you open a project,
+RStudio sets the working directory to the project folder, so you can refer to
+files *relative* to that folder instead of spelling out the full path from the
+root of your hard drive.
+
+```{r eval=FALSE}
+# An absolute path is tied to one machine and one user:
+expr <- read.csv("/Users/username/Documents/my_analysis/data/dataset.csv")
+
+# A relative path works for anyone who opens the project:
+expr <- read.csv("data/dataset.csv")
+```
+
+::: {.callout-warning}
+## Absolute paths break reproducibility
+
+An absolute path like `/Users/username/Documents/...` only exists on *your*
+computer. Email that script to a colleague and the very first line fails for
+them. Relative paths (`data/dataset.csv`), anchored by a project, are the habit
+that keeps your code portable.
+:::
+
+::: {.callout-tip}
+## The `here` package for robust paths
+
+In larger projects — especially ones with notebooks tucked into subfolders — the
+`here` package makes paths bulletproof. `here()` always resolves from the project
+root (the folder with the `.Rproj` file), no matter which subfolder your script
+sits in:
+
+```{r eval=FALSE}
+install.packages("here")
+library(here)
+
+expr <- read.csv(here("data", "dataset.csv"))
+```
+:::
+
+When you share a project folder (or push it to GitHub), a collaborator can clone
+it, open the `.Rproj` file, and run your scripts with no path edits at all. That
+seamless hand-off is what makes an analysis credible and repeatable.
+
+## Saving and loading your workspace
+
+A project keeps your *files* organized. But what about the objects you build up
+during a session — the data frame you cleaned, the model you fit, the vector of
+gene names you assembled by hand? Those live in R's memory, and they vanish when
+you quit unless you save them.
+
+The whole collection of objects in your current session is called your
+**workspace** (or the *global environment*). When you quit R with `q()` and
+answer "yes" to *Save workspace image?*, R writes your entire workspace to a file
+named `.RData` in the working directory. That is exactly equivalent to running:
+
+```{r, eval=FALSE}
+save.image()
+```
+
+The next time you start R *in the same directory*, it finds that `.RData` file
+and reloads every object automatically — you're back where you left off.
+
+You can also save the workspace to a file you name yourself:
+
+```{r, eval=FALSE}
+save.image(file = "analysis_checkpoint.RData")
+```
+
+A named file behaves differently from the default `.RData`: R will **not** load
+it automatically on startup. You reload it by hand whenever you want it back:
+
+```{r, eval=FALSE}
+load("analysis_checkpoint.RData")
+```
+
+::: {.callout-tip}
+## Prefer named files, and a fresh session
+
+Letting R silently restore `.RData` every time feels convenient, but it quietly
+brings along *every* object from your last session — including mistakes. Many
+experienced users turn that behavior off and instead save named checkpoints with
+`save.image("descriptive_name.RData")`, so each saved state is deliberate and
+self-documenting.
+:::
+
+## Saving and loading selected objects
+
+Saving the *entire* workspace is often more than you want. Usually only a couple
+of objects are worth keeping — the cleaned dataset, the final result — while the
+rest is scratch work. The `save()` function lets you pick exactly which objects
+to write, and `load()` brings them back.
+
+```{r, eval=FALSE}
+ages <- 1:4
+months <- c("may", "june", "july", "august")
+flags <- c(TRUE, FALSE, TRUE)
+
+# Save just two of the three objects:
+save(months, ages, file = "subset.RData")
+```
+
+In a later session, `load()` drops `months` and `ages` straight back into your
+workspace — `flags` is not in the file, so it does not come along:
+
+```{r, eval=FALSE}
+load("subset.RData")
+```
+
+::: {.callout-note}
+## `save()` versus `saveRDS()`
+
+`save()` stores objects *together with their names*, so `load()` recreates them
+under those same names. A close cousin, `saveRDS()`, stores a *single* object
+with no name attached, and you assign it yourself on the way back in:
+`my_data <- readRDS("file.rds")`. Reach for `saveRDS()` when you want one object
+and full control over what it's called.
+:::
+
+## Saving and loading your command history
+
+R also remembers the *commands* you type, not just the objects they create. When
+you save your session on quit, your command history is saved too. You can manage
+it by hand with `savehistory()` and `loadhistory()`:
+
+```{r, eval=FALSE}
+savehistory(file = "analysis.Rhistory")   # write the commands you've run
+loadhistory(file = "analysis.Rhistory")   # replay them into a new session
+```
+
+Saving the history is handy for turning an exploratory session into a clean
+script later: you can open the `.Rhistory` file, keep the lines that mattered,
+and drop the dead ends.
+
+## Exercises
+
+1. **Spot the fragile path.** A collaborator sends you a script that begins with
+   `expr <- read.csv("C:/Users/jordan/Desktop/data/counts.csv")`. It runs fine on
+   their laptop but errors on yours. Why, and how would you rewrite the line so it
+   works for both of you?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   That path exists only on Jordan's machine, so R can't find the file on yours.
+   Put the data inside an RStudio Project (say, in a `data/` folder) and use a
+   relative path instead:
+
+   ```{r eval=FALSE}
+   expr <- read.csv("data/counts.csv")
+   ```
+
+   Now anyone who opens the project gets the same working directory, and the path
+   resolves the same way for everyone.
+   :::
+
+2. **Save just what matters.** You have three objects in your session —
+   `counts`, `samples`, and a throwaway `tmp`. Write the one line that saves only
+   `counts` and `samples` to a file called `results.RData`, then the line that
+   loads them back in a future session.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r eval=FALSE}
+   save(counts, samples, file = "results.RData")
+   # ... later, in a fresh session ...
+   load("results.RData")
+   ```
+   `tmp` is never named in the `save()` call, so it isn't written — and `load()`
+   restores `counts` and `samples` under their original names.
+   :::
+
+3. **One object, your name.** You want to hand a single cleaned data frame,
+   `brfss_clean`, to a colleague who will read it under a name of *their* choosing.
+   Which function fits better, `save()` or `saveRDS()`, and why?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   `saveRDS()`. It stores the object without a name, so your colleague assigns it
+   themselves on the way in:
+
+   ```{r eval=FALSE}
+   saveRDS(brfss_clean, file = "brfss_clean.rds")
+   # colleague's session:
+   my_data <- readRDS("brfss_clean.rds")
+   ```
+   `save()` would have forced the object back into their workspace as
+   `brfss_clean`, whether they wanted that name or not.
+   :::
+
+## Summary
+
+You now have the habits that keep an analysis reproducible from one session to
+the next:
+
+- **Organize** each analysis as an RStudio Project so your working directory is
+  predictable and your paths are *relative*, not tied to one machine.
+- **Checkpoint** a whole session with `save.image()` / `load()`, preferring named
+  files over the silent `.RData` restore.
+- **Save selectively** with `save()` (objects plus their names) or `saveRDS()`
+  (one object, you name it on the way back).
+- **Keep your history** with `savehistory()` / `loadhistory()` to turn a messy
+  session into a tidy script.
+
+With your work organized and safely saved, let's explore how to read and write
+the data files that will live within these project structures.

@@ -2,40 +2,61 @@
 title: "Vectors"
 ---
 
-## What is a Vector?
+```{r setup, include=FALSE}
+# Seed the RNG so the random examples below render identically every time.
+set.seed(1)
+```
 
-A vector is the simplest and most basic data structure in R. It is a
-one-dimensional, ordered collection of elements, where all the elements are of
-the same data type. Vectors can store various types of data, such as numeric,
-character, or logical values. @fig-vector shows a pictorial representation of
-three vector examples.
+Suppose you've just measured the expression of one gene across a dozen samples,
+or jotted down the ages of every patient in a study, or listed the gene names you
+want to pull out of a results table. Each of those is the same shape: a single,
+ordered run of values of one kind. R has a container built exactly for that shape,
+and it is the workhorse you'll reach for more than any other. It's called a
+**vector**.
+
+Almost everything in R is built on vectors. A column of a data frame is a vector.
+The output of most calculations is a vector. Even a single number, as you'll see
+in a moment, is just a vector of length one. So getting comfortable here pays off
+everywhere downstream. Let's build that comfort.
+
+## What you'll learn
+
+- Create vectors with `c()`, the colon operator `:`, and `seq()`.
+- Do arithmetic on whole vectors at once, and recognize the **recycling** rule.
+- Build logical vectors with comparisons like `>` and `==`.
+- Pull elements out of a vector by position, by name, and by a logical test.
+- Work with character vectors using `paste()`, `nchar()`, `substr()`, and `grep()`.
+- Spot and handle missing values (`NA`).
+
+## A vector is a column of measurements
+
+A vector is a one-dimensional, ordered collection of elements that are all the
+same type. That last part matters: every value in a vector is numeric, *or* every
+value is text, *or* every value is logical — never a mix. @fig-vector shows three
+vectors side by side: a numeric one, a logical one, and a character one. Notice
+that each element has a position (an *index*) and can optionally carry a *name*.
 
 !["Pictorial representation of three vector examples. The first vector is a
 numeric vector. The second is a 'logical' vector. The third is a character
-vector. Vectors also have indices and, optionally, names. "](images/vector.png){#fig-vector}
+vector. Vectors also have indices and, optionally, names."](images/vector.png){#fig-vector}
 
-In this chapter, we will provide a comprehensive overview of vectors, including
-how to create, access, and manipulate them. We will also discuss some unique
-properties and rules associated with vectors, and explore their applications in
-data analysis tasks.
-
-
-In R, even a single value is a vector with length=1. 
+Here's the first surprise. In R, even a lone value is a vector — one of length 1:
 
 ```{r}
-z = 1
-z
-length(z)
+gene_count <- 1
+gene_count
+length(gene_count)
 ```
 
-In the code above, we "assigned" the value 1 to the variable named `z`. Typing `z` by itself is an "expression" that returns a result which is, in this case, the value that we just assigned. The `length` method takes an R object and returns the R length. There are numerous ways of asking R about what an object represents, and `length` is one of them.
+We *assigned* the value `1` to a variable named `gene_count`. Typing `gene_count`
+by itself is an *expression*: it returns whatever is stored there. The `length()`
+function reports how many elements an object holds — here, just one. R gives you
+many ways to interrogate an object, and `length()` is one of the friendliest.
 
-
-Vectors can contain numbers, strings (character data), or logical values
-(`TRUE` and `FALSE`) or other "atomic" data types @tbl-simpletypes. *Vectors cannot contain a mix of types!* We will
-introduce another data structure, the R `list` for situations when we need to
-store a mix of base R data types. 
-
+A vector can hold numbers, text (character data), or logical values (`TRUE` and
+`FALSE`), or other "atomic" types from @tbl-simpletypes. What it *cannot* do is
+hold a mix of types. When you need a grab-bag of different types in one container,
+R offers a different structure, the `list`, which you'll meet in a later chapter.
 
 |  Data type |  Stores  |
 |-----------|------------------------|
@@ -46,346 +67,498 @@ store a mix of base R data types.
 |  character|          strings       |
 |   logical |      TRUE or FALSE     |
 |     NA    |          missing       |
-|     NULL   |           empty  |   
+|     NULL   |           empty  |
 |   function |       function type    |
 
 : Atomic (simplest) data types in R. {#tbl-simpletypes}
 
-## Creating vectors
+::: {.callout-important}
+## One type per vector
 
-Character vectors (also sometimes called "string" vectors) are entered with each value
-surrounded by single or double quotes; either is acceptable, but they
-must match. They are always displayed by R with double quotes. Here are some examples of creating vectors:
-
-```{r}
-# examples of vectors
-c('hello','world')
-c(1,3,4,5,1,2)
-c(1.12341e7,78234.126)
-c(TRUE,FALSE,TRUE,TRUE)
-# note how in the next case the TRUE is converted to "TRUE"
-# with quotes around it.
-c(TRUE,'hello')
-```
-
-We can also create vectors as "regular sequences" of numbers. For example:
-
-```{r}
-# create a vector of integers from 1 to 10
-x = 1:10
-# and backwards
-x = 10:1
-```
-
-The `seq` function can create more flexible regular sequences. 
-  
-```{r}
-# create a vector of numbers from 1 to 4 skipping by 0.3
-y = seq(1,4,0.3)
-```    
-
-
-And creating a new vector by concatenating existing vectors is possible, as well.
-
-```{r}
-# create a sequence by concatenating two other sequences
-z = c(y,x)
-z
-```
-
-
-## Vector Operations
-
-Operations on a single vector are typically done element-by-element. For example, we can add `2` to a vector, `2` is added to each element of the vector and a new vector of the same length is returned.
-
-```{r}
-x = 1:10
-x + 2
-```
-
-If the operation involves two vectors, the following rules apply. If the vectors are the same length: R simply applies the operation to each pair of elements.
-
-```{r}
-x + x
-```
-
-If the vectors are different lengths, but one length a multiple of the other, R
-reuses the shorter vector as needed.
-
-```{r}
-x = 1:10
-y = c(1,2)
-x * y
-```
-
-If the vectors are different lengths, but one length *not* a multiple of the
-other, R reuses the shorter vector as needed *and* delivers a
-warning.
-
-```{r}
-x = 1:10
-y = c(2,3,4)
-x * y
-```
-
-
-Typical operations include multiplication ("\*"), addition,
-subtraction, division, exponentiation ("\^"), but many operations
-in R operate on vectors and are then called "vectorized".
-
-::: {.callout-warning}
-Be aware of the recycling rule when working with vectors of different lengths, as it may lead to unexpected results if you're not careful.
+If you try to mix types, R doesn't error — it quietly *coerces* everything to a
+single type that can hold all the values. Watch what happens when a logical meets
+a string: the `TRUE` becomes the text `"TRUE"`, quotes and all. Keep this in the
+back of your mind; a column that "looks numeric" but secretly contains one stray
+word will arrive as character, and your math will fail in confusing ways.
 :::
 
+## Creating vectors
 
-
-## Logical Vectors
-
-Logical vectors are vectors composed on only the values `TRUE` and
-`FALSE`. Note the all-upper-case and no quotation marks.
+The most direct way to build a vector is `c()`, short for *combine*. Character
+values go in matching quotes — single or double, your choice — and R always
+displays them back with double quotes.
 
 ```{r}
-a = c(TRUE,FALSE,TRUE)
-
-# we can also create a logical vector from a numeric vector
-# 0 = false, everything else is 1
-b = c(1,0,217)
-d = as.logical(b)
-d
-# test if a and d are the same at every element
-all.equal(a,d)
-
-# We can also convert from logical to numeric
-as.numeric(a)
+# a few vectors of different types
+c("BRCA1", "TP53")
+c(1, 3, 4, 5, 1, 2)
+c(1.12341e7, 78234.126)
+c(TRUE, FALSE, TRUE, TRUE)
+# mixing a logical and a string forces BOTH to character:
+c(TRUE, "hello")
 ```
 
-### Logical Operators
+That last line is the coercion we just warned about: `TRUE` came back as `"TRUE"`.
 
-Some operators like `<, >, ==, >=, <=, !=` can be used to create logical
-vectors.
+When you want a regular run of integers, the colon operator `:` is the quickest
+tool. It counts from the first number to the second, in either direction.
 
 ```{r}
-# create a numeric vector
-x = 1:10
-# testing whether x > 5 creates a logical vector
-x > 5
-x <= 5
-x != 5
-x == 5
+# the integers 1 through 10
+sample_ids <- 1:10
+sample_ids
+# ...and counting back down
+countdown <- 10:1
+countdown
 ```
 
-We can also assign the results to a variable:
+For sequences with a custom step size, `seq()` is more flexible. Here we step by
+0.3 instead of 1:
 
 ```{r}
-y = (x == 5)
-y
+# from 1 to 4 in steps of 0.3
+grid <- seq(1, 4, by = 0.3)
+grid
 ```
 
-
-## Indexing Vectors
-
-In R, an index is used to refer to a specific element or
-set of elements in an vector (or other data structure). [R uses `[` and `]` to perform indexing,
-although other approaches to getting subsets of larger data
-structures are common in R.
+And you can build a new vector by gluing existing ones together with `c()`:
 
 ```{r}
-x = seq(0,1,0.1)
-# create a new vector from the 4th element of x
+# concatenate two vectors into one
+combined <- c(grid, sample_ids)
+combined
+```
+
+## Vector operations
+
+Here is where vectors earn their keep. Arithmetic on a vector happens
+**element-by-element**. Add `2` to a vector and R adds `2` to every element,
+handing back a new vector of the same length. You never have to write a loop.
+
+```{r}
+expression <- 1:10
+expression + 2
+```
+
+Think of how often that's what you want: shift every measurement, scale every
+value, take the log of a whole column. One short line does it.
+
+When two vectors are involved, the rules depend on their lengths. If they're the
+**same length**, R simply pairs up matching elements and operates on each pair:
+
+```{r}
+expression + expression
+```
+
+If the lengths differ but the longer is a **multiple** of the shorter, R reuses
+the shorter vector from the start as many times as needed. Here the two-element
+vector `c(1, 2)` is repeated five times to line up with the ten-element vector:
+
+```{r}
+expression <- 1:10
+pair <- c(1, 2)
+expression * pair
+```
+
+If the longer length is **not** a clean multiple of the shorter, R still recycles
+the short vector — but warns you, because this is usually a sign of a mistake:
+
+```{r}
+expression <- 1:10
+triple <- c(2, 3, 4)
+expression * triple
+```
+
+The usual arithmetic is all here — multiplication (`*`), addition (`+`),
+subtraction (`-`), division (`/`), exponentiation (`^`) — and because each acts
+on whole vectors, we call these operations *vectorized*.
+
+::: {.callout-warning}
+## The recycling rule can bite
+
+When you combine vectors of different lengths, R silently stretches the shorter
+one to match. If that wasn't your intent, you'll get plausible-looking but wrong
+numbers and no error. The "not a multiple" case at least prints a warning; the
+"clean multiple" case prints nothing at all. When two vectors should be the same
+length, check that they are — `length(x)` is your friend.
+:::
+
+## Logical vectors
+
+A logical vector holds only `TRUE` and `FALSE` (all uppercase, no quotes). These
+turn up constantly, because asking a yes/no question of a whole vector returns one.
+
+```{r}
+keep <- c(TRUE, FALSE, TRUE)
+
+# a logical vector can also be built from numbers:
+# 0 becomes FALSE, anything else becomes TRUE
+counts <- c(1, 0, 217)
+as_flags <- as.logical(counts)
+as_flags
+
+# do keep and as_flags match element-by-element?
+all.equal(keep, as_flags)
+
+# and logical converts back to numeric: TRUE -> 1, FALSE -> 0
+as.numeric(keep)
+```
+
+### Logical operators
+
+The comparison operators `<`, `>`, `==`, `>=`, `<=`, and `!=` each take a vector
+and return a logical vector — one `TRUE`/`FALSE` per element. This is the engine
+behind filtering data.
+
+```{r}
+expression <- 1:10
+# which elements are greater than 5?
+expression > 5
+expression <= 5
+expression != 5
+expression == 5
+```
+
+You can save that logical result in a variable to reuse later:
+
+```{r}
+is_five <- (expression == 5)
+is_five
+```
+
+::: {.callout-warning}
+## `=` assigns, `==` compares
+
+A single `=` is assignment; a double `==` is a test for equality. Writing
+`x = 5` *changes* `x`, while `x == 5` *asks whether* `x` equals 5. Mixing them up
+is one of the most common beginner errors. In this book we always assign with `<-`,
+which keeps the two jobs visually distinct.
+:::
+
+## Indexing vectors
+
+An *index* lets you reach into a vector and pull out one element or a handful. R
+uses square brackets, `[` and `]`, for this.
+
+::: {.callout-important}
+## R counts from 1
+
+Unlike many programming languages that start counting at 0, R starts at **1**. The
+first element of `x` is `x[1]`, the second is `x[2]`, and so on. If you've
+programmed before, this is a frequent source of off-by-one surprises.
+:::
+
+```{r}
+x <- seq(0, 1, by = 0.1)
+# the 4th element
 x[4]
 ```
 
-We can even use other vectors to perform the "indexing".
+You can index with a *vector* of positions to grab several elements at once:
 
 ```{r}
-x[c(3,5,6)]
-y = 3:6
-x[y]
+x[c(3, 5, 6)]
+positions <- 3:6
+x[positions]
 ```
 
-
-Combining the concept of indexing with the concept of logical vectors
-results in a very power combination.
-
+Now combine indexing with logical vectors, and you have one of the most powerful
+patterns in all of R. Here we generate ten random values, flag the ones above
+0.25, and keep only those:
 
 ```{r}
-# use help('rnorm') to figure out what is happening next
-myvec = rnorm(10)
+# rnorm() draws random numbers; see help('rnorm')
+measurements <- rnorm(10)
 
-# create logical vector that is TRUE where myvec is >0.25
-gt1 = (myvec > 0.25)
-sum(gt1)
-# and use our logical vector to create a vector of myvec values that are >0.25
-myvec[gt1]
-# or <=0.25 using the logical "not" operator, "!"
-myvec[!gt1]
-# shorter, one line approach
-myvec[myvec > 0.25]
+# a logical vector: TRUE where measurements exceed 0.25
+above <- (measurements > 0.25)
+# sum() of a logical vector counts the TRUEs
+sum(above)
+
+# keep only the values where 'above' is TRUE
+measurements[above]
+# or the complement, using the logical NOT operator "!"
+measurements[!above]
+# the same idea in one compact line
+measurements[measurements > 0.25]
 ```
 
-## Named Vectors
+That last line — *subset a vector by a condition on itself* — is something you'll
+write hundreds of times. Read it as "the measurements where measurements exceed
+0.25."
 
-Named vectors are vectors with labels or names assigned to their elements.
-These names can be used to access and manipulate the elements in a more
-meaningful way.
+## Named vectors
 
-To create a named vector, use the `names()` function:
+Elements can carry names as well as positions, which often makes code far more
+readable. Imagine a small set of patient ages keyed by patient ID. You attach
+names with `names()`:
 
 ```{r}
-fruit_prices <- c(0.5, 0.75, 1.25)
-names(fruit_prices) <- c("apple", "banana", "cherry")
-print(fruit_prices)
+patient_ages <- c(54, 39, 71)
+names(patient_ages) <- c("p01", "p02", "p03")
+patient_ages
 ```
 
-You can also access and modify elements using their names:
+Once a vector is named, you can access elements by name instead of remembering
+their position:
 
 ```{r}
-banana_price <- fruit_prices["banana"]
-print(banana_price)
+patient_ages["p02"]
 
-fruit_prices["apple"] <- 0.6
-print(fruit_prices)
+# and update by name, too
+patient_ages["p01"] <- 55
+patient_ages
 ```
 
+Names are just labels riding alongside the values; the vector is still a plain
+numeric vector underneath.
 
-## Character Vectors, A.K.A. Strings
+## Character vectors, a.k.a. strings
 
-R uses the `paste` function to concatenate strings.
+Text data — gene names, sample labels, file paths — lives in character vectors,
+and R has a toolkit for manipulating them. To glue strings together, use
+`paste()`:
 
 ```{r}
-paste("abc","def")
-paste("abc","def",sep="THISSEP")
-paste0("abc","def")
-## [1] "abcdef"
-paste(c("X","Y"),1:10)
-paste(c("X","Y"),1:10,sep="_")
+paste("BRCA", "1")
+paste("BRCA", "1", sep = "_")
+paste0("BRCA", "1")           # paste0 uses no separator
+paste(c("sample", "control"), 1:10)
+paste(c("sample", "control"), 1:10, sep = "_")
 ```
 
-We can count the number of characters in a string.
+Notice `paste()` is vectorized too: in the last two lines it recycles the
+two-element vector across the ten numbers.
+
+To count characters in each string, use `nchar()`:
 
 ```{r}
-nchar('abc')
-nchar(c('abc','d',123456))
-```
-        
-Pulling out parts of strings is also sometimes useful.
-
-```{r}
-substr('This is a good sentence.',start=10,stop=15)
+nchar("BRCA1")
+nchar(c("BRCA1", "TP53", "EGFR"))
 ```
 
-Another common operation is to replace something in a string with something (a find-and-replace).
+To pull a piece out of a string by position, use `substr()`:
 
 ```{r}
-sub('This','That','This is a good sentence.')
+substr("chr7:55019021", start = 1, stop = 4)
 ```
 
-When we want to find all strings that match some other string, we can use `grep`, or "grab regular expression".
+To find-and-replace within a string, use `sub()`:
 
 ```{r}
-grep('bcd',c('abcdef','abcd','bcde','cdef','defg'))
-grep('bcd',c('abcdef','abcd','bcde','cdef','defg'),value=TRUE)
+sub("chr", "Chromosome ", "chr7:55019021")
 ```
 
-Read about the `grepl` function (`?grepl`). Use that function to
-return a logical vector (TRUE/FALSE) for each entry above with an `a`
-in it.
-
-## Missing Values, AKA “NA”
-
-R has a special value, “NA”, that represents a “missing” value, or *Not Available*, in a
-vector or other data structure. Here, we just create a vector to experiment.
+And to find *which* strings in a vector contain a pattern, use `grep()` — the name
+comes from "**g**lobally search a **r**egular **e**xpression and **p**rint." By
+default it returns the matching *positions*; add `value = TRUE` to get the matching
+strings themselves:
 
 ```{r}
-x = 1:5
+genes <- c("BRCA1", "BRCA2", "TP53", "EGFR", "BARD1")
+# positions of genes containing "BR"
+grep("BR", genes)
+# the matching gene names themselves
+grep("BR", genes, value = TRUE)
+```
+
+A close relative, `grepl()`, answers the yes/no version of that question — you'll
+meet it in the exercises.
+
+## Missing values, a.k.a. `NA`
+
+Real data has holes: an assay that failed, a measurement never taken. R marks such
+gaps with the special value `NA` (*Not Available*). Crucially, `NA` is still an
+element — it occupies a position and counts toward `length()`.
+
+```{r}
+x <- 1:5
 x
 length(x)
 ```
 
+The function `is.na()` tests each element and returns a logical vector. Let's poke
+a hole in `x` by setting its second element to `NA`:
+
 ```{r}
 is.na(x)
-x[2] = NA
+x[2] <- NA
 x
 ```
-The length of `x` is unchanged, but there is one value that is marked as "missing" by virtue of being `NA`.
+
+The length hasn't changed — `x` still has five slots — but one of them is now
+flagged as missing:
 
 ```{r}
 length(x)
 is.na(x)
 ```
 
-We can remove `NA` values by using indexing. In the following, `is.na(x)` returns a logical vector the
-length of `x`. The `!` is the logical _NOT_ operator and converts `TRUE` to `FALSE` and vice-versa.
+To drop the missing values, lean on the indexing pattern from earlier. `is.na(x)`
+gives a logical vector that is `TRUE` at the gaps; the `!` operator flips it to
+`TRUE` everywhere there's a real value; indexing with that keeps only the real
+values:
 
 ```{r}
 x[!is.na(x)]
 ```
 
-
 ## Exercises
 
-1.  Create a numeric vector called `temperatures` containing the following values: 72, 75, 78, 81, 76, 73.
+Each solution names the key idea and a one-line *why*, because the reasoning
+transfers further than the answer.
 
+1.  Create a numeric vector called `temperatures` containing the values 72, 75,
+    78, 81, 76, and 73.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
-    temperatures <- c(72, 75, 78, 81, 76, 73, 93)
+    temperatures <- c(72, 75, 78, 81, 76, 73)
+    temperatures
     ```
+    `c()` combines individual values into one numeric vector — the most basic way
+    to build a vector by hand.
+    :::
 
-1.  Create a character vector called `days` containing the following values: "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday".
+2.  Create a character vector called `days` containing "Monday", "Tuesday",
+    "Wednesday", "Thursday", "Friday", "Saturday", and "Sunday".
 
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
-    days <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    days <- c("Monday", "Tuesday", "Wednesday", "Thursday",
+              "Friday", "Saturday", "Sunday")
+    days
     ```
+    The same `c()`, now with quoted strings, so R makes a character vector instead
+    of a numeric one.
+    :::
 
-3.  Calculate the average temperature for the week and store it in a variable called `average_temperature`.
+3.  Calculate the average of `temperatures` and store it in `average_temperature`.
 
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
     average_temperature <- mean(temperatures)
+    average_temperature
     ```
+    `mean()` reduces a whole numeric vector to a single summary value.
+    :::
 
-4.  Create a named vector called `weekly_temperatures`, where the names are the days of the week and the values are the temperatures from the `temperatures` vector.
+4.  Build a named vector `weekly_temperatures` whose names are the (first six) days
+    and whose values are the six temperatures.
 
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
     weekly_temperatures <- temperatures
-    names(weekly_temperatures) <- days
+    names(weekly_temperatures) <- days[1:6]
+    weekly_temperatures
     ```
+    `names()` attaches labels to existing elements; we use `days[1:6]` so the six
+    names line up with the six temperatures.
+    :::
 
-5.  Create a numeric vector called `ages` containing the following values: 25, 30, 35, 40, 45, 50, 55, 60.
+5.  Create a numeric vector `ages` with the values 25, 30, 35, 40, 45, 50, 55,
+    and 60.
 
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
     ages <- c(25, 30, 35, 40, 45, 50, 55, 60)
+    ages
     ```
+    Again `c()` — the same tool builds every vector regardless of the numbers
+    inside.
+    :::
 
-6.  Create a logical vector called `is_adult` by checking if the elements in the `ages` vector are greater than or equal to 18.
+6.  Create a logical vector `is_adult` that is `TRUE` where `ages` is at least 18.
 
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
     is_adult <- ages >= 18
+    is_adult
     ```
+    A comparison applied to a vector returns a logical vector, one `TRUE`/`FALSE`
+    per element.
+    :::
 
-7.  Calculate the sum and product of the `ages` vector.
+7.  Calculate both the sum and the product of `ages`.
 
+    ::: {.callout-note collapse="true"}
+    ## Solution
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
     sum_ages <- sum(ages)
     product_ages <- prod(ages)
+    sum_ages
+    product_ages
     ```
+    `sum()` and `prod()` are reductions: each collapses the whole vector to one
+    number.
+    :::
 
-8.  Extract the ages greater than or equal to 40 from the `ages` vector and store them in a variable called `older_ages`.
+8.  Extract the ages greater than or equal to 40 into a vector called `older_ages`.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    older_ages <- ages[ages >= 40]
+    older_ages
+    ```
+    This is logical indexing: `ages >= 40` builds a `TRUE`/`FALSE` mask, and
+    `ages[...]` keeps only the elements where it is `TRUE`.
+    :::
+
+9.  The `grepl()` function (read `?grepl`) returns a logical vector — `TRUE` where
+    a pattern is found, `FALSE` where it isn't. Using the vector below, return a
+    logical vector that is `TRUE` for each entry containing the letter `"a"`.
 
     ```{r}
-    #| code-fold: true
-    #| code-summary: Show answer
-    older_ages <- ages[ages >= 40]
+    words <- c("abcdef", "abcd", "bcde", "cdef", "defg")
     ```
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    grepl("a", words)
+    ```
+    Where `grep()` returns *positions*, `grepl()` returns a logical vector you can
+    feed straight into indexing — for example, `words[grepl("a", words)]` keeps
+    only the matching entries.
+    :::
+
+10. From `measurements <- rnorm(20)`, count how many values are negative without
+    writing a loop.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    set.seed(1)
+    measurements <- rnorm(20)
+    sum(measurements < 0)
+    ```
+    `measurements < 0` is a logical vector, and `sum()` counts its `TRUE`s because
+    `TRUE` equals 1 — the same count-by-summing trick from the indexing section.
+    :::
+
+## Summary
+
+You can now create and wield the container R uses for almost everything:
+
+- **Create** vectors with `c()`, the colon operator `:`, and `seq()` — and recall
+  that even a single value is a length-1 vector, all of one type.
+- **Operate** on whole vectors at once; arithmetic is element-by-element, and the
+  **recycling rule** stretches a shorter vector to match a longer one (with a
+  warning when the lengths don't divide evenly).
+- **Compare** with `>`, `==`, `!=`, and friends to produce logical vectors.
+- **Index** with positions, with names, or with a logical test — and remember R
+  counts from 1.
+- **Manipulate strings** with `paste()`, `nchar()`, `substr()`, `sub()`, and
+  `grep()`/`grepl()`.
+- **Handle gaps** with `NA` and `is.na()`, dropping them via `x[!is.na(x)]`.
+
+The logical-indexing pattern — ask a yes/no question of a vector, then use the
+answer to subset it — is the single most useful idea here. It reappears every time
+you filter data, so the practice you put in now pays off in every chapter to come.

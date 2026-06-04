@@ -1,7 +1,5 @@
 ---
 title: "Genomic ranges and features"
-output: 
-  html_document
 ---
 
 ```{r init, include=FALSE}
@@ -10,23 +8,44 @@ opts_chunk$set(message=FALSE)
 Biocpkg <- function(pkg) paste0("[`", pkg, "`](http://bioconductor.org/packages/", pkg, ".html)")
 ```
 
-## Introduction
+Almost everything you study in genomics lives at a *place* on the genome. A gene
+sits between two coordinates on a chromosome. An exon is a stretch within that
+gene. A ChIP-seq peak marks where a protein bound. A SNP is a single position. As
+soon as you have two such sets of places, the most interesting biological
+questions become questions about *location*: Which peaks fall inside a promoter?
+What is the nearest gene to this variant? Where do these two experiments agree?
 
-Genomic ranges are essential components in the field of genomics, representing intervals on the genome that specify the start and end positions of DNA segments. These ranges can denote various genomic features, such as genes, exons, regulatory elements, and regions identified in genomic studies like ChIP-seq peaks. They play a pivotal role in the annotation, comparison, and interpretation of genomic features and experimental data, making them indispensable in biological data analysis.
+In this chapter you'll learn to represent those places as **genomic ranges** and
+to ask how they relate to one another. The workhorse is Bioconductor's
+`r Biocpkg("GenomicRanges")` package [@lawrence_software_2013], which gives you a
+compact object to hold ranges plus any data attached to them, and a vocabulary of
+fast operations — overlap, nearest-neighbor, flank, reduce — that scale to
+millions of regions. We'll build small example objects by hand so you can see
+exactly what each operation does, then finish with real gene models pulled from a
+genome annotation.
 
-Understanding genomic ranges begins with the concept of coordinate systems. Different databases and tools adopt different conventions for indexing genomic coordinates. For instance, the UCSC Genome Browser uses a 0-based coordinate system, while Ensembl employs a 1-based system. Moreover, genomic ranges often include strand information, indicating whether the feature is on the positive or negative DNA strand, which is crucial for correctly interpreting gene expression and other genomic functions.
+::: {.callout-note}
+## A note on coordinate systems
 
-Genomic ranges come in various forms, from single ranges defined by a simple start and end position (such as a single exon) to complex multi-range sets encompassing collections of ranges like all exons of a gene. Manipulating these ranges involves several fundamental operations. Intersection allows researchers to find overlapping regions between two sets of ranges, such as identifying ChIP-seq peaks that overlap with promoter regions. Union operations combine multiple ranges into a single contiguous range, while set difference identifies regions in one set that do not overlap with another set.
+Different tools count positions differently. The UCSC Genome Browser uses
+0-based, half-open coordinates internally, while Ensembl and Bioconductor use
+1-based, inclusive coordinates (position 1 is the first base, and both endpoints
+are included). `GRanges` objects are always 1-based and inclusive, which is one
+fewer thing to track once you stay inside Bioconductor.
+:::
 
-Several tools and libraries have been developed to facilitate the manipulation of genomic ranges. In the R programming environment, the Bioconductor project provides the GenomicRanges package, which is specifically designed for representing and manipulating genomic ranges. This package offers a variety of functions for range arithmetic and efficient overlap queries. Another useful R package is rtracklayer, which enables the import and export of genomic data in various formats, including BED and GFF files.
+## What you'll learn
 
-For those who prefer a command-line interface, BEDTools offers a suite of utilities for performing a wide range of operations on genomic intervals. This toolset is highly versatile, supporting tasks like intersecting, merging, and complementing genomic intervals. In the Python ecosystem, PyRanges provides a fast and flexible library for manipulating genomic intervals, offering similar functionality to Bioconductor’s GenomicRanges.
-
-The applications of genomic ranges are diverse and far-reaching. In gene annotation, for instance, RNA-seq reads are mapped to known gene models to quantify gene expression levels. Variant annotation involves mapping variants identified from sequencing data to their genomic context, predicting functional consequences based on their location within genes or intergenic regions. Comparative genomics leverages genomic ranges to compare intervals between species, identifying conserved regions that might indicate essential functional elements. Epigenomic studies utilize genomic ranges to intersect DNA methylation data or histone modification peaks with genomic features, providing insights into regulatory mechanisms.
-
-Despite their utility, working with genomic ranges presents several challenges. Converting coordinates between different reference genomes or different versions of the same genome can be complex and prone to errors. Integrating diverse types of genomic data, such as DNA sequences, epigenetic marks, and RNA-seq data, requires meticulous handling of genomic coordinates and ranges to ensure accurate analyses. Moreover, the sheer scale of genomic data necessitates optimized algorithms and data structures to handle large datasets efficiently.
-
-Interpreting genomic ranges within their biological context is crucial for drawing meaningful conclusions. For instance, a range within a gene’s promoter region might indicate potential regulatory activity. Understanding the functional implications of genomic ranges often involves overlapping these ranges with known functional elements, such as enhancers or silencers, to infer gene regulation mechanisms and their phenotypic consequences. Tools like the UCSC Genome Browser and the Integrative Genomics Viewer (IGV) are invaluable for visualizing genomic ranges alongside other genomic annotations, aiding in the interpretation and exploration of genomic data.
+- Build a `GRanges` object and read its two-part display (coordinates on the
+  left, metadata on the right).
+- Subset and extract parts of a `GRanges` object with accessors like
+  `seqnames()`, `ranges()`, `strand()`, and `mcols()`.
+- Apply intra-range operations (`flank()`, `shift()`, `resize()`) and inter-range
+  operations (`reduce()`, `disjoin()`, `gaps()`, `coverage()`).
+- Find relationships between two sets of ranges with `findOverlaps()`,
+  `subsetByOverlaps()`, `nearest()`, and `distanceToNearest()`.
+- Group ranges into a `GRangesList` (for example, the exons of a transcript).
+- Pull gene, transcript, and exon models out of a `TxDb` annotation package.
 
 ## Bioconductor and GenomicRanges
 
@@ -58,7 +77,7 @@ The GenomicRanges package in Bioconductor uses the S4 class system (see @tbl-gen
 |GRangesList          |Represents a list of GenomicRanges objects.                                     |transcript models (exons, introns) |
 |RangesList           |Represents a list of Ranges objects.                                            |  |
 |IRanges              |Represents a collection of integer ranges.                                      |used mainly to *build* GRanges, etc. |
-|GPos                 |Represents genomic positions.                                                   |SNPs or other single nicleotide locations |
+|GPos                 |Represents genomic positions.                                                   |SNPs or other single-nucleotide locations |
 |GAlignments          |Represents alignments against a reference genome.                               |Sequence read locations from a BAM file |
 |GAlignmentPairs      |Represents pairs of alignments, typically representing a single fragment of DNA.|Paired-end sequence alignments |
 
@@ -131,6 +150,20 @@ and the metadata columns are located on the right. For this example, the
 metadata is comprised of score and GC information, but almost anything can be stored in
 the metadata portion of a GRanges object.
 
+::: {.callout-note}
+## Reading a `GRanges`: the `|` is the dividing line
+
+Think of a `GRanges` as a spreadsheet with a heavy vertical rule drawn down the
+middle. **Everything to the left of the `|` answers "where?"** — the chromosome
+(`seqnames`), the start and end (`ranges`), and the `strand`. These columns are
+mandatory and have their own special accessors. **Everything to the right of the
+`|` answers "what do we know about it?"** — the metadata: scores, GC content,
+gene names, p-values, whatever you attach. These are optional and you reach them
+all at once with `mcols()`. Keeping that line in mind makes every later operation
+easier: range operations rearrange the *left* side; your annotations ride along
+on the *right*.
+:::
+
 ![The structure of a `GRanges` object, which behaves a bit like a vector of ranges, although the analogy is not perfect. A `GRanges` object is composed of the "Ranges" part the lefthand box, the "metadata" columns (the righthand box), and a "seqinfo" part that describes the names and lengths of associated sequences. Only the "Ranges" part is required. The figure also shows a few of the "accessors" and approaches to subsetting a `GRanges` object.](images/granges_structure.png){#fig-granges-structure}
 
 
@@ -159,28 +192,35 @@ work with the data.
 mcols(gr)$score
 ```
 
-We can even assign a new column.
+We can even assign a new column. Here we add an `AT` column derived from `GC`
+(since the fractions sum to 1). Notice that the new column appears on the right
+of the `|`, alongside `score` and `GC`.
 
 ```{r new-mcols-column}
-mcols(gr)$AT = 1-mcols(gr)$GC
+mcols(gr)$AT <- 1 - mcols(gr)$GC
 gr
 ```
 
 
 Another common way to create a `GRanges` object is to start with a `data.frame`, perhaps created
-by hand like below or read in using `read.csv` or `read.table`. We can convert from a 
-`data.frame`, when columns are named appropriately, to a `GRanges` object. 
+by hand like below or read in using `read.csv` or `read.table`. We can convert from a
+`data.frame`, when columns are named appropriately, to a `GRanges` object.
 
 ```{r granges-from-data.frame}
-df_regions = data.frame(chromosome = rep("chr1",10),
-                        start=seq(1000,10000,1000),
-                        end=seq(1100, 10100, 1000))
-as(df_regions,'GRanges') # note that names have to match with GRanges slots
+df_regions <- data.frame(chromosome = rep("chr1", 10),
+                         start = seq(1000, 10000, 1000),
+                         end = seq(1100, 10100, 1000))
+as(df_regions, 'GRanges') # note that names have to match with GRanges slots
 ## fix column name
-colnames(df_regions)[1] = 'seqnames'
-gr2 = as(df_regions,'GRanges')
+colnames(df_regions)[1] <- 'seqnames'
+gr2 <- as(df_regions, 'GRanges')
 gr2
 ```
+
+The first `as()` call worked even though the chromosome column was named
+`chromosome` — `as()` recognized `start` and `end` and treated the rest as
+metadata. After we rename that column to `seqnames`, the conversion places it
+correctly on the *left* of the `|` as the sequence name.
 
 `GRanges` have one-dimensional-like behavior. For instance, we can check the `length` and 
 even give `GRanges` names.
@@ -247,12 +287,23 @@ the ranges that include the 10 bases *upstream* of the ranges:
 flank(g, 10)
 ```
 
-Note how `flank` pays attention to "strand". 
+Note how `flank` pays attention to "strand".
 To get the flanking regions *downstream* of the ranges, we can do:
 
 ```{r grflank2}
 flank(g, 10, start=FALSE)
 ```
+
+::: {.callout-warning}
+## Strand changes what "upstream" means
+
+For `flank()`, `resize()`, `precede()`, and `follow()`, "upstream" and
+"downstream" are interpreted *relative to the strand*. On the `+` strand,
+upstream is toward lower coordinates; on the `-` strand it is toward higher
+coordinates. A `*` (unstranded) range is treated as `+`. If your ranges have the
+wrong strand — or you forgot to set it — these operations will silently flank the
+wrong side. When a result looks backwards, check `strand()` first.
+:::
 
 Other examples of intra-range methods include `resize` and `shift`. The shift method will
 move the ranges by a specific number of base pairs, and the resize method will extend the
@@ -285,10 +336,16 @@ represented by your GRanges object. The gaps method provides this information:
 gaps(g)
 ```
 
-In this case, we have not specified the lengths of the chromosomes, so Bioconductor is 
-making the assumption (incorrectly) that the chromosomes end at the largest location
-on each chromosome. We can correct this by setting the `seqlengths` correctly, but
-we can ignore that detail for now.
+::: {.callout-warning}
+## `gaps()` needs to know how long each chromosome is
+
+We never told this object how long the chromosomes are, so Bioconductor assumes
+each chromosome ends at the largest coordinate it has seen. That means the final
+gap (from the last range to the true end of the chromosome) is missing. In real
+work you set the chromosome lengths with `seqlengths()` so that `gaps()`,
+`coverage()`, and friends know the full extent of each sequence. We can ignore
+that detail for these toy examples.
+:::
 
 The disjoin method represents a GRanges object as a collection of non-overlapping ranges:
 
@@ -309,10 +366,15 @@ values to `numeric` using `as.numeric`. In many cases, this will happen automati
 though. 
 
 ```{r coveragegr2}
-covg = coverage(g)
-covg_chr2 = covg[['chr2']]
+covg <- coverage(g)
+covg_chr2 <- covg[['chr2']]
 plot(covg_chr2, type='l')
 ```
+
+The plot shows how many ranges cover each base along `chr2`: the line steps up to
+2 where two ranges overlap and drops back to 0 in the gaps. This is exactly the
+kind of per-base signal you compute from aligned sequencing reads in RNA-seq or
+ChIP-seq.
 
 See the `r Biocpkg("GenomicRanges")` help page `?"intra-range-methods"` for more details.
 
@@ -353,11 +415,11 @@ methods(class="GRanges")
 
 Some important genomic features, such as spliced transcripts that are are comprised of exons,
 are inherently compound structures. Such a feature makes much more sense when expressed
-as a compound object such as a GRangesList. If we thing of each transcript as a set of exons,
+as a compound object such as a GRangesList. If we think of each transcript as a set of exons,
 each transcript would be summarized as a `GRanges` object. However, if we have multiple transcripts,
-we want to somehow keep them separate, with each transcript having its own exons. The `GRangesList`
-is then a list of `GRanges` objects that. Continuing with the transcripts thought, a `GRangesList`
-can contain all the transcripts and their exons; each transcript is an element in the list. 
+we want to keep them separate, with each transcript holding its own exons. A `GRangesList`
+is a list of `GRanges` objects. Continuing with the transcripts idea, a `GRangesList`
+can contain all the transcripts and their exons; each transcript is one element in the list.
 
 ![The structure of a GRangesList, which is a `list` of GRanges objects. While the analogy is not perfect, a `GRangesList` behaves a bit like a list. Each element in the `GRangesList` *is* a `Granges` object. A common use case for a `GRangesList` is to store a list of transcripts, each of which have exons as the regions in the `GRanges`. ](images/granges_list_structure.png){#fig-granges-list-structure}
 
@@ -491,16 +553,18 @@ The `subsetByOverlaps` method simply subsets the query `GRanges` object to inclu
 subsetByOverlaps(gr1, gr2)
 ```
 
-In some cases, you may be interested in only one hit when doing 
-overlaps. Note the `select` parameter. See the help for `findOverlaps`
+In some cases, you may be interested in only one hit per query range. The
+`select` parameter handles this: with `select="first"`, `findOverlaps()` returns
+a plain integer vector with one entry per query range (the index of its first
+overlapping subject, or `NA` if there is none) instead of a full `Hits` object.
 
 ```{r select-first}
 findOverlaps(gr1, gr2, select="first")
-findOverlaps(gr1, gr2, select="first")
 ```
 
-The `%over%` logical operator allows us to do similar things to 
-`findOverlaps` and `subsetByOverlaps`. 
+The `%over%` logical operator allows us to do similar things to
+`findOverlaps` and `subsetByOverlaps`. It returns a `TRUE`/`FALSE` for each range,
+which is handy for subsetting.
 
 ```{r}
 gr2 %over% gr1
@@ -547,26 +611,37 @@ i)     *  |  *        |  --->  (the only situation where * arbitrarily means +)
 
 
 ```{r nearest}
-res = nearest(g, gr)
+res <- nearest(g, gr)
 res
 ```
+
+Each element of `res` is the index *into* `gr` of the nearest range to the
+corresponding range in `g`. So `gr[res]` would give you the actual nearest
+ranges.
 
 While `nearest` and friends give the index of the nearest feature, the distance
 to the nearest is sometimes also useful to have. The `distanceToNearest`
 method calculates the nearest feature as well as reporting the distance.
 
 ```{r distanceToNearest}
-res = distanceToNearest(g, gr)
+res <- distanceToNearest(g, gr)
 res
 ```
+
+This returns a `Hits` object with an extra `distance` column. A distance of 0
+means the two ranges overlap or touch; larger values are the gap in base pairs
+between them.
 
 
 ## Gene models
 
-The `TxDb` package provides a convenient interface to gene models from
-a variety of sources. The `TxDb.Hsapiens.UCSC.hg38.knownGene` package
-provides access to the UCSC knownGene gene model for the hg19 build of
-the human genome. 
+So far every range has been one we typed by hand. In practice you usually pull
+ranges from an annotation. A `TxDb` ("transcript database") package provides a
+convenient interface to gene models from a variety of sources. The
+`r Biocpkg("TxDb.Hsapiens.UCSC.hg38.knownGene")` package provides access to the
+UCSC knownGene gene model for the **hg38** build of the human genome. Everything
+it returns is a `GRanges` (or `GRangesList`), so all the operations from this
+chapter apply directly.
 
 ![A graphical representation of range operations demonstrated on a gene model.](images/range_operations_diagram.png){#fig-range-operations}
 
@@ -576,21 +651,152 @@ txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
 ```
 
 The `transcripts` function returns a `GRanges` object with the
-transcripts for all genes in the database. 
+transcripts for all genes in the database.
 
-```{r}
+```{r txdb-transcripts}
 tx <- transcripts(txdb)
+tx
 ```
 
 The `exons` function returns a `GRanges` object with the exons.
 
-```{r}
+```{r txdb-exons}
 ex <- exons(txdb)
+ex
 ```
 
-The `genes` function returns a `GRanges` object with the genes.
+The `genes` function returns a `GRanges` object with one range per gene.
 
-```{r}
+```{r txdb-genes}
 gn <- genes(txdb)
+gn
 ```
+
+Notice the scale: these are real `GRanges` objects with tens of thousands of
+ranges, yet they print and subset instantly. That is the payoff of the compact
+representation — the same `findOverlaps()`, `nearest()`, and `subsetByOverlaps()`
+calls you practiced on the toy `gr` work unchanged here. For example,
+`subsetByOverlaps(gn, peaks)` would give you the genes hit by a set of ChIP-seq
+`peaks`, and `nearest(peaks, tx)` would assign each peak to its closest
+transcript.
+
+::: {.callout-tip}
+## Grouping exons by transcript
+
+`exons(txdb)` gives you a flat `GRanges` of every exon. When you instead want the
+exons *grouped by the transcript they belong to* — a `GRangesList`, one element
+per transcript — use `exonsBy(txdb, by = "tx")`. That is the natural object for
+counting reads per transcript and is exactly the `GRangesList` structure we built
+by hand earlier.
+:::
+
+## Summary
+
+You now have a working vocabulary for genomic locations.
+
+- A **`GRanges`** object holds a set of ranges. Coordinates (`seqnames`,
+  `ranges`, `strand`) sit to the left of the `|`; optional metadata reached with
+  `mcols()` sits to the right. You can build one from scratch or coerce a
+  `data.frame` with `as(df, "GRanges")`.
+- **Intra-range** operations (`flank()`, `shift()`, `resize()`) reshape each range
+  on its own and respect strand. **Inter-range** operations (`reduce()`,
+  `disjoin()`, `gaps()`, `coverage()`) summarize a set of ranges together.
+- **Between-set** operations answer the integration questions: `findOverlaps()`
+  and `subsetByOverlaps()` for overlap, `nearest()` and `distanceToNearest()` for
+  proximity, plus `union()`/`intersect()`/`setdiff()` for set arithmetic.
+- A **`GRangesList`** groups ranges by a parent feature, such as exons within a
+  transcript.
+- A **`TxDb`** package (here `r Biocpkg("TxDb.Hsapiens.UCSC.hg38.knownGene")`)
+  hands you real gene, transcript, and exon models as `GRanges`, so every
+  operation above applies to genome-scale annotation with no new syntax.
+
+## Exercises
+
+These reuse the objects built earlier in the chapter: the 10-range `gr`, its
+3-range subset `g`, and the `grl` `GRangesList`. Run the chapter's chunks first
+so those objects exist.
+
+**1. Read the structure.** Without running any code, which of these belong to the
+*left* of the `|` in a `GRanges` (the coordinates) and which to the *right* (the
+metadata): `strand`, `score`, `seqnames`, `GC`, `width`?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+Left of the `|` (coordinates): `seqnames`, `strand`, and `width` (part of
+`ranges`). Right of the `|` (metadata): `score` and `GC`. The coordinate columns
+have dedicated accessors; the metadata columns are reached together with
+`mcols()`.
+:::
+
+**2. Promoters by hand.** A common task is to grab the region just upstream of a
+feature's start — a rough promoter. Use `flank()` to get the 50 bases upstream of
+each range in `g`, then confirm with `width()` that each result is 50 bases wide.
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r ex-flank}
+prom <- flank(g, 50)
+prom
+width(prom)
+```
+
+`flank()` defaults to the upstream side (`start = TRUE`), measured relative to
+strand. Every flank is exactly 50 bases wide.
+:::
+
+**3. Collapse overlaps.** Use `reduce()` on `gr` to merge overlapping or adjacent
+ranges into a minimal set, then report how many ranges remain with `length()`.
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r ex-reduce}
+reduced <- reduce(gr)
+reduced
+length(reduced)
+```
+
+`reduce()` works per chromosome and per strand, merging ranges that overlap or
+abut into single ranges — the standard way to collapse overlapping exons into
+non-redundant regions.
+:::
+
+**4. Overlap counting.** Build `q <- gr[1:4]` and `s <- gr[3:8]`, then use
+`countOverlaps(q, s)` to find how many ranges in `s` each range in `q` overlaps.
+Which range in `q` has the most overlaps?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r ex-overlap}
+q <- gr[1:4]
+s <- gr[3:8]
+counts <- countOverlaps(q, s)
+counts
+which.max(counts)
+```
+
+`countOverlaps()` returns one integer per range in the query. Remember that
+strand participates in the overlap test, so a `+` query range will not overlap a
+`-` subject range unless you set `ignore.strand = TRUE`.
+:::
+
+**5. Nearest with distance.** Use `distanceToNearest(g, gr)` and pull out the
+`distance` metadata column with `mcols(...)$distance`. What does a distance of 0
+tell you?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r ex-distance}
+hits <- distanceToNearest(g, gr)
+mcols(hits)$distance
+```
+
+A distance of 0 means the nearest range overlaps or directly touches the query
+range — here every range in `g` is also present in `gr`, so each finds itself at
+distance 0.
+:::
 

@@ -2,99 +2,134 @@
 title: "The t-statistic and t-distribution"
 ---
 
+Suppose you measure a gene's expression in five treated samples and five
+controls, and the treated mean comes out higher. Is that a real effect, or just
+the kind of gap you'd expect by chance from five noisy measurements? With only a
+handful of samples you can't lean on the normal distribution as-is, because you
+had to *estimate* the variability from the same tiny sample you're testing. The
+**t-distribution** is the honest accounting for that extra uncertainty — and in
+this chapter we'll *build* it by simulation so you can see exactly where it comes
+from, then use R's `t.test()` to put it to work.
+
+The distribution that the t-statistic follows was described in a famous 1908
+paper [@student_probable_1908] by "Student" — a pseudonym for
+[William Sealy Gosset](https://en.wikipedia.org/wiki/William_Sealy_Gosset), who
+worked at the Guinness brewery and published anonymously because his employer
+treated statistical methods as a trade secret.
+
+## What you'll learn
+
+- Explain why estimating the standard deviation from a small sample forces us off
+  the normal distribution and onto the t-distribution.
+- Read a Z-score and a t-score and say what each one measures.
+- Use simulation to show that t-based p-values are calibrated (uniform under the
+  null hypothesis) when the normal-based ones are not.
+- Run one-sample, two-sample, and formula-based tests with `t.test()`.
+- Estimate statistical power with `power.t.test()` and by simulation.
+
 ## Background
 
-The t-test is a [statistical hypothesis test](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing) that is 
-commonly used when the data are normally distributed (follow a normal 
-distribution) if the value of the population standard deviation were known. When
-the population standard deviation is not known and is replaced by an estimate
-based no the data, the test statistic follows a Student's t distribution. 
+A **t-test** is a [statistical hypothesis test](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing)
+you reach for when you want to compare means and you only have a sample to work
+from. It comes in three everyday flavors:
 
-T-tests are 
-handy hypothesis tests in statistics when you want to compare means. You can 
-compare a sample mean to a hypothesized or target value using a one-sample 
-t-test. You can compare the means of two groups with a two-sample t-test. If 
-you have two groups with paired observations (e.g., before and after 
-measurements), use the paired t-test.
+- **One-sample** — compare a sample mean to a single hypothesized or target value.
+- **Two-sample** — compare the means of two groups.
+- **Paired** — compare two measurements on the same units (e.g., before-and-after
+  on the same patients).
 
-A t-test looks at the t-statistic, the t-distribution values, and 
-the degrees of freedom to determine the statistical significance. 
-To conduct a test with three or more means, we would use an analysis 
-of variance.
+A t-test combines three ingredients — the **t-statistic**, the
+**t-distribution**, and the **degrees of freedom** — to decide whether a
+difference is bigger than chance would comfortably produce. (To compare three or
+more means at once you'd reach instead for an analysis of variance, or ANOVA.)
 
-The distriubution that the t-statistic follows was described in a famous 
-paper [@student_probable_1908] by "Student", a pseudonym for [William Sealy Gosset](https://en.wikipedia.org/wiki/William_Sealy_Gosset). 
+We'll get to `t.test()`, but the point of this chapter is to first see *why* the
+t-distribution exists. That story starts with something you may already have met:
+the Z-score.
 
 ## The Z-score and probability
 
-Before talking about the t-distribution and t-scores, lets review the Z-score, 
-its relation to the normal distribution, and probability.
+Before we talk about t-scores, let's review the Z-score, its relationship to the
+normal distribution, and how it turns into a probability.
 
 The Z-score is defined as:
 
 $$Z = \frac{x - \mu}{\sigma}$$ {#eq-zscore}
 
-where $\mu$ is a the population mean from which $x$ is drawn and $\sigma$ is
-the population standard deviation (taken as known, not estimated from the data).
+where $\mu$ is the population mean that $x$ is drawn from and $\sigma$ is the
+population standard deviation — **taken as known**, not estimated from the data.
+In words: a Z-score says how many standard deviations a value sits from the mean.
 
-The probability of observing a $Z$ score of $z$ or greater can be calculated by
-$pnorm(z,\mu,\sigma)$.
+The probability of observing a Z-score of $z$ or smaller can be calculated with
+`pnorm(z, mu, sigma)`.
 
-For example, let's assume that our "population" is known and it truly
-has a mean 0 and standard deviation 1. If we have observations drawn from
-that population, we can assign a probability of seeing that observation
-by random chance _under the assumption that the null hypothesis is **TRUE**_. 
+For example, suppose our "population" is known and truly has a mean of 0 and a
+standard deviation of 1 (the *standard normal*). For any observation drawn from
+that population, we can assign a probability of seeing a value that extreme by
+random chance — *under the assumption that the null hypothesis is **TRUE***.
 
 ```{r}
-zscore = seq(-5,5,1)
+zscore <- seq(-5, 5, 1)
 ```
 
-For each value of zscore, let's calculate the p-value and put the results in a `data.frame`.
+For each value of `zscore`, let's calculate the probability and collect the
+results in a `data.frame`. We'll name it `pdat` (for "probability data") so it
+doesn't collide with the `df` we use later for degrees of freedom.
 
 ```{r}
-df = data.frame(
+pdat <- data.frame(
     zscore = zscore,
     pval   = pnorm(zscore, 0, 1)
 )
-df
+pdat
 ```
 
-Why is the p-value of something 5 population standard deviations away from
-the mean (zscore=5) nearly 1 in this calculation? What is the default for
-`pnorm` with respect to being one-sided or two-sided?
+Why is the p-value for something 5 standard deviations *above* the mean
+(`zscore = 5`) nearly 1 here? Because `pnorm` reports the *lower* tail by default
+— the probability of a value *at or below* `z`. A value 5 standard deviations
+above the mean has almost the entire distribution below it, so that probability
+is nearly 1.
 
-Let's plot the values of probability vs z-score:
+Let's plot probability against Z-score:
 
 ```{r}
-plot(df$zscore, df$pval, type='b')
+plot(pdat$zscore, pdat$pval, type = 'b')
 ```
 
-This plot is the *empirical* cumulative density function (cdf) for our data.
-How can we use it? If we know the z-score, we can look up the probability of
-observing that value. Since we have constructed our experiment to follow the
-standard normal distribution, this cdf also represents the cdf of the standard
-normal distribution.
+This curve is the *cumulative distribution function* (CDF). Read it like a lookup
+table: pick a Z-score on the x-axis and read off the probability of seeing a
+value that small. Because we built our example to follow the standard normal, this
+is also the CDF of the standard normal distribution.
 
-### Small diversion: two-sided pnorm function
+::: {.callout-tip}
+## What a p-value is (and isn't)
 
-The `pnorm` function returns the "one-sided" probability of having
-a value at least as extreme as the observed $x$ and uses the "lower" tail
-by default. Let's create a function that computes two-sided p-values.
+A p-value is the probability of a result *at least this extreme* **if the null
+hypothesis were true**. It is *not* the probability that the null hypothesis is
+true, and a small p-value is not a measure of effect size. For an accessible,
+authoritative take on the common misreadings, see the American Statistical
+Association's statement on p-values [@doi:10.1080/00031305.2016.1154108].
+:::
 
-1. Take the absolute value of x
-2. Compute `pnorm` with `lower.tail=FALSE` so we get lower p-values with
-larger values of $x$.
-3. Since we want to include both tails, we need to multiply the area 
-(probability) returned by pnorm by 2.
+### Small diversion: a two-sided pnorm
+
+`pnorm` returns a *one-sided* probability using the lower tail by default. Often
+we don't care which direction a value deviates — only that it's far from the mean
+— so we want a *two-sided* p-value. We can build one in three steps:
+
+1. Take the absolute value of `x`, so direction no longer matters.
+2. Call `pnorm` with `lower.tail = FALSE`, so larger `|x|` gives smaller
+   probabilities.
+3. Multiply by 2 to count *both* tails.
 
 ```{r}
-twosidedpnorm = function(x,mu=0,sd=1) {
-    2*pnorm(abs(x),mu,sd,lower.tail=FALSE)
+twosidedpnorm <- function(x, mu = 0, sd = 1) {
+    2 * pnorm(abs(x), mu, sd, lower.tail = FALSE)
 }
 ```
 
-And we can test this to see how likely it is to be 2 or 3 standard deviations
-from the mean:
+Now we can ask how surprising it is to land 2 or 3 standard deviations from the
+mean in either direction:
 
 ```{r}
 twosidedpnorm(2)
@@ -103,392 +138,478 @@ twosidedpnorm(3)
 
 ## The t-distribution
 
-We spent time above working with z-scores and probability. An important
-aspect of working with the normal distribution is that we MUST assume
-that we know the standard deviation. Remember that the Z-score is defined
-as:
+Everything above leaned on one big assumption: that we *know* the standard
+deviation $\sigma$. Recall the Z-score:
 
 $$Z = \frac{x - \mu}{\sigma}$$
 
-The formula for the *population*
-standard deviation is:
+and the *population* standard deviation:
 
-$$\sigma = \sqrt{\frac{1}{N}\sum_{i=1}^{N}({xi - \mu)^2}}$$ {#eq-pop-sd}
+$$\sigma = \sqrt{\frac{1}{N}\sum_{i=1}^{N}(x_i - \mu)^2}$$ {#eq-pop-sd}
 
-In general, the population standard deviation is taken as "known" as
-we did above. 
-
-If we do not but only have a *sample*
-from the population, instead of using the Z-score, we use the t-score 
-defined as:
+When we genuinely know $\sigma$, the Z-score is the right tool. But usually we
+only have a *sample*, not the whole population. Then we swap the Z-score for the
+**t-score**:
 
 $$t = \frac{x - \bar{x}}{s}$$ {#eq-tscore}
 
-This looks quite similar to the formula for Z-score, but here we have to
-*estimate* the standard deviation, $s$ from the data. The formula for $s$
-is:
+This looks almost identical to the Z-score, with two changes: we use the *sample*
+mean $\bar{x}$ in place of $\mu$, and we *estimate* the standard deviation as $s$
+from the data:
 
-$$s = \sqrt{\frac{1}{N-1}\sum_{i=1}^{N}({x_{i} - \bar{x})^2}}$$ {#eq-sample-sd}
+$$s = \sqrt{\frac{1}{N-1}\sum_{i=1}^{N}(x_i - \bar{x})^2}$$ {#eq-sample-sd}
 
-Since we are estimating the standard deviation from the data, this leads
-to extra variability that shows up as "fatter tails" for smaller sample
-sizes than for larger sample sizes. We can see this by comparing the
-_t-distribution_ for various numbers of degrees of freedom (sample sizes).
+In words: the sample standard deviation $s$ is the typical distance of a data
+point from the sample mean. The only change from the population formula is the
+divisor — $N-1$ instead of $N$ — which corrects for the fact that we used the
+data twice: once to estimate the mean, and again to measure the spread around it.
 
-We can look at the effect of sample size on the distributions graphically
-by looking at the densities for 3, 5, 10, 20 degrees of freedom and
-the normal distribution:
+::: {.callout-important}
+## The whole point of the t-distribution
 
-```{r #fig-t-vs-z,message=FALSE, fig.cap="t-distributions for various degrees of freedom. Note that the tails are fatter for smaller degrees of freedom, which is a result of estimating the standard deviation from the data."}
+Because we *estimate* the standard deviation from a small sample, our test
+statistic is more uncertain than a Z-score. The t-distribution captures that by
+having **fatter tails** for small samples — so it takes a more extreme result to
+reach significance. As the sample grows, the estimate sharpens and the
+t-distribution slides back toward the normal.
+:::
+
+We can *see* those fatter tails. Let's plot the t-distribution densities for 3, 6,
+10, and 20 degrees of freedom (smaller degrees of freedom means a smaller sample)
+alongside the normal:
+
+```{r fig-t-vs-z, message=FALSE, fig.cap="t-distributions for various degrees of freedom. The tails are fatter for smaller degrees of freedom — the visible cost of estimating the standard deviation from the data."}
 library(dplyr)
 library(ggplot2)
-t_values = seq(-6,6,0.01)
-df = data.frame(
-    value = t_values,
-    t_3   = dt(t_values,3),
-    t_6   = dt(t_values,6),
-    t_10  = dt(t_values,10),
-    t_20  = dt(t_values,20),
-    Normal= dnorm(t_values)
+t_values <- seq(-6, 6, 0.01)
+tdens <- data.frame(
+    value  = t_values,
+    t_3    = dt(t_values, 3),
+    t_6    = dt(t_values, 6),
+    t_10   = dt(t_values, 10),
+    t_20   = dt(t_values, 20),
+    Normal = dnorm(t_values)
 ) |>
-    tidyr::gather("Distribution", "density", -value)
-ggplot(df, aes(x=value, y=density, color=Distribution)) + 
+    tidyr::pivot_longer(-value, names_to = "Distribution", values_to = "density")
+ggplot(tdens, aes(x = value, y = density, color = Distribution)) +
     geom_line()
 ```
 
-The `dt` and `dnorm` functions give the density of the distributions
-for each point. 
+The `dt` and `dnorm` functions give the *density* (the height of the curve) at
+each point. Notice how the `t_3` curve sits lowest in the middle and highest in
+the tails — that extra tail weight is the uncertainty from a tiny sample, drawn to
+scale.
 
+We can also look at the cumulative version of each curve:
 
 ```{r}
-df2 = df |> 
+tcdf <- tdens |>
     group_by(Distribution) |>
-    arrange(value) |> 
-    mutate(cdf=cumsum(density))
-ggplot(df2, aes(x=value, y=cdf, color=Distribution)) + 
+    arrange(value) |>
+    mutate(cdf = cumsum(density))
+ggplot(tcdf, aes(x = value, y = cdf, color = Distribution)) +
     geom_line()
 ```
 
 ### p-values based on Z vs t
 
-When we have a "sample" of data and want to compute the statistical 
-significance of the difference of the mean from the population mean, 
-we calculate the standard deviation of the sample means (standard error).
+When we have a *sample* and want to test how far its mean sits from a population
+mean, we scale by the standard error (the standard deviation of the sample mean),
+$\sigma/\sqrt{n}$:
 
 $$z = \frac{x - \mu}{\sigma/\sqrt{n}}$$
 
-Let's look at the relationship between the p-values of Z (from the normal distribution) vs t for a **sample** of data.
+Let's compare the p-value we'd get from the normal distribution against the one
+from the t-distribution, for a single small sample.
 
 ```{r}
 set.seed(5432)
-samp = rnorm(5,mean = 0.5)
-z = sqrt(length(samp)) * mean(samp) #simplifying assumption (sigma=1, mu=0)
+samp <- rnorm(5, mean = 0.5)
+z <- sqrt(length(samp)) * mean(samp)  # simplifying assumption: sigma = 1, mu = 0
 ```
 
-And the p-value if we assume we know the standard deviation:
+The p-value if we *pretend* we know the standard deviation:
 
 ```{r}
 pnorm(z, lower.tail = FALSE)
 ```
 
-In reality, we don't know the standard deviation, so we have to estimate it
-from the data. We can do this by calculating the sample standard deviation:
+In reality we don't know it, so we estimate it from the data with `sd()` and use
+the t-distribution (with `length(samp) - 1` degrees of freedom):
 
 ```{r}
-ts = sqrt(length(samp)) * mean(samp) / sd(samp)
-pnorm(ts, lower.tail = FALSE)
-pt(ts,df = length(samp)-1, lower.tail = FALSE)
+ts <- sqrt(length(samp)) * mean(samp) / sd(samp)
+pnorm(ts, lower.tail = FALSE)                      # wrong: treats the estimate as known
+pt(ts, df = length(samp) - 1, lower.tail = FALSE)  # right: accounts for the estimate
 ```
 
-### Experiment
+The two numbers differ, and that difference is the whole story: using the normal
+distribution on an *estimated* standard deviation quietly understates our
+uncertainty. The next section makes that mistake visible at scale.
 
-When sampling from a normal distribution, we often calculate p-values to test
-hypotheses or determine the statistical significance of our results. The
-p-value represents the probability of obtaining a test statistic as extreme or
-more extreme than the one observed, under the null hypothesis.
+### Experiment: does the choice of distribution actually matter?
 
-In a typical scenario, we assume that the population mean and standard
-deviation are known. However, in many real-life situations, we don't know the
-true population standard deviation, and we have to estimate it using the sample
-standard deviation (@eq-sample-sd). This estimation introduces some uncertainty into our
-calculations, which affects the p-values. When we include an estimate of the standard deviation, we switch from using the
-standard normal (z) distribution to the t-distribution for calculating
-p-values. 
+Here's a claim worth testing for yourself rather than taking on faith: *if you
+estimate the standard deviation but compute p-values from the normal
+distribution, your p-values will be wrong.* Let's find out how wrong.
 
-What would happen if we used the normal distribution to calculate p-values
-when we use the sample standard deviation? Let's find out!
+There's a tidy way to check. If a test is working correctly, then **under the
+null hypothesis its p-values should be uniformly distributed between 0 and 1** —
+every value equally likely. So we'll simulate many samples where the null is
+*true*, compute p-values three ways, and look at the histograms. A flat histogram
+means the test is honest; a lopsided one means it isn't.
 
-1. Simulate a bunch of samples of size `n` from the standard normal distribution
-2. Calculate the p-value distribution for those samples based on the 
-normal.
-3. Calculate the p-value distribution for those samples based on the 
-normal, but with the *estimated* standard deviation.
-4. Calculate the p-value distribution for those samples based on the 
-t-distribution.
+The plan:
 
+1. Draw many samples of size `n` from the standard normal distribution.
+2. Score each with the **Z**-statistic (pretending we know $\sigma$).
+3. Score each with the **t**-statistic (estimating $\sigma$ from the data), then
+   compute p-values *two* ways — from the normal, and from the t-distribution.
 
-Create a function that draws a sample of size `n` from the standard
-normal distribution.
+First, a function that draws a sample and returns its Z-score:
 
 ```{r}
-zf = function(n) {
-    samp = rnorm(n)
-    z = sqrt(length(samp)) * mean(samp) / 1 #simplifying assumption (sigma=1, mu=0)
-    z
+zf <- function(n) {
+    samp <- rnorm(n)
+    sqrt(length(samp)) * mean(samp) / 1  # simplifying assumption: sigma = 1, mu = 0
 }
 ```
 
-And give it a try:
+Give it a try:
 
 ```{r}
 zf(5)
 ```
 
-Perform 10000 replicates of our sampling and z-scoring. We are using the assumption
-that we know the population standard deviation; in this case, we do know since we 
-are sampling from the standard normal distribution.
+Run 10,000 replicates and look at the p-value histogram. Here we *do* know the
+population standard deviation (we're sampling from the standard normal), so the
+normal distribution is the correct choice — and the histogram should be flat:
 
 ```{r}
-z10k = replicate(10000,zf(5))
+z10k <- replicate(10000, zf(5))
 hist(pnorm(z10k))
 ```
 
-And do the same, but now creating a t-score function. We are using the assumption
-that we *don't* know the population standard deviation; in this case, we must
-estimate it from the data. Note the difference in the calculation of the t-score (`ts`)
-as compared to the z-score (`z`).
-
+Flat, as promised. Now the t-score function — same idea, but we *estimate* the
+standard deviation with `sd()` instead of assuming it:
 
 ```{r}
-tf = function(n) {
-    samp = rnorm(n)
-    # now, using the sample standard deviation since we 
-    # "don't know" the population standard deviation
-    ts = sqrt(length(samp)) * mean(samp) / sd(samp)
-    ts
+tf <- function(n) {
+    samp <- rnorm(n)
+    # use the sample standard deviation, since we "don't know" the population one
+    sqrt(length(samp)) * mean(samp) / sd(samp)
 }
 ```
 
-If we use those t-scores and calculate the p-values based on the normal distribution, the 
-histogram of those p-values looks like:
+If we feed those t-scores to the **normal** distribution — the common mistake —
+the histogram is no longer flat:
 
 ```{r}
-t10k = replicate(10000,tf(5))
+t10k <- replicate(10000, tf(5))
 hist(pnorm(t10k))
 ```
 
-Since we are using the normal distribution to calculate the p-values, we are, in effect,
-assuming that we know the population standard deviation. This assumption is incorrect,
-and we can see that the p-values are not uniformly distributed between 0 and 1.
-
-If we use those t-scores and calculate the p-values based on the t-distribution, the
-histogram of those p-values looks like:
+The pile-ups near 0 and 1 mean this test rejects the null too often: it's
+overconfident, exactly because it treats an *estimated* standard deviation as if
+it were known. Now feed the same t-scores to the **t-distribution** (with
+`n - 1 = 4` degrees of freedom):
 
 ```{r}
-hist(pt(t10k,5))
+hist(pt(t10k, 4))
 ```
 
-Now, the p-values are uniformly distributed between 0 and 1, as expected.
+Flat again. The t-distribution restores honest, uniform p-values — *that* is the
+payoff for all the math above.
 
-What is a qqplot and how do we use it? A qqplot is a plot of the quantiles of
-two distributions against each other. If the two distributions are identical,
-the points will fall on a straight line. If the two distributions are different,
-the points will deviate from the straight line. We can use a qqplot to compare
-the t-distribution to the normal distribution. If the t-distribution is
-identical to the normal distribution, the points will fall on a straight line.
-If the t-distribution is different from the normal distribution, the points
-will deviate from the straight line. In this case, we can see that the
-t-distribution is different from the normal distribution, as the points deviate
-from the straight line. What would happen if we increased the sample size? The
-t-distribution would approach the normal distribution, and the points would
-fall closer and closer to the straight line.
+We can also compare the two sets of scores directly with a Q-Q plot.
+
+A **Q-Q plot** plots the quantiles of two distributions against each other. If
+the two distributions are identical, the points fall on a straight line; where
+they differ, the points peel away from it.
+
+Here we compare our simulated z-scores against our simulated t-scores. Because the
+t-scores carry the extra uncertainty from estimating the standard deviation, we
+expect them to disagree with the z-scores in the tails.
 
 ```{r}
-qqplot(z10k,t10k)
-abline(0,1)
+qqplot(z10k, t10k)
+abline(0, 1)
 ```
 
-## Summary of t-distribution vs normal distribution
+The points bow away from the line at both ends — the t-distribution's fatter
+tails, made visible. What would happen if you raised the sample size from 5 to
+50? Try it: the bow should shrink as the t-distribution approaches the normal.
 
-The t-distribution is a family of probability distributions that depends on a
-parameter called degrees of freedom, which is related to the sample size. The
-t-distribution approaches the standard normal distribution as the sample size
-increases but has heavier tails for smaller sample sizes. This means that the
-t-distribution is more conservative in calculating p-values for small samples,
-making it harder to reject the null hypothesis. Including an estimate of the
-standard deviation changes the way we calculate p-values by switching from the
-standard normal distribution to the t-distribution, which accounts for the
-uncertainty introduced by estimating the population standard deviation from the
-sample. This adjustment is particularly important for small sample sizes, as it
-provides a more accurate assessment of the statistical significance of our
-results.
+## Checkpoint: t vs normal
 
+Before we start using `t.test()`, let's pin down the one idea this chapter has
+been circling.
 
-## t.test
+The t-distribution is a *family* of distributions indexed by the **degrees of
+freedom**, which track the sample size. It has heavier tails than the normal for
+small samples and approaches the normal as the sample grows. Those heavier tails
+make it more conservative — it takes a more extreme result to reach significance —
+which is the correct response to the uncertainty introduced by *estimating* the
+standard deviation from the data. That correction matters most exactly when you
+have the least data.
+
+## t.test {#sec-ttest}
+
+Now the practical part. R's `t.test()` packages everything above into one
+function — you hand it data, it returns a t-statistic, degrees of freedom, a
+p-value, and a confidence interval.
 
 ### One-sample
 
-We are going to use the `t.test` function to perform a one-sample t-test. The 
-`t.test` function takes a vector of values as input that represents the sample 
-values. In this case, we'll simulate our sample using the `rnorm` function and
-presume that our "effect-size" is 1. 
+A one-sample test compares a sample mean to a single value (zero, by default).
+We'll simulate a sample whose true mean is 1, so we *know* the answer the test
+should be reaching for.
 
 ```{r}
-x = rnorm(20,1)
-# small sample
-# Just use the first 5 values of the sample
+x <- rnorm(20, 1)
+# small sample: just the first 5 values
 t.test(x[1:5])
 ```
 
-In this case, we set up the experiment so that the null hypothesis is true (the 
-true mean is not zero, but actually 1). However, we only have a small sample size
-that leads to a modest p-value. 
-
-Increasing the sample size allows us to see the effect more clearly. 
+We rigged this so the null hypothesis (mean = 0) is **false** — the true mean is
+1. But with only 5 values the evidence is thin, so the p-value is modest. Add more
+data and the effect comes through clearly:
 
 ```{r}
 t.test(x[1:20])
 ```
 
-### two-sample
+### Two-sample
+
+A two-sample test compares the means of two groups:
 
 ```{r}
-x = rnorm(10,0.5)
-y = rnorm(10,-0.5)
-t.test(x,y)
+x <- rnorm(10, 0.5)
+y <- rnorm(10, -0.5)
+t.test(x, y)
 ```
 
-### from a data.frame
+### From a data frame
 
-In some situations, you may have data and groups as columns in a data.frame.
-See the following data.frame, for example
+Often your data and group labels live in two columns of a data frame rather than
+in two separate vectors:
 
 ```{r}
-df = data.frame(value=c(x,y),group=as.factor(rep(c('g1','g2'),each=10)))
-df
+tdat <- data.frame(
+    value = c(x, y),
+    group = as.factor(rep(c('g1', 'g2'), each = 10))
+)
+tdat
 ```
 
-R allows us to perform a t-test using the `formula` notation. 
+R lets you run the same test with **formula notation**:
 
 ```{r}
-t.test(value ~ group, data=df)
+t.test(value ~ group, data = tdat)
 ```
 
-You read that as `value` **is a function of** `group`. In practice, this will
-do a t-test between the `values` in `g1` vs `g2`.
+Read `value ~ group` as "*`value` is a function of `group`*" — in practice, do a
+t-test of the `value`s in `g1` against those in `g2`.
 
+### Equivalence to a linear model
 
-### Equivalence to linear model
+A two-sample t-test (with equal variances assumed) is really a linear model in
+disguise. Run the test:
 
 ```{r}
-t.test(value ~ group, data=df, var.equal=TRUE)
+t.test(value ~ group, data = tdat, var.equal = TRUE)
 ```
 
-This is *equivalent* to:
+and compare it to fitting a line:
 
 ```{r}
-res = lm(value ~ group, data=df)
+res <- lm(value ~ group, data = tdat)
 summary(res)
 ```
 
+The `groupg2` coefficient is the difference in means, and its p-value matches the
+t-test's. Same question, same answer, two front doors.
+
 ## Power calculations
 
-The power of a statistical test is the probability that the test will reject
-the null hypothesis when the alternative hypothesis is true. In other words,
-the power of a statistical test is the probability of not making a Type II
-error. The power of a statistical test depends on the significance level
-(alpha), the sample size, and the effect size.
+The **power** of a test is the probability that it *correctly* rejects the null
+hypothesis when the alternative is true — in other words, the probability of *not*
+missing a real effect (not making a Type II error). Power rises with the
+significance level (`alpha`), the sample size, and the effect size. It's what you
+compute *before* an experiment to ask "how many samples do I need?"
 
-The `power.t.test` function can be used to calculate the power of a
-one-sample t-test. 
+`power.t.test()` ties these quantities together. From `help("power.t.test")`, the
+main arguments are:
 
-Looking at `help("power.t.test")`, we see that the function takes the following
-arguments:
+- `n` — sample size
+- `delta` — effect size (difference in means)
+- `sd` — standard deviation
+- `sig.level` — significance level
+- `power` — power
 
-* `n` - sample size
-* `delta` - effect size
-* `sd` - standard deviation of the sample
-* `sig.level` - significance level
-* `power` - power
-
-We need to supply four of these arguments to calculate the fifth. For example,
-if we want to calculate the power of a one-sample t-test with a sample size of
-5, a standard deviation of 1, and an effect size of 1, we can use the
-following command:
+You supply any four and it solves for the fifth. For example, the power of a
+one-sample test with `n = 5`, `sd = 1`, and an effect size of 1:
 
 ```{r}
 power.t.test(n = 5, delta = 1, sd = 1, sig.level = 0.05)
 ```
 
-This gives a nice summary of the power calculation. We can also extract the
-power value from the result:
+That prints a full summary. To grab just the power value, use `$`:
 
 ```{r}
-power.t.test(n = 5, delta = 1, sd = 1, 
-             sig.level = 0.05, type='one.sample')$power
+power.t.test(n = 5, delta = 1, sd = 1,
+             sig.level = 0.05, type = 'one.sample')$power
 ```
 
 ::: {.callout-tip}
-When getting results from a function that don't look "computable" such as 
-those from `power.t.test`, you can use the `$` operator to extract the
-value you want. In this case, we want the `power` value from the result
-of `power.t.test`. 
-
-How would you know what to extract? You can use the `names` function
-or the `str` function to see the structure of the result. For example:
+When a function returns a result that doesn't look "computable" — like the summary
+from `power.t.test` — you can pull out a single piece with `$`. How do you know
+what's available to extract? Use `names()` for the labels, or `str()` for the full
+structure:
 
 ```{r}
-names(power.t.test(n = 5, delta = 1, sd = 1, 
-             sig.level = 0.05, type='one.sample'))
-# or 
-str(power.t.test(n = 5, delta = 1, sd = 1, 
-             sig.level = 0.05, type='one.sample'))
+names(power.t.test(n = 5, delta = 1, sd = 1,
+             sig.level = 0.05, type = 'one.sample'))
+# or
+str(power.t.test(n = 5, delta = 1, sd = 1,
+             sig.level = 0.05, type = 'one.sample'))
 ```
 :::
 
-Alternatively, we may know a lot about our experimental system and want to 
-calculate the sample size needed to achieve a certain power. For example, if
-we want to achieve a power of 0.8 with a standard deviation of 1 and an effect
-size of 1, we can use the following command:
+Just as often you'll flip the question around: *how big a sample* do I need to hit
+a target power? Solve for `n` by supplying `power` instead:
 
 ```{r}
 power.t.test(delta = 1, sd = 1, sig.level = 0.05, power = 0.8, type = "one.sample")
 ```
 
-The power.t.test function is convenient and quite fast. As we've seen before, though,
-sometimes the distribution of the test statistics is now easily calculated. In those
-cases, we can use simulation to calculate the power of a statistical test. For example,
-if we want to calculate the power of a one-sample t-test with a sample size of 5, a
-standard deviation of 1, and an effect size of 1, we can use the following command:
+`power.t.test` is convenient and fast. But as we saw with the t-distribution
+itself, sometimes the distribution of a test statistic is **not** easily
+calculated in closed form. In those cases we can estimate power by *simulation* —
+run the experiment thousands of times and count how often it rejects the null:
 
 ```{r}
 sim_t_test_pval <- function(n = 5, delta = 1, sd = 1, sig.level = 0.05) {
-    x = rnorm(n, delta, sd)
+    x <- rnorm(n, delta, sd)
     t.test(x)$p.value <= sig.level
 }
-pow = mean(replicate(1000, sim_t_test_pval()))
+pow <- mean(replicate(1000, sim_t_test_pval()))
 pow
 ```
 
-Let's break this down. First, we define a function called `sim_t_test_pval` that
-takes the same arguments as the `power.t.test` function. Inside the function, we
-simulate a sample of size `n` from a normal distribution with mean `delta` and
-standard deviation `sd`. Then, we perform a one-sample t-test on the sample and
-return a logical value indicating whether the p-value is less than the
-significance level. Next, we use the `replicate` function to repeat the
-simulation 1000 times. Finally, we calculate the proportion of simulations in
-which the p-value was less than the significance level. This proportion is an
-estimate of the power of the one-sample t-test.
+Step by step: `sim_t_test_pval` simulates one sample of size `n` from a normal
+distribution with mean `delta` and standard deviation `sd`, runs a one-sample
+t-test, and returns `TRUE` when the p-value clears the significance threshold.
+`replicate` repeats that 1000 times, and `mean` turns the resulting `TRUE`/`FALSE`
+vector into the *proportion* of significant results — our estimate of power.
 
-Let's compare the results of the `power.t.test` function and our simulation-based
-approach:
+The two approaches should land in the same place:
 
 ```{r}
-power.t.test(n = 5, delta = 1, sd = 1, sig.level = 0.05, type='one.sample')$power
+power.t.test(n = 5, delta = 1, sd = 1, sig.level = 0.05, type = 'one.sample')$power
 mean(replicate(1000, sim_t_test_pval(n = 5, delta = 1, sd = 1, sig.level = 0.05)))
 ```
 
+Close — and the simulation route keeps working in situations where no neat
+formula exists.
+
+## Exercises
+
+::: {.callout-note}
+Several exercises reuse objects (`samp`, `t10k`, `tdat`) built earlier in the
+chapter. Run the chapter's chunks first, or recreate the objects in your session.
+:::
+
+1. **One-sided vs two-sided.** Use `twosidedpnorm()` to find the two-sided
+   p-value for a Z-score of 1.96. Does the answer match the "95%" rule of thumb
+   you may have heard?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   twosidedpnorm(1.96)
+   ```
+   It's almost exactly 0.05 — which is *why* 1.96 is the classic cutoff for a
+   two-sided test at the 5% level.
+   :::
+
+2. **Degrees of freedom matter.** Compute the two-sided p-value for `t = 2.5`
+   from the t-distribution with 4 degrees of freedom and again with 30. Which is
+   larger, and does that fit the "fatter tails" story?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   2 * pt(2.5, df = 4,  lower.tail = FALSE)
+   2 * pt(2.5, df = 30, lower.tail = FALSE)
+   ```
+   The 4-df p-value is larger. Fewer degrees of freedom means fatter tails, so the
+   same t-statistic is *less* surprising — it takes more extreme evidence to reach
+   significance with a small sample.
+   :::
+
+3. **A paired test.** Imagine the same 8 patients measured before and after a
+   treatment. Simulate the pairs below and run a paired t-test with
+   `t.test(after, before, paired = TRUE)`. How does the result compare to treating
+   the two groups as independent (`paired = FALSE`)?
+
+   ```{r}
+   set.seed(11)
+   before <- rnorm(8, 10, 2)
+   after  <- before + rnorm(8, 1, 0.5)  # a real, consistent bump per patient
+   ```
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   t.test(after, before, paired = TRUE)
+   t.test(after, before, paired = FALSE)
+   ```
+   The paired test has a much smaller p-value. By matching each patient to
+   themselves it removes the patient-to-patient variability, leaving only the
+   change due to treatment — so it detects the effect that the unpaired test can
+   barely see.
+   :::
+
+4. **Power and sample size.** Using `power.t.test`, find the sample size needed to
+   detect an effect of `delta = 0.5` (with `sd = 1`) at 80% power for a one-sample
+   test. Then halve the effect size to `0.25` and recompute. Roughly how does the
+   required `n` change?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   power.t.test(delta = 0.5,  sd = 1, sig.level = 0.05, power = 0.8, type = "one.sample")$n
+   power.t.test(delta = 0.25, sd = 1, sig.level = 0.05, power = 0.8, type = "one.sample")$n
+   ```
+   Halving the effect size roughly *quadruples* the required sample size — small
+   effects are expensive to detect. This is the single most useful intuition to
+   carry out of a power calculation.
+   :::
+
+## Summary
+
+You can now:
+
+- Explain why estimating the standard deviation from a small sample pushes us from
+  the normal distribution onto the t-distribution, and what "fatter tails" buys
+  you.
+- Distinguish a Z-score from a t-score and turn either into a p-value with `pnorm`
+  and `pt`.
+- Use simulation to *check* that a test is honest — uniform p-values under the
+  null — rather than taking it on trust.
+- Run one-sample, two-sample, paired, and formula-based tests with `t.test()`, and
+  recognize the two-sample t-test as a linear model.
+- Estimate power and required sample size with `power.t.test()` and by simulation.
+
+The thread tying it all together: when you estimate uncertainty from your data
+instead of knowing it, you have to pay for that estimate — and the t-distribution
+is how statistics keeps the books honest.
+
 ## Resources
 
-See the [pwr package](https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html) for more information on power calculations.
-
+- The [pwr package](https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html)
+  for a fuller toolkit of power calculations.
+- The American Statistical Association's statement on p-values
+  [@doi:10.1080/00031305.2016.1154108] for what a p-value does and doesn't tell
+  you.

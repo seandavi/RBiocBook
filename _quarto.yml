@@ -1,5 +1,10 @@
 project:
   type: book
+  # quartobot citation pipeline: resolves persistent-identifier cite keys
+  # (@doi:…, @pmid:…) via manubot into references.resolved.bib before render.
+  # Hand-curated keys in references.bib are left untouched. Requires the
+  # quartobot CLI on PATH (`uv tool install quartobot`).
+  pre-render: quartobot resolve --from-scan . --id-mode citation-key
 
 author:
   - name: Sean Davis
@@ -7,6 +12,12 @@ author:
     affiliation: University of Colorado<br/>Anschutz School of Medicine
     affiliation-url: https://medschool.cuanschutz.edu/
     email: seandavi@gmail.com
+  - name: Lori Shepherd Kern
+    affiliation: Roswell Park Comprehensive Cancer Center<br/>Bioconductor Core Team
+    affiliation-url: https://www.roswellpark.org/
+  - name: Martin Morgan
+    affiliation: Roswell Park Comprehensive Cancer Center<br/>Bioconductor Core Team
+    affiliation-url: https://www.roswellpark.org/
 citation:
   url: https://seandavi.github.io/RBiocBook
 date: "2024-06-01"
@@ -48,6 +59,7 @@ book:
         - r_intro_mechanics.qmd
         - r_basics.qmd
         - packages_and_dice.qmd
+        - rproj_and_save_load.qmd
         - reading_and_writing.qmd
     - part: data_structures_overview.qmd
       chapters:
@@ -56,11 +68,14 @@ book:
         - lists.qmd
         - dataframes_intro.qmd
         - factors.qmd
+        - control_statements.qmd
 
     - part: eda_overview.qmd
       chapters:
         - dplyr_intro_msleep.qmd
         - eda_and_univariate_brfss.qmd
+        - ggplot2/intro.qmd
+        - comparison_options.qmd
         - visualization_guide.qmd
 
     - part: statistics
@@ -75,13 +90,15 @@ book:
         - machine_learning/intro.qmd
         - machine_learning/models.qmd
         - machine_learning/mlr3verse_intro.qmd
-        - machine_learning/machine_learning_mlr3.qmd
+        - machine_learning/ml_cancer.qmd
+        - machine_learning/ml_methylation_age.qmd
+        - machine_learning/ml_expression.qmd
 
     - part: "Bioconductor"
       chapters:
         - geoquery.qmd
-        - 310_microbiome.qmd
         - bioc-summarizedexperiment.qmd
+        - 310_microbiome.qmd
         - genomic_ranges_tutorial.qmd
         - ranges_and_signals.qmd
         - ranges_exercises.qmd
@@ -95,11 +112,9 @@ book:
     - references.qmd
 
   appendices:
-    - appendix.qmd
     - git_and_github.qmd
     - additional_resources.qmd
     - ai_tools.qmd
-    - dataviz.qmd
     - matrix_exercises.qmd
     #- part: "Bioconductor"
     #chapters:
@@ -110,8 +125,9 @@ book:
       - text: "License"
         href: license.qmd
 
-bibliography: 
-  - bibliography.bib
+bibliography:
+  - references.bib
+  - references.resolved.bib
 
 format:
   html:

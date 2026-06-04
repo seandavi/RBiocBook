@@ -1,123 +1,195 @@
-# About R
+---
+title: "About R"
+---
 
-In this chapter, we will discuss the basics of R and RStudio\index{RStudio}, two essential
-tools in genomics data analysis. We will cover the advantages of using R and
-RStudio, how to set up RStudio, and the different panels of the RStudio
-interface.
+Imagine you've just gotten back a spreadsheet with expression values for 20,000
+genes across 100 samples, and your advisor wants to know which genes differ
+between treated and untreated cells — by Friday. Clicking through that by hand is
+hopeless. This is exactly the kind of problem R was built for: load the data,
+filter and reshape it, run the statistics, and draw a publication-quality figure,
+all in a handful of lines you can save, rerun, and share.
+
+This chapter is the gentlest possible start. We won't write much code yet. Instead,
+we'll answer two questions that matter before you type a single command: *what is
+R*, and *why is it worth your time as a biologist*? Once you're convinced it's
+worth learning, the next chapter gets you set up with RStudio and your first
+commands.
+
+## What you'll learn
+
+- Describe what R is and where it came from, in plain language.
+- Explain why R is so widely used in genomics and bioinformatics.
+- Recognize the trade-offs — the things R is *not* good at — so you know when to
+  reach for another tool.
+- Understand what "open source" means and why it matters for reproducible science.
 
 ## What is R?
 
 [R](https://en.wikipedia.org/wiki/R_(programming_language)) is a programming
-language and software environment designed for statistical computing and
-graphics. It is widely used by statisticians, data scientists, and researchers
-for data analysis and visualization. R is an open-source language, which means
-it is free to use, modify, and distribute. Over the years, R has become
-particularly popular in the fields of genomics and bioinformatics, owing to its
-extensive libraries and powerful data manipulation capabilities.
+language and free software environment built for working with data: cleaning it,
+analyzing it, modeling it, and turning it into graphics. You write short
+instructions, R carries them out, and you see the results immediately. That's
+the whole loop.
 
-The R language is a dialect of the S language, which was developed in the 1970s
-at Bell Laboratories. The first version of R was written by Robert Gentleman
-and Ross Ihaka and released in 1995 (see [this slide
-deck](https://www.stat.auckland.ac.nz/~ihaka/downloads/Massey.pdf) for Ross
-Ihaka's take on R's history). Since then, R has been continuously developed by
-the R Core Team, a group of statisticians and computer scientists. The R Core
-Team releases a new version of R every year.
+R didn't appear out of nowhere. It's a dialect of an older language called S,
+developed in the 1970s at Bell Laboratories. The first version of R was written
+by Robert Gentleman and Ross Ihaka and released in 1995 (Ihaka's own
+[slide deck](https://www.stat.auckland.ac.nz/~ihaka/downloads/Massey.pdf) tells
+the story well). Since then a volunteer group called the R Core Team — statisticians
+and computer scientists — has maintained and improved it, releasing a new version
+roughly every year. So when you use R, you're standing on three decades of careful
+work, and you're not paying a cent for it.
 
+R has become especially popular in genomics and bioinformatics, and that
+popularity has held up over time even as other languages have risen alongside it
+(@fig-r-google-trends).
 
 ```{r echo=FALSE}
-#| fig-cap: "Google trends showing the popularity of R over time based on [Google Trends](https://trends.google.com/trends/explore?cat=5&date=all&geo=US&q=r,python&hl=en). Note that google does not capture the context here; bioinformatics applications are still quite heavily reliant on R."
+#| fig-cap: "Worldwide search interest in R and Python over time, from [Google Trends](https://trends.google.com/trends/explore?cat=5&date=all&geo=US&q=r,python&hl=en). Search interest is a rough proxy for general popularity — it does not capture how heavily specific fields lean on each language. Bioinformatics, in particular, remains deeply invested in R."
 #| label: fig-r-google-trends
 #| message: FALSE
 library(ggplot2)
-readr::read_csv('data/r_python_google_trends.csv',skip=3, col_names=c('month', 'R', 'Python')) |> 
-   tidyr::pivot_longer(!month, names_to='language', values_to = 'interest') |>
-   dplyr::mutate(month=lubridate::ym(month)) |>
-   ggplot(aes(x=month, y=interest, group=language, color=language)) +
+readr::read_csv('data/r_python_google_trends.csv', skip = 3, col_names = c('month', 'R', 'Python')) |>
+   tidyr::pivot_longer(!month, names_to = 'language', values_to = 'interest') |>
+   dplyr::mutate(month = lubridate::ym(month)) |>
+   ggplot(aes(x = month, y = interest, group = language, color = language)) +
    geom_line() +
    theme_minimal()
 ```
 
+The figure plots search interest for R and Python over the years. Python is the
+more general-purpose language and gets more total searches, but don't read too
+much into that: a search-popularity chart can't see *which* communities depend on
+*which* tool. In bioinformatics specifically — think Bioconductor, the ecosystem
+this book leans on heavily — R remains a first-class citizen, and that's a big
+part of why we teach it here.
 
 ## Why use R?
 
-There are several reasons why R is a popular choice for data analysis,
-particularly in genomics and bioinformatics. These include:
+So why has R earned such a devoted following among biologists and data scientists?
+A few reasons stand out.
 
-1. **Open-source**: R is free to use and has a large community of developers
-   who contribute to its growth and development. [What is "open-source"?](https://opensource.com/resources/what-open-source)
-1. **Extensive libraries**: There are thousands of R packages available for a
-   wide range of tasks, including specialized packages for genomics and
-   bioinformatics. These libraries have been extensively tested and ara
-   available for free.
-1. **Data manipulation**: R has powerful data manipulation capabilities, making
-   it easy (or at least possible) to clean, process, and analyze large
-   datasets.
-1. **Graphics and visualization**: R has excellent tools for creating
-   high-quality graphics and visualizations that can be customized to meet the
-   specific needs of your analysis. In most cases, graphics produced by R are
-   publication-quality. 
-1. **Reproducible research**: R enables you to create reproducible research by
-   recording your analysis in a script, which can be easily shared and executed
-   by others. In addition, R does not have a meaningful graphical user
-   interface (GUI), which renders analysis in R much more reproducible than
-   tools that rely on GUI interactions.
-1. **Cross-platform**: R runs on Windows, Mac, and Linux (as well as more
-   obscure systems).
-1. **Interoperability with other languages**: R can interfact with FORTRAN, C,
-   and many other languages.
-1. **Scalability**: R is useful for small and large projects.
+**It's free and open source.** R costs nothing to download, use, modify, or share,
+and a large worldwide community keeps building it. We'll come back to what "open
+source" really means in the section on R's license below.
 
-I can develop code for analysis on my Mac laptop. I can
-then install the *same* code on our 20k core cluster and run it in
-parallel on 100 samples, monitor the process, and then update a database (for example)
-with R when complete. In other words, R is a powerful tool that can be used
-for a wide range of tasks, from small-scale data analysis to large-scale
-genomics and omics data science projects.
+**There's a package for almost everything.** Thousands of add-on packages extend
+R's reach, including a deep catalogue of tools written specifically for genomics
+and bioinformatics. Many have been tested by thousands of users — and, like R
+itself, they're free.
+
+**It's built for wrangling messy data.** Real biological data arrives messy. R
+gives you powerful, well-worn tools to clean, reshape, and summarize even large
+datasets — not always *easy*, but reliably *possible*.
+
+**The graphics are publication quality.** R's plotting tools produce figures you
+can drop straight into a paper or poster, and you can tune nearly every detail to
+say exactly what you mean.
+
+**Your work is reproducible.** Because an R analysis is a *script* — a written
+record of every step — you (or a colleague, or a reviewer) can rerun it and get
+the same answer. Point-and-click tools rarely leave that kind of trail.
+
+**It runs everywhere and scales.** R works on Windows, Mac, and Linux, and it can
+talk to other languages like FORTRAN and C when you need extra speed. The same
+code serves a quick afternoon analysis or a major project.
+
+That last point is worth a concrete example. I can write and test an analysis on
+my Mac laptop, then install the *exact same* code on our 20,000-core compute
+cluster and run it in parallel across a hundred samples, watch the jobs as they
+go, and have R write the results into a database when it finishes. One language
+carried me from a back-of-the-envelope idea to a full-scale genomics pipeline
+without rewriting anything.
+
+::: {.callout-note}
+## Open source, in one sentence
+
+"Open source" means the program's underlying code is published for anyone to read,
+change, and redistribute. For science that's not a nicety — it's what lets others
+inspect exactly how a result was produced and verify it for themselves. R, and the
+Bioconductor packages you'll meet later, are open source top to bottom.
+:::
 
 ## Why not use R?
 
-- R cannot do everything.
-- R is not always the “best” tool for the job.
-- R will *not* hold your hand. Often, it will *slap* your hand instead.
-- The documentation can be opaque (but there is documentation).
-- R can drive you crazy (on a good day) or age you prematurely (on a
-    bad one).
-- Finding the right package to do the job you want to do can be
-    challenging; worse, some contributed packages are unreliable.]{}
-- R does not have a meaningfully useful graphical user interface (GUI).
-- Additional languages are becoming increasingly popular for bioinformatics
-  and biological data science, such as Python, Julia, and Rust.
+No tool is perfect, and it's healthier to know R's rough edges going in than to be
+blindsided by them later. R is not always the best tool for every job. It can be
+slower than languages like C for certain heavy number-crunching, and its
+documentation can be terse or assume more than a beginner knows. Some
+community-contributed packages are excellent; others are unmaintained or buggy, so
+a little judgment helps when you pick one. R also has no single, polished
+point-and-click interface — that's a feature for reproducibility, but it does mean
+you commit to writing code. And other languages, notably Python, Julia, and Rust,
+are increasingly used in biological data science, so R is one strong choice among
+several rather than the only one.
 
-## R License and the Open Source Ideal
+::: {.callout-tip}
+## R will not hold your hand — and that's okay
 
-R is free (yes, totally free!) and distributed under GNU license. In particular, this license allows one to:
+You'll hear people joke that R doesn't hold your hand; sometimes it *slaps* it
+instead, with a cryptic error message. Here's the reassuring truth: every R user,
+including experienced ones, sees errors constantly. An error is not a verdict on
+you. It's just R saying "I didn't understand that," and the fix is usually a typo,
+a missing comma, or a quick web search away. We'll return to reading errors calmly
+in later chapters — for now, just know that getting stuck is normal and temporary.
+:::
 
-- Download the source code
-- Modify the source code to your heart’s content
-- Distribute the modified source code and even charge
-    money for it, but you must distribute the modified source code
-    under the original GNU license.
+## R license and the open source ideal
 
-This license means that R will always be
-available, will always be open source, and can grow organically without
-constraint.
+R is free — genuinely, completely free — and distributed under the GNU General
+Public License. Among other things, that license lets anyone:
 
-## Working with R
+- Download the source code.
+- Modify it however they like.
+- Redistribute the modified code (even for money), as long as it stays under the
+  same GNU license.
 
-R is a programming language, and as such, it requires you to write code to
-perform tasks. This can be intimidating for beginners, but it is also what
-makes R so powerful. In R, you can write scripts to automate tasks, create
-functions to encapsulate complex operations, and use packages to extend the
-functionality of R.
+That last condition is the clever part: improvements have to flow back to the
+community on the same open terms. The practical upshot for you is reassuring — R
+will always be available, will always be open, and can keep growing without being
+locked behind a paywall or controlled by a single company.
 
-R can be used interactively or as a scripting language. In interactive mode, you can
-enter commands directly into the R console and see the results immediately. In
-scripting mode, you can write a series of commands in a script file and then
-execute the entire script at once. This allows you to save your work, reuse code,
-and share your analysis with others.
+## Where this is going
 
-In the next section, we will discuss how to set up RStudio, an integrated
-development environment (IDE) for R that makes it easier to write and execute R
-code. However, you can use R without RStudio if you prefer to work in the R console or
-another IDE. RStudio is not required to use R, but it does provide a more user-friendly
-interface and several useful features that can enhance your R programming experience.
+R is a *programming language*, which means you get things done by writing code
+rather than clicking buttons. That can feel intimidating at first, but it's also
+the source of everything we just praised: scripts you can rerun, functions you can
+reuse, and analyses you can share. You can work with R two ways — *interactively*,
+typing one command at a time and seeing each result right away, or as a *script*,
+saving a whole sequence of commands to run together. You'll use both.
+
+In the next chapter, on RStudio, we'll install RStudio — a friendly home base for
+writing and running R — and take a tour of its panels. The chapter after that gets
+you up and running with your first real R code, where you'll build a pair of
+virtual dice and roll them.
+
+::: {.callout-tip}
+## Try it
+You don't need anything installed to look ahead: open the
+[Google Trends page](https://trends.google.com/trends/explore?cat=5&date=all&geo=US&q=r,python&hl=en)
+behind @fig-r-google-trends and add a third language to the comparison. It's a
+gentle reminder that the tools you choose are part of a living, shifting community.
+:::
+
+## Summary
+
+You now have the lay of the land. R is a free, open-source language with three
+decades of history, a vast library of packages, strong graphics, and a deep
+commitment to reproducibility — which is exactly why it's a mainstay of genomics
+and bioinformatics. You also know its limits: it can be slow for some tasks, its
+error messages can sting, and it's one good option among several. With the "why"
+settled, you're ready to set up the tools and start writing code.
+
+## Reflection
+
+Take a moment to check your understanding before moving on. You don't need to write
+anything down — just see whether you can answer each in a sentence or two.
+
+1. In your own words, what does it mean that R is "open source," and why does that
+   matter for a published scientific result?
+2. Name two reasons a biologist might choose R over a point-and-click spreadsheet
+   program for analyzing experimental data.
+3. The Google Trends figure shows Python with more overall search interest than R.
+   Why is that *not* a good reason to conclude R is unimportant in bioinformatics?
+4. What is one situation where R might *not* be the best tool, and what would you
+   consider reaching for instead?
