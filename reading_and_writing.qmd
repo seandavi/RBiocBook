@@ -1,5 +1,6 @@
 ---
 title: "Reading and writing data files"
+author: "Sean Davis"
 ---
 
 Almost no analysis starts inside R. Your data lives somewhere else first — an
@@ -13,112 +14,6 @@ This chapter is about that round trip. You'll write a small table of genes and
 their expression values to disk, read it back, pull a real dataset straight from
 a URL, and do the same with Excel files. None of it is hard once you know which
 function to reach for — and knowing that is most of the battle.
-
-## What you'll learn
-
-- Organize an analysis in an RStudio Project so your file paths stay portable.
-- Write a data frame to a CSV file with `write_csv()` and read it back with
-  `read_csv()`.
-- Read a CSV directly from a URL, without downloading it by hand.
-- Read and write Excel files with `read_excel()` and `write_xlsx()`.
-- Recognize when other formats (Google Sheets, JSON, databases) need a different
-  package.
-
-## Organizing your work with RStudio Projects {#sec-rstudio-projects}
-
-Before you read or write a single file, it helps to decide *where* those files
-live. An RStudio Project is a folder that holds everything for one analysis —
-scripts, data, and outputs — together in one place. When you create a project,
-RStudio drops a `.Rproj` file into the folder, and that file anchors your
-workspace.
-
-Working in a project buys you a few things:
-
-- **A consistent working directory.** Open the project and your working
-  directory is automatically the project folder. No more guessing where R thinks
-  it is.
-- **Everything in one place.** Scripts, data, and outputs travel together.
-- **Reproducibility.** A collaborator can open your project and run your code
-  without rewriting any paths.
-- **Version control.** Projects work cleanly with Git and GitHub.
-
-### Creating a project
-
-You can make a new project from **File > New Project...**, or from the project
-dropdown in the top-right corner of RStudio. You'll be offered three choices:
-
-- **New Directory** — start a fresh project folder.
-- **Existing Directory** — turn a folder you already have into a project.
-- **Version Control** — clone a repository from GitHub.
-
-### A sensible project layout
-
-A good project has a predictable shape — one that *you* define and then stick to.
-A common starting point:
-
-```
-my_analysis_project/
-├── my_analysis_project.Rproj
-├── data/
-│   ├── raw/
-│   └── processed/
-├── scripts/
-├── notebooks/
-├── outputs/
-│   ├── figures/
-│   └── tables/
-├── README.md
-└── .gitignore
-```
-
-This keeps raw data separate from processed data, scripts in one place, and
-outputs where you can find them later.
-
-### Why this fixes file paths
-
-The biggest practical payoff is path management. When you open a project,
-RStudio sets the working directory to the project folder, so you can refer to
-files *relative* to that folder instead of spelling out the full path from the
-root of your hard drive.
-
-```{r eval=FALSE}
-# An absolute path is tied to one machine and one user:
-expr <- read.csv("/Users/username/Documents/my_analysis/data/dataset.csv")
-
-# A relative path works for anyone who opens the project:
-expr <- read.csv("data/dataset.csv")
-```
-
-::: {.callout-warning}
-## Absolute paths break reproducibility
-
-An absolute path like `/Users/username/Documents/...` only exists on *your*
-computer. Email that script to a colleague and the very first line fails for
-them. Relative paths (`data/dataset.csv`), anchored by a project, are the habit
-that keeps your code portable.
-:::
-
-::: {.callout-tip}
-## The `here` package for robust paths
-
-In larger projects — especially ones with notebooks tucked into subfolders — the
-`here` package makes paths bulletproof. `here()` always resolves from the project
-root (the folder with the `.Rproj` file), no matter which subfolder your script
-sits in:
-
-```{r eval=FALSE}
-install.packages("here")
-library(here)
-
-expr <- read.csv(here("data", "dataset.csv"))
-```
-:::
-
-When you share a project folder (or push it to GitHub), a collaborator can clone
-it, open the `.Rproj` file, and run your scripts with no path edits at all. That
-seamless hand-off is what makes an analysis credible and repeatable.
-
-Now that you have a place to put files, let's read and write some.
 
 ## CSV files
 

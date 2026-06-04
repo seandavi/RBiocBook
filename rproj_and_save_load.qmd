@@ -1,0 +1,134 @@
+---
+title: Saving and Loading Workspaces and Objects
+author: "Sean Davis and Lori Kern"
+---
+
+## Rstudio Projects: Organizing Your Work
+
+Before diving into reading and writing files, it's essential to understand how to organize your work effectively. RStudio Projects provide a powerful way to keep your files, scripts, and data organized in a self-contained workspace.
+
+### What are RStudio Projects?
+
+An RStudio Project is a special folder that contains all the files associated with a particular analysis or research project. When you create a project, RStudio creates a `.Rproj` file that serves as the anchor for your project workspace. This approach offers several key benefits:
+
+- **Consistent working directory**: The project folder automatically becomes your working directory
+- **File organization**: All related files (scripts, data, outputs) are kept together
+- **Reproducibility**: Others can easily run your code without worrying about file paths
+- **Version control integration**: Projects work seamlessly with Git and GitHub
+
+### Creating an RStudio Project
+
+You can create a new RStudio Project in several ways:
+
+1. **File menu**: Go to `File > New Project...`
+2. **Project dropdown**: Click the project dropdown in the top-right corner and select "New Project"
+3. **Choose New Directory**: Create a project in a new folder.
+
+When creating a project, you have three main options:
+
+- **New Directory**: Create a fresh project folder
+- **Existing Directory**: Turn an existing folder into a project
+- **Version Control**: Clone a repository from GitHub or other version control systems
+
+### Project Structure Best Practices
+
+A well-organized project typically follows a consistent structure (that YOU define). Here's a common structure that you might consider:
+
+```
+my_analysis_project/
+├── my_analysis_project.Rproj
+├── data/
+│   ├── raw/
+│   └── processed/
+├── scripts/
+├── notebooks/
+├── outputs/
+│   ├── figures/
+│   └── tables/
+├── README.md
+└── .gitignore
+```
+
+This structure separates raw data from processed data, keeps scripts organized, and provides clear locations for outputs.
+
+### Working Directories and File Paths
+
+One of the most significant advantages of using RStudio Projects is that they solve the common problem of file path management. When you open a project, RStudio automatically sets the working directory to the project folder. This means:
+
+```{r eval=FALSE}
+# Instead of using absolute paths like this:
+df <- read.csv("/Users/username/Documents/my_analysis/data/dataset.csv")
+
+# You can use relative paths like this:
+df <- read.csv("data/dataset.csv")
+```
+
+Relative paths make your code portable—anyone who opens your project will be able to run your scripts without modifying file paths.
+
+### Projects and Reproducibility
+
+RStudio Projects can play a key (but optional) role in creating reproducible analyses. When you share a project folder (or push it to GitHub), collaborators can:
+
+1. Download/clone the entire project
+2. Open the `.Rproj` file
+3. Run your scripts without any setup or path modifications
+
+This seamless workflow is essential for collaborative research and makes your work more credible and verifiable.
+
+
+## Saving and Loading Workspace
+
+If you are not in Rstudio and want to save your workspace there are a few
+options. If you choose to save your session when you quit out of R
+with `q("yes")` or `q()` and selecting `yes`, it is also equivalent to the
+following using save
+
+```{r, eval=FALSE}
+save(list = ls(all.names = TRUE), file =".RData", envir = .GlobalEnv)
+```
+This saves your workspace and command history. Any object assignments and
+command history (viewable with `history()`) will be available in your next R
+session. Your session will load automatically when you start up R in the same
+directory. 
+
+You can use the `save.image` option
+
+```{r, eval=FALSE}
+save.image()
+# or
+save.image(file="descriptiveFileName.RData")
+```
+
+If you do not give `save.image` a file name, it will also load on default if you
+start an R session in that directory but with default settings will not have
+your command history. 
+
+If you give `save.image` a file name, it will not automatically load when you
+start R and will not have command history. You will have to load the image
+manually to see the objects in the new R session.
+
+```{r, eval=FALSE}
+load("descriptiveFileName.RData")
+```
+
+## Saving and Loading Objects
+
+If you want to selectively save objects, the `save` function is utilized. This
+allows you to choose the objects you want saved. The `load` function would then
+load the selected objects into a new R session.
+
+```{r, eval=FALSE}
+ages = 1:4
+months = c("may", "june", "july", "august")
+vec = c(TRUE, FALSE, TRUE)
+save(months, ages, file="subset.RData")
+```
+
+## Saving and Loading Command History
+
+When quitting out of R, if you save, it also saves your command history. To do
+this manually you can use the `savehistory`/`loadhistory` functions in R.
+
+
+Now that we understand how to organize our work with RStudio Projects and how to
+save and load workspaces, let's explore how to read and write the data files that will live within these organized project structures.
