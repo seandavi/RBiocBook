@@ -845,12 +845,14 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="importing-the-ctcf-peaks" class="level2" data-number="32.4"><h2 data-number="32.4" class="anchored" data-anchor-id="importing-the-ctcf-peaks">
+</section><section id="importing-the-ctcf-peaks" class="level2 page-columns page-full" data-number="32.4"><h2 data-number="32.4" class="anchored" data-anchor-id="importing-the-ctcf-peaks">
 <span class="header-section-number">32.4</span> Importing the CTCF peaks</h2>
-<p>We’ll use a CTCF ChIP-seq peak file from ENCODE. It lives at a URL, and <code>rtracklayer::import()</code> can read straight from that URL — no need to download it by hand first.</p>
-<p>Before we use the convenient importer, let’s peek at the raw file so you can see that it really is just a table of numbers and text:</p>
+<p>We’ll use a CTCF ChIP-seq peak file from ENCODE.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> It lives at a URL, and <code>rtracklayer::import()</code> can read straight from that URL — no need to download it by hand first.</p>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;ENCODE accession <a href="https://www.encodeproject.org/files/ENCFF960ZGP/">ENCFF960ZGP</a>, originally at <a href="https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz" class="uri">https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz</a>. We keep a copy in this book’s repository and read it from the GitHub URL below, so the code runs unchanged on any machine.</p></div></div><p>Before we use the convenient importer, let’s peek at the raw file so you can see that it really is just a table of numbers and text:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">bed_url</span> <span class="op">&lt;-</span> <span class="st">"https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The peak file lives in this book's GitHub repository; we read it straight from</span></span>
+<span><span class="co"># its URL so this code runs unchanged anywhere (no local checkout needed).</span></span>
+<span><span class="va">bed_url</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/seandavi/RBiocBook/main/data/ctcf_peaks_ENCFF960ZGP.bed.gz"</span></span>
 <span></span>
 <span><span class="co"># Read the raw file as a plain table just to see its shape</span></span>
 <span><span class="va">ctcf_peaks_raw</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_table.html">read_table</a></span><span class="op">(</span><span class="va">bed_url</span>, col_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
