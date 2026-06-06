@@ -302,6 +302,10 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <a class="nav-link active" href="../index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
 </ul>
 </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools tools-wide">
@@ -843,13 +847,17 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">789</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="the-data" class="level2" data-number="27.3"><h2 data-number="27.3" class="anchored" data-anchor-id="the-data">
+</section><section id="the-data" class="level2 page-columns page-full" data-number="27.3"><h2 data-number="27.3" class="anchored" data-anchor-id="the-data">
 <span class="header-section-number">27.3</span> The data</h2>
-<p>The biology behind it: within each individual, the level of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174260/">DNA methylation</a> at certain sites changes steadily with age. The <a href="https://en.wikipedia.org/wiki/CpG_site">CpG sites</a> whose methylation correlates most strongly with age make excellent <strong>biomarkers</strong> — and excellent features for a regression model. The data come from <a href="https://training.galaxyproject.org/training-material/topics/statistics/tutorials/regression_machinelearning/tutorial.html">this Galaxy tutorial</a>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">meth_age</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html">fread</a></span><span class="op">(</span><span class="st">'https://zenodo.org/record/2545213/files/test_rows_labels.csv'</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html">fread</a></span><span class="op">(</span><span class="st">'https://zenodo.org/record/2545213/files/train_rows.csv'</span><span class="op">)</span></span>
+<p>The biology behind it: within each individual, the level of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3174260/">DNA methylation</a> at certain sites changes steadily with age. The <a href="https://en.wikipedia.org/wiki/CpG_site">CpG sites</a> whose methylation correlates most strongly with age make excellent <strong>biomarkers</strong> — and excellent features for a regression model. The data come from <a href="https://training.galaxyproject.org/training-material/topics/statistics/tutorials/regression_machinelearning/tutorial.html">this Galaxy tutorial</a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;The two files were originally published on Zenodo at <a href="https://zenodo.org/records/2545213" class="uri">https://zenodo.org/records/2545213</a> (<code>test_rows_labels.csv</code> and <code>train_rows.csv</code>). We keep a copy in this book’s repository and read it from the GitHub URL below, so the code runs unchanged on any machine.</p></div></div><div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The data live in this book's GitHub repository; we read them straight from</span></span>
+<span><span class="co"># their URL so this code runs unchanged anywhere (no local checkout needed).</span></span>
+<span><span class="co"># fread() auto-detects the tab separator.</span></span>
+<span><span class="va">gh</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/seandavi/RBiocBook/main/data"</span></span>
+<span><span class="va">meth_age</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">gh</span>, <span class="st">"methylation_age_test.csv"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">gh</span>, <span class="st">"methylation_age_train.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>A quick look at the data:</p>
@@ -1098,8 +1106,8 @@ Mtry:                             2
 Target node size:                 20 
 Variable importance mode:         none 
 Splitrule:                        variance 
-OOB prediction error (MSE):       17.72152 
-R squared (OOB):                  0.918883 </code></pre>
+OOB prediction error (MSE):       18.46479 
+R squared (OOB):                  0.9154808 </code></pre>
 </div>
 </div>
 <section id="predict-2" class="level3" data-number="27.6.1"><h3 data-number="27.6.1" class="anchored" data-anchor-id="predict-2">
@@ -1116,13 +1124,13 @@ R squared (OOB):                  0.918883 </code></pre>
 <pre><code>
 ── &lt;PredictionRegr&gt; for 209 observations: ──────────────────────────────────────
  row_ids truth response
-     298    29 30.48368
-     103    58 58.25574
-     194    53 48.05929
+     298    29 30.73644
+     103    58 58.11206
+     194    53 48.40537
      ---   ---      ---
-     312    48 51.18667
-     246    66 64.54711
-     238    38 37.65249</code></pre>
+     312    48 51.14171
+     246    66 64.41901
+     238    38 37.83379</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -1145,7 +1153,7 @@ R squared (OOB):                  0.918883 </code></pre>
 <span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
-0.9623924 </code></pre>
+0.9620203 </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -1154,18 +1162,18 @@ R squared (OOB):                  0.918883 </code></pre>
 <pre><code>
 ── &lt;PredictionRegr&gt; for 103 observations: ──────────────────────────────────────
  row_ids truth response
-       4    37 37.10820
-       5    24 29.29540
-       7    34 33.02805
+       4    37 37.65201
+       5    24 29.29569
+       7    34 32.89875
      ---   ---      ---
-     306    42 40.41656
-     307    63 58.32185
-     309    68 63.00852</code></pre>
+     306    42 40.57969
+     307    63 58.52445
+     309    68 63.00209</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
-0.9226935 </code></pre>
+0.9206675 </code></pre>
 </div>
 </div>
 <p>Compare the test R² across the three regression models. The forest typically predicts age more accurately than either the linear model or the single tree, and without the single tree’s discrete artifacts.</p>
@@ -1713,6 +1721,11 @@ R squared (OOB):                  0.918883 </code></pre>
     <div class="nav-footer-center">
       <ul class="footer-items list-unstyled">
 <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+<p>About</p>
+</a>
+  </li>  
+    <li class="nav-item">
     <a class="nav-link" href="../license.html">
 <p>License</p>
 </a>
