@@ -5,8 +5,6 @@
 <meta name="generator" content="quarto-1.9.37">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Sean Davis">
-<meta name="author" content="Lori Shepherd Kern">
-<meta name="author" content="Martin Morgan">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
 <title>30&nbsp; Storing experiments with SummarizedExperiment – The RBioc Book</title>
@@ -753,8 +751,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 
 
 <div class="quarto-title-meta-author">
-  <div class="quarto-title-meta-heading">Authors</div>
-  <div class="quarto-title-meta-heading">Affiliations</div>
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
   
     <div class="quarto-title-meta-contents">
     <p class="author"><a href="https://seandavi.github.io/">Sean Davis</a> <a href="mailto:seandavi@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
@@ -763,26 +761,6 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
         <p class="affiliation">
             <a href="https://medschool.cuanschutz.edu/">
             University of Colorado<br>Anschutz School of Medicine
-            </a>
-          </p>
-      </div>
-    <div class="quarto-title-meta-contents">
-    <p class="author">Lori Shepherd Kern </p>
-  </div>
-  <div class="quarto-title-meta-contents">
-        <p class="affiliation">
-            <a href="https://www.roswellpark.org/">
-            Roswell Park Comprehensive Cancer Center<br>Bioconductor Core Team
-            </a>
-          </p>
-      </div>
-    <div class="quarto-title-meta-contents">
-    <p class="author">Martin Morgan </p>
-  </div>
-  <div class="quarto-title-meta-contents">
-        <p class="affiliation">
-            <a href="https://www.roswellpark.org/">
-            Roswell Park Comprehensive Cancer Center<br>Bioconductor Core Team
             </a>
           </p>
       </div>
@@ -1274,24 +1252,9 @@ ENSG00000000460         60         55         40         35         78</code></p
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Subset for only the genes that fall in the interval 100,000 to 1,100,000</span></span>
 <span><span class="co"># of chromosome 1</span></span>
-<span><span class="va">roi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span>seqnames<span class="op">=</span><span class="st">"1"</span>, ranges<span class="op">=</span><span class="fu">IRanges</span><span class="op">(</span>start<span class="op">=</span><span class="fl">100000</span>, end<span class="op">=</span><span class="fl">1100000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in S4Vectors:::anyMissing(runValue(x_seqnames)): 'S4Vectors:::anyMissing()' is deprecated.
-Use 'anyNA()' instead.
-See help("Deprecated")</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in S4Vectors:::anyMissing(runValue(strand(x))): 'S4Vectors:::anyMissing()' is deprecated.
-Use 'anyNA()' instead.
-See help("Deprecated")</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sub_se</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">se</span>, <span class="va">roi</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in S4Vectors:::anyMissing(gapwidth): 'S4Vectors:::anyMissing()' is deprecated.
-Use 'anyNA()' instead.
-See help("Deprecated")</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sub_se</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="va">roi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span>seqnames<span class="op">=</span><span class="st">"1"</span>, ranges<span class="op">=</span><span class="fu">IRanges</span><span class="op">(</span>start<span class="op">=</span><span class="fl">100000</span>, end<span class="op">=</span><span class="fl">1100000</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">sub_se</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">se</span>, <span class="va">roi</span><span class="op">)</span></span>
+<span><span class="va">sub_se</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: RangedSummarizedExperiment 
 dim: 74 8 
@@ -1303,7 +1266,7 @@ rowData names(10): gene_id gene_name ... seq_coord_system symbol
 colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
 colData names(9): SampleName cell ... Sample BioSample</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">sub_se</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">sub_se</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 74  8</code></pre>
 </div>
@@ -1315,7 +1278,7 @@ colData names(9): SampleName cell ... Sample BioSample</code></pre>
 <p>To construct a <code>SummarizedExperiment</code> object, you need to provide the following components: - <code>assays</code>: A list of matrices or matrix-like objects containing the data. - <code>rowData</code>: A <code>DataFrame</code> containing information about the features (rows). - <code>colData</code>: A <code>DataFrame</code> containing information about the samples (columns). - +/- <code>metadata</code>: A list containing additional metadata about the experiment.</p>
 <p>For a nearly real example, we will use the DeRisi dataset. We’ll start with the original data, which is a <code>data.frame</code> with the first couple of columns containing the gene information and the rest of the columns containing the data.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the DeRisi dataset</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the DeRisi dataset</span></span>
 <span><span class="va">deRisi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"https://raw.githubusercontent.com/seandavi/RBiocBook/refs/heads/main/data/derisi.csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">deRisi</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1347,7 +1310,7 @@ colData names(9): SampleName cell ... Sample BioSample</code></pre>
 <span class="header-section-number">30.4.1</span> rowData, or feature information</h3>
 <p>Let’s start with the rowData, which will be a <code>DataFrame</code> containing the gene information. We can use the first two columns of the data frame for this purpose.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rdata</span> <span class="op">&lt;-</span> <span class="va">deRisi</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rdata</span> <span class="op">&lt;-</span> <span class="va">deRisi</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">rdata</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      ORF  Name
@@ -1363,7 +1326,7 @@ colData names(9): SampleName cell ... Sample BioSample</code></pre>
 <span class="header-section-number">30.4.2</span> colData, or sample information</h3>
 <p>Next, we will create the colData, which will be a <code>DataFrame</code> containing the sample information. Since the sample information really isn’t in the dataset, we will create a simple <code>DataFrame</code> with sample names.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cdata</span> <span class="op">&lt;-</span> <span class="fu">DataFrame</span><span class="op">(</span>sample<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Sample"</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>, timepoint <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">6</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cdata</span> <span class="op">&lt;-</span> <span class="fu">DataFrame</span><span class="op">(</span>sample<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Sample"</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>, timepoint <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">6</span>,</span>
 <span>    hours <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">9.5</span>,<span class="fl">11.5</span>,<span class="fl">13.5</span>,<span class="fl">15.5</span>,<span class="fl">18.5</span>,<span class="fl">20.5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">cdata</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1407,7 +1370,7 @@ colData names(9): SampleName cell ... Sample BioSample</code></pre>
 </table>
 <p>We will create a list of matrices, one for each assay. The matrices will be the numeric values in the data frame, excluding the first two columns.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">deRisi</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">deRisi</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">deRisi</span><span class="op">[</span>, <span class="fl">10</span><span class="op">:</span><span class="fl">16</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">Rb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">deRisi</span><span class="op">[</span>, <span class="fl">17</span><span class="op">:</span><span class="fl">23</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">Gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">deRisi</span><span class="op">[</span>, <span class="fl">24</span><span class="op">:</span><span class="fl">30</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1415,15 +1378,15 @@ colData names(9): SampleName cell ... Sample BioSample</code></pre>
 <p>When we create a SummarizedExperiment object, the “constructor” will check to see that the colnames of the matrices in the list are the same as the <em>rownames</em> of the <code>colData</code> <code>DataFrame</code>, and that the rownames of the matrices in the list are the same as the <em>rownames</em> of the <code>rowData</code> <code>DataFrame</code>.</p>
 <p>So, we need to fix that all up. Let’s start with the rownames of the <code>rowData</code> <code>DataFrame</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">rdata</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">rdata</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now, let’s set the rownames of the coldata <code>DataFrame</code> to the sample names:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">cdata</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">cdata</span><span class="op">$</span><span class="va">sample</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">cdata</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">cdata</span><span class="op">$</span><span class="va">sample</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now, we can fix the rownames and colnames of the matrices for our R, G, Rb, and Gb assays:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">G</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">Rb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">Gb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rdata</span><span class="op">$</span><span class="va">ORF</span></span>
@@ -1436,23 +1399,23 @@ colData names(9): SampleName cell ... Sample BioSample</code></pre>
 </section><section id="putting-it-all-together" class="level3" data-number="30.4.4"><h3 data-number="30.4.4" class="anchored" data-anchor-id="putting-it-all-together">
 <span class="header-section-number">30.4.4</span> Putting it all together</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">SummarizedExperiment</a></span><span class="op">(</span>assays<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>R<span class="op">=</span><span class="va">R</span>, G<span class="op">=</span><span class="va">G</span>, Rb<span class="op">=</span><span class="va">Rb</span>, Gb<span class="op">=</span><span class="va">Gb</span><span class="op">)</span>, rowData<span class="op">=</span><span class="va">rdata</span>, colData<span class="op">=</span><span class="va">cdata</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">SummarizedExperiment</a></span><span class="op">(</span>assays<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>R<span class="op">=</span><span class="va">R</span>, G<span class="op">=</span><span class="va">G</span>, Rb<span class="op">=</span><span class="va">Rb</span>, Gb<span class="op">=</span><span class="va">Gb</span><span class="op">)</span>, rowData<span class="op">=</span><span class="va">rdata</span>, colData<span class="op">=</span><span class="va">cdata</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="getting-logratios" class="level3" data-number="30.4.5"><h3 data-number="30.4.5" class="anchored" data-anchor-id="getting-logratios">
 <span class="header-section-number">30.4.5</span> Getting logRatios</h3>
 <p>Now that we have a <code>SummarizedExperiment</code> object, we can easily compute the log ratios of the Red and Green foreground fluorescence. This is a common operation in microarray data analysis.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">logRatios</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log2</a></span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">logRatios</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log2</a></span><span class="op">(</span></span>
 <span>    <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"R"</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"Rb"</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"G"</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"Gb"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: NaNs produced</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">$</span><span class="va">logRatios</span> <span class="op">&lt;-</span> <span class="va">logRatios</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">$</span><span class="va">logRatios</span> <span class="op">&lt;-</span> <span class="va">logRatios</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now, we’ve added a new assay to the <code>SummarizedExperiment</code> object called <code>logRatios</code>. This assay contains the log ratios of the Red and Green foreground fluorescence.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of length 5
 names(5): R G Rb Gb logRatios</code></pre>
@@ -1460,7 +1423,7 @@ names(5): R G Rb Gb logRatios</code></pre>
 </div>
 <p>And if we want to access the log ratios, we can do so using the <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay()</a></code> method:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"logRatios"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"logRatios"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          Sample 0     Sample 1  Sample 2   Sample 3   Sample 4 Sample 5
 YHR007C -1.2204686          NaN       NaN 2.70275677  1.6545902 5.260867
@@ -1477,7 +1440,7 @@ YAL053W 0.8875253
 YAL054C       NaN
 YAL055W       NaN</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## OR</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## OR</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">$</span><span class="va">logRatios</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          Sample 0     Sample 1  Sample 2   Sample 3   Sample 4 Sample 5
@@ -1497,7 +1460,7 @@ YAL055W       NaN</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">$</span><span class="va">logRatios</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"Log Ratios of Red and Green Foreground Fluorescence"</span>, xlab<span class="op">=</span><span class="st">"Log Ratio"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">$</span><span class="va">logRatios</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"Log Ratios of Red and Green Foreground Fluorescence"</span>, xlab<span class="op">=</span><span class="st">"Log Ratio"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><a href="bioc-summarizedexperiment_files/figure-html/unnamed-chunk-15-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="bioc-summarizedexperiment_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></a></p>
@@ -1512,7 +1475,7 @@ YAL055W       NaN</code></pre>
 <span class="header-section-number">30.6</span> Exercises</h2>
 <p>The <code>airway</code> dataset is a good sandbox. Load a fresh copy so you’re not relying on any object created earlier in the chapter:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">airway</span>, package <span class="op">=</span> <span class="st">"airway"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">airway</span>, package <span class="op">=</span> <span class="st">"airway"</span><span class="op">)</span></span>
 <span><span class="va">air</span> <span class="op">&lt;-</span> <span class="va">airway</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol type="1">
@@ -1533,27 +1496,27 @@ YAL055W       NaN</code></pre>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 1. shape and the treatment column</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 1. shape and the treatment column</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">air</span><span class="op">)</span>              <span class="co"># genes x samples</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 63677     8</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">air</span><span class="op">)</span><span class="op">$</span><span class="va">dex</span>      <span class="co"># treatment per sample</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">air</span><span class="op">)</span><span class="op">$</span><span class="va">dex</span>      <span class="co"># treatment per sample</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] untrt trt   untrt trt   untrt trt   untrt trt  
 Levels: trt untrt</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 2. subsetting carries the metadata along</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 2. subsetting carries the metadata along</span></span>
 <span><span class="va">untrt</span> <span class="op">&lt;-</span> <span class="va">air</span><span class="op">[</span>, <span class="va">air</span><span class="op">$</span><span class="va">dex</span> <span class="op">==</span> <span class="st">"untrt"</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">untrt</span><span class="op">)</span>            <span class="co"># fewer columns; same number of rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 63677     4</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">untrt</span><span class="op">)</span><span class="op">)</span>  <span class="co"># colData has the same columns, fewer rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">untrt</span><span class="op">)</span><span class="op">)</span>  <span class="co"># colData has the same columns, fewer rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 9</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 3. reach into one assay and slice it</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 3. reach into one assay and slice it</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">air</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                SRR1039508 SRR1039509 SRR1039512
