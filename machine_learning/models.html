@@ -84,7 +84,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="../site_libs/bootstrap/bootstrap-dark-9fe7af23de747b2ab7192c628daeeef8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -1080,7 +1083,7 @@ node), split, n, loss, yval, (yprob)
 <p><a href="#fig-decision-tree" class="quarto-xref">Figure&nbsp;<span>23.1</span></a> shows the same idea drawn out for a clinical example: each internal node tests one feature, and following the branches leads to a leaf with a predicted class.</p>
 <div id="fig-decision-tree" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-decision-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="../images/decision_tree.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+<a href="../images/decision_tree.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;23.1: A classification tree for a breast-cancer screening example. Each internal (blue) node tests one feature; following the branch that matches a sample leads, eventually, to a leaf (green/red) that gives the predicted class."><img src="../images/decision_tree.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-decision-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;23.1: A classification tree for a breast-cancer screening example. Each internal (blue) node tests one feature; following the branch that matches a sample leads, eventually, to a leaf (green/red) that gives the predicted class.
@@ -1104,7 +1107,7 @@ Figure&nbsp;23.1: A classification tree for a breast-cancer screening example. E
 <p><strong>Plain-language intuition.</strong> If one decision tree is twitchy, build <em>hundreds</em> of them and let them vote. A <strong>random forest</strong> grows many trees, each on a random bootstrap sample of the data and each allowed to consider only a random subset of features at every split. That deliberate randomness makes the individual trees disagree in their mistakes — and when you average many imperfect-but-different predictions, the errors cancel out. The result is far more stable and accurate than any single tree, while needing very little tuning. <a href="#fig-random-forest" class="quarto-xref">Figure&nbsp;<span>23.2</span></a> sketches the idea: many trees, one combined vote.</p>
 <div id="fig-random-forest" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-random-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="../images/random-forest.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+<a href="../images/random-forest.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;23.2: Graphical representation of a random forest: many decision trees, each grown on a slightly different view of the data, combine their votes into one prediction."><img src="../images/random-forest.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-random-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;23.2: Graphical representation of a random forest: many decision trees, each grown on a slightly different view of the data, combine their votes into one prediction.
@@ -1785,7 +1788,38 @@ bill_depth_mm         .     </code></pre>
       &nbsp;
     </div>
   </div>
-</footer>
+</footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 <script src="../site_libs/quarto-html/zenscroll-min.js"></script>

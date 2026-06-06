@@ -84,7 +84,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="../site_libs/bootstrap/bootstrap-dark-9fe7af23de747b2ab7192c628daeeef8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -882,7 +885,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <div class="cell-output-display page-columns page-full">
 <div id="fig-regression-diagnostic" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-regression-diagnostic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="img-fluid figure-img" width="672">
+<a href="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;26.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs.&nbsp;leverage."><img src="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-regression-diagnostic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;26.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs.&nbsp;leverage.
@@ -924,7 +927,7 @@ Figure&nbsp;26.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitt
 </div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="ml_methylation_age_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="ml_methylation_age_files/figure-html/unnamed-chunk-10-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="ml_methylation_age_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -1021,7 +1024,7 @@ node), split, n, deviance, yval
 </div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="ml_methylation_age_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="ml_methylation_age_files/figure-html/unnamed-chunk-16-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="ml_methylation_age_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -1114,7 +1117,7 @@ R squared (OOB):                  0.918883 </code></pre>
 </div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="ml_methylation_age_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><a href="ml_methylation_age_files/figure-html/unnamed-chunk-22-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="ml_methylation_age_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -1703,7 +1706,38 @@ R squared (OOB):                  0.918883 </code></pre>
       &nbsp;
     </div>
   </div>
-</footer>
+</footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 <script src="../site_libs/quarto-html/zenscroll-min.js"></script>
