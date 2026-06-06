@@ -1,5 +1,7 @@
 # The RBioc Book
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20574829.svg)](https://doi.org/10.5281/zenodo.20574829)
+
 [**The RBioc Book**](https://seandavi.github.io/RBiocBook) — a [Quarto](https://quarto.org/)
 book teaching introductory R, statistics, and Bioconductor for biologists and
 others coming to data science for the first time.
@@ -23,11 +25,11 @@ If you use this book, please cite it. A machine-readable citation is in
 [`CITATION.cff`](CITATION.cff) — GitHub turns it into a **"Cite this repository"**
 button (with APA and BibTeX export).
 
-<!-- After the first Zenodo release, replace the line below with the DOI badge:
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
--->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20574829.svg)](https://doi.org/10.5281/zenodo.20574829)
 
-> Davis, S. *The RBioc Book*. <https://seandavi.github.io/RBiocBook>
+The DOI above is the *concept* DOI — it always resolves to the latest version.
+
+> Davis, S. *The RBioc Book*. <https://doi.org/10.5281/zenodo.20574829>
 
 ## License
 
