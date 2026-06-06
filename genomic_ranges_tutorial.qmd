@@ -78,7 +78,11 @@ theme_set(theme_minimal())
 
 ## Importing the CTCF peaks
 
-We'll use a CTCF ChIP-seq peak file from ENCODE. It lives at a URL, and
+We'll use a CTCF ChIP-seq peak file from ENCODE.^[ENCODE accession
+[ENCFF960ZGP](https://www.encodeproject.org/files/ENCFF960ZGP/), originally at
+<https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz>.
+We keep a copy in this book's repository and read it from the GitHub URL below,
+so the code runs unchanged on any machine.] It lives at a URL, and
 `rtracklayer::import()` can read straight from that URL — no need to download it
 by hand first.
 
@@ -86,7 +90,9 @@ Before we use the convenient importer, let's peek at the raw file so you can see
 that it really is just a table of numbers and text:
 
 ```{r load-data}
-bed_url <- "https://www.encodeproject.org/files/ENCFF960ZGP/@@download/ENCFF960ZGP.bed.gz"
+# The peak file lives in this book's GitHub repository; we read it straight from
+# its URL so this code runs unchanged anywhere (no local checkout needed).
+bed_url <- "https://raw.githubusercontent.com/seandavi/RBiocBook/main/data/ctcf_peaks_ENCFF960ZGP.bed.gz"
 
 # Read the raw file as a plain table just to see its shape
 ctcf_peaks_raw <- readr::read_table(bed_url, col_names = FALSE)
