@@ -119,24 +119,38 @@ the row names of `rowData`, and the column names of every assay matrix must matc
 the row names of `colData`. If they don't, you get an error rather than a silent
 mismatch — the constructor refuses to build something inconsistent.
 
-So we set those names explicitly. Genes (rows) are keyed by their ORF identifier;
-samples (columns) by their sample name:
+So we set those names explicitly. First the two annotation tables, keyed by gene
+(ORF) and by sample name:
 
-```{r names}
+```{r names-tables}
 rownames(rdata) <- rdata$ORF
 rownames(cdata) <- cdata$sample
-for (m in c("R", "G", "Rb", "Gb")) {
-    mat <- get(m)
+```
+
+The four assay matrices all need the *same* gene names on their rows and the same
+sample names on their columns. Rather than repeat the same two lines four times,
+we gather the matrices into a **named list** and use `lapply()` — which runs a
+function on every element of a list and returns a new list — to label them all at
+once:
+
+```{r names}
+assay_list <- list(R = R, G = G, Rb = Rb, Gb = Gb)
+assay_list <- lapply(assay_list, function(mat) {
     rownames(mat) <- rdata$ORF
     colnames(mat) <- cdata$sample
-    assign(m, mat)
-}
+    mat
+})
 ```
+
+The little function takes one matrix, sets its row and column names, and returns
+it; `lapply()` applies it to `R`, `G`, `Rb`, and `Gb` in turn. We're left with
+`assay_list`, a named list of four correctly-labeled matrices, ready to become the
+object's assays.
 
 ### Putting it together
 
 ```{r build}
-se <- SummarizedExperiment(assays = list(R = R, G = G, Rb = Rb, Gb = Gb),
+se <- SummarizedExperiment(assays = assay_list,
                            rowData = rdata, colData = cdata)
 se
 ```
@@ -167,6 +181,12 @@ logRatios <- log2((assay(se, "R") - assay(se, "Rb")) /
 assays(se)$logRatios <- logRatios
 assayNames(se)
 ```
+
+Reading the calculation from the inside out: subtract each channel's background
+(`R - Rb` and `G - Gb`), divide red by green to get the ratio, and take `log2` so
+the scale is symmetric — equal red and green gives 0, twice as much red gives +1,
+half as much gives −1. The `assays(se)$logRatios <- ...` line then tucks the new
+matrix into the object beside the originals.
 
 That is a real benefit worth pausing on: you can keep raw and processed
 measurements *in the same object*, each guaranteed to refer to the same genes and
@@ -200,6 +220,14 @@ top <- head(order(apply(lr, 1, sd), decreasing = TRUE), 50)
 lr_top <- lr[top, ]
 dim(lr_top)
 ```
+
+That filter line reads inside-out: `is.finite(lr)` is a `TRUE`/`FALSE` matrix
+marking the good values; `!is.finite(lr)` flips it to mark the *bad* ones;
+`rowSums(...)` counts the bad values in each gene's row; and `== 0` keeps only the
+genes with **none** — a clean log ratio at all seven timepoints. Then
+`apply(lr, 1, sd)` gives each surviving gene's standard deviation across the
+timepoints, and `head(order(..., decreasing = TRUE), 50)` keeps the 50 most
+variable.
 
 Now the heatmap. Two deliberate choices: we **don't** cluster the columns
 (`cluster_cols = FALSE`) so the samples stay in time order and we can read each
