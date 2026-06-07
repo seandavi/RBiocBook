@@ -1,0 +1,348 @@
+---
+title: "Building and sharing a SummarizedExperiment"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
+---
+
+In the [previous chapter](bioc-summarizedexperiment.qmd) you worked with a
+`SummarizedExperiment` someone else had assembled — the `airway` dataset, ready to
+subset and plot. But a great deal of real data does *not* arrive that way. It
+arrives as a spreadsheet: a few columns describing the genes, a wall of numeric
+columns holding the measurements, and the sample information living only in your
+head or a separate file. Turning that loose table into a proper
+`SummarizedExperiment` is one of the most useful things you can do, because from
+that point on the object keeps itself consistent — and it speaks the same language
+as every Bioconductor analysis package you'll reach for next.
+
+In this chapter you'll build a `SummarizedExperiment` from raw parts, add a derived
+assay, draw a clustered heatmap, and then save and share the result so a
+collaborator gets everything in a single file.
+
+## What you'll learn
+
+By the end of this chapter you will be able to:
+
+- Assemble a `SummarizedExperiment` from a matrix (or several), a feature table,
+  and a sample table — and explain the alignment rules the constructor enforces.
+- Add a **derived assay** (e.g. a normalized or log-ratio matrix) that stays
+  aligned to the originals.
+- Select informative (variable) features and draw an unsupervised clustering
+  heatmap.
+- **Save** an experiment to one file and **share** it, provenance and all, with
+  `saveRDS()`/`readRDS()`.
+- Explain why this one object plugs into the wider Bioconductor ecosystem.
+
+::: {.callout-tip}
+## Installing the packages
+
+```{r eval=FALSE}
+BiocManager::install(c("SummarizedExperiment", "pheatmap"))
+```
+:::
+
+```{r setup, echo=FALSE}
+suppressPackageStartupMessages(library(SummarizedExperiment))
+```
+
+## The ingredients
+
+To construct a `SummarizedExperiment` you supply:
+
+- `assays`: one or more matrices (or matrix-like objects) of data — the numbers;
+- `rowData`: a `DataFrame` describing the features (rows);
+- `colData`: a `DataFrame` describing the samples (columns);
+- optionally `metadata`: a list of anything else about the experiment.
+
+We'll build one from the **DeRisi** dataset — a classic yeast microarray time
+course measuring gene expression as cells exhaust their glucose and switch
+metabolic gears (the *diauxic shift*). It begins life as a plain `data.frame`: the
+first two columns identify each gene, and the rest are measurements.
+
+```{r load}
+library(SummarizedExperiment)
+deRisi <- read.csv("https://raw.githubusercontent.com/seandavi/RBiocBook/main/data/derisi.csv")
+head(deRisi)
+```
+
+We'll pull the three pieces out of this table one at a time.
+
+### rowData — feature information
+
+The first two columns describe each gene, so they become the `rowData`:
+
+```{r rowdata}
+rdata <- deRisi[, 1:2]
+head(rdata)
+```
+
+### colData — sample information
+
+The sample information isn't in the file, so we supply it ourselves. Each of the
+seven columns of measurements is a timepoint in the experiment:
+
+```{r coldata}
+cdata <- DataFrame(sample = paste("Sample", 0:6), timepoint = 0:6,
+                   hours = c(0, 9.5, 11.5, 13.5, 15.5, 18.5, 20.5))
+cdata
+```
+
+### assays — the data
+
+The DeRisi experiment recorded four *different* measurements for every gene at
+every timepoint:
+
+| assay | description |
+|-------|-------------|
+| `R`  | Red foreground fluorescence |
+| `G`  | Green foreground fluorescence |
+| `Rb` | Red background fluorescence |
+| `Gb` | Green background fluorescence |
+
+Each becomes its own matrix, sliced out of the numeric columns:
+
+```{r matrices}
+R  <- as.matrix(deRisi[, 3:9])
+G  <- as.matrix(deRisi[, 10:16])
+Rb <- as.matrix(deRisi[, 17:23])
+Gb <- as.matrix(deRisi[, 24:30])
+```
+
+### Aligning the names
+
+Here is the rule that makes the whole container trustworthy. The constructor
+**checks that the pieces line up**: the row names of every assay matrix must match
+the row names of `rowData`, and the column names of every assay matrix must match
+the row names of `colData`. If they don't, you get an error rather than a silent
+mismatch — the constructor refuses to build something inconsistent.
+
+So we set those names explicitly. Genes (rows) are keyed by their ORF identifier;
+samples (columns) by their sample name:
+
+```{r names}
+rownames(rdata) <- rdata$ORF
+rownames(cdata) <- cdata$sample
+for (m in c("R", "G", "Rb", "Gb")) {
+    mat <- get(m)
+    rownames(mat) <- rdata$ORF
+    colnames(mat) <- cdata$sample
+    assign(m, mat)
+}
+```
+
+### Putting it together
+
+```{r build}
+se <- SummarizedExperiment(assays = list(R = R, G = G, Rb = Rb, Gb = Gb),
+                           rowData = rdata, colData = cdata)
+se
+```
+
+One object now holds four aligned assays, the gene table, and the sample table.
+The constructor accepted it, which means everything lines up.
+
+::: {.callout-warning}
+## When the constructor complains
+If you ever see an error about non-matching dimensions or names when building a
+`SummarizedExperiment`, that is the container doing its job. Check that each
+matrix is genes × samples (not transposed), and that its `rownames`/`colnames`
+match `rowData`/`colData`. The error is annoying once; the silent mismatch it
+prevents is annoying for the life of the paper.
+:::
+
+## Adding a derived assay
+
+Real analysis rarely stops at the raw numbers. A natural quantity here is the
+background-corrected **log ratio** of red to green — a standard summary of
+two-color microarray signal. Because we compute it from assays that are already
+aligned, the result drops straight back into the object as a fifth assay, aligned
+forever:
+
+```{r logratios}
+logRatios <- log2((assay(se, "R") - assay(se, "Rb")) /
+                  (assay(se, "G") - assay(se, "Gb")))
+assays(se)$logRatios <- logRatios
+assayNames(se)
+```
+
+That is a real benefit worth pausing on: you can keep raw and processed
+measurements *in the same object*, each guaranteed to refer to the same genes and
+samples. Reach for any of them by name:
+
+```{r logratios-peek}
+head(assay(se, "logRatios"))
+```
+
+```{r fig-derisi-hist, fig.cap="Distribution of background-corrected log ratios across the DeRisi time course."}
+hist(assay(se, "logRatios"), breaks = 50,
+     main = "DeRisi log ratios", xlab = "log2(R/G)")
+```
+
+## A clustering heatmap of informative genes
+
+With 6,400 genes, no heatmap can show them all — nor would you want it to. As in
+the previous chapter, we keep the **variable** genes, because a gene whose log
+ratio barely moves across the time course carries no information about the
+diauxic shift; the genes that rise and fall are the informative ones. We rank by
+standard deviation and keep the top 50.
+
+The log-ratio calculation produces some non-finite values (a background-corrected
+signal can go negative, and `log2` of a negative number is `NaN`), so we first
+keep only genes measured cleanly at every timepoint:
+
+```{r topvar}
+lr <- assay(se, "logRatios")
+lr <- lr[rowSums(!is.finite(lr)) == 0, ]    # genes finite at all 7 timepoints
+top <- head(order(apply(lr, 1, sd), decreasing = TRUE), 50)
+lr_top <- lr[top, ]
+dim(lr_top)
+```
+
+Now the heatmap. Two deliberate choices: we **don't** cluster the columns
+(`cluster_cols = FALSE`) so the samples stay in time order and we can read each
+gene's trajectory left to right; and we **do** cluster the rows, which groups
+genes that move together. The column annotation — the time in hours — comes
+straight from `colData`.
+
+```{r fig-derisi-heatmap, fig.cap="The 50 most variable genes across the DeRisi diauxic-shift time course. Columns are held in time order; rows (genes) are clustered, grouping co-regulated genes. The annotation bar (hours) comes directly from colData."}
+library(pheatmap)
+ann <- as.data.frame(colData(se)[, "hours", drop = FALSE])
+pheatmap(lr_top,
+         cluster_cols = FALSE,          # keep samples in time order
+         cluster_rows = TRUE,           # group co-regulated genes
+         annotation_col = ann,
+         show_rownames = FALSE,
+         scale = "row",
+         main = "Top 50 variable genes (DeRisi)")
+```
+
+::: {.callout-note}
+## Unsupervised clustering, again — now on the genes
+Clustering the **rows** here groups genes purely by how similarly their expression
+moves over time, with no labels supplied — the same *unsupervised* idea you met in
+the [previous chapter](bioc-summarizedexperiment.qmd), now pointed at features
+instead of samples. Blocks of genes that rise together (or fall together) across
+the diauxic shift show up as bands. That is exactly the structure the
+[k-means chapter](kmeans.qmd) sets out to find formally on this very dataset; the
+heatmap is the quick, visual version of the same question.
+:::
+
+## Saving and sharing
+
+Here is the part that makes a collaborator's day. Your experiment — four raw
+assays, a derived one, the gene table, the sample table, and any notes — is a
+single R object. Save it to a single file:
+
+```{r save}
+# In practice you'd give it a real name, e.g. "derisi_experiment.rds".
+path <- tempfile(fileext = ".rds")
+saveRDS(se, path)
+```
+
+Anyone who receives that file reads it back and has *everything*, already aligned,
+with nothing to re-link:
+
+```{r load-back}
+se2 <- readRDS(path)
+se2
+```
+
+No "which spreadsheet had the sample labels?", no "are the columns in the same
+order?". The object is self-describing. Stash provenance in `metadata()` and it
+rides along too:
+
+```{r provenance}
+metadata(se)$processing <- "background-corrected log2 ratios; built in the RBioc Book"
+metadata(se)$date <- "2026-06-06"
+saveRDS(se, path)
+metadata(readRDS(path))            # the notes survive the round trip
+```
+
+This is also how published datasets are distributed: many arrive as ready-made
+`SummarizedExperiment` objects through Bioconductor's `ExperimentHub` and data
+packages (the `airway` package from the last chapter is exactly this). You load
+one line and get an analysis-ready object — because the author saved it in this
+shape.
+
+## Why this is worth it: the ecosystem payoff
+
+Step back and ask what you actually *gained* by building this object instead of
+keeping a few matrices around.
+
+- **It can't silently desync.** Every subset, every new assay, stays aligned.
+- **It carries its own context.** Feature annotation, sample annotation, and
+  experiment notes travel with the numbers, in one file.
+- **It is the common currency of Bioconductor.** This is the big one. Hundreds of
+  analysis packages — `DESeq2` and `edgeR` and `limma` for differential
+  expression, `scran` and `scater` for single cell, and many more — *take a
+  `SummarizedExperiment` and hand one back*. You don't reshape your data for each
+  tool; you build the object once and plug it into all of them.
+- **It is the root of a family.** The `SingleCellExperiment` you'll meet in the
+  [single-cell chapter](single_cell/setup.qmd) and the `TreeSummarizedExperiment`
+  in the [microbiome chapter](310_microbiome.qmd) are both `SummarizedExperiment`s
+  with extra parts bolted on. Learn this shape once and those feel familiar
+  immediately. The [GEOquery chapter](geoquery.qmd) and the
+  [k-means chapter](kmeans.qmd) both hand you data in exactly this form.
+
+Build it once; everything downstream speaks the same language.
+
+## Summary
+
+You took a flat spreadsheet and assembled it into a `SummarizedExperiment` —
+extracting `rowData`, supplying `colData`, building four assay matrices, and
+letting the constructor enforce that they all line up. You added a derived
+log-ratio assay that stays aligned, drew an unsupervised clustering heatmap of the
+most informative genes, and saved the whole thing to one self-describing file that
+carries its provenance. Most importantly, you now hold an object that the rest of
+the Bioconductor ecosystem accepts directly.
+
+## Exercises
+
+```{r ex-fresh, echo=FALSE}
+suppressPackageStartupMessages(library(SummarizedExperiment))
+```
+
+1. **Build a tiny one.** Create a `SummarizedExperiment` from a 4 × 3 matrix of
+   your choosing, a `rowData` with a `gene` column, and a `colData` with a
+   `group` column. Confirm its `dim()`.
+2. **Break it on purpose.** Try to build a `SummarizedExperiment` where the assay
+   has 3 columns but `colData` has 4 rows. What happens, and why is that a good
+   thing?
+3. **Add a derived assay.** To the DeRisi `se`, add an assay called `Rcorr` equal
+   to `R - Rb` (red minus red background). Confirm it appears in `assayNames(se)`.
+4. **Save and reload.** Save the DeRisi `se` to a temporary file, read it back,
+   and confirm the assay names and `metadata()` survived.
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+```{r}
+# 1. a minimal SummarizedExperiment
+m <- matrix(1:12, nrow = 4,
+            dimnames = list(paste0("g", 1:4), paste0("s", 1:3)))
+rd <- DataFrame(gene = paste0("g", 1:4), row.names = paste0("g", 1:4))
+cd <- DataFrame(group = c("a", "a", "b"), row.names = paste0("s", 1:3))
+tiny <- SummarizedExperiment(assays = list(counts = m), rowData = rd, colData = cd)
+dim(tiny)
+
+# 2. mismatched dimensions -> the constructor errors (a feature, not a bug):
+#    it refuses to build an object whose pieces don't line up, so you can never
+#    end up with sample labels pointing at the wrong columns.
+try(SummarizedExperiment(assays = list(x = m[, 1:3]),
+                         colData = DataFrame(group = letters[1:4])))
+
+# 3. a derived assay, aligned automatically
+assays(se)$Rcorr <- assay(se, "R") - assay(se, "Rb")
+assayNames(se)
+
+# 4. round-trip through a file
+f <- tempfile(fileext = ".rds")
+saveRDS(se, f)
+back <- readRDS(f)
+assayNames(back)
+metadata(back)
+```
+:::
