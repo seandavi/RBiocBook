@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.9.37">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
 <meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
-
-<title>Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics – The RBioc Book</title>
+<title>7&nbsp; Literate programming with Quarto – The RBioc Book</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 /* CSS for citations */
 div.csl-bib-body { }
@@ -47,7 +79,6 @@ div.csl-indent {
   margin-left: 2em;
 }</style>
 
-
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
@@ -55,8 +86,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./matrix_exercises.html" rel="next">
-<link href="./additional_resources.html" rel="prev">
+<link href="./reading_and_writing.html" rel="next">
+<link href="./rproj_and_save_load.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -70,8 +101,7 @@ div.csl-indent {
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark-9fe7af23de747b2ab7192c628daeeef8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -97,22 +127,15 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script>
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-KLLV1GCF4E"></script>
-
-<script type="text/javascript">
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-KLLV1GCF4E"></script><script type="text/javascript">
 
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
-</script>
-<style>html{ scroll-behavior: smooth; }</style>
-
-
+</script><style>html{ scroll-behavior: smooth; }</style>
 </head>
-
-<body class="nav-sidebar floating nav-fixed slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -277,9 +300,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </script>
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
-      <div class="navbar-container container-fluid">
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">The RBioc Book</span>
@@ -291,7 +312,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
+<li class="nav-item">
     <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
@@ -300,13 +321,13 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <span class="menu-text">About</span></a>
   </li>  
 </ul>
-          </div> <!-- /navcollapse -->
+</div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools tools-wide">
     <a href="https://github.com/seandavi/RBiocBook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
     <div class="dropdown">
       <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Download"><i class="bi bi-download"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
+<li>
             <a class="dropdown-item quarto-navbar-tools-item" href="./The-RBioc-Book.pdf">
               <i class="bi bi-file-pdf pe-1"></i>
             Download PDF
@@ -319,24 +340,24 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             </a>
           </li>
       </ul>
-    </div>
+</div>
     <div class="dropdown">
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-1">
-          <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
+<li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
               <i class="bi bi-twitter pe-1"></i>
             Twitter
             </a>
           </li>
           <li>
-            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
               <i class="bi bi-facebook pe-1"></i>
             Facebook
             </a>
           </li>
       </ul>
-    </div>
+</div>
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
   <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
   <div class="quarto-reader-toggle-btn">
@@ -345,25 +366,19 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </a>
 </div>
       </div> <!-- /container-fluid -->
-    </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./git_and_github.html">Appendices</a></li><li class="breadcrumb-item"><a href="./ai_tools.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html">Introduction</a></li><li class="breadcrumb-item"><a href="./literate_programming.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Literate programming with Quarto</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
-  </nav>
-</header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
@@ -377,8 +392,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">About R</span></span></a>
@@ -416,7 +431,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./literate_programming.html" class="sidebar-item-text sidebar-link">
+  <a href="./literate_programming.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Literate programming with Quarto</span></span></a>
   </div>
 </li>
@@ -427,7 +442,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
@@ -436,15 +451,15 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./biology_primer.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">A primer on biological assays</span></span></a>
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a href="./data_structures_overview.html" class="sidebar-item-text sidebar-link">
@@ -453,8 +468,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./vectors.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Vectors</span></span></a>
@@ -491,7 +506,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a href="./eda_overview.html" class="sidebar-item-text sidebar-link">
@@ -500,8 +515,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
@@ -532,7 +547,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
@@ -541,8 +556,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./norm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Working with distribution functions</span></span></a>
@@ -561,7 +576,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
@@ -570,8 +585,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./machine_learning/intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Introduction to machine learning</span></span></a>
@@ -608,7 +623,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
@@ -617,8 +632,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Working with a SummarizedExperiment</span></span></a>
@@ -673,7 +688,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
@@ -688,8 +703,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./git_and_github.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Git and GitHub</span></span></a>
@@ -703,7 +718,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./ai_tools.html" class="sidebar-item-text sidebar-link active">
+  <a href="./ai_tools.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></span></a>
   </div>
 </li>
@@ -714,37 +729,33 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </div>
 </li>
       </ul>
-  </li>
+</li>
     </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#introduction-ai-as-your-bioinformatics-learning-companion" id="toc-introduction-ai-as-your-bioinformatics-learning-companion" class="nav-link active" data-scroll-target="#introduction-ai-as-your-bioinformatics-learning-companion"><span class="header-section-number">C.1</span> Introduction: AI as Your Bioinformatics Learning Companion</a></li>
-  <li><a href="#ai-for-understanding-statistical-concepts-and-r-functions" id="toc-ai-for-understanding-statistical-concepts-and-r-functions" class="nav-link" data-scroll-target="#ai-for-understanding-statistical-concepts-and-r-functions"><span class="header-section-number">C.2</span> AI for Understanding Statistical Concepts and R Functions</a></li>
-  <li><a href="#ai-for-data-exploration-and-visualization-strategies" id="toc-ai-for-data-exploration-and-visualization-strategies" class="nav-link" data-scroll-target="#ai-for-data-exploration-and-visualization-strategies"><span class="header-section-number">C.3</span> AI for Data Exploration and Visualization Strategies</a></li>
-  <li><a href="#ai-for-boosting-productivity-and-troubleshooting" id="toc-ai-for-boosting-productivity-and-troubleshooting" class="nav-link" data-scroll-target="#ai-for-boosting-productivity-and-troubleshooting"><span class="header-section-number">C.4</span> AI for Boosting Productivity and Troubleshooting</a></li>
-  <li><a href="#best-practices-for-prompt-engineering" id="toc-best-practices-for-prompt-engineering" class="nav-link" data-scroll-target="#best-practices-for-prompt-engineering"><span class="header-section-number">C.5</span> Best Practices for Prompt Engineering</a></li>
-  <li><a href="#ethical-considerations-and-limitations" id="toc-ethical-considerations-and-limitations" class="nav-link" data-scroll-target="#ethical-considerations-and-limitations"><span class="header-section-number">C.6</span> Ethical Considerations and Limitations</a></li>
-  <li><a href="#de-skilling-never-skilling-and-how-to-stay-sharp" id="toc-de-skilling-never-skilling-and-how-to-stay-sharp" class="nav-link" data-scroll-target="#de-skilling-never-skilling-and-how-to-stay-sharp"><span class="header-section-number">C.7</span> De-skilling, never-skilling, and how to stay sharp</a></li>
-  <li><a href="#using-ai-constructively-when-to-lean-in-and-when-to-step-back" id="toc-using-ai-constructively-when-to-lean-in-and-when-to-step-back" class="nav-link" data-scroll-target="#using-ai-constructively-when-to-lean-in-and-when-to-step-back"><span class="header-section-number">C.8</span> Using AI constructively: when to lean in, and when to step back</a></li>
-  <li><a href="#the-future-ai-in-bioinformatics-and-data-science" id="toc-the-future-ai-in-bioinformatics-and-data-science" class="nav-link" data-scroll-target="#the-future-ai-in-bioinformatics-and-data-science"><span class="header-section-number">C.9</span> The Future: AI in Bioinformatics and Data Science</a></li>
-  <li><a href="#practical-exercises-and-activities" id="toc-practical-exercises-and-activities" class="nav-link" data-scroll-target="#practical-exercises-and-activities"><span class="header-section-number">C.10</span> Practical Exercises and Activities</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/ai_tools.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/ai_tools.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
+<li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">7.1</span> What you’ll learn</a></li>
+  <li><a href="#what-is-literate-programming" id="toc-what-is-literate-programming" class="nav-link" data-scroll-target="#what-is-literate-programming"><span class="header-section-number">7.2</span> What is literate programming?</a></li>
+  <li><a href="#why-bother-the-benefits" id="toc-why-bother-the-benefits" class="nav-link" data-scroll-target="#why-bother-the-benefits"><span class="header-section-number">7.3</span> Why bother? The benefits</a></li>
+  <li><a href="#your-first-quarto-document-in-rstudio" id="toc-your-first-quarto-document-in-rstudio" class="nav-link" data-scroll-target="#your-first-quarto-document-in-rstudio"><span class="header-section-number">7.4</span> Your first Quarto document in RStudio</a></li>
+  <li><a href="#when-not-to-use-literate-programming" id="toc-when-not-to-use-literate-programming" class="nav-link" data-scroll-target="#when-not-to-use-literate-programming"><span class="header-section-number">7.5</span> When <em>not</em> to use literate programming</a></li>
+  <li><a href="#keeping-heavy-steps-literate-anyway" id="toc-keeping-heavy-steps-literate-anyway" class="nav-link" data-scroll-target="#keeping-heavy-steps-literate-anyway"><span class="header-section-number">7.6</span> Keeping heavy steps literate anyway</a></li>
+  <li><a href="#publishing-to-github-pages" id="toc-publishing-to-github-pages" class="nav-link" data-scroll-target="#publishing-to-github-pages"><span class="header-section-number">7.7</span> Publishing to GitHub Pages</a></li>
+  <li><a href="#document-or-script-a-quick-checklist" id="toc-document-or-script-a-quick-checklist" class="nav-link" data-scroll-target="#document-or-script-a-quick-checklist"><span class="header-section-number">7.8</span> “Document or script?” — a quick checklist</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7.9</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">7.10</span> Exercises</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources"><span class="header-section-number">7.11</span> Resources</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/literate_programming.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/literate_programming.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./git_and_github.html">Appendices</a></li><li class="breadcrumb-item"><a href="./ai_tools.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></a></li></ol></nav>
-<div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Appendix C — AI Tools for Enhanced Learning and Productivity in Bioinformatics</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/ai_tools.qmd"><i class="bi"></i> Code</button></div></div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html">Introduction</a></li><li class="breadcrumb-item"><a href="./literate_programming.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Literate programming with Quarto</span></a></li></ol></nav><div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">
+<span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Literate programming with Quarto</span>
+</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/literate_programming.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
@@ -785,294 +796,253 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   
 
 
-</header>
-
-
-<p>The rise of sophisticated Artificial Intelligence (AI) tools, particularly Large Language Models (LLMs), has drastically altered day-to-day tasks for many. This chapter aims to guide you, as biologists venturing into these computational fields, on how to effectively and responsibly harness these AI tools. The focus will be on using them as powerful assistants to deepen your understanding of statistical concepts, enhance your ability to explore complex biological data with R, and ultimately boost your overall productivity and learning experience. Think of these tools not as a shortcut around learning, but as a versatile companion on your journey.</p>
-<section id="introduction-ai-as-your-bioinformatics-learning-companion" class="level2 page-columns page-full" data-number="C.1">
-<h2 data-number="C.1" class="anchored" data-anchor-id="introduction-ai-as-your-bioinformatics-learning-companion"><span class="header-section-number">C.1</span> Introduction: AI as Your Bioinformatics Learning Companion</h2>
-<p>You’ve likely heard of tools like ChatGPT, Gemini, Claude, or GitHub Copilot. These are examples of LLMs and other AI-driven assistants that can process and generate human-like text, code, and even help with complex reasoning tasks. Their capabilities are particularly relevant when grappling with new programming languages like R, intricate statistical methods, or the challenge of deriving meaning from large biological datasets.</p>
-<table class="table">
-<caption>Table AI Tools for Bioinformatics Learning</caption>
-<thead>
-<tr class="header">
-<th>AI Tool</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="https://chat.openai.com/chat">ChatGPT</a></td>
-<td>A conversational AI that can answer questions, explain concepts, and generate code snippets.</td>
-</tr>
-<tr class="even">
-<td><a href="https://gemini.google.com/app">Gemini</a></td>
-<td>Google’s AI that can assist with coding, data analysis, and more.</td>
-</tr>
-<tr class="odd">
-<td><a href="https://claude.ai/">Claude</a></td>
-<td>An AI assistant that can help with writing, coding, and problem-solving.</td>
-</tr>
-<tr class="even">
-<td><a href="https://github.com/features/copilot">GitHub Copilot</a></td>
-<td>An AI-powered code completion tool that suggests code as you type, based on the context of your project.</td>
-</tr>
-<tr class="odd">
-<td><a href="https://www.perplexity.ai/">Perplexity</a></td>
-<td>An AI that can answer questions and provide explanations across various domains, including programming and data science.</td>
-</tr>
-</tbody>
-</table>
-<p>Why should you consider integrating these AI tools into your learning workflow? The benefits are manifold. They can help demystify complex topics by offering alternative explanations, assist in drafting R code for specific analyses, aid in the often-frustrating process of debugging, summarize lengthy documents, and even help you brainstorm approaches for data exploration.</p>
-<div class="callout callout-style-default callout-note callout-titled" title="A Supplement, Not a Replacement">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>A Supplement, Not a Replacement
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>It’s crucial to remember that AI is here to <em>supplement</em> your learning and critical thinking, not replace it. Your growing expertise in biology, combined with a solid understanding of statistical principles, remains paramount. AI can help you get there faster and overcome hurdles, but the destination is your own deep understanding.</p>
-</div>
-</div>
-<p>However, it’s also important to approach these tools with realistic expectations. LLMs can sometimes provide inaccurate information—a phenomenon often called “hallucination”—or exhibit biases present in their training data.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Therefore, your domain knowledge and developing statistical intuition are your best guides in sifting the digital wheat from the chaff.</p>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;Always be prepared to critically evaluate and verify information from AI tools against trusted sources.</p></div></div></section>
-<section id="ai-for-understanding-statistical-concepts-and-r-functions" class="level2" data-number="C.2">
-<h2 data-number="C.2" class="anchored" data-anchor-id="ai-for-understanding-statistical-concepts-and-r-functions"><span class="header-section-number">C.2</span> AI for Understanding Statistical Concepts and R Functions</h2>
-<p>One of the most immediate benefits of LLMs is their ability to act as a patient, tireless tutor for statistical concepts. If you find a particular statistical idea challenging, you can ask an LLM to explain it in various ways. For instance, you might prompt: “Explain the concept of a p-value as if you were talking to a biologist who is new to statistics,” or “Describe the key differences between Principal Component Analysis (PCA) and t-Distributed Stochastic Neighbor Embedding (t-SNE) when analyzing gene expression data.” The ability to request analogies or examples directly relevant to biological datasets can be incredibly helpful.</p>
-<p>Similarly, when you’re wrestling with the R language, AI tools can be invaluable. Perhaps you’re unsure about the syntax for a <code>dplyr</code> verb or the arguments for a <code>ggplot2</code> function. You could ask, “How do I use the <code>dplyr::filter()</code> function in R to select rows from my dataframe where the ‘gene_expression’ column is greater than 100 and the ‘treatment_group’ column is ‘Condition_A’?” or “Can you explain the main arguments of the <code>stats::t.test()</code> function in R and what its output signifies?” These tools can also help you discover R packages specifically designed for statistical tasks you have in mind.</p>
-<p>When it comes to applying these concepts, AI can generate example R code. For common statistical tests like t-tests, ANOVAs, or chi-squared tests, you can request simple, reproducible examples, perhaps even with dummy data that you can then adapt.</p>
-<div class="callout callout-style-default callout-warning callout-titled" title="Understand Before You Use">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Understand Before You Use
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>A word of caution is essential here: while AI can generate code, <em>you</em> are the scientist. Always strive to understand the code provided. Ensure it aligns with your research question, your data structure, and the assumptions of the statistical test you’re performing. Blindly copying and pasting code without comprehension can lead to erroneous conclusions.</p>
-</div>
-</div>
-</section>
-<section id="ai-for-data-exploration-and-visualization-strategies" class="level2" data-number="C.3">
-<h2 data-number="C.3" class="anchored" data-anchor-id="ai-for-data-exploration-and-visualization-strategies"><span class="header-section-number">C.3</span> AI for Data Exploration and Visualization Strategies</h2>
-<p>Exploring a new biological dataset can sometimes feel like navigating uncharted territory. AI can act as a brainstorming partner in this process. You could describe your dataset—its variables, the type of data (e.g., RNA-seq counts, proteomics measurements, microbial abundances), and the underlying biological context—and then ask for suggestions on initial exploratory analyses. For example: “I have a dataset with normalized protein abundance levels for samples from cancerous and healthy tissues, along with patient metadata like age and disease stage. What are some initial plots I could make in R with <code>ggplot2</code> to explore potential patterns or differences?”</p>
-<p>Speaking of <code>ggplot2</code> and other R visualization libraries, LLMs can be particularly adept at helping you craft the precise code for the plots you envision. You can request code for specific plot types, ask for help customizing aesthetics like colors, labels, and themes, or even troubleshoot why your plot isn’t rendering as expected. “How can I add a title to my ggplot, change the x-axis label to ‘Gene Length (bp)’, and use a different color palette for my groups?” is a typical query an LLM can handle.</p>
-<p>AI can also offer tentative interpretations of statistical outputs or visual patterns. However, this is where your scientific judgment is most critical.</p>
-<div class="callout callout-style-default callout-caution callout-titled" title="AI Suggestions are Starting Points">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Caution</span>AI Suggestions are Starting Points
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>While an LLM might suggest that a particular cluster in your PCA plot <em>could</em> represent a distinct biological condition, this is merely a hypothesis generated by the model. It is your responsibility to correlate this with your biological knowledge, experimental design, and further statistical validation. AI interpretations are starting points for your own deeper investigation, not final conclusions.</p>
-</div>
-</div>
-</section>
-<section id="ai-for-boosting-productivity-and-troubleshooting" class="level2 page-columns page-full" data-number="C.4">
-<h2 data-number="C.4" class="anchored" data-anchor-id="ai-for-boosting-productivity-and-troubleshooting"><span class="header-section-number">C.4</span> AI for Boosting Productivity and Troubleshooting</h2>
-<p>Beyond conceptual understanding and data exploration, AI tools can significantly enhance your day-to-day productivity. For instance, code generation and autocompletion features, whether in standalone LLMs or integrated into development environments (like GitHub Copilot, if available to you), can speed up the writing of boilerplate R code or complete lines of code you’ve started. This is especially useful for repetitive tasks, freeing you up to focus on the more analytical aspects of your work. Remember, the goal is to accelerate your coding, not to have entire complex analyses generated without your deep involvement and understanding.</p>
-<p>One of the most common frustrations in programming is debugging. AI can be a powerful ally here. You can paste R error messages directly into an LLM and ask for explanations and potential fixes. If your code isn’t behaving as expected, describe its intended function and the problematic output, and the AI may be able to pinpoint the issue.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Providing a minimal reproducible example (a small piece of code with sample data that replicates the error) greatly improves the chances of getting useful debugging help from an AI.</p></div></div><p>Other productivity boosts include asking AI to summarize lengthy R package documentation or even sections of research articles (always being mindful of access permissions and copyright). Furthermore, if you have a piece of R code that works but feels clunky or inefficient, you can ask an AI for suggestions on how to refactor it to make it more readable, efficient, or aligned with common R programming idioms.</p>
-</section>
-<section id="best-practices-for-prompt-engineering" class="level2" data-number="C.5">
-<h2 data-number="C.5" class="anchored" data-anchor-id="best-practices-for-prompt-engineering"><span class="header-section-number">C.5</span> Best Practices for Prompt Engineering</h2>
-<p>The quality of the output you receive from an LLM is heavily dependent on the quality of your input—your “prompt.” Effective prompt engineering is a skill that improves with practice.</p>
-<p>The cornerstone of a good prompt is <strong>specificity and context</strong>. The more information you provide about your goal, your data, the biological question at hand, the specific R package you’re using, or the exact error message you’re encountering, the more tailored and useful the AI’s response will be. Consider the difference:</p>
-<table class="table">
-<colgroup>
-<col style="width: 19%">
-<col style="width: 80%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Vague Prompt</th>
-<th>Specific &amp; Contextualized Prompt</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>“How to plot data in R?”</td>
-<td>“How can I create a scatter plot in R using <code>ggplot2</code> to show the relationship between ‘gene_expression_log2fc’ and ‘mirna_expression_log2fc’ from my <code>results_df</code> dataframe, with points colored by ‘cancer_subtype’?”</td>
-</tr>
-<tr class="even">
-<td>“My R code isn’t working.”</td>
-<td>“I’m getting the error ‘Error: object ’x’ not found’ in R when I run this code: <code>plot(x, y)</code>. I defined <code>x</code> in a previous chunk. Why might this be happening and how can I fix it?”</td>
-</tr>
-</tbody>
-</table>
-<p>Don’t expect the perfect answer on your first attempt. <strong>Iterate and refine your prompts.</strong> If the initial response isn’t quite what you need, try rephrasing your question, adding more details, or breaking down a complex request into smaller parts. You can also <strong>specify the desired output format</strong>, such as “Provide the R code for this,” “Explain this concept in three simple bullet points,” or “List three potential statistical approaches for this problem.” Sometimes, asking for multiple perspectives or alternative solutions can also be enlightening. Finally, don’t hesitate to experiment with different LLMs if you have access to more than one, as their strengths can vary.</p>
-</section>
-<section id="ethical-considerations-and-limitations" class="level2" data-number="C.6">
-<h2 data-number="C.6" class="anchored" data-anchor-id="ethical-considerations-and-limitations"><span class="header-section-number">C.6</span> Ethical Considerations and Limitations</h2>
-<p>While AI tools offer tremendous potential, it’s imperative to use them responsibly and be acutely aware of their limitations.</p>
-<p><strong>Accuracy and “Hallucinations”:</strong> This is perhaps the most critical point. LLMs are designed to generate plausible text, but this text is not always factually correct or logically sound. They can “hallucinate” answers, code, or citations that seem convincing but are entirely fabricated.</p>
-<div class="callout-danger" title="Always Verify AI Output!">
-<p>You <strong>must</strong> critically evaluate all information and code generated by AI. Cross-reference with trusted sources like official R documentation, textbooks, peer-reviewed literature, and your own developing expertise. Never blindly trust AI-generated content, especially for scientific analysis.</p>
-</div>
-<p><strong>Bias in AI Models:</strong> AI models learn from the vast corpus of text and code they are trained on. This training data can contain societal biases, which may then be reflected in the AI’s responses. Be mindful of how this could subtly influence suggestions, interpretations, or even the tone of explanations.</p>
-<p><strong>Data Privacy and Confidentiality:</strong> This is a paramount concern in biomedical research, where the data you work with may be protected by law and by your duty to the people it describes. Two categories deserve special vigilance:</p>
+</header><p>You run an analysis in the console, copy the key number and a figure into a Word document, and email it off. A week later the data changes, you re-run the code — but the document still shows last week’s number and last week’s plot, and nobody notices. That gap between <em>the analysis</em> and <em>the writeup</em> is where a huge fraction of scientific errors live.</p>
+<p><strong>Literate programming</strong> closes the gap. Instead of keeping code in one place and prose in another, you write a single document that contains the prose, the code, <em>and</em> the results the code produces — and the whole thing regenerates from the data every time you render it. The numbers and figures can’t go stale, because they are never pasted: they are computed fresh, on the spot.</p>
+<p>You are reading literate programming right now. This entire book is a <a href="https://quarto.org">Quarto</a> project: every code block you’ve seen actually <em>ran</em>, every plot was generated straight from the data at high quality, and every figure reference, citation, and cross-reference resolves itself automatically. The book <em>is</em> its own source code. That’s the idea this chapter teaches you to use.</p>
+<section id="what-youll-learn" class="level2" data-number="7.1"><h2 data-number="7.1" class="anchored" data-anchor-id="what-youll-learn">
+<span class="header-section-number">7.1</span> What you’ll learn</h2>
+<p>By the end of this chapter you will be able to:</p>
 <ul>
-<li><strong>PII</strong> (personally identifiable information) — names, dates of birth, addresses, email addresses, identifying numbers, or any combination of fields that could single out an individual.</li>
-<li><strong>PHI</strong> (protected health information) — the subset of PII tied to health, diagnoses, treatments, or genetic data, regulated under frameworks such as HIPAA in the United States and GDPR in Europe.</li>
+<li>Explain what literate programming is and the problem it solves.</li>
+<li>Name its concrete benefits — reproducibility, live in-text results, one source to many formats.</li>
+<li>Create, develop, render, and preview a Quarto document in RStudio, using the console-and-document loop you already know.</li>
+<li>Decide when literate programming is the right tool, and when a plain script or a pipeline is the better choice.</li>
+<li>(with a GitHub account) publish a rendered document to the web with one command.</li>
+</ul></section><section id="what-is-literate-programming" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="what-is-literate-programming">
+<span class="header-section-number">7.2</span> What is literate programming?</h2>
+<p>The term comes from Donald Knuth <span class="citation" data-cites="doi:10.1093/comjnl/27.2.97">(<a href="references.html#ref-doi:10.1093/comjnl/27.2.97" role="doc-biblioref">Knuth 1984</a>)</span>, who argued that a program should be written first for <em>humans</em> to read — an explanatory narrative with the code woven into it — and only incidentally for the machine to run. The modern incarnation for data analysis is <strong>Quarto</strong> (and its predecessor, R Markdown).</p>
+<p>A Quarto document is a plain-text file with the extension <code>.qmd</code> that interleaves three things:</p>
+<ul>
+<li>
+<strong>prose</strong>, written in Markdown (headings, lists, <strong>bold</strong>, links);</li>
+<li>
+<strong>code</strong>, in fenced <em>chunks</em>;</li>
+<li>the <strong>output</strong> that code produces — printed values, tables, and plots — generated when you <em>render</em> the document.</li>
 </ul>
-<p>Pasting either kind of data into a public chatbot can constitute an unauthorized disclosure, and genomic data is especially hard to truly de-identify — a genome is itself an identifier <span class="citation" data-cites="doi:10.1186/s12910-021-00687-3">(<a href="references.html#ref-doi:10.1186/s12910-021-00687-3" role="doc-biblioref">Murdoch 2021</a>)</span>. The privacy and governance challenges that large language models add on top of this are still being worked out, and formal oversight lags well behind adoption <span class="citation" data-cites="doi:10.1038/s41746-023-00873-0">(<a href="references.html#ref-doi:10.1038/s41746-023-00873-0" role="doc-biblioref">Meskó and Topol 2023</a>)</span>, so the safe default falls to you.</p>
-<div class="callout callout-style-default callout-warning callout-titled" title="Protect Your Sensitive Data">
+<p>There is no separate “the analysis” and “the report.” They are the same file, and that file is the single source of truth.</p>
+<p>Here is what a tiny <code>.qmd</code> looks like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "My first analysis"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Here is some prose describing what I'm about to do.</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>::: {.cell}</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="in">```{.r .cell-code}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>::: {.cell-output .cell-output-stdout}</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="in">[1] 5</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>And a sentence with a value computed inline: the mean is 5.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The header between the <code>---</code> lines is <strong>YAML</strong> metadata (title, output format). Below it, prose and <code>```{r}</code> code chunks alternate freely.</p>
+</section><section id="why-bother-the-benefits" class="level2" data-number="7.3"><h2 data-number="7.3" class="anchored" data-anchor-id="why-bother-the-benefits">
+<span class="header-section-number">7.3</span> Why bother? The benefits</h2>
+<ul>
+<li>
+<strong>Reproducibility, with no copy-paste drift.</strong> Rendering re-runs <em>all</em> the code from the data. A figure or number in the document can’t be stale, because it is regenerated rather than pasted. Reproducibility like this is now considered a baseline expectation of computational work <span class="citation" data-cites="doi:10.1371/journal.pcbi.1003285">(<a href="references.html#ref-doi:10.1371/journal.pcbi.1003285" role="doc-biblioref">Sandve et al. 2013</a>)</span>.</li>
+<li>
+<strong>Live results in the text.</strong> You can drop a computed value straight into a sentence — an <em>inline</em> code expression. For example, the mean of the vector <code>x &lt;- c(2, 4, 6, 8)</code> is 5, and that number was calculated when this page was rendered, not typed by hand. Change the data, re-render, and the sentence updates itself.</li>
+<li>
+<strong>One source, many formats.</strong> The same <code>.qmd</code> renders to HTML, PDF, or Word — you don’t rewrite anything to change the output.</li>
+<li>
+<strong>Beautiful, consistent rendering.</strong> Clean typography, high-quality plots straight from your code, tables, mathematics, citations, and automatic figure/section <strong>cross-references</strong> that number and link themselves.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Protect Your Sensitive Data
+<span class="screen-reader-only">Tip</span>Exhibit A: the book in your hands
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>Under no circumstances should you paste sensitive, unpublished, or personally identifiable data — including PHI/PII and individual-level genomic or clinical data — into public LLM interfaces.</strong> Always assume that anything you input could be stored, logged, or used to train future models. Before using any AI tool on research data, confirm what its data-usage policy permits and whether your institution has approved it; many universities and hospitals offer vetted, private-instance deployments with contractual data protections for exactly this reason. For coursework and everyday learning, keep AI to conceptual questions, code on non-sensitive example datasets, and publicly available data.</p>
+<p>You don’t have to take this on faith — you’re holding the proof. This book is a Quarto project, so its code blocks <strong>always work</strong> (they are executed and checked on every build; if a chunk broke, the build would fail), its figures are generated fresh at high quality, and its citations and <code>@fig-</code>/<code>@sec-</code> cross-references all resolve automatically. Literate programming, demonstrating itself.</p>
 </div>
 </div>
-<p><strong>Over-Reliance and Skill Atrophy:</strong> The convenience of AI can be seductive. However, relying on it too heavily can hinder the development of your own foundational R programming and statistical reasoning skills, and there is now empirical evidence that heavy reliance both erodes the skills of experts and reduces the critical thinking people invest in a task <span class="citation" data-cites="pmid:40816301 doi:10.1145/3706598.3713778">(<a href="references.html#ref-pmid:40816301" role="doc-biblioref">Budzyń et al. 2025</a>; <a href="references.html#ref-doi:10.1145/3706598.3713778" role="doc-biblioref">Lee et al. 2025</a>)</span>. Use AI as a tool to <em>aid</em> and <em>accelerate</em> your learning, not to <em>replace</em> the hard work of understanding. The ultimate goal is for <em>you</em> to become proficient, not for the AI to perform tasks for you. This risk is important enough that the next section treats it on its own.</p>
-<p><strong>Reproducibility:</strong> If you incorporate AI-generated code or insights into your analyses, ensure you thoroughly understand them, can justify their use, and document them meticulously for reproducibility. It can be good practice to note the prompts you used if the interaction significantly shaped your approach, treating it almost like a consultation.</p>
-<p>The table below summarizes some key limitations and suggested mitigations:</p>
+</section><section id="your-first-quarto-document-in-rstudio" class="level2" data-number="7.4"><h2 data-number="7.4" class="anchored" data-anchor-id="your-first-quarto-document-in-rstudio">
+<span class="header-section-number">7.4</span> Your first Quarto document in RStudio</h2>
+<p>The best part: developing a Quarto document is the same console workflow you already use, with the code saved in a document and the output captured alongside it.</p>
+<ol type="1">
+<li>
+<strong>Create it.</strong> In RStudio: <strong>File → New File → Quarto Document…</strong>, give it a title, choose <strong>HTML</strong>, and click <em>Create</em>. You’ll get a starter <code>.qmd</code> with a YAML header and a sample chunk.</li>
+<li>
+<strong>Recognize the parts.</strong> The <code>---</code> header sets the title and format; the body alternates Markdown prose with <code>```{r}</code> chunks.</li>
+<li>
+<strong>Develop in the mirrored console.</strong> Click the green ▶ button at the top-right of a chunk (or press <code>Ctrl</code>/<code>Cmd</code>+<code>Shift</code>+<code>Enter</code>) and the chunk runs <em>in the R console you already know</em> — the same console from the <a href="./r_intro_mechanics.html">R mechanics chapter</a> — with its results shown inline, right under the chunk. You can also run a single line with <code>Ctrl</code>/<code>Cmd</code>+<code>Enter</code> to experiment, exactly as in a script. This is the key mental shift: a <code>.qmd</code> is your interactive session, made permanent.</li>
+<li>
+<strong>Render.</strong> Click the <strong>Render</strong> button. Quarto runs the <em>entire</em> document top-to-bottom in a <strong>fresh</strong> R session and produces the output, shown in the preview pane.</li>
+<li>
+<strong>Edit how you like.</strong> RStudio offers a <strong>Source</strong> editor (raw Markdown) and a <strong>Visual</strong> editor (a word-processor-like view); switch between them with the buttons above the document. Use whichever you prefer — the <code>.qmd</code> file is the same either way.</li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Why “fresh session” is a feature, not a nuisance
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Rendering starts from a blank R session, so it only sees what the document itself defines. That catches the most common reproducibility bug: code that secretly relied on a variable you created in the console an hour ago and forgot to write down. If it renders, it reproduces — on your machine <em>and</em> on someone else’s.</p>
+</div>
+</div>
+</section><section id="when-not-to-use-literate-programming" class="level2" data-number="7.5"><h2 data-number="7.5" class="anchored" data-anchor-id="when-not-to-use-literate-programming">
+<span class="header-section-number">7.5</span> When <em>not</em> to use literate programming</h2>
+<p>Literate programming is for the <strong>analysis and communication layer</strong> of your work. Underneath that often sits a <strong>heavy data-processing or pipeline layer</strong>, and that layer usually wants different tools. Reach for a plain script (or a pipeline tool) instead when:</p>
+<ul>
+<li>
+<strong>A step is slow or compute-heavy.</strong> If a chunk takes an hour, you don’t want it re-running every time you fix a typo in a sentence. Either cache it (see below) or move it to a script that runs once and saves its result.</li>
+<li>
+<strong>The work is an independent heavy-lift pipeline step.</strong> Aligning sequencing reads, processing huge files, multi-stage bioinformatics workflows — these belong in scripts orchestrated by a <code>Makefile</code>, the <code>targets</code> package, Snakemake, or Nextflow, not in a render-on-every-build document.</li>
+<li>
+<strong>You’re still exploring.</strong> Poke around in the console first; write it up <em>after</em> you know what you’ve found. Don’t fight a document while you’re still thinking.</li>
+<li>
+<strong>You’re building reusable software.</strong> Functions and packages live in <code>.R</code> files, not in narrative documents.</li>
+<li>
+<strong>The deliverable isn’t a document</strong> — a trained model, a cleaned dataset, an API. Produce those with scripts.</li>
+</ul>
+<p>A one-line rule of thumb: <strong>if the output is meant for a human to read, reach for a Quarto document; if the output is data, a model, or a pipeline artifact, reach for a script.</strong></p>
+</section><section id="keeping-heavy-steps-literate-anyway" class="level2" data-number="7.6"><h2 data-number="7.6" class="anchored" data-anchor-id="keeping-heavy-steps-literate-anyway">
+<span class="header-section-number">7.6</span> Keeping heavy steps literate anyway</h2>
+<p>The boundary above isn’t a wall. Three tools let you keep an expensive analysis inside a literate document without paying the cost on every render:</p>
+<ul>
+<li>
+<strong>Chunk caching.</strong> Add <code>#| cache: true</code> to a chunk and its results are saved and reused until <em>that chunk’s code</em> changes — ideal for one slow model fit.</li>
+<li>
+<strong>Freeze.</strong> A Quarto book can set <code>execute: freeze: auto</code>, which re-executes a document only when its source changes and reuses stored results otherwise. This book uses exactly that: heavy Bioconductor chapters are frozen, so a normal build reuses their results instead of re-downloading and re-computing.</li>
+<li>
+<strong>Precompute and load.</strong> Run the heavy step once in a separate script, <code><a href="https://rdrr.io/r/base/readRDS.html">saveRDS()</a></code> the result, and have the document <code><a href="https://rdrr.io/r/base/readRDS.html">readRDS()</a></code> it. The document stays literate and fast; the heavy lifting happens out of band.</li>
+</ul></section><section id="publishing-to-github-pages" class="level2" data-number="7.7"><h2 data-number="7.7" class="anchored" data-anchor-id="publishing-to-github-pages">
+<span class="header-section-number">7.7</span> Publishing to GitHub Pages</h2>
+<p>If you have a GitHub account, putting a rendered document on the public web is one command. From the project’s directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> publish gh-pages</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This renders your document, pushes the output to a special <code>gh-pages</code> branch of your repository, and switches on GitHub Pages — giving you a public address like <code>https://USERNAME.github.io/REPO/</code>. Run the same command again whenever you want to update the live version. (See the <a href="./git_and_github.html">Git and GitHub</a> appendix if you’re new to repositories.)</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>No GitHub account? No problem
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>quarto publish quarto-pub</code> publishes to <a href="https://quartopub.com">Quarto Pub</a>, a free hosting service, with the same one-command flow and no GitHub required. And for a document or book you update often, you can have <strong>GitHub Actions</strong> render and publish automatically on every push — which is precisely how this book is built and deployed.</p>
+</div>
+</div>
+</section><section id="document-or-script-a-quick-checklist" class="level2" data-number="7.8"><h2 data-number="7.8" class="anchored" data-anchor-id="document-or-script-a-quick-checklist">
+<span class="header-section-number">7.8</span> “Document or script?” — a quick checklist</h2>
 <table class="table">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 35%">
+<col style="width: 50%">
 <col style="width: 50%">
 </colgroup>
-<thead>
-<tr class="header">
-<th>Limitation</th>
-<th>Description</th>
-<th>Mitigation Strategies</th>
-</tr>
-</thead>
+<thead><tr class="header">
+<th>The work…</th>
+<th>Use</th>
+</tr></thead>
 <tbody>
 <tr class="odd">
-<td><strong>Accuracy Issues (Hallucinations)</strong></td>
-<td>Generates plausible but incorrect/fabricated information or code.</td>
-<td>Verify with trusted sources; test code thoroughly; use critical thinking.</td>
+<td>produces a report, figure, or notebook <strong>for people to read</strong>
+</td>
+<td>a Quarto document</td>
 </tr>
 <tr class="even">
-<td><strong>Bias</strong></td>
-<td>Reflects biases present in training data.</td>
-<td>Be aware of potential biases; seek diverse perspectives; critically evaluate fairness of suggestions.</td>
+<td>produces a <strong>dataset, model, or pipeline artifact</strong>
+</td>
+<td>a script</td>
 </tr>
 <tr class="odd">
-<td><strong>Data Privacy</strong></td>
-<td>Risk of exposing sensitive data if input into public tools.</td>
-<td>Avoid inputting sensitive/unpublished data; use institutional/private instances if available and vetted; understand terms of service.</td>
+<td>takes seconds-to-minutes and belongs in the narrative</td>
+<td>a document (cache if needed)</td>
 </tr>
 <tr class="even">
-<td><strong>Lack of True Understanding</strong></td>
-<td>Manipulates patterns in data, doesn’t “understand” concepts like humans do.</td>
-<td>Don’t attribute human-like reasoning; use it for specific tasks, not overarching scientific judgment.</td>
+<td>takes hours, or is shared across many analyses</td>
+<td>a script + a saved artifact</td>
 </tr>
 <tr class="odd">
-<td><strong>Over-Reliance</strong></td>
-<td>Can hinder development of personal skills if used as a crutch.</td>
-<td>Focus on learning principles; use AI to assist, not replace, your own effort; regularly practice without AI.</td>
-</tr>
-<tr class="even">
-<td><strong>Reproducibility Challenges</strong></td>
-<td>AI responses can vary; difficult to document exact “reasoning” of the AI.</td>
-<td>Document prompts used for significant code/ideas; thoroughly understand and vet any AI-generated code you use.</td>
+<td>is open-ended <strong>exploration</strong>
+</td>
+<td>the console/script now; write it up later</td>
 </tr>
 </tbody>
-</table>
-</section>
-<section id="de-skilling-never-skilling-and-how-to-stay-sharp" class="level2" data-number="C.7">
-<h2 data-number="C.7" class="anchored" data-anchor-id="de-skilling-never-skilling-and-how-to-stay-sharp"><span class="header-section-number">C.7</span> De-skilling, never-skilling, and how to stay sharp</h2>
-<p>The most subtle risk of AI is not that it gives a wrong answer — it is that it gives a <em>right</em> one, so smoothly that you never build the skill yourself. It is worth separating two versions of this:</p>
-<ul>
-<li><strong>De-skilling</strong> is the <em>erosion</em> of a competence you already have. Skills decay when they go unused, and outsourcing them to a machine is a fast way to stop using them. In one striking study, experienced endoscopists who had been working alongside an AI detection tool became measurably <em>worse</em> at finding polyps on their own once the AI was taken away — their unaided detection rate dropped after routine exposure to the assistant <span class="citation" data-cites="pmid:40816301">(<a href="references.html#ref-pmid:40816301" role="doc-biblioref">Budzyń et al. 2025</a>)</span>. The skill atrophied precisely because the machine had been carrying it.</li>
-<li><strong>Never-skilling</strong> is the failure to <em>acquire</em> a competence in the first place. For a learner, this is the bigger danger. If every exercise is answered by an LLM before you have struggled with it, you collect finished code without ever building the mental model that lets you write or debug it yourself. A large survey of knowledge workers found that the more people trusted generative AI for a task, the <em>less</em> critical thinking they reported applying to it — they shifted from doing the work to merely checking the machine’s output, and sometimes not even that <span class="citation" data-cites="doi:10.1145/3706598.3713778">(<a href="references.html#ref-doi:10.1145/3706598.3713778" role="doc-biblioref">Lee et al. 2025</a>)</span>.</li>
-</ul>
-<p>Both are versions of a long-known phenomenon. <strong>Automation bias</strong> — the tendency to over-trust an automated system and stop scrutinizing it — has been documented in clinical decision support for decades, and it causes the most harm exactly where the stakes are highest <span class="citation" data-cites="doi:10.1136/amiajnl-2011-000089">(<a href="references.html#ref-doi:10.1136/amiajnl-2011-000089" role="doc-biblioref">Goddard et al. 2012</a>)</span>. A related trap in research is the <em>illusion of understanding</em>: AI tools can make a field feel mastered and a result feel explained when neither is actually true <span class="citation" data-cites="doi:10.1038/s41586-024-07146-0">(<a href="references.html#ref-doi:10.1038/s41586-024-07146-0" role="doc-biblioref">Messeri and Crockett 2024</a>)</span>.</p>
-<div class="callout callout-style-default callout-tip callout-titled" title="Protect the struggle">
-<div class="callout-header d-flex align-content-center">
+</table></section><section id="summary" class="level2" data-number="7.9"><h2 data-number="7.9" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">7.9</span> Summary</h2>
+<p>Literate programming keeps code, prose, and results in one document that regenerates from the data, so your writeup can never drift out of sync with your analysis. In Quarto that document is a <code>.qmd</code> you develop with the same RStudio console loop you already use, then <strong>Render</strong> in a fresh session — which both produces a polished, multi-format report and guarantees it reproduces. It is the right tool for the analysis-and-communication layer, while heavy processing and pipelines belong in scripts (with caching, freeze, and precomputed artifacts to bridge the two). And with one command you can publish the result to the web.</p>
+</section><section id="exercises" class="level2" data-number="7.10"><h2 data-number="7.10" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">7.10</span> Exercises</h2>
+<ol type="1">
+<li>
+<strong>Make one.</strong> In RStudio, create a new Quarto document with a title, a sentence of prose, and a code chunk that computes something (e.g.&nbsp;the mean of a vector). Render it to HTML.</li>
+<li>
+<strong>Watch it update.</strong> Add an <em>inline</em> value to your prose so a number in the sentence is computed from your data. Change the data, re-render, and confirm the sentence changed on its own.</li>
+<li>
+<strong>Classify.</strong> For each task, say whether it belongs in a Quarto document or a script, and why: (a) fit a quick model and report the result; (b) align 200 GB of sequencing reads; (c) explore a brand-new dataset for the first time; (d) write a reusable plotting function you’ll call from several analyses.</li>
+<li>
+<strong>(Optional, needs GitHub.)</strong> Publish a document with <code>quarto publish gh-pages</code> and visit the resulting URL.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Protect the struggle
+<span class="screen-reader-only">Note</span>Solutions
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The productive struggle <em>is</em> the learning. This book’s <a href="./index.html">preface</a> argues that the “Read–Do” loop — reading a little, then immediately trying it yourself — is what moves knowledge into long-term memory. AI is most corrosive when it lets you skip the “Do.” So protect it deliberately: attempt the problem before you ask the AI, and treat the AI’s answer as something to <em>check against</em>, not to copy.</p>
-</div>
-</div>
-<p>A few habits keep AI on the right side of this line:</p>
-<ul>
-<li><strong>Try first, ask second.</strong> Write your own attempt — even a broken one — before prompting. You will understand the AI’s answer far better, and you will notice when it is wrong.</li>
-<li><strong>Make the AI explain, not just produce.</strong> Ask <em>why</em> a piece of code works, or ask it to walk you through the logic, rather than only requesting the finished snippet.</li>
-<li><strong>Practice unplugged.</strong> Periodically solve problems with no AI at all, the way a musician practices scales — this is how you find out which skills are actually yours.</li>
-<li><strong>Verify by hand on small cases.</strong> Run AI-suggested code on a tiny example whose answer you can work out yourself.</li>
-</ul>
-</section>
-<section id="using-ai-constructively-when-to-lean-in-and-when-to-step-back" class="level2" data-number="C.8">
-<h2 data-number="C.8" class="anchored" data-anchor-id="using-ai-constructively-when-to-lean-in-and-when-to-step-back"><span class="header-section-number">C.8</span> Using AI constructively: when to lean in, and when to step back</h2>
-<p>AI is not equally appropriate for every task or every moment. A useful mental model is to ask two questions before reaching for it: <em>How well do I understand this already?</em> and <em>How costly is a mistake?</em></p>
-<p>Lean <strong>in</strong> when the task is low-stakes and reversible, when you are exploring or brainstorming, when you are learning a concept you can then verify, or when you are stuck and need a starting point. These are situations where an occasional wrong answer costs you a little time and nothing more, and where the act of checking the AI’s output is itself good practice.</p>
-<p>Step <strong>back</strong> — or skip AI entirely — in two situations in particular:</p>
-<ul>
-<li><strong>Under time pressure.</strong> Deadlines are exactly when you are least able to carefully verify an answer and most tempted to accept it on faith. Automation bias is strongest when attention and time are scarce, so the moment you feel rushed is the moment an unchecked AI answer is most likely to slip through <span class="citation" data-cites="doi:10.1136/amiajnl-2011-000089">(<a href="references.html#ref-doi:10.1136/amiajnl-2011-000089" role="doc-biblioref">Goddard et al. 2012</a>)</span>. If you cannot afford to verify it, you cannot afford to trust it.</li>
-<li><strong>In high-stakes environments.</strong> Where an error could harm a patient, corrupt a published result, or expose protected data, the cost of a confident-sounding hallucination is far too high to absorb. In these settings AI should at most be a <em>second opinion</em> that a qualified human checks — never the final word — and its use should be governed by your institution’s policies rather than left to individual judgment <span class="citation" data-cites="doi:10.1038/s41746-023-00873-0">(<a href="references.html#ref-doi:10.1038/s41746-023-00873-0" role="doc-biblioref">Meskó and Topol 2023</a>)</span>.</li>
-</ul>
-<p>One well-studied way to keep yourself honest is a <strong>cognitive forcing function</strong>: a small deliberate friction that makes you engage before you accept. Asking the AI to justify its reasoning, committing to your own answer first, or requiring a manual check before you act all measurably reduce over-reliance and the errors it produces <span class="citation" data-cites="doi:10.1145/3449287">(<a href="references.html#ref-doi:10.1145/3449287" role="doc-biblioref">Buçinca et al. 2021</a>)</span>. The goal is not to use AI less for its own sake, but to make sure a human mind — yours — is still in the loop where it matters.</p>
-</section>
-<section id="the-future-ai-in-bioinformatics-and-data-science" class="level2" data-number="C.9">
-<h2 data-number="C.9" class="anchored" data-anchor-id="the-future-ai-in-bioinformatics-and-data-science"><span class="header-section-number">C.9</span> The Future: AI in Bioinformatics and Data Science</h2>
-<p>The field of AI is evolving at a breathtaking pace, and its integration into bioinformatics and data science is only set to deepen. We may see more sophisticated AI-powered tools for hypothesis generation, experimental design, drug discovery, and personalized medicine. As future biologists and data scientists, cultivating an adaptable mindset and committing to continuous learning will be key to navigating and leveraging these advancements effectively. Staying curious about new tools, while maintaining a strong foundation in scientific principles and ethics, will serve you well.</p>
-</section>
-<section id="practical-exercises-and-activities" class="level2" data-number="C.10">
-<h2 data-number="C.10" class="anchored" data-anchor-id="practical-exercises-and-activities"><span class="header-section-number">C.10</span> Practical Exercises and Activities</h2>
-<p>To help you get comfortable and skilled in using AI tools, we encourage you to try the following:</p>
 <ol type="1">
-<li><strong>Conceptual Clarification:</strong> Choose a statistical concept from this course that you find somewhat challenging (e.g., “false discovery rate,” “cross-validation,” or “the assumptions of linear regression”). Use an LLM to ask for an explanation tailored to a biologist. Note down your prompt and the AI’s response. Then, try to re-explain the concept in your own words to a classmate, drawing from (but not merely repeating) the AI’s explanation.</li>
-<li><strong>R Code Generation &amp; Adaptation:</strong> Imagine you have a data frame in R named <code>rna_seq_data</code> with columns <code>gene_id</code>, <code>sample_name</code>, <code>normalized_count</code>, and <code>treatment_group</code> (with levels “control” and “treated”). Ask an LLM to generate R code using <code>dplyr</code> and <code>tidyr</code> to calculate the average <code>normalized_count</code> for each <code>gene_id</code> within each <code>treatment_group</code>, and then spread the data so that ‘control’ and ‘treated’ averages are in separate columns for each gene. Once you have the code, test it with some sample data (you can ask the AI to generate that too!) and ensure you understand each step.</li>
-<li><strong>Debugging Practice:</strong> Take a piece of R code. First, try to understand and debug it yourself. Then, paste the code and the error message into an LLM and ask for help. Compare the AI’s suggestions to your own troubleshooting. Did it help you find the solution faster? Did it explain the error well?</li>
-<li><strong>Visualization Brainstorming:</strong> Provide a clear description of a biological dataset, ideally one of your own (e.g., “A dataset containing measurements of 5 different cytokine levels in blood samples taken from patients at 3 time points post-vaccination, with patients also categorized by age group (young, middle, old).”). Use an LLM to brainstorm 3-4 different types of visualizations you could create using <code>ggplot2</code> to explore this data. For each visualization, describe what insights it might provide.</li>
-<li><strong>Solve it twice.</strong> Pick a small exercise from an earlier chapter and solve it <em>without</em> any AI help. Then solve the same problem by prompting an LLM and accepting its answer. Compare: which version do you understand better, and which could you reproduce next week without help? Use this to calibrate where AI genuinely helps your learning versus where it quietly does the learning for you.</li>
+<li>New File → Quarto Document, write a title and a <code>```{r}</code> chunk such as <code>mean(c(2, 4, 6, 8))</code>, then click <strong>Render</strong>. The HTML appears in the preview.</li>
+<li>Define a value in a chunk, then reference it inline in a sentence with an <code>r</code> expression in single backticks; re-rendering after editing the value updates the text automatically — nothing was retyped.</li>
+<li><ol type="a">
+<li>
+<strong>Document</strong> — it’s a short analysis meant to be read. (b) <strong>Script</strong> — a heavy, independent processing step; orchestrate it with a pipeline tool and have a later document load its summarized output. (c) <strong>Script/console first</strong> — explore, then write up once you know the story. (d) <strong>Script</strong> (<code>.R</code>) — reusable software, not a narrative.</li>
+</ol></li>
+<li>
+<code>quarto publish gh-pages</code> renders and pushes to the <code>gh-pages</code> branch; the live page appears at <code>https://USERNAME.github.io/REPO/</code>.</li>
 </ol>
-<p>As you work through these exercises, make it a habit to document the prompts you use and critically assess the AI’s responses. Reflect on when the AI was most helpful, when its advice was off-base, and how you can refine your prompting strategy for better results in the future. This reflective practice is key to becoming a discerning and effective user of AI in your scientific endeavors.</p>
+</div>
+</div>
+</div>
+</section><section id="resources" class="level2" data-number="7.11"><h2 data-number="7.11" class="anchored" data-anchor-id="resources">
+<span class="header-section-number">7.11</span> Resources</h2>
+<ul>
+<li>
+<a href="https://quarto.org">Quarto documentation</a> — the authoritative guide, with tutorials for RStudio, VS Code, and Jupyter.</li>
+<li>
+<a href="https://r4ds.hadley.nz/"><em>R for Data Science</em></a>, the Quarto chapters — a gentle, practical introduction in book form.</li>
+<li>Knuth, D. E. (1984). <em>Literate Programming</em> <span class="citation" data-cites="doi:10.1093/comjnl/27.2.97">(<a href="references.html#ref-doi:10.1093/comjnl/27.2.97" role="doc-biblioref">Knuth 1984</a>)</span> — the original essay that named the idea.</li>
+<li>Sandve et al.&nbsp;(2013). <em>Ten Simple Rules for Reproducible Computational Research</em> <span class="citation" data-cites="doi:10.1371/journal.pcbi.1003285">(<a href="references.html#ref-doi:10.1371/journal.pcbi.1003285" role="doc-biblioref">Sandve et al. 2013</a>)</span> — why this workflow matters.</li>
+</ul>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-doi:10.1145/3449287" class="csl-entry" role="listitem">
-Buçinca, Zana, Maja Barbara Malaya, and Krzysztof Z. Gajos. 2021. <span>“To <span>Trust</span> or to <span>Think</span>.”</span> <em>Proceedings of the ACM on Human-Computer Interaction</em> 5 (CSCW1): 1–21. <a href="https://doi.org/10.1145/3449287">https://doi.org/10.1145/3449287</a>.
+<div id="ref-doi:10.1093/comjnl/27.2.97" class="csl-entry" role="listitem">
+Knuth, D. E. 1984. <span>“Literate <span>Programming</span>.”</span> <em>The Computer Journal</em> 27 (2): 97–111. <a href="https://doi.org/10.1093/comjnl/27.2.97">https://doi.org/10.1093/comjnl/27.2.97</a>.
 </div>
-<div id="ref-pmid:40816301" class="csl-entry" role="listitem">
-Budzyń, Krzysztof, Marcin Romańczyk, Diana Kitala, et al. 2025. <span>“Endoscopist Deskilling Risk After Exposure to Artificial Intelligence in Colonoscopy: A Multicentre, Observational Study.”</span> <em>The Lancet. Gastroenterology &amp; Hepatology</em> 10 (10): 896–903. <a href="https://doi.org/10.1016/s2468-1253(25)00133-5">https://doi.org/10.1016/s2468-1253(25)00133-5</a>.
-</div>
-<div id="ref-doi:10.1136/amiajnl-2011-000089" class="csl-entry" role="listitem">
-Goddard, Kate, Abdul Roudsari, and Jeremy C Wyatt. 2012. <span>“Automation Bias: A Systematic Review of Frequency, Effect Mediators, and Mitigators.”</span> <em>Journal of the American Medical Informatics Association</em> 19 (1): 121–27. <a href="https://doi.org/10.1136/amiajnl-2011-000089">https://doi.org/10.1136/amiajnl-2011-000089</a>.
-</div>
-<div id="ref-doi:10.1145/3706598.3713778" class="csl-entry" role="listitem">
-Lee, Hao-Ping (Hank), Advait Sarkar, Lev Tankelevitch, et al. 2025. <span>“The <span>Impact</span> of <span>Generative</span> <span>AI</span> on <span>Critical</span> <span>Thinking:</span> <span>Self-Reported</span> <span>Reductions</span> in <span>Cognitive</span> <span>Effort</span> and <span>Confidence</span> <span>Effects</span> <span>From</span> a <span>Survey</span> of <span>Knowledge</span> <span>Workers</span>.”</span> <em>Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems</em>, April 25, 1–22. <a href="https://doi.org/10.1145/3706598.3713778">https://doi.org/10.1145/3706598.3713778</a>.
-</div>
-<div id="ref-doi:10.1038/s41746-023-00873-0" class="csl-entry" role="listitem">
-Meskó, Bertalan, and Eric J. Topol. 2023. <span>“The Imperative for Regulatory Oversight of Large Language Models (or Generative <span>AI)</span> in Healthcare.”</span> <em>Npj Digital Medicine</em> 6 (1). <a href="https://doi.org/10.1038/s41746-023-00873-0">https://doi.org/10.1038/s41746-023-00873-0</a>.
-</div>
-<div id="ref-doi:10.1038/s41586-024-07146-0" class="csl-entry" role="listitem">
-Messeri, Lisa, and M. J. Crockett. 2024. <span>“Artificial Intelligence and Illusions of Understanding in Scientific Research.”</span> <em>Nature</em> 627 (8002): 49–58. <a href="https://doi.org/10.1038/s41586-024-07146-0">https://doi.org/10.1038/s41586-024-07146-0</a>.
-</div>
-<div id="ref-doi:10.1186/s12910-021-00687-3" class="csl-entry" role="listitem">
-Murdoch, Blake. 2021. <span>“Privacy and Artificial Intelligence: Challenges for Protecting Health Information in a New Era.”</span> <em>BMC Medical Ethics</em> 22 (1). <a href="https://doi.org/10.1186/s12910-021-00687-3">https://doi.org/10.1186/s12910-021-00687-3</a>.
+<div id="ref-doi:10.1371/journal.pcbi.1003285" class="csl-entry" role="listitem">
+Sandve, Geir Kjetil, Anton Nekrutenko, James Taylor, and Eivind Hovig. 2013. <span>“Ten <span>Simple</span> <span>Rules</span> for <span>Reproducible</span> <span>Computational</span> <span>Research</span>.”</span> <em>PLoS Computational Biology</em> 9 (10): e1003285. <a href="https://doi.org/10.1371/journal.pcbi.1003285">https://doi.org/10.1371/journal.pcbi.1003285</a>.
 </div>
 </div>
-</section>
-
-
-</main> <!-- /main -->
-<script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
     if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
@@ -1535,28 +1505,25 @@ Murdoch, Blake. 2021. <span>“Privacy and Artificial Intelligence: Challenges f
       }
     }
   });
-  </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="./additional_resources.html" class="pagination-link" aria-label="Further reading, cheat sheets, and datasets">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Further reading, cheat sheets, and datasets</span></span>
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./rproj_and_save_load.html" class="pagination-link" aria-label="Organizing, saving, and loading your work">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Organizing, saving, and loading your work</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./matrix_exercises.html" class="pagination-link" aria-label="Matrix Exercises">
-        <span class="nav-page-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Matrix Exercises</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./reading_and_writing.html" class="pagination-link" aria-label="Reading and writing data files">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
-<footer class="footer">
-  <div class="nav-footer">
+<footer class="footer"><div class="nav-footer">
     <div class="nav-footer-left">
       &nbsp;
     </div>   
     <div class="nav-footer-center">
       <ul class="footer-items list-unstyled">
-    <li class="nav-item">
+<li class="nav-item">
     <a class="nav-link" href="./about.html">
 <p>About</p>
 </a>
@@ -1572,14 +1539,12 @@ Murdoch, Blake. 2021. <span>“Privacy and Artificial Intelligence: Challenges f
 </a>
   </li>  
 </ul>
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/ai_tools.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/ai_tools.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/literate_programming.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/literate_programming.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
   </div>
 </footer>
-
-
 
 
 <script src="site_libs/quarto-html/zenscroll-min.js"></script>
