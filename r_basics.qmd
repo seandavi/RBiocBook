@@ -238,9 +238,29 @@ die * die
 
 R uses _element-wise execution_ when working with a _vector_ like `die`. When you manipulate a set of numbers, R will apply the same operation to each element in the set. So for example, when you run *`die - 1`*, R subtracts one from each element of `die`. 
 
-When you use two or more vectors in an operation, R will line up the vectors and perform a sequence of individual operations. For example, when you run *`die * die`*, R lines up the two `die` vectors and then multiplies the first element of vector 1 by the first element of vector 2. R then multiplies the second element of vector 1 by the second element of vector 2, and so on, until every element has been multiplied. The result will be a new vector the same length as the first two {@fig-elementwise}.
+When you use two or more vectors in an operation, R will line up the vectors and perform a sequence of individual operations. For example, when you run *`die * die`*, R lines up the two `die` vectors and then multiplies the first element of vector 1 by the first element of vector 2. R then multiplies the second element of vector 1 by the second element of vector 2, and so on, until every element has been multiplied. The result will be a new vector the same length as the first two (@fig-elementwise).
 
-!["When R performs element-wise execution, it matches up vectors and then manipulates each pair of elements independently."](images/hopr_0103.png){#fig-elementwise}
+```{r}
+#| label: fig-elementwise
+#| fig-cap: "Element-wise execution lines the two vectors up and operates on each matched pair independently, producing a result of the same length."
+#| fig-width: 6.5
+#| fig-height: 2.6
+#| echo: false
+a <- 1:6
+op <- par(mar = c(0, 0, 0, 0)); on.exit(par(op))
+plot.new()
+plot.window(xlim = c(-2, 6.6), ylim = c(0.4, 3.6))
+draw_row <- function(vals, y, fill, lab) {
+  for (i in seq_along(vals)) {
+    rect(i - 0.45, y - 0.42, i + 0.45, y + 0.42, col = fill, border = "grey45")
+    text(i, y, vals[i], cex = 1.1)
+  }
+  text(0.3, y, lab, adj = 1)
+}
+draw_row(a, 3, "#cfe8ff", "die")
+draw_row(a, 2, "#cfe8ff", "die")
+draw_row(a * a, 1, "#d6f0d6", "die * die")
+```
 
 If you give R two vectors of unequal lengths, R will repeat the shorter vector until it is as long as the longer vector, and then do the math, as shown in @fig-recycle. This isn't a permanent change--the shorter vector will be its original size after R does the math. If the length of the short vector does not divide evenly into the length of the long vector, R will return a warning message. This behavior is known as _vector recycling_, and it helps R do element-wise operations:
 
@@ -252,7 +272,29 @@ die + 1:2
 die + 1:4
 ```
 
-!["R will repeat a short vector to do element-wise operations with two vectors of uneven lengths."](images/hopr_0104.png){#fig-recycle}
+```{r}
+#| label: fig-recycle
+#| fig-cap: "Vector recycling: the shorter vector (here 1:2) is repeated until it matches the longer one, then the operation runs element-wise. The repeated copies are shown in a lighter shade."
+#| fig-width: 6.5
+#| fig-height: 2.6
+#| echo: false
+a <- 1:6
+b <- rep(1:2, 3)
+fill_b <- c("#ffd08a", "#ffd08a", "#ffe9c6", "#ffe9c6", "#ffe9c6", "#ffe9c6")
+op <- par(mar = c(0, 0, 0, 0)); on.exit(par(op))
+plot.new()
+plot.window(xlim = c(-3, 6.6), ylim = c(0.4, 3.6))
+draw_row <- function(vals, y, fill, lab) {
+  for (i in seq_along(vals)) {
+    rect(i - 0.45, y - 0.42, i + 0.45, y + 0.42, col = fill[i], border = "grey45")
+    text(i, y, vals[i], cex = 1.1)
+  }
+  text(0.3, y, lab, adj = 1)
+}
+draw_row(a, 3, rep("#cfe8ff", 6), "die")
+draw_row(b, 2, fill_b, "1:2 (recycled)")
+draw_row(a + b, 1, rep("#d6f0d6", 6), "die + 1:2")
+```
 
 Element-wise operations are a very useful feature in R because they manipulate groups of values in an orderly way. When you start working with data sets, element-wise operations will ensure that values from one observation or case are only paired with values from the same observation or case. Element-wise operations also make it easier to write your own programs and functions in R. 
 
@@ -280,15 +322,13 @@ round(3.1415)
 factorial(3)
 ```
 
-The data that you pass into the function is called the function's _argument_. The argument can be raw data, an R object, or even the results of another R function. In this last case, R will work from the innermost function to the outermost @fig-pemdas.
+The data that you pass into the function is called the function's _argument_. The argument can be raw data, an R object, or even the results of another R function. In this last case, R will work from the innermost function to the outermost.
 
 ```{r}
 mean(1:6)
 mean(die)
 round(mean(die))
 ```
-
-!["When you link functions together, R will resolve them from the innermost operation to the outermost. Here R first looks up die, then calculates the mean of one through six, then rounds the mean."](images/hopr_0105.png){#fig-pemdas}
 
 Returning to our die, we can use the `sample` function to randomly select one of the die's values; in other words, the `sample` function can simulate rolling the `die`.
 
@@ -553,19 +593,32 @@ roll2()
 
 You can give your functions as many arguments as you like. Just list their names, separated by commas, in the parentheses that follow `function`. When the function is run, R will replace each argument name in the function body with the value that the user supplies for the argument. If the user does not supply a value, R will replace the argument name with the argument's default value (if you defined one).
 
-To summarize, `function` helps you construct your own R functions. You create a body of code for your function to run by writing code between the braces that follow `function`. You create arguments for your function to use by supplying their names in the parentheses that follow `function`. Finally, you give your function a name by saving its output to an R object, as shown in @fig-functions.
+To summarize, `function` helps you construct your own R functions. You create a body of code for your function to run by writing code between the braces that follow `function`. You create arguments for your function to use by supplying their names in the parentheses that follow `function`. Finally, you give your function a name by saving its output to an R object.
 
 Once you've created your function, R will treat it like every other function in R. Think about how useful this is. Have you ever tried to create a new Excel option and add it to Microsoft's menu bar? Or a new slide animation and add it to Powerpoint's options? When you work with a programming language, you can do these types of things. As you learn to program in R, you will be able to create new, customized, reproducible tools for yourself whenever you like.
 
-!["Every function in R has the same parts, and you can use `function` to create these parts. Assign the result to a name, so you can call the function later."](images/hopr_0106.png){#fig-functions}
+::: {.callout-note}
+## The parts of a function
+
+```r
+roll <- function(bones) {           # name  <-  function(arguments)
+  result <- sample(bones, size = 1) # body: the code that runs on a call
+  result                            # the last value is returned
+}
+```
+
+Every function you write has the same three parts: a **name** (the object you
+assign it to with `<-`), its **arguments** (the inputs, listed in the
+parentheses), and its **body** (the code between the braces). Calling
+`roll(1:6)` runs the body with `bones` set to `1:6`.
+:::
 
 ## Scripts
 
-Scripts are code that are saved for later reuse or editing. An R script is just a plain text file that you save R code in. You can open an R script in RStudio by going to **File > New File > R script** in the menu bar. RStudio will then open a fresh script above your console pane, as shown in @fig-blank-script.
+Scripts are code that are saved for later reuse or editing. An R script is just a plain text file that you save R code in. You can open an R script in RStudio by going to **File > New File > R script** in the menu bar. RStudio will then open a fresh script above your console pane (the
+[RStudio chapter](intro_to_rstudio.qmd) tours the panes).
 
 I strongly encourage you to write and edit all of your R code in a script before you run it in the console. Why? This habit creates a reproducible record of your work. When you're finished for the day, you can save your script and then use it to rerun your entire analysis the next day. Scripts are also very handy for editing and proofreading your code, and they make a nice copy of your work to share with others. To save a script, click the scripts pane, and then go to **File > Save As** in the menu bar.
-
-!["When you open an R Script (File > New File > R Script in the menu bar), RStudio creates a fourth pane (or puts a new tab in the existing pane) above the console where you can write and edit your code."](images/hopr_0107.png){#fig-blank-script}
 
 RStudio comes with many built-in features that make it easy to work with scripts. First, you can automatically execute a line of code in a script by clicking the Run button at the top of the editor panel.
 
