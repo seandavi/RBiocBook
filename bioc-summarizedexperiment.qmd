@@ -249,6 +249,19 @@ metadata(se)$formula <- counts ~ cell + dex
 metadata(se)
 ```
 
+::: {.callout-note}
+## What is a formula?
+`counts ~ cell + dex` is an R **formula** — a compact way to say "the thing on the
+left is modeled by the things on the right." The `~` reads as "is explained by"
+(or simply "by"), and `+` adds terms. So this one says "model the counts using
+both the cell line *and* the treatment." Formulas are how you specify models all
+over R: `t.test()`, `lm()`, `ggplot2`'s `facet_*()`, and differential-expression
+tools like `DESeq2` all take one. Here we are only *storing* the formula as a
+note — nothing is fitted yet. We wrote `~ cell + dex` (rather than `~ dex` alone)
+for a concrete reason you'll see in the heatmap below: the donor (`cell`) is a big
+source of variation, so a sensible model accounts for it alongside the treatment.
+:::
+
 ## A subsetting cookbook
 
 Every example below subsets the **object** and lets the metadata follow. That is
