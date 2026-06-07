@@ -50,7 +50,7 @@ The examples below use the `SummarizedExperiment` class, the `airway` example
 dataset, and a couple of plotting helpers. Install them once with `BiocManager`:
 
 ```{r eval=FALSE}
-BiocManager::install(c("SummarizedExperiment", "airway", "matrixStats", "pheatmap"))
+BiocManager::install(c("SummarizedExperiment", "airway", "pheatmap"))
 ```
 :::
 
@@ -323,16 +323,16 @@ First, put the counts on a log scale (counts are very skewed) and keep only gene
 that are expressed at all:
 
 ```{r logcounts}
-library(matrixStats)
 logc <- log2(assay(se, "counts") + 1)
 logc <- logc[rowSums(assay(se, "counts")) > 0, ]   # drop all-zero genes
 dim(logc)
 ```
 
-Now rank genes by their standard deviation across samples and keep the top 50:
+Now rank genes by their standard deviation across samples (`apply()` runs `sd()`
+down each row) and keep the top 50:
 
 ```{r topvar}
-gene_sd <- rowSds(logc)
+gene_sd <- apply(logc, 1, sd)
 top <- head(order(gene_sd, decreasing = TRUE), 50)
 logc_top <- logc[top, ]
 ```
@@ -432,10 +432,10 @@ expressed <- air[rowSums(assay(air, "counts")) > 100, ]
 nrow(expressed)
 
 # 5. top-20 heatmap, annotated by cell line
-library(matrixStats); library(pheatmap)
+library(pheatmap)
 lc  <- log2(assay(air, "counts") + 1)
 lc  <- lc[rowSums(assay(air, "counts")) > 0, ]
-top <- head(order(rowSds(lc), decreasing = TRUE), 20)
+top <- head(order(apply(lc, 1, sd), decreasing = TRUE), 20)
 pheatmap(lc[top, ],
          annotation_col = as.data.frame(colData(air)[, "cell", drop = FALSE]),
          show_rownames = FALSE, scale = "row")

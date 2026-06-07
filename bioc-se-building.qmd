@@ -40,7 +40,7 @@ By the end of this chapter you will be able to:
 ## Installing the packages
 
 ```{r eval=FALSE}
-BiocManager::install(c("SummarizedExperiment", "matrixStats", "pheatmap"))
+BiocManager::install(c("SummarizedExperiment", "pheatmap"))
 ```
 :::
 
@@ -194,10 +194,9 @@ signal can go negative, and `log2` of a negative number is `NaN`), so we first
 keep only genes measured cleanly at every timepoint:
 
 ```{r topvar}
-library(matrixStats)
 lr <- assay(se, "logRatios")
 lr <- lr[rowSums(!is.finite(lr)) == 0, ]    # genes finite at all 7 timepoints
-top <- head(order(rowSds(lr), decreasing = TRUE), 50)
+top <- head(order(apply(lr, 1, sd), decreasing = TRUE), 50)
 lr_top <- lr[top, ]
 dim(lr_top)
 ```
