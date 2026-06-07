@@ -1,0 +1,272 @@
+---
+title: "Literate programming with Quarto"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
+---
+
+You run an analysis in the console, copy the key number and a figure into a Word
+document, and email it off. A week later the data changes, you re-run the code —
+but the document still shows last week's number and last week's plot, and nobody
+notices. That gap between *the analysis* and *the writeup* is where a huge fraction
+of scientific errors live.
+
+**Literate programming** closes the gap. Instead of keeping code in one place and
+prose in another, you write a single document that contains the prose, the code,
+*and* the results the code produces — and the whole thing regenerates from the data
+every time you render it. The numbers and figures can't go stale, because they are
+never pasted: they are computed fresh, on the spot.
+
+You are reading literate programming right now. This entire book is a
+[Quarto](https://quarto.org) project: every code block you've seen actually *ran*,
+every plot was generated straight from the data at high quality, and every figure
+reference, citation, and cross-reference resolves itself automatically. The book
+*is* its own source code. That's the idea this chapter teaches you to use.
+
+## What you'll learn
+
+By the end of this chapter you will be able to:
+
+- Explain what literate programming is and the problem it solves.
+- Name its concrete benefits — reproducibility, live in-text results, one source to
+  many formats.
+- Create, develop, render, and preview a Quarto document in RStudio, using the
+  console-and-document loop you already know.
+- Decide when literate programming is the right tool, and when a plain script or a
+  pipeline is the better choice.
+- (with a GitHub account) publish a rendered document to the web with one command.
+
+## What is literate programming?
+
+The term comes from Donald Knuth [@doi:10.1093/comjnl/27.2.97], who argued that a
+program should be written first for *humans* to read — an explanatory narrative
+with the code woven into it — and only incidentally for the machine to run. The
+modern incarnation for data analysis is **Quarto** (and its predecessor, R
+Markdown).
+
+A Quarto document is a plain-text file with the extension `.qmd` that interleaves
+three things:
+
+- **prose**, written in Markdown (headings, lists, **bold**, links);
+- **code**, in fenced *chunks*;
+- the **output** that code produces — printed values, tables, and plots —
+  generated when you *render* the document.
+
+There is no separate "the analysis" and "the report." They are the same file, and
+that file is the single source of truth.
+
+Here is what a tiny `.qmd` looks like:
+
+````markdown
+---
+title: "My first analysis"
+format: html
+---
+
+Here is some prose describing what I'm about to do.
+
+```{r}
+x <- c(2, 4, 6, 8)
+mean(x)
+```
+
+And a sentence with a value computed inline: the mean is `r mean(x)`.
+````
+
+The header between the `---` lines is **YAML** metadata (title, output format).
+Below it, prose and ```` ```{r} ```` code chunks alternate freely.
+
+## Why bother? The benefits
+
+```{r demo-vector, echo=FALSE}
+x <- c(2, 4, 6, 8)
+```
+
+- **Reproducibility, with no copy-paste drift.** Rendering re-runs *all* the code
+  from the data. A figure or number in the document can't be stale, because it is
+  regenerated rather than pasted. Reproducibility like this is now considered a
+  baseline expectation of computational work [@doi:10.1371/journal.pcbi.1003285].
+- **Live results in the text.** You can drop a computed value straight into a
+  sentence — an *inline* code expression. For example, the mean of the vector
+  `x <- c(2, 4, 6, 8)` is `r mean(x)`, and that number was calculated when this page
+  was rendered, not typed by hand. Change the data, re-render, and the sentence
+  updates itself.
+- **One source, many formats.** The same `.qmd` renders to HTML, PDF, or Word —
+  you don't rewrite anything to change the output.
+- **Beautiful, consistent rendering.** Clean typography, high-quality plots
+  straight from your code, tables, mathematics, citations, and automatic
+  figure/section **cross-references** that number and link themselves.
+
+::: {.callout-tip}
+## Exhibit A: the book in your hands
+You don't have to take this on faith — you're holding the proof. This book is a
+Quarto project, so its code blocks **always work** (they are executed and checked
+on every build; if a chunk broke, the build would fail), its figures are generated
+fresh at high quality, and its citations and `@fig-`/`@sec-` cross-references all
+resolve automatically. Literate programming, demonstrating itself.
+:::
+
+## Your first Quarto document in RStudio
+
+The best part: developing a Quarto document is the same console workflow you
+already use, with the code saved in a document and the output captured alongside
+it.
+
+1. **Create it.** In RStudio: **File → New File → Quarto Document…**, give it a
+   title, choose **HTML**, and click *Create*. You'll get a starter `.qmd` with a
+   YAML header and a sample chunk.
+2. **Recognize the parts.** The `---` header sets the title and format; the body
+   alternates Markdown prose with ```` ```{r} ```` chunks.
+3. **Develop in the mirrored console.** Click the green ▶ button at the top-right of
+   a chunk (or press `Ctrl`/`Cmd`+`Shift`+`Enter`) and the chunk runs *in the R
+   console you already know* — the same console from the
+   [R mechanics chapter](r_intro_mechanics.qmd) — with its results shown inline,
+   right under the chunk. You can also run a single line with
+   `Ctrl`/`Cmd`+`Enter` to experiment, exactly as in a script. This is the key
+   mental shift: a `.qmd` is your interactive session, made permanent.
+4. **Render.** Click the **Render** button. Quarto runs the *entire* document
+   top-to-bottom in a **fresh** R session and produces the output, shown in the
+   preview pane.
+5. **Edit how you like.** RStudio offers a **Source** editor (raw Markdown) and a
+   **Visual** editor (a word-processor-like view); switch between them with the
+   buttons above the document. Use whichever you prefer — the `.qmd` file is the
+   same either way.
+
+::: {.callout-important}
+## Why "fresh session" is a feature, not a nuisance
+Rendering starts from a blank R session, so it only sees what the document itself
+defines. That catches the most common reproducibility bug: code that secretly
+relied on a variable you created in the console an hour ago and forgot to write
+down. If it renders, it reproduces — on your machine *and* on someone else's.
+:::
+
+## When *not* to use literate programming
+
+Literate programming is for the **analysis and communication layer** of your work.
+Underneath that often sits a **heavy data-processing or pipeline layer**, and that
+layer usually wants different tools. Reach for a plain script (or a pipeline tool)
+instead when:
+
+- **A step is slow or compute-heavy.** If a chunk takes an hour, you don't want it
+  re-running every time you fix a typo in a sentence. Either cache it (see below) or
+  move it to a script that runs once and saves its result.
+- **The work is an independent heavy-lift pipeline step.** Aligning sequencing
+  reads, processing huge files, multi-stage bioinformatics workflows — these belong
+  in scripts orchestrated by a `Makefile`, the `targets` package, Snakemake, or
+  Nextflow, not in a render-on-every-build document.
+- **You're still exploring.** Poke around in the console first; write it up *after*
+  you know what you've found. Don't fight a document while you're still thinking.
+- **You're building reusable software.** Functions and packages live in `.R` files,
+  not in narrative documents.
+- **The deliverable isn't a document** — a trained model, a cleaned dataset, an API.
+  Produce those with scripts.
+
+A one-line rule of thumb: **if the output is meant for a human to read, reach for a
+Quarto document; if the output is data, a model, or a pipeline artifact, reach for
+a script.**
+
+## Keeping heavy steps literate anyway
+
+The boundary above isn't a wall. Three tools let you keep an expensive analysis
+inside a literate document without paying the cost on every render:
+
+- **Chunk caching.** Add `#| cache: true` to a chunk and its results are saved and
+  reused until *that chunk's code* changes — ideal for one slow model fit.
+- **Freeze.** A Quarto book can set `execute: freeze: auto`, which re-executes a
+  document only when its source changes and reuses stored results otherwise. This
+  book uses exactly that: heavy Bioconductor chapters are frozen, so a normal build
+  reuses their results instead of re-downloading and re-computing.
+- **Precompute and load.** Run the heavy step once in a separate script, `saveRDS()`
+  the result, and have the document `readRDS()` it. The document stays literate and
+  fast; the heavy lifting happens out of band.
+
+## Publishing to GitHub Pages
+
+If you have a GitHub account, putting a rendered document on the public web is one
+command. From the project's directory:
+
+```bash
+quarto publish gh-pages
+```
+
+This renders your document, pushes the output to a special `gh-pages` branch of
+your repository, and switches on GitHub Pages — giving you a public address like
+`https://USERNAME.github.io/REPO/`. Run the same command again whenever you want to
+update the live version. (See the [Git and GitHub](git_and_github.qmd) appendix if
+you're new to repositories.)
+
+::: {.callout-note}
+## No GitHub account? No problem
+`quarto publish quarto-pub` publishes to [Quarto Pub](https://quartopub.com), a free
+hosting service, with the same one-command flow and no GitHub required. And for a
+document or book you update often, you can have **GitHub Actions** render and
+publish automatically on every push — which is precisely how this book is built and
+deployed.
+:::
+
+## "Document or script?" — a quick checklist
+
+| The work… | Use |
+|---|---|
+| produces a report, figure, or notebook **for people to read** | a Quarto document |
+| produces a **dataset, model, or pipeline artifact** | a script |
+| takes seconds-to-minutes and belongs in the narrative | a document (cache if needed) |
+| takes hours, or is shared across many analyses | a script + a saved artifact |
+| is open-ended **exploration** | the console/script now; write it up later |
+
+## Summary
+
+Literate programming keeps code, prose, and results in one document that
+regenerates from the data, so your writeup can never drift out of sync with your
+analysis. In Quarto that document is a `.qmd` you develop with the same RStudio
+console loop you already use, then **Render** in a fresh session — which both
+produces a polished, multi-format report and guarantees it reproduces. It is the
+right tool for the analysis-and-communication layer, while heavy processing and
+pipelines belong in scripts (with caching, freeze, and precomputed artifacts to
+bridge the two). And with one command you can publish the result to the web.
+
+## Exercises
+
+1. **Make one.** In RStudio, create a new Quarto document with a title, a sentence
+   of prose, and a code chunk that computes something (e.g. the mean of a vector).
+   Render it to HTML.
+2. **Watch it update.** Add an *inline* value to your prose so a number in the
+   sentence is computed from your data. Change the data, re-render, and confirm the
+   sentence changed on its own.
+3. **Classify.** For each task, say whether it belongs in a Quarto document or a
+   script, and why: (a) fit a quick model and report the result; (b) align 200 GB of
+   sequencing reads; (c) explore a brand-new dataset for the first time; (d) write a
+   reusable plotting function you'll call from several analyses.
+4. **(Optional, needs GitHub.)** Publish a document with `quarto publish gh-pages`
+   and visit the resulting URL.
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+1. New File → Quarto Document, write a title and a ```` ```{r} ```` chunk such as
+   `mean(c(2, 4, 6, 8))`, then click **Render**. The HTML appears in the preview.
+2. Define a value in a chunk, then reference it inline in a sentence with an `r`
+   expression in single backticks; re-rendering after editing the value updates the
+   text automatically — nothing was retyped.
+3. (a) **Document** — it's a short analysis meant to be read. (b) **Script** — a
+   heavy, independent processing step; orchestrate it with a pipeline tool and have
+   a later document load its summarized output. (c) **Script/console first** —
+   explore, then write up once you know the story. (d) **Script** (`.R`) — reusable
+   software, not a narrative.
+4. `quarto publish gh-pages` renders and pushes to the `gh-pages` branch; the live
+   page appears at `https://USERNAME.github.io/REPO/`.
+:::
+
+## Resources
+
+- [Quarto documentation](https://quarto.org) — the authoritative guide, with
+  tutorials for RStudio, VS Code, and Jupyter.
+- [*R for Data Science*](https://r4ds.hadley.nz/), the Quarto chapters — a gentle,
+  practical introduction in book form.
+- Knuth, D. E. (1984). *Literate Programming* [@doi:10.1093/comjnl/27.2.97] — the
+  original essay that named the idea.
+- Sandve et al. (2013). *Ten Simple Rules for Reproducible Computational Research*
+  [@doi:10.1371/journal.pcbi.1003285] — why this workflow matters.
