@@ -71,6 +71,9 @@ div.csl-indent {
 <link href="site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark-9fe7af23de747b2ab7192c628daeeef8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <link href="site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -917,7 +920,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </table>
 <p>Don’t expect the perfect answer on your first attempt. <strong>Iterate and refine your prompts.</strong> If the initial response isn’t quite what you need, try rephrasing your question, adding more details, or breaking down a complex request into smaller parts. You can also <strong>specify the desired output format</strong>, such as “Provide the R code for this,” “Explain this concept in three simple bullet points,” or “List three potential statistical approaches for this problem.” Sometimes, asking for multiple perspectives or alternative solutions can also be enlightening. Finally, don’t hesitate to experiment with different LLMs if you have access to more than one, as their strengths can vary.</p>
 </section>
-<section id="ethical-considerations-and-limitations" class="level2" data-number="D.6">
+<section id="ethical-considerations-and-limitations" class="level2 page-columns page-full" data-number="D.6">
 <h2 data-number="D.6" class="anchored" data-anchor-id="ethical-considerations-and-limitations"><span class="header-section-number">D.6</span> Ethical Considerations and Limitations</h2>
 <p>While AI tools offer tremendous potential, it’s imperative to use them responsibly and be acutely aware of their limitations.</p>
 <p><strong>Accuracy and “Hallucinations”:</strong> This is perhaps the most critical point. LLMs are designed to generate plausible text, but this text is not always factually correct or logically sound. They can “hallucinate” answers, code, or citations that seem convincing but are entirely fabricated.</p>
@@ -945,6 +948,12 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </div>
 </div>
 <p><strong>Over-Reliance and Skill Atrophy:</strong> The convenience of AI can be seductive. However, relying on it too heavily can hinder the development of your own foundational R programming and statistical reasoning skills, and there is now empirical evidence that heavy reliance both erodes the skills of experts and reduces the critical thinking people invest in a task <span class="citation" data-cites="pmid:40816301 doi:10.1145/3706598.3713778">(<a href="references.html#ref-pmid:40816301" role="doc-biblioref">Budzyń et al. 2025</a>; <a href="references.html#ref-doi:10.1145/3706598.3713778" role="doc-biblioref">Lee et al. 2025</a>)</span>. Use AI as a tool to <em>aid</em> and <em>accelerate</em> your learning, not to <em>replace</em> the hard work of understanding. The ultimate goal is for <em>you</em> to become proficient, not for the AI to perform tasks for you. This risk is important enough that the next section treats it on its own.</p>
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><a href="images/ai-skilling-timing.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Optimal timing of AI usage."><img src="images/ai-skilling-timing.png" class="img-fluid figure-img" alt="Optimal timing of AI usage."></a></p>
+<figcaption class="margin-caption">Optimal timing of AI usage.</figcaption>
+</figure>
+</div>
 <p><strong>Reproducibility:</strong> If you incorporate AI-generated code or insights into your analyses, ensure you thoroughly understand them, can justify their use, and document them meticulously for reproducibility. It can be good practice to note the prompts you used if the interaction significantly shaped your approach, treating it almost like a consultation.</p>
 <p>The table below summarizes some key limitations and suggested mitigations:</p>
 <table class="table">
@@ -1589,6 +1598,38 @@ Murdoch, Blake. 2021. <span>“Privacy and Artificial Intelligence: Challenges f
     </div>
   </div>
 </footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
