@@ -1,5 +1,11 @@
 ---
 title: "Accessing public omics data with GEOquery"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
 ---
 
 Someone has already run the experiment you need. Thousands of expression
@@ -27,6 +33,8 @@ By the end of this chapter you will be able to:
 - Summarize sample annotations with `table()`.
 - Filter an expression matrix down to its most variable genes.
 - Run PCA with `prcomp()` and plot the samples to see how they group.
+- Explain what PCA does, and how it differs from nonlinear methods such as t-SNE
+  and UMAP.
 
 This chapter builds directly on the `SummarizedExperiment` chapter. If the words
 `assay()`, `colData()`, or "rows are genes, columns are samples" don't feel
@@ -151,9 +159,30 @@ matrix.
 
 ## Running and interpreting the PCA
 
-PCA finds new axes (principal components) that capture the largest patterns of
-variation in the data. `prcomp()` expects **samples as rows**, so we transpose
-the matrix with `t()` before handing it over:
+::: {.callout-note}
+## What *is* a principal component analysis?
+
+Each sample is now described by 500 numbers (one per gene) — 500 dimensions, far
+too many to look at directly. PCA re-describes the same samples using a new set of
+axes, the **principal components**, chosen to have three useful properties:
+
+- each component is a **weighted blend of the original genes** (a *linear
+  combination*), so a single axis summarizes many genes at once;
+- the components are **ordered by how much of the variation they capture** — PC1
+  captures the most, PC2 the next most, and so on;
+- the components are **uncorrelated** — geometrically, at right angles — so each
+  carries information the others don't.
+
+The payoff is **dimensionality reduction**: when the first two or three components
+capture most of the variation (they often do), you can plot just those and *see*
+the structure of a 500-dimensional dataset on a flat page. PCA is **linear**
+(components are straight-line blends of genes), **deterministic** (same data, same
+answer), and its axes are **interpretable** — you can ask which genes weigh most
+heavily on PC1.
+:::
+
+With that picture in mind: `prcomp()` runs the analysis, and it expects **samples
+as rows**, so we transpose the matrix with `t()` before handing it over:
 
 ```{r pca, echo=TRUE, cache=TRUE}
 pca_results <- prcomp(t(dat))
@@ -162,9 +191,14 @@ pca_df$Type <- factor(colData(se)[, "cancer.type.ch1"])
 pca_df$Normal <- factor(colData(se)[, "normal.ch1"])
 ```
 
-`pca_results$x` holds each sample's coordinates along every principal component.
-We pull those into a data frame and attach the cancer type and tumor/normal
-label so we can color and shape the plot.
+`prcomp()` returns a list with a few pieces worth knowing. `$x` holds each
+sample's coordinates along every principal component — the new positions we'll
+plot. `$sdev` is each component's standard deviation, which we'll turn into
+"variance explained" in a moment. And `$rotation` (which we won't use here) holds
+the **loadings** — how strongly each gene contributes to each component — which is
+where you'd look to ask *which genes* drive PC1. For now we pull `$x` into a data
+frame and attach the cancer type and tumor/normal label so we can color and shape
+the plot.
 
 How much of the variation does each component capture? Each component's variance
 is its squared standard deviation; divide by the total to get a fraction:
@@ -199,6 +233,32 @@ study set out to characterize. In other words, a handful of unsupervised
 components, computed from just 500 genes, already recover biology you'd expect:
 different cancers look different, and within a cancer, tumor looks different from
 normal.
+
+::: {.callout-tip}
+## PCA is one of several dimensionality-reduction tools
+
+PCA is the workhorse, but it isn't the only way to squeeze many dimensions onto a
+plot, and the alternatives make different trade-offs:
+
+- **PCA** — *linear*, fast, deterministic, with interpretable axes. It preserves
+  the **global** structure (the biggest sources of variation) but can blur groups
+  that differ only in subtle, nonlinear ways.
+- **t-SNE** and **UMAP** — *nonlinear* methods that preserve **local
+  neighborhoods**: similar samples are placed close together, so clusters pop out
+  vividly. The trade-offs: the axes have no inherent meaning, distances *between*
+  well-separated clusters are not meaningful, and the result is **stochastic**
+  (different runs or settings give different-looking pictures). They are
+  visualization tools, not a basis for measurement. You'll use t-SNE in the
+  [single-cell chapter](single_cell/setup.qmd), where many thousands of cells form
+  many subtle clusters.
+- **MDS** (multidimensional scaling) — arranges points to preserve their
+  **pairwise distances** as faithfully as possible; classical MDS on Euclidean
+  distances is essentially PCA in disguise.
+
+A common, sensible workflow is **PCA first** — it's quick and tells you how many
+dimensions actually carry signal — followed by a nonlinear method like UMAP on the
+top components when you need to resolve fine cluster structure.
+:::
 
 ## Summary
 

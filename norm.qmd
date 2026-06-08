@@ -1,5 +1,11 @@
 ---
 title: "Working with distribution functions"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
 ---
 
 ```{r setup, include=FALSE}
@@ -201,6 +207,117 @@ pnorm(1, lower.tail = FALSE)   # area to the RIGHT of 1
 ```
 
 
+
+## The cumulative distribution function
+
+Step back and look at what `pnorm` really *is*. Each call answers one question —
+"how much probability lies to the left of this value?" If you ask that question at
+*every* point along the x-axis and plot the answers, you trace out a single curve:
+the **cumulative distribution function**, or **CDF**. Where the density (`dnorm`)
+tells you how *concentrated* probability is at each point, the CDF tells you how
+much has *accumulated* by that point. They are two views of the same distribution,
+and learning to move between them is most of what "distribution intuition" really
+means.
+
+Here is the CDF of the standard normal — `pnorm(x)` evaluated at every `x`:
+
+```{r}
+#| label: fig-cdf-curve
+#| echo: false
+#| fig-cap: "The cumulative distribution function of the standard normal: pnorm(x) plotted at every x. It is the running total of the area under the density curve, climbing from 0 (no probability accumulated yet) to 1 (all of it)."
+#| fig-width: 7
+#| fig-height: 3.4
+cdf <- data.frame(x = x, p = pnorm(x))
+ggplot(cdf, aes(x, p)) +
+  geom_line(linewidth = 1.3, color = "steelblue") +
+  scale_x_continuous(n.breaks = 7) +
+  labs(x = "x", y = expression(P(X <= x))) +
+  theme_classic(base_size = 14)
+```
+
+A few features are worth naming, because they hold for *every* CDF, not just the
+normal:
+
+- It **starts near 0 and ends near 1.** A CDF is accumulated probability, and all
+  the probability sums to 1, so the curve can only climb from 0 up to 1.
+- It **never goes down.** Moving to the right can only *add* area, never remove it,
+  so a CDF is always non-decreasing.
+- It is **S-shaped (for the normal) because of where the density lives.** Out in
+  the left tail almost no probability is accumulating, so the curve is nearly flat;
+  through the middle — where the bell is tallest — probability piles up quickly and
+  the curve climbs steeply; in the right tail there is little left to add, so it
+  levels off toward 1.
+
+That last point is the key link between the two views: **the density is the *slope*
+of the CDF.** The curve rises fastest exactly where the density is tallest (the
+mean), and flattens wherever the density is near zero (the tails). Read the other
+direction, the **CDF is the running total — the accumulated area — of the density.**
+
+### The area is the height
+
+The cleanest way to *feel* the connection is to put the two pictures side by side.
+In @fig-cdf-link the same value `q` appears in both rows: the **shaded area** under
+the density (top) is exactly the **height** of the CDF (bottom). As `q` slides to
+the right, the shading fills in and the point climbs the S-curve. That shaded
+area-equals-curve-height is precisely the number `pnorm(q)` returns.
+
+```{r}
+#| label: fig-cdf-link
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-cap: "Two views of the same probability at q = -1, 0, and 1. Top row: the density with the area to the left of q shaded. Bottom row: the CDF, with a point at (q, pnorm(q)) and dashed guides. In every column the shaded area above equals the height below."
+#| fig-width: 9
+#| fig-height: 5
+library(patchwork)
+pair <- function(q) {
+  area <- subset(normal, x <= q)
+  top <- ggplot(normal, aes(x, y)) +
+    geom_area(data = area, fill = "tomato", alpha = 0.3) +
+    geom_line(linewidth = 1) +
+    labs(subtitle = paste0("shaded area = ", sprintf("%.2f", pnorm(q))),
+         x = NULL, y = "density") +
+    theme_classic(base_size = 12)
+  bot <- ggplot(cdf, aes(x, p)) +
+    geom_line(linewidth = 1, color = "steelblue") +
+    annotate("segment", x = q, xend = q, y = 0, yend = pnorm(q),
+             linetype = 2, color = "grey45") +
+    annotate("segment", x = -3, xend = q, y = pnorm(q), yend = pnorm(q),
+             linetype = 2, color = "grey45") +
+    annotate("point", x = q, y = pnorm(q), size = 3, color = "steelblue") +
+    labs(subtitle = paste0("pnorm(", q, ") = ", sprintf("%.2f", pnorm(q))),
+         x = "x", y = expression(P(X <= x))) +
+    theme_classic(base_size = 12)
+  top / bot
+}
+pair(-1) | pair(0) | pair(1)
+```
+
+### Everything you already know, on one curve
+
+Once you can see the CDF as a curve, the whole `d`/`p`/`q`/`r` family lines up on
+it:
+
+- **`pnorm`** reads the curve **upward**: hand it a value `q` on the x-axis and it
+  returns the *height* of the curve there — the probability to the left.
+- **`qnorm`** reads the same curve **across**: hand it a probability on the y-axis
+  and it returns the *x* where the curve reaches that height. That is why `qnorm`
+  is the exact inverse of `pnorm` — it's the same S-curve, read sideways.
+- **`dnorm`** is the curve's **steepness** — how fast probability is piling up at
+  that point.
+
+So `pnorm` and `qnorm` are not two separate things to memorize; they are the same
+curve approached from two directions, and `dnorm` is its slope.
+
+::: {.callout-note}
+## This isn't special to the normal
+Everything in this section is general. *Every* distribution — binomial, Poisson,
+t, exponential, and the rest — has a density (or, for counts, a probability mass)
+and a matching CDF, related in exactly the same way: the CDF is the accumulated
+area under the density, and the density is the slope of the CDF. That shared
+structure is *why* R gives every distribution the same `d`/`p`/`q`/`r` quartet.
+Swap `norm` for `pois` or `binom` and the picture you just built still holds.
+:::
 
 ## dnorm
 
