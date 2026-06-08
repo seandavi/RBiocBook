@@ -730,12 +730,19 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   <ul>
 <li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">21.1</span> What you’ll learn</a></li>
   <li><a href="#pnorm" id="toc-pnorm" class="nav-link" data-scroll-target="#pnorm"><span class="header-section-number">21.2</span> pnorm</a></li>
-  <li><a href="#dnorm" id="toc-dnorm" class="nav-link" data-scroll-target="#dnorm"><span class="header-section-number">21.3</span> dnorm</a></li>
-  <li><a href="#qnorm" id="toc-qnorm" class="nav-link" data-scroll-target="#qnorm"><span class="header-section-number">21.4</span> qnorm</a></li>
-  <li><a href="#rnorm" id="toc-rnorm" class="nav-link" data-scroll-target="#rnorm"><span class="header-section-number">21.5</span> rnorm</a></li>
-  <li><a href="#worked-example-iq-scores" id="toc-worked-example-iq-scores" class="nav-link" data-scroll-target="#worked-example-iq-scores"><span class="header-section-number">21.6</span> Worked example: IQ scores</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">21.7</span> Exercises</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">21.8</span> Summary</a></li>
+  <li>
+<a href="#the-cumulative-distribution-function" id="toc-the-cumulative-distribution-function" class="nav-link" data-scroll-target="#the-cumulative-distribution-function"><span class="header-section-number">21.3</span> The cumulative distribution function</a>
+  <ul class="collapse">
+<li><a href="#the-area-is-the-height" id="toc-the-area-is-the-height" class="nav-link" data-scroll-target="#the-area-is-the-height"><span class="header-section-number">21.3.1</span> The area is the height</a></li>
+  <li><a href="#everything-you-already-know-on-one-curve" id="toc-everything-you-already-know-on-one-curve" class="nav-link" data-scroll-target="#everything-you-already-know-on-one-curve"><span class="header-section-number">21.3.2</span> Everything you already know, on one curve</a></li>
+  </ul>
+</li>
+  <li><a href="#dnorm" id="toc-dnorm" class="nav-link" data-scroll-target="#dnorm"><span class="header-section-number">21.4</span> dnorm</a></li>
+  <li><a href="#qnorm" id="toc-qnorm" class="nav-link" data-scroll-target="#qnorm"><span class="header-section-number">21.5</span> qnorm</a></li>
+  <li><a href="#rnorm" id="toc-rnorm" class="nav-link" data-scroll-target="#rnorm"><span class="header-section-number">21.6</span> rnorm</a></li>
+  <li><a href="#worked-example-iq-scores" id="toc-worked-example-iq-scores" class="nav-link" data-scroll-target="#worked-example-iq-scores"><span class="header-section-number">21.7</span> Worked example: IQ scores</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">21.8</span> Exercises</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">21.9</span> Summary</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/norm.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/norm.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -775,7 +782,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 7, 2026</p>
+      <p class="date-modified">June 8, 2026</p>
     </div>
   </div>
     
@@ -931,8 +938,71 @@ Figure&nbsp;21.4: The pnorm function takes a quantile (value on the x-axis) and 
 <pre><code>[1] 0.1586553</code></pre>
 </div>
 </div>
-</section><section id="dnorm" class="level2 page-columns page-full" data-number="21.3"><h2 data-number="21.3" class="anchored" data-anchor-id="dnorm">
-<span class="header-section-number">21.3</span> dnorm</h2>
+</section><section id="the-cumulative-distribution-function" class="level2 page-columns page-full" data-number="21.3"><h2 data-number="21.3" class="anchored" data-anchor-id="the-cumulative-distribution-function">
+<span class="header-section-number">21.3</span> The cumulative distribution function</h2>
+<p>Step back and look at what <code>pnorm</code> really <em>is</em>. Each call answers one question — “how much probability lies to the left of this value?” If you ask that question at <em>every</em> point along the x-axis and plot the answers, you trace out a single curve: the <strong>cumulative distribution function</strong>, or <strong>CDF</strong>. Where the density (<code>dnorm</code>) tells you how <em>concentrated</em> probability is at each point, the CDF tells you how much has <em>accumulated</em> by that point. They are two views of the same distribution, and learning to move between them is most of what “distribution intuition” really means.</p>
+<p>Here is the CDF of the standard normal — <code>pnorm(x)</code> evaluated at every <code>x</code>:</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-cdf-curve" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-cdf-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="norm_files/figure-html/fig-cdf-curve-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;21.5: The cumulative distribution function of the standard normal: pnorm(x) plotted at every x. It is the running total of the area under the density curve, climbing from 0 (no probability accumulated yet) to 1 (all of it)."><img src="norm_files/figure-html/fig-cdf-curve-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-cdf-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.5: The cumulative distribution function of the standard normal: pnorm(x) plotted at every x. It is the running total of the area under the density curve, climbing from 0 (no probability accumulated yet) to 1 (all of it).
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>A few features are worth naming, because they hold for <em>every</em> CDF, not just the normal:</p>
+<ul>
+<li>It <strong>starts near 0 and ends near 1.</strong> A CDF is accumulated probability, and all the probability sums to 1, so the curve can only climb from 0 up to 1.</li>
+<li>It <strong>never goes down.</strong> Moving to the right can only <em>add</em> area, never remove it, so a CDF is always non-decreasing.</li>
+<li>It is <strong>S-shaped (for the normal) because of where the density lives.</strong> Out in the left tail almost no probability is accumulating, so the curve is nearly flat; through the middle — where the bell is tallest — probability piles up quickly and the curve climbs steeply; in the right tail there is little left to add, so it levels off toward 1.</li>
+</ul>
+<p>That last point is the key link between the two views: <strong>the density is the <em>slope</em> of the CDF.</strong> The curve rises fastest exactly where the density is tallest (the mean), and flattens wherever the density is near zero (the tails). Read the other direction, the <strong>CDF is the running total — the accumulated area — of the density.</strong></p>
+<section id="the-area-is-the-height" class="level3 page-columns page-full" data-number="21.3.1"><h3 data-number="21.3.1" class="anchored" data-anchor-id="the-area-is-the-height">
+<span class="header-section-number">21.3.1</span> The area is the height</h3>
+<p>The cleanest way to <em>feel</em> the connection is to put the two pictures side by side. In <a href="#fig-cdf-link" class="quarto-xref">Figure&nbsp;<span>21.6</span></a> the same value <code>q</code> appears in both rows: the <strong>shaded area</strong> under the density (top) is exactly the <strong>height</strong> of the CDF (bottom). As <code>q</code> slides to the right, the shading fills in and the point climbs the S-curve. That shaded area-equals-curve-height is precisely the number <code>pnorm(q)</code> returns.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-cdf-link" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-cdf-link-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="norm_files/figure-html/fig-cdf-link-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;21.6: Two views of the same probability at q = -1, 0, and 1. Top row: the density with the area to the left of q shaded. Bottom row: the CDF, with a point at (q, pnorm(q)) and dashed guides. In every column the shaded area above equals the height below."><img src="norm_files/figure-html/fig-cdf-link-1.png" class="img-fluid figure-img" width="864"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-cdf-link-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21.6: Two views of the same probability at q = -1, 0, and 1. Top row: the density with the area to the left of q shaded. Bottom row: the CDF, with a point at (q, pnorm(q)) and dashed guides. In every column the shaded area above equals the height below.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="everything-you-already-know-on-one-curve" class="level3" data-number="21.3.2"><h3 data-number="21.3.2" class="anchored" data-anchor-id="everything-you-already-know-on-one-curve">
+<span class="header-section-number">21.3.2</span> Everything you already know, on one curve</h3>
+<p>Once you can see the CDF as a curve, the whole <code>d</code>/<code>p</code>/<code>q</code>/<code>r</code> family lines up on it:</p>
+<ul>
+<li>
+<strong><code>pnorm</code></strong> reads the curve <strong>upward</strong>: hand it a value <code>q</code> on the x-axis and it returns the <em>height</em> of the curve there — the probability to the left.</li>
+<li>
+<strong><code>qnorm</code></strong> reads the same curve <strong>across</strong>: hand it a probability on the y-axis and it returns the <em>x</em> where the curve reaches that height. That is why <code>qnorm</code> is the exact inverse of <code>pnorm</code> — it’s the same S-curve, read sideways.</li>
+<li>
+<strong><code>dnorm</code></strong> is the curve’s <strong>steepness</strong> — how fast probability is piling up at that point.</li>
+</ul>
+<p>So <code>pnorm</code> and <code>qnorm</code> are not two separate things to memorize; they are the same curve approached from two directions, and <code>dnorm</code> is its slope.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>This isn’t special to the normal
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Everything in this section is general. <em>Every</em> distribution — binomial, Poisson, t, exponential, and the rest — has a density (or, for counts, a probability mass) and a matching CDF, related in exactly the same way: the CDF is the accumulated area under the density, and the density is the slope of the CDF. That shared structure is <em>why</em> R gives every distribution the same <code>d</code>/<code>p</code>/<code>q</code>/<code>r</code> quartet. Swap <code>norm</code> for <code>pois</code> or <code>binom</code> and the picture you just built still holds.</p>
+</div>
+</div>
+</section></section><section id="dnorm" class="level2 page-columns page-full" data-number="21.4"><h2 data-number="21.4" class="anchored" data-anchor-id="dnorm">
+<span class="header-section-number">21.4</span> dnorm</h2>
 <p><code>dnorm</code> gives the <strong>height</strong> of the bell curve at a value — the probability <em>density</em>. The curve is tallest at the mean and falls off symmetrically on either side. Unlike <code>pnorm</code>, the result is not a probability you can read as a percentage; it’s the height of the curve, used mainly for <em>drawing</em> the distribution or in likelihood calculations.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">dnorm</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>    <span class="co"># the peak of the standard normal</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -953,36 +1023,36 @@ Figure&nbsp;21.4: The pnorm function takes a quantile (value on the x-axis) and 
 <div class="cell-output-display page-columns page-full">
 <div id="fig-dnorm-1" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-dnorm-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-dnorm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;21.5: The dnorm function returns the height of the normal distribution at a given point."><img src="norm_files/figure-html/fig-dnorm-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-dnorm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;21.7: The dnorm function returns the height of the normal distribution at a given point."><img src="norm_files/figure-html/fig-dnorm-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-dnorm-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.5: The <code>dnorm</code> function returns the height of the normal distribution at a given point.
+Figure&nbsp;21.7: The <code>dnorm</code> function returns the height of the normal distribution at a given point.
 </figcaption></figure>
 </div>
 </div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-dnorm-2" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-dnorm-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-dnorm-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;21.6: The dnorm function returns the height of the normal distribution at a given point."><img src="norm_files/figure-html/fig-dnorm-2.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-dnorm-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;21.8: The dnorm function returns the height of the normal distribution at a given point."><img src="norm_files/figure-html/fig-dnorm-2.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-dnorm-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.6: The <code>dnorm</code> function returns the height of the normal distribution at a given point.
+Figure&nbsp;21.8: The <code>dnorm</code> function returns the height of the normal distribution at a given point.
 </figcaption></figure>
 </div>
 </div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-dnorm-3" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-dnorm-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-dnorm-3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;21.7: The dnorm function returns the height of the normal distribution at a given point."><img src="norm_files/figure-html/fig-dnorm-3.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-dnorm-3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;21.9: The dnorm function returns the height of the normal distribution at a given point."><img src="norm_files/figure-html/fig-dnorm-3.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-dnorm-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.7: The <code>dnorm</code> function returns the height of the normal distribution at a given point.
+Figure&nbsp;21.9: The <code>dnorm</code> function returns the height of the normal distribution at a given point.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="qnorm" class="level2 page-columns page-full" data-number="21.4"><h2 data-number="21.4" class="anchored" data-anchor-id="qnorm">
-<span class="header-section-number">21.4</span> qnorm</h2>
+</section><section id="qnorm" class="level2 page-columns page-full" data-number="21.5"><h2 data-number="21.5" class="anchored" data-anchor-id="qnorm">
+<span class="header-section-number">21.5</span> qnorm</h2>
 <p><code>qnorm</code> runs <code>pnorm</code> in reverse: hand it a probability and it returns the value with that much area to its left. Since <code>pnorm(1)</code> is about 0.84, <code>qnorm(0.84)</code> is about 1 — the two functions undo each other. This is how you find <strong>percentiles</strong>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">qnorm</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>     <span class="co"># the median: half the area lies to its left</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1003,61 +1073,61 @@ Figure&nbsp;21.7: The <code>dnorm</code> function returns the height of the norm
 <div class="cell-output-display page-columns page-full">
 <div id="fig-qnorm-1" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-qnorm-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-qnorm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;21.8: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-qnorm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;21.10: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-qnorm-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.8: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
+Figure&nbsp;21.10: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
 </figcaption></figure>
 </div>
 </div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-qnorm-2" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-qnorm-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-qnorm-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;21.9: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-2.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-qnorm-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;21.11: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-2.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-qnorm-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.9: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
+Figure&nbsp;21.11: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
 </figcaption></figure>
 </div>
 </div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-qnorm-3" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-qnorm-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-qnorm-3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;21.10: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-3.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-qnorm-3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;21.12: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-3.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-qnorm-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.10: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
+Figure&nbsp;21.12: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
 </figcaption></figure>
 </div>
 </div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-qnorm-4" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-qnorm-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-qnorm-4.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;21.11: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-4.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-qnorm-4.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;21.13: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-4.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-qnorm-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.11: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
+Figure&nbsp;21.13: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
 </figcaption></figure>
 </div>
 </div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-qnorm-5" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-qnorm-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-qnorm-5.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;21.12: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-5.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-qnorm-5.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;21.14: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile."><img src="norm_files/figure-html/fig-qnorm-5.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-qnorm-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.12: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
+Figure&nbsp;21.14: The qnorm function is the inverse of the pnorm function in that it takes a probability and gives the quantile.
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="rnorm" class="level2 page-columns page-full" data-number="21.5"><h2 data-number="21.5" class="anchored" data-anchor-id="rnorm">
-<span class="header-section-number">21.5</span> rnorm</h2>
+</section><section id="rnorm" class="level2 page-columns page-full" data-number="21.6"><h2 data-number="21.6" class="anchored" data-anchor-id="rnorm">
+<span class="header-section-number">21.6</span> rnorm</h2>
 <p><code>rnorm</code> draws random samples from the distribution — the workhorse for <em>simulating</em> data (we leaned on it heavily in the t-distribution chapter). Give it a count <code>n</code> and it hands back that many random values:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.6149261 1.2206819 0.7393680 0.6183436 0.3753819</code></pre>
+<pre><code>[1] -0.8425551 -0.7183510  1.4164141  1.3236451  1.2487917</code></pre>
 </div>
 </div>
 <p>Run that again and you’ll get five <em>different</em> numbers. To make a simulation reproducible — so you and a reader see the same “random” draws — set a seed first:</p>
@@ -1080,16 +1150,16 @@ Figure&nbsp;21.12: The qnorm function is the inverse of the pnorm function in th
 <div class="cell-output-display page-columns page-full">
 <div id="fig-rnorm" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-rnorm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="norm_files/figure-html/fig-rnorm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a vector of random numbers from the normal distribution (with mean=0, sd=1 as defaults)"><img src="norm_files/figure-html/fig-rnorm-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="norm_files/figure-html/fig-rnorm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;21.15: The rnorm function takes a number of samples and returns a vector of random numbers from the normal distribution (with mean=0, sd=1 as defaults)"><img src="norm_files/figure-html/fig-rnorm-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-rnorm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a vector of random numbers from the normal distribution (with mean=0, sd=1 as defaults)
+Figure&nbsp;21.15: The rnorm function takes a number of samples and returns a vector of random numbers from the normal distribution (with mean=0, sd=1 as defaults)
 </figcaption></figure>
 </div>
 </div>
 </div>
-</section><section id="worked-example-iq-scores" class="level2" data-number="21.6"><h2 data-number="21.6" class="anchored" data-anchor-id="worked-example-iq-scores">
-<span class="header-section-number">21.6</span> Worked example: IQ scores</h2>
+</section><section id="worked-example-iq-scores" class="level2" data-number="21.7"><h2 data-number="21.7" class="anchored" data-anchor-id="worked-example-iq-scores">
+<span class="header-section-number">21.7</span> Worked example: IQ scores</h2>
 <p>The normal distribution (also called the Gaussian distribution) is defined by two numbers: the <strong>mean</strong> (µ), which sets the centre, and the <strong>standard deviation</strong> (σ), which sets the spread. IQ scores are deliberately built to be normal with a <strong>mean of 100</strong> and a <strong>standard deviation of 15</strong>, which makes them a perfect playground for the four functions.</p>
 <p>A handy rule of thumb — the “68–95–99.7 rule” — says about 68% of values fall within one standard deviation of the mean (here, 85 to 115) and about 95% within two (70 to 130). Let’s check the 68% with <code>pnorm</code>. The area <em>between</em> 85 and 115 is the area below 115 minus the area below 85:</p>
 <div class="cell">
@@ -1099,14 +1169,14 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 </div>
 </div>
 <p>About 0.68 — exactly what the rule promises. Notice the pattern: a “between” question becomes one <code>pnorm</code> minus another.</p>
-</section><section id="exercises" class="level2" data-number="21.7"><h2 data-number="21.7" class="anchored" data-anchor-id="exercises">
-<span class="header-section-number">21.7</span> Exercises</h2>
+</section><section id="exercises" class="level2" data-number="21.8"><h2 data-number="21.8" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">21.8</span> Exercises</h2>
 <p>Use the IQ distribution (mean 100, sd 15) for each. Each solution names <em>which</em> of the four functions fits the question — that choice is the real skill.</p>
 <ol type="1">
 <li>
 <p><strong>Top 10%.</strong> Which IQ score marks the 90th percentile — the cutoff above which only the top 10% fall?</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1115,7 +1185,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">qnorm</a></span><span class="op">(</span><span class="fl">0.9</span>, mean <span class="op">=</span> <span class="fl">100</span>, sd <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1131,7 +1201,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 <li>
 <p><strong>Above 130.</strong> What fraction of people have an IQ above 130 (two standard deviations up)?</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1140,7 +1210,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">pnorm</a></span><span class="op">(</span><span class="fl">130</span>, mean <span class="op">=</span> <span class="fl">100</span>, sd <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1161,7 +1231,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 <li>
 <p><strong>Below 70.</strong> What fraction have an IQ below 70?</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1170,7 +1240,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">pnorm</a></span><span class="op">(</span><span class="fl">70</span>, mean <span class="op">=</span> <span class="fl">100</span>, sd <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1189,7 +1259,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 <li>(Set a seed so your answer is reproducible.)</li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1198,7 +1268,7 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -1213,8 +1283,8 @@ Figure&nbsp;21.13: The rnorm function takes a number of samples and returns a ve
 </div>
 </div>
 </li>
-</ol></section><section id="summary" class="level2" data-number="21.8"><h2 data-number="21.8" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">21.8</span> Summary</h2>
+</ol></section><section id="summary" class="level2" data-number="21.9"><h2 data-number="21.9" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">21.9</span> Summary</h2>
 <p>You now have the four-function toolkit for the normal distribution — and, thanks to R’s naming rule, the blueprint for every other distribution too:</p>
 <ul>
 <li>
