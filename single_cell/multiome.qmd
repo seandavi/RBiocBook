@@ -14,7 +14,7 @@ Why does the wiring matter if you can already see the output? Because a cell oft
 
 The technology that makes this concrete is the **multiome** assay (here, 10x Genomics' Single Cell Multiome ATAC + Gene Expression), which measures *both* RNA and open chromatin in the *same nucleus*. That "same nucleus" is the crucial part. With separate experiments you can only compare populations — the average RNA of one batch of cells against the average accessibility of another. With a multiome you can ask a cause-and-effect question inside a single cell: *this* enhancer is open, and *this* gene, which it controls, is expressed, in this very cell. That is what lets you move from cataloguing cell types to reconstructing the regulatory logic that defines them.
 
-This chapter is about **integration**: combining the two modalities into one coherent analysis instead of two parallel ones. We will build the intuition for what integration means, why it is harder than it sounds, and then do it hands-on with a public 10x PBMC multiome dataset that ships ready-to-use as a Bioconductor `MultiAssayExperiment`.
+This chapter is about **integration**: combining the two modalities into one coherent analysis instead of two parallel ones. We will build the intuition for what integration means, why it is harder than it sounds, and then do it hands-on with a public 10x PBMC multiome dataset that ships ready-to-use as a Bioconductor `MultiAssayExperiment`. For the wider landscape of single-cell multi-omic technologies and the computational methods that pair with them, two reviews are good companions to this chapter [@argelaguet2021computational; @vandereyken2023methods].
 
 ## What you'll learn
 
@@ -62,7 +62,7 @@ Because RNA lives in gene space and ATAC in peak space, every integration method
 
 - **Gene-activity scores.** Summarize a gene's accessibility by summing the ATAC signal over its body and promoter (or, better, distance-weighted nearby peaks). This *casts ATAC into gene space*, so an ATAC cell can be compared to an RNA cell gene-for-gene. It is crude — accessibility is not expression — but it is the workhorse bridge for *aligning* unpaired datasets and for *annotating* ATAC cells from an RNA reference.
 - **Peak-to-gene links.** Correlate a peak's accessibility against a gene's expression *across cells*. A peak whose opening tracks a gene's expression is a candidate regulatory element for that gene. This is less a bridge for alignment than a *biological result* — it is how you discover enhancer→gene wiring, and it needs paired (or pseudobulked) data to compute.
-- **Motif / TF activity.** Collapse the tens of thousands of peaks into the handful of transcription factors whose binding motifs they contain (e.g. with `chromVAR`). This turns the unwieldy peak space into a small, interpretable space of TF activities — and TFs are the natural currency for connecting open chromatin back to the genes it regulates.
+- **Motif / TF activity.** Collapse the tens of thousands of peaks into the handful of transcription factors whose binding motifs they contain (e.g. with `chromVAR` [@schep2017chromvar]). This turns the unwieldy peak space into a small, interpretable space of TF activities — and TFs are the natural currency for connecting open chromatin back to the genes it regulates.
 
 Keep these three straight and most of the integration literature snaps into focus: methods differ mainly in *which bridge they use* and *whether they need the cells to be paired*.
 
@@ -70,7 +70,7 @@ Keep these three straight and most of the integration literature snaps into focu
 
 We'll use a public 10x Genomics dataset of roughly 10,000 peripheral blood mononuclear cells (PBMCs) from a healthy donor, profiled with the Single Cell Multiome assay so that every nucleus has both an RNA and an ATAC measurement. It is a good teaching set: PBMCs contain well-characterized, easily recognized immune cell types (T cells, B cells, monocytes, NK cells), so we have strong priors about what the answer should look like.
 
-Rather than download and reprocess the raw 10x files, we use the curated copy from the Bioconductor `SingleCellMultiModal` package, which delivers the dataset as a `MultiAssayExperiment` — the natural container for "several assays measured on the same cells," and the multi-modal generalization of the `SummarizedExperiment`/`SingleCellExperiment` classes you have already met.
+Rather than download and reprocess the raw 10x files, we use the curated copy from the Bioconductor `SingleCellMultiModal` package [@eckenrode2023curated], which delivers the dataset as a `MultiAssayExperiment` — the natural container for "several assays measured on the same cells," and the multi-modal generalization of the `SummarizedExperiment`/`SingleCellExperiment` classes you have already met.
 
 ```{r}
 #| label: load-packages
@@ -110,7 +110,7 @@ sce.atac
 
 ## From Bioconductor to Seurat: building the joint object
 
-The joint-embedding method we'll use — **weighted nearest neighbors (WNN)** — lives in the Seurat/Signac ecosystem, which is the de-facto standard for paired multiome. So our first practical step is to bridge our `MultiAssayExperiment` into a Seurat object: the RNA counts become a standard expression assay, and the ATAC peak counts become a Signac **`ChromatinAssay`**. This Bioconductor→Seurat hand-off is worth learning in its own right — you will reach for it constantly, because single-cell data routinely arrives in one ecosystem and the method you want lives in the other.
+The joint-embedding method we'll use — **weighted nearest neighbors (WNN)** — lives in the Seurat/Signac ecosystem [@stuart2021signac], which is the de-facto standard for paired multiome. So our first practical step is to bridge our `MultiAssayExperiment` into a Seurat object: the RNA counts become a standard expression assay, and the ATAC peak counts become a Signac **`ChromatinAssay`**. This Bioconductor→Seurat hand-off is worth learning in its own right — you will reach for it constantly, because single-cell data routinely arrives in one ecosystem and the method you want lives in the other.
 
 ```{r}
 #| label: to-seurat
@@ -153,25 +153,49 @@ pbmc <- RunPCA(pbmc, reduction.name = "pca")
 
 ### ATAC reduction: why not PCA, and what TF-IDF + LSI do instead
 
-The accessibility side needs a different reduction, and the reason is the structure of the data. Recall that the peak matrix is **sparse and nearly binary**: a cell has at most a couple of copies of any locus, so most entries are 0 and the rest are small. Log-normalization-then-PCA, which works well for the graded counts of RNA, is a poor fit for this on/off signal.
+The accessibility side needs a different reduction, and the reason is the structure of the data. Recall that the peak matrix is **sparse and nearly binary**: a cell has at most a couple of copies of any locus, so most entries are 0 and the rest are small. Log-normalization-then-PCA, which works well for the graded counts of RNA, is a poor fit for this on/off signal. The fix, worked out for the earliest single-cell ATAC experiments [@cusanovich2015multiplex], borrows two ideas from how search engines compare text documents: **TF-IDF**, then **LSI**.
 
-The standard reduction for ATAC is **TF-IDF followed by LSI**:
+#### TF-IDF, in miniature
 
-- **TF-IDF** (term frequency–inverse document frequency, borrowed from text analysis, where "documents" are cells and "terms" are peaks) up-weights peaks that are informative *because* they are accessible in only a few cells, and down-weights peaks open everywhere. It is how we let rare, cell-type-defining peaks carry more signal than ubiquitous ones.
-- **LSI** (latent semantic indexing) is then just a singular value decomposition of the TF-IDF matrix — the accessibility analogue of PCA.
+**TF-IDF** stands for *term frequency–inverse document frequency*. The analogy is to text: if cells are "documents" and peaks are "words," then a peak open in nearly every cell is like the word *the* — common, and therefore almost useless for telling documents apart — while a peak open in just a handful of cells is like a rare, distinctive word that pins down which documents resemble each other. TF-IDF rewrites each entry so that rare, informative peaks count for more and ubiquitous ones count for less.
+
+The quickest way to *feel* this is to do it by hand on a tiny matrix — four cells, three peaks, `1` meaning "accessible":
+
+```{r}
+#| label: tfidf-toy
+# rows = peaks, columns = cells; 1 = accessible in that cell
+toy <- matrix(c(1, 1, 1, 1,    # peak A: open everywhere (an uninformative "the")
+                1, 1, 0, 0,    # peak B: open in half the cells
+                0, 0, 0, 1),   # peak C: open in one cell (rare, distinctive)
+              nrow = 3, byrow = TRUE,
+              dimnames = list(c("peakA", "peakB", "peakC"),
+                              c("c1", "c2", "c3", "c4")))
+
+n_cells   <- ncol(toy)
+peak_freq <- rowSums(toy)                  # in how many cells is each peak open?
+idf       <- log(1 + n_cells / peak_freq)  # inverse document frequency = the weight
+round(idf, 2)
+```
+
+The ubiquitous peak A gets the smallest weight and the rare peak C the largest — precisely the re-weighting we want before we go looking for structure. (Signac's `RunTFIDF()` uses a refined version of this same idea; the toy captures the intuition, not the exact formula.)
+
+#### LSI: a PCA for the re-weighted matrix
+
+Once the peak matrix is re-weighted, **LSI** (*latent semantic indexing*) reduces it to a handful of components using a **singular value decomposition (SVD)** — mathematically the same machinery as PCA, applied to the TF-IDF matrix instead of a scaled expression matrix. Each component is a *latent* pattern of co-accessible peaks: a set of regulatory regions that tend to open together across cells. Where PCA on RNA finds axes of co-expressed genes, LSI on ATAC finds axes of co-accessible peaks — and those axes are what separate one cell state from another.
 
 ```{r}
 #| label: atac-reduction
 DefaultAssay(pbmc) <- "ATAC"
 pbmc <- FindTopFeatures(pbmc, min.cutoff = 5)   # keep peaks seen in >= 5 cells
-pbmc <- RunTFIDF(pbmc)                           # normalize
+pbmc <- RunTFIDF(pbmc)                           # re-weight (TF-IDF)
 pbmc <- RunSVD(pbmc, reduction.name = "lsi")     # the SVD that makes it "LSI"
 ```
 
-There is one wrinkle worth teaching because it trips people up: the **first LSI component usually captures sequencing depth, not biology** — cells with more total fragments score high on it regardless of type. We check this and, if so, exclude component 1 from everything downstream (using dimensions `2:n` instead of `1:n`):
+There is one wrinkle worth teaching because it trips people up: the **first LSI component usually captures sequencing depth, not biology**. The reason is mechanical — a cell sequenced more deeply has more fragments and therefore more nonzero peaks across the board, so the single largest axis of variation in the data is often just "how much was this cell sequenced," not "what kind of cell is it." We check for this with `DepthCor()`, which correlates each component against each cell's total counts, and routinely drop component 1 (using dimensions `2:n` instead of `1:n`):
 
 ```{r}
 #| label: lsi-depthcor
+#| fig-cap: "Correlation between each LSI component and the total ATAC fragment count per cell. The first component is almost perfectly correlated with sequencing depth — a technical artifact, not biology — which is why we exclude it from every downstream step and use components 2 onward. The later components show little correlation with depth and are the ones carrying the cell-type signal."
 DepthCor(pbmc, reduction = "lsi")
 ```
 
@@ -179,7 +203,9 @@ DepthCor(pbmc, reduction = "lsi")
 
 Here is the heart of vertical integration. We have two reductions of the same cells — a PCA from RNA and an LSI from ATAC — and we want **one** representation that uses both. The naive approach (just glue the two sets of components together) treats every cell as trusting both modalities equally. But that is rarely true: for some cells the RNA cleanly says "T cell" while the ATAC is murky, and for others the reverse.
 
-**WNN** handles exactly this. For *each individual cell* it learns a pair of weights — how much to trust RNA versus ATAC — by asking which modality better predicts that cell's near neighbors. It then builds a single neighbor graph from the weighted combination. The output is a joint graph we can embed (UMAP) and cluster, where each cell's contribution from each modality is tuned to that cell.
+**Weighted nearest neighbors (WNN)** [@hao2021integrated] handles exactly this by letting *every cell weight the two modalities for itself*. The intuition is a panel of two advisors. Suppose you must sort people into groups by similarity, and you have two advisors: one judges by what people *say* (RNA), the other by what they are *poised to do* (ATAC). For some people the first advisor is far more reliable; for others, the second. The sensible strategy is to ask, *for each person individually*, which advisor's notion of "similar people" better matches that person — and to trust that advisor more for that person.
+
+That is essentially WNN's algorithm. For each cell it asks: using this cell's RNA neighbors, how well can I reconstruct the cell's own RNA profile — and using its ATAC neighbors, how well can I reconstruct its own ATAC profile? Whichever modality predicts the cell better earns a higher weight *for that cell*. These per-cell weights (a number between 0 and 1 for each modality, the two summing to 1) then merge the two neighbor graphs into a single **weighted nearest-neighbor graph**, which we embed with UMAP and cluster exactly as we would a single-modality graph.
 
 ```{r}
 #| label: wnn
@@ -208,16 +234,18 @@ pbmc <- RunUMAP(pbmc, reduction = "lsi", dims = 2:40, reduction.name = "atac.uma
 #| label: compare-umaps
 #| fig-width: 12
 #| fig-height: 4
+#| fig-cap: "The same PBMCs embedded three ways; every point is a cell, colored by its WNN joint cluster. **Left (RNA only):** UMAP from gene expression alone. **Middle (ATAC only):** UMAP from chromatin accessibility alone — typically blurrier, because the near-binary ATAC signal carries less information per cell than expression does. **Right (WNN, joint):** the embedding that weights both modalities per cell. Read the figure by following one color across the three panels: a cluster that is smeared or split in a single-modality panel but compact and cleanly separated in the joint panel is a population the joint view resolves better than either modality alone. Because the points are colored by the *joint* clusters, the right-hand panel is the one in which they should look tightest and best separated."
 p1 <- DimPlot(pbmc, reduction = "rna.umap")  + ggtitle("RNA only")
 p2 <- DimPlot(pbmc, reduction = "atac.umap") + ggtitle("ATAC only")
 p3 <- DimPlot(pbmc, reduction = "wnn.umap")  + ggtitle("WNN (joint)")
 p1 + p2 + p3
 ```
 
-We can also look directly at what WNN learned — the per-cell modality weights. Plotting the RNA weight by cluster shows *which cell types lean on expression and which lean on accessibility* to define themselves:
+We can also look directly at what WNN learned — the per-cell modality weights. Each cell received an RNA weight (and an ATAC weight equal to 1 − the RNA weight); plotting the RNA weight by cluster shows *which cell types lean on expression and which lean on accessibility* to define themselves:
 
 ```{r}
 #| label: modality-weights
+#| fig-cap: "Per-cell RNA modality weight, grouped by WNN cluster. A value near 1 means WNN found that cell's identity better defined by gene expression; a low value means chromatin accessibility was the more informative modality for that cell. Clusters sitting well above 0.5 are 'RNA-driven'; those below are 'ATAC-driven.' The differences between clusters are the biological readout — they tell you which populations are distinguished more by what they transcribe versus how their chromatin is configured."
 VlnPlot(pbmc, features = "RNA.weight", group.by = "seurat_clusters", pt.size = 0)
 ```
 
