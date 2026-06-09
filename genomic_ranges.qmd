@@ -221,33 +221,124 @@ The methods described in this section work *one-region-at-a-time* and are, there
 "intra-range" methods. Methods that work across all regions are described below 
 in the [Inter-range methods] section.
 
+To make the operations in this section easy to *see*, we'll work with a small set
+of ranges on a single chromosome and draw a picture of each operation as we go.
+Here is the toy `GRanges`, `g`:
+
+```{r make-g}
+g <- GRanges("chr1",
+             IRanges(start = c(5, 15, 30, 33, 50),
+                     end   = c(22, 27, 42, 55, 58)),
+             score = c(5, 8, 3, 9, 6))
+names(g) <- letters[1:5]
+g
+```
+
+All five ranges are left **unstranded** (`*`) on purpose: the operations below act
+purely on position, which is the cleaner first mental model. We bring strand back
+in deliberately when it changes the answer — for `flank()` and `resize()`.
+
+The figures are all drawn with one small helper built on `ggplot2`. You don't need
+to study it to follow the chapter — it just lays each range out as a labelled bar
+on a coordinate axis, stacking ranges into rows so overlapping ones stay visible —
+but it's here if you'd like to reuse it.
+
+```{r range-plot-helper}
+#| code-fold: true
+#| code-summary: "Show the range-plotting helper"
+library(ggplot2)
+library(patchwork)
+
+# Lay a GRanges out as labelled bars on a shared coordinate axis. Overlapping
+# ranges are stacked into separate rows with IRanges::disjointBins(); strand, when
+# present, is shown by colour and unstranded (*) ranges are drawn grey.
+plot_ranges <- function(gr, title = NULL, xlim = NULL) {
+  bins <- as.integer(IRanges::disjointBins(ranges(gr)))
+  df <- data.frame(
+    xmin = start(gr) - 0.5, xmax = end(gr) + 0.5, lane = bins,
+    strand = factor(as.character(strand(gr)), levels = c("+", "-", "*")),
+    label = if (!is.null(names(gr))) names(gr) else as.character(seq_along(gr)))
+  if (is.null(xlim)) xlim <- c(min(df$xmin), max(df$xmax))
+  has_strand <- any(as.character(strand(gr)) %in% c("+", "-"))
+  ggplot(df) +
+    geom_rect(aes(xmin = xmin, xmax = xmax, ymin = lane - 0.35, ymax = lane + 0.35,
+                  fill = strand), colour = "grey20", linewidth = 0.3) +
+    geom_text(aes(x = (xmin + xmax) / 2, y = lane, label = label), size = 3.2) +
+    scale_fill_manual(values = c("+" = "#4C72B0", "-" = "#C44E52", "*" = "grey80"),
+                      drop = FALSE, name = "strand") +
+    scale_y_reverse() +
+    coord_cartesian(xlim = xlim) +
+    labs(title = title, x = NULL, y = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(axis.text.y = element_blank(), panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position = if (has_strand) "right" else "none")
+}
+
+# Stack a "before" and an "after" GRanges on a shared x-axis for comparison.
+before_after <- function(before, after, after_label, before_label = "g") {
+  xl <- range(c(start(before), end(before), start(after), end(after))) + c(-2, 2)
+  (plot_ranges(before, before_label, xl) / plot_ranges(after, after_label, xl)) +
+    plot_layout(guides = "collect")
+}
+
+# Draw the per-base coverage of a GRanges as a step plot.
+plot_coverage <- function(gr, xlim = NULL) {
+  cv <- as.numeric(coverage(gr)[[1]])
+  df <- data.frame(pos = seq_along(cv), depth = cv)
+  if (is.null(xlim)) xlim <- c(min(start(gr)) - 2, max(end(gr)) + 2)
+  ggplot(df, aes(pos, depth)) +
+    geom_step(direction = "hv", colour = "#4C72B0") +
+    coord_cartesian(xlim = xlim, ylim = c(0, max(df$depth) + 0.5)) +
+    labs(x = NULL, y = "depth") +
+    theme_minimal(base_size = 11) +
+    theme(panel.grid.minor = element_blank())
+}
+```
+
+```{r}
+#| label: fig-g-toy
+#| fig-cap: "Our toy `GRanges` `g`: five ranges on `chr1`, drawn as bars along the coordinate axis. Ranges that would overlap are stacked onto separate rows (`a`, `c`, `e` on top; `b`, `d` below) so each stays visible — the rows carry no meaning beyond avoiding collisions. The ranges form two clusters, `a`/`b` around 5–27 and `c`/`d`/`e` around 30–58, with a clean gap between them at 28–29. Keep this picture in mind: every figure that follows shows what one operation does to it."
+plot_ranges(g, "g")
+```
+
 The `GRanges` class has accessors for the "ranges" part of the data. For example:
 
 ```{r basicgrfuncs}
-## Make a smaller GRanges subset
-g <- gr[1:3]
 start(g) # to get start locations
 end(g)   # to get end locations
 width(g) # to get the "widths" of each range
 range(g) # to get the "range" for each sequence (min(start) through max(end))
 ```
 
-The GRanges class also has many methods for manipulating the ranges. The methods can
-be classified as intra-range methods, inter-range methods, and between-range methods.
-Intra-range methods operate on each element of a GRanges object independent of the other
-ranges in the object. For example, the flank method can be used to recover regions flanking
-the set of ranges represented by the GRanges object. So to get a GRanges object containing
-the ranges that include the 10 bases *upstream* of the ranges:
+The `GRanges` class has many methods for manipulating ranges, classed as
+intra-range, inter-range, and between-range methods. Intra-range methods operate
+on each range independently. The `flank()` method returns the region *flanking*
+each range — the bases immediately upstream (or downstream) of it. This is how you
+turn a gene into its **promoter** (the window just upstream of its start), or grab
+the sequence beside a transcription-factor binding site to scan for a partner's
+motif. Which side is
+"upstream" depends on **strand**, so to see `flank()` clearly we switch to a tiny
+stranded example: one gene `p` on the `+` strand and one gene `m` on the `-`
+strand.
 
 ```{r grflank}
-flank(g, 10)
+gs <- GRanges("chr1",
+              IRanges(start = c(10, 40), end = c(25, 55)),
+              strand = c("+", "-"))
+names(gs) <- c("p", "m")
+flank(gs, 8)                # 8 bases upstream of each range
+flank(gs, 8, start = FALSE) # 8 bases downstream of each range
 ```
 
-Note how `flank` pays attention to "strand".
-To get the flanking regions *downstream* of the ranges, we can do:
-
-```{r grflank2}
-flank(g, 10, start=FALSE)
+```{r}
+#| label: fig-flank
+#| fig-cap: "`flank()` is strand-aware. **Top:** the two genes, `p` on the `+` strand (blue) and `m` on the `-` strand (red). **Middle:** `flank(gs, 8)` returns the 8 bases *upstream* of each. For the `+` gene, upstream is to the *left* (lower coordinates); but the `-` gene runs the other way, so its upstream flank sits to the *right* (higher coordinates). **Bottom:** `flank(gs, 8, start = FALSE)` takes the *downstream* side, flipping each flank to the opposite end. The width (8) is the same in every case — only which side, and that side is decided by strand. Forgetting this is a classic source of off-by-a-region bugs."
+( plot_ranges(gs, "gs", c(0, 68)) /
+  plot_ranges(flank(gs, 8), "flank(gs, 8) — upstream", c(0, 68)) /
+  plot_ranges(flank(gs, 8, start = FALSE),
+              "flank(gs, 8, start = FALSE) — downstream", c(0, 68)) ) +
+  plot_layout(guides = "collect")
 ```
 
 ::: {.callout-warning}
@@ -261,13 +352,30 @@ wrong strand — or you forgot to set it — these operations will silently flan
 wrong side. When a result looks backwards, check `strand()` first.
 :::
 
-Other examples of intra-range methods include `resize` and `shift`. The shift method will
-move the ranges by a specific number of base pairs, and the resize method will extend the
-ranges by a specified width.
+Two more intra-range methods are `shift` and `resize`. `shift()` slides every range
+by a fixed number of bases; `resize()` sets every range to a chosen width. You reach
+for `shift()` to apply small systematic coordinate corrections — such as nudging an
+ATAC-seq fragment end to the Tn5 cut site — and for `resize()` whenever you need
+*comparable* regions: fixed-width windows centred on peak summits for motif
+discovery, or uniform windows around transcription start sites for a metagene
+heatmap (exactly what the ATAC-seq chapter builds).
 
 ```{r shiftandresize}
 shift(g, 5)
-resize(g, 30)
+resize(g, width = 12, fix = "center")
+```
+
+```{r}
+#| label: fig-shift
+#| fig-cap: "`shift(g, 5)` slides every range 5 bases toward higher coordinates — the entire picture moves right by 5, and nothing else changes. Every width is preserved and the overlaps are carried along unchanged; only position moves. A negative number shifts left."
+before_after(g, shift(g, 5), "shift(g, 5)")
+```
+
+```{r}
+#| label: fig-resize
+#| fig-cap: "`resize(g, width = 12, fix = \"center\")` forces every range to width 12, holding each range's *centre* fixed so it grows or shrinks symmetrically: the wide ranges (`a`, `d`) contract and the narrow one (`e`) expands, until all are equal width. The `fix` argument chooses the anchor — `fix = \"start\"` or `\"end\"` instead pin one end in place, and, exactly as with `flank()`, *which* physical end that is depends on strand (these ranges are unstranded, so `\"start\"` means the lower coordinate)."
+before_after(g, resize(g, width = 12, fix = "center"),
+             'resize(g, width = 12, fix = "center")')
 ```
 
 The `r Biocpkg("GenomicRanges")` help page `?"intra-range-methods"` summarizes these methods.
@@ -282,14 +390,29 @@ a simplified set.
 reduce(g)
 ```
 
-The reduce method could, for example, be used to collapse individual overlapping coding
-exons into a single set of coding regions.
+```{r}
+#| label: fig-reduce
+#| fig-cap: "`reduce(g)` merges every group of overlapping or touching ranges into the smallest set that covers exactly the same bases. The five input ranges collapse to two: the `a`/`b` overlap becomes 5–27 and the `c`/`d`/`e` overlap becomes 30–58. The 28–29 gap survives, because no input range covered those bases. This is the standard way to turn a pile of overlapping annotations (say, exons from many transcripts) into one non-redundant set of covered regions."
+before_after(g, reduce(g), "reduce(g)")
+```
 
-Sometimes one is interested in the gaps or the qualities of the gaps between the ranges
-represented by your GRanges object. The gaps method provides this information:
+For example, a gene's exons — pooled across all of its transcripts — overlap
+heavily; `reduce()` collapses them into the gene's non-redundant exonic footprint,
+the set you would sum to answer "how many bases of this gene are exonic?". The same
+move merges peak calls from several replicates into one consensus set.
+
+Sometimes you care about what lies *between* the ranges. If the ranges are a gene's
+exons, the gaps between them are its **introns**; if they are all the genes on a
+chromosome, the gaps are the **intergenic** regions. The gaps method provides them:
 
 ```{r}
 gaps(g)
+```
+
+```{r}
+#| label: fig-gaps
+#| fig-cap: "`gaps(g)` returns the complement of `g` — the stretches *not* covered by any range. The informative one is 28–29, the gap between the two clusters; the 1–4 stretch before the first range also appears. (The gap *after* the last range is missing because the object has no chromosome length to mark where `chr1` ends — see the warning below.) `gaps()` and `reduce()` are mirror images: one returns what is covered, the other what is not."
+before_after(g, gaps(g), "gaps(g)")
 ```
 
 ::: {.callout-warning}
@@ -303,14 +426,26 @@ work you set the chromosome lengths with `seqlengths()` so that `gaps()`,
 that detail for these toy examples.
 :::
 
-The disjoin method represents a GRanges object as a collection of non-overlapping ranges:
+The disjoin method represents a GRanges object as a collection of non-overlapping
+ranges. This is the step before *counting*: once a region is split into pieces that
+each belong to a fixed set of features, a read landing in a piece can be attributed
+to those features unambiguously.
 
 ```{r disjoin}
 disjoin(g)
 ```
 
+```{r}
+#| label: fig-disjoin
+#| fig-cap: "`disjoin(g)` cuts the ranges at every start and end into non-overlapping pieces, so that within each output piece the *same* set of input ranges is present throughout. Where ranges overlapped — `b` over `a`, or `d` over `c` and `e` — the region is carved into separate before / overlap / after segments, giving eight pieces here. Unlike `reduce()`, which merges, `disjoin()` subdivides; it is the machinery behind per-base summaries such as coverage, computed next."
+before_after(g, disjoin(g), "disjoin(g)")
+```
 
-The `coverage` method quantifies the degree of overlap for all the ranges in a GRanges object.
+
+The `coverage` method counts, base by base, how many ranges overlap each position —
+and it is the workhorse of sequencing analysis. Pile up aligned reads and the tall
+stacks are where signal concentrates: the **peaks** of a ChIP-seq or ATAC-seq
+experiment, or the per-exon read depth behind an RNA-seq count.
 
 ```{r coveragegr1}
 coverage(g)
@@ -321,16 +456,12 @@ The `Rle` class is used to store the values. Sometimes, one must convert these
 values to `numeric` using `as.numeric`. In many cases, this will happen automatically,
 though. 
 
-```{r coveragegr2}
-covg <- coverage(g)
-covg_chr2 <- covg[['chr2']]
-plot(covg_chr2, type='l')
+```{r}
+#| label: fig-coverage
+#| fig-cap: "`coverage(g)` counts, at every base, how many ranges overlap that position. Drawing the ranges (top) directly above their coverage (bottom) makes the link plain: depth is 1 under a lone range, steps up to 2 wherever two ranges overlap (the `a`/`b` overlap, and the `c`/`d` and `d`/`e` overlaps), and drops to 0 across the 28–29 gap. This is the per-base signal you compute from piled-up sequencing reads — the tall stacks are the peaks a ChIP-seq or ATAC-seq experiment hunts for."
+xl <- c(0, 62)
+(plot_ranges(g, "g", xl) / plot_coverage(g, xl)) + plot_layout(heights = c(2, 1))
 ```
-
-The plot shows how many ranges cover each base along `chr2`: the line steps up to
-2 where two ranges overlap and drops back to 0 in the gaps. This is exactly the
-kind of per-base signal you compute from aligned sequencing reads in RNA-seq or
-ChIP-seq.
 
 See the `r Biocpkg("GenomicRanges")` help page `?"intra-range-methods"` for more details.
 
@@ -339,17 +470,30 @@ See the `r Biocpkg("GenomicRanges")` help page `?"intra-range-methods"` for more
 Between-range methods calculate relationships between different GRanges objects. Of central
 importance are findOverlaps and related operations; these are discussed below. Additional
 operations treat GRanges as mathematical sets of coordinates; union(g, g2) is the union of
-the coordinates in g and g2. Here are examples for calculating the union, the intersect and
-the asymmetric difference (using setdiff).
-
-
-
+the coordinates in g and g2. Here we compare `g` with a second set `g2` (also on
+`chr1`, overlapping `g` in places), calculating the union, the intersection, and
+the asymmetric difference (`setdiff`). These are everyday tools for comparing
+experiments: `intersect()` two replicate peak sets to keep the peaks they agree on,
+`setdiff()` to find condition-specific peaks, or intersect peaks with promoters to
+count how many binding sites fall in a promoter.
 
 ```{r intervalsgr1}
-g2 <- head(gr, n=2)
+g2 <- GRanges("chr1", IRanges(c(24, 62), c(36, 70)))
+names(g2) <- c("x", "y")
 GenomicRanges::union(g, g2)
 GenomicRanges::intersect(g, g2)
 GenomicRanges::setdiff(g, g2)
+```
+
+```{r}
+#| label: fig-setops
+#| echo: false
+#| fig-cap: "The three set operations on `g` and `g2`, drawn on a shared axis. **union** keeps every base in *either* set — here `g2`'s range `x` bridges `g`'s two clusters into one 5–58 range, while `y` stays separate. **intersect** keeps only bases in *both* sets (the slivers where `x` overlaps `b`/`c`/`d`). **setdiff(g, g2)** keeps the bases of `g` that are *not* in `g2` (it carves `x`'s footprint out of `g`). Read against the `g`/`g2` rows at the top, this is the coordinate bookkeeping behind comparing two experiments — shared peaks, or peaks unique to one condition."
+sl <- function(gr, lab) plot_ranges(gr, lab, c(0, 72))
+sl(g, "g") / sl(g2, "g2") /
+  sl(GenomicRanges::union(g, g2),     "union(g, g2)") /
+  sl(GenomicRanges::intersect(g, g2), "intersect(g, g2)") /
+  sl(GenomicRanges::setdiff(g, g2),   "setdiff(g, g2)")
 ```
 
 There is extensive additional help in the vignettes at the
@@ -463,80 +607,100 @@ Here's how it works:
 * Output
   : The function returns a Hits (see `?Hits`) object, which is a compact representation of the matrix of overlaps. Each entry in the Hits object corresponds to a pair of overlapping ranges, with the query index and the subject index.
 
-Here is an example of how you might use the findOverlaps function:
+Here is an example, reusing `g` as the query and `g2` as the subject:
 
 ```{r}
-# Create two GRanges objects
-gr1 <- gr[1:4]
-gr2 <- gr[3:8]
-gr1
-gr2
-``` 
-
-```{r}
-# Find overlaps  
-overlaps <- findOverlaps(query = gr1, subject = gr2)  
+overlaps <- findOverlaps(query = g, subject = g2)
 overlaps
 ```
 
-In the resulting overlaps object, each row corresponds to an overlapping pair of ranges, with the first column giving the index of the range in gr1 and the second column giving the index of the overlapping range in gr2.
-
-If you are interested in only the `queryHits` or the `subjectHits`, there are 
-accessors for those (ie., `queryHits(overlaps)`). To get the actual ranges
-that overlap, you can use the `subjectHits` or `queryHits` as an index into
-the original `GRanges` object. 
-
-Spend some time looking at these results. Note how the strand comes into play
-when determining overlaps.
+Each row of the `Hits` object is an overlapping pair: the first column is the index
+of the range in `g`, the second the index of the overlapping range in `g2`. Ranges
+`b`, `c`, and `d` of `g` all overlap `g2`'s first range (`x`), while `g2`'s second
+range (`y`) is hit by nothing — @fig-overlaps shows exactly this.
 
 ```{r}
-gr1[queryHits(overlaps)]
-gr2[subjectHits(overlaps)]
+#| label: fig-overlaps
+#| echo: false
+#| fig-cap: "`findOverlaps(g, g2)` / `g %over% g2`. The subject `g2` is drawn on top; the query `g` below, with each range coloured green if it overlaps the subject and grey if not. Ranges `b`, `c`, `d` overlap `g2`'s range `x` and so are green; `a` and `e` touch nothing and stay grey; `g2`'s range `y` has no query over it. This is the picture behind every overlap question — 'which peaks fall in a promoter?', 'which variants land in an exon?'"
+qb <- as.integer(IRanges::disjointBins(ranges(g)))
+sb <- as.integer(IRanges::disjointBins(ranges(g2)))
+qy <- qb; sy <- max(qb) + 0.8 + (sb - 1)
+ov_df <- rbind(
+  data.frame(xmin = start(g) - .5,  xmax = end(g) + .5,  y = qy,
+             cat = ifelse(g %over% g2, "query: overlaps", "query: no overlap"),
+             label = names(g)),
+  data.frame(xmin = start(g2) - .5, xmax = end(g2) + .5, y = sy,
+             cat = "subject", label = names(g2)))
+ggplot(ov_df) +
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = y - .38, ymax = y + .38, fill = cat),
+            colour = "grey20", linewidth = .3) +
+  geom_text(aes(x = (xmin + xmax) / 2, y = y, label = label), size = 3.2) +
+  scale_fill_manual(values = c("subject" = "grey70", "query: overlaps" = "#55A868",
+                               "query: no overlap" = "grey88"), name = NULL) +
+  scale_y_continuous(breaks = c(mean(range(qy)), mean(range(sy))),
+                     labels = c("query g", "subject g2")) +
+  coord_cartesian(xlim = c(0, 72)) + labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
+
+If you want only the `queryHits` or the `subjectHits`, there are accessors for those
+(e.g. `queryHits(overlaps)`). Used as an index into the original objects, they pull
+out the ranges that overlap:
+
+```{r}
+g[queryHits(overlaps)]
+g2[subjectHits(overlaps)]
 ```
 
 As you might expect, the `countOverlaps` method counts, for each range in the
 first `GRanges`, how many ranges in the second it overlaps.
 
 ```{r countoverlaps}
-countOverlaps(gr1, gr2)
+countOverlaps(g, g2)
 ```
 
 The `subsetByOverlaps` method simply subsets the query `GRanges` object to include
-*only* those that overlap the subject. 
+*only* those that overlap the subject — the green ranges in @fig-overlaps.
 
 ```{r subsetByOverlaps}
-subsetByOverlaps(gr1, gr2)
+subsetByOverlaps(g, g2)
 ```
 
-In some cases, you may be interested in only one hit per query range. The
-`select` parameter handles this: with `select="first"`, `findOverlaps()` returns
-a plain integer vector with one entry per query range (the index of its first
-overlapping subject, or `NA` if there is none) instead of a full `Hits` object.
+In some cases, you may want only one hit per query range. The `select` parameter
+handles this: with `select="first"`, `findOverlaps()` returns a plain integer vector
+with one entry per query range (the index of its first overlapping subject, or `NA`
+if there is none) instead of a full `Hits` object.
 
 ```{r select-first}
-findOverlaps(gr1, gr2, select="first")
+findOverlaps(g, g2, select="first")
 ```
 
-The `%over%` logical operator allows us to do similar things to
-`findOverlaps` and `subsetByOverlaps`. It returns a `TRUE`/`FALSE` for each range,
-which is handy for subsetting.
+The `%over%` logical operator is the quick version: it returns `TRUE`/`FALSE` for
+each query range, which is handy for subsetting.
 
 ```{r}
-gr2 %over% gr1
-gr1[gr1 %over% gr2]
+g %over% g2
+g[g %over% g2]
 ```
 
 
 ### Nearest feature
 
-There are a number of useful methods that find the nearest feature (region) in a second set
-for each element in the first set. 
+There are a number of useful methods that find the nearest feature in a second set
+for each element in the first — answering a question you meet constantly: *which
+gene is this peak closest to?* Annotating each ChIP-seq peak with its nearest
+transcription start site, or reporting how far a variant sits from the nearest
+gene, is a single `nearest()` or `distanceToNearest()` call.
 
-We can review our two `GRanges` toy objects:
+We can review the two `GRanges` toy objects we'll compare — `g` and the second
+set `g2` from the set-operations section:
 
 ```{r gr-review}
 g
-gr
+g2
 ```
 
 - nearest: Performs conventional nearest neighbor finding. Returns an integer vector containing the index of the nearest neighbor range in subject for each range in x. If there is no nearest neighbor NA is returned. For details of the algorithm see the man page in the IRanges package (?nearest).
@@ -566,12 +730,12 @@ i)     *  |  *        |  --->  (the only situation where * arbitrarily means +)
 
 
 ```{r nearest}
-res <- nearest(g, gr)
+res <- nearest(g, g2)
 res
 ```
 
-Each element of `res` is the index *into* `gr` of the nearest range to the
-corresponding range in `g`. So `gr[res]` would give you the actual nearest
+Each element of `res` is the index *into* `g2` of the nearest range to the
+corresponding range in `g`. So `g2[res]` would give you the actual nearest
 ranges.
 
 While `nearest` and friends give the index of the nearest feature, the distance
@@ -579,13 +743,46 @@ to the nearest is sometimes also useful to have. The `distanceToNearest`
 method calculates the nearest feature as well as reporting the distance.
 
 ```{r distanceToNearest}
-res <- distanceToNearest(g, gr)
+res <- distanceToNearest(g, g2)
 res
 ```
 
-This returns a `Hits` object with an extra `distance` column. A distance of 0
-means the two ranges overlap or touch; larger values are the gap in base pairs
-between them.
+This returns a `Hits` object with an extra `distance` column. Several of `g`'s
+ranges overlap `g2` and so report distance 0; the rest report the gap in base
+pairs to their nearest neighbour (range `a` is 1 bp from `g2`'s first range, and
+`e` is 3 bp from its second).
+
+```{r}
+#| label: fig-nearest
+#| echo: false
+#| fig-cap: "`nearest(g, g2)` links each query range in `g` (bottom) to its closest range in `g2` (top); the label on each arrow is the `distanceToNearest()` distance. Ranges `b`, `c`, `d` sit on top of `g2`'s range `x`, so their distance is 0; `a` is 1 bp away and `e` is 3 bp from `g2`'s range `y`. This is the operation behind 'assign each ChIP-seq peak to its nearest gene' or 'how far is this variant from the closest transcription start site?'"
+qb <- as.integer(IRanges::disjointBins(ranges(g)))
+sb <- as.integer(IRanges::disjointBins(ranges(g2)))
+qy <- qb; sy <- max(qb) + 0.8 + (sb - 1)
+nr  <- nearest(g, g2)
+cg  <- (start(g) + end(g)) / 2; cg2 <- (start(g2) + end(g2)) / 2
+nd  <- mcols(distanceToNearest(g, g2))$distance
+nr_rects <- rbind(
+  data.frame(xmin = start(g) - .5,  xmax = end(g) + .5,  y = qy,
+             fill = "g (query)",    label = names(g)),
+  data.frame(xmin = start(g2) - .5, xmax = end(g2) + .5, y = sy,
+             fill = "g2 (subject)", label = names(g2)))
+nr_seg <- data.frame(x = cg, y = qy + 0.4, xend = cg2[nr], yend = sy[nr] - 0.4, dist = nd)
+ggplot() +
+  geom_rect(data = nr_rects, aes(xmin = xmin, xmax = xmax, ymin = y - .38, ymax = y + .38,
+            fill = fill), colour = "grey20", linewidth = .3) +
+  geom_text(data = nr_rects, aes(x = (xmin + xmax) / 2, y = y, label = label), size = 3.2) +
+  geom_segment(data = nr_seg, aes(x = x, xend = xend, y = y, yend = yend),
+               arrow = arrow(length = unit(.1, "in")), colour = "grey25", linewidth = .4) +
+  geom_label(data = nr_seg, aes(x = (x + xend) / 2, y = (y + yend) / 2, label = dist),
+             size = 2.7, label.padding = unit(.08, "lines")) +
+  scale_fill_manual(values = c("g (query)" = "grey80", "g2 (subject)" = "#4C72B0"), name = NULL) +
+  scale_y_continuous(breaks = c(mean(range(qy)), mean(range(sy))), labels = c("g", "g2")) +
+  coord_cartesian(xlim = c(0, 75)) + labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
 
 
 ## Gene models
@@ -649,33 +846,73 @@ by hand earlier.
 ## Quick reference: GRanges methods {#sec-granges-methods}
 
 Every method below was introduced by example earlier in the chapter; this is a
-compact place to look them back up.
+compact place to look them back up. @fig-ops-overview shows the single-set
+reshaping operations side by side.
 
-| Method | Description |
-|--------|-------------|
-| `length` | Number of ranges in the object. |
-| `seqnames` | Sequence (chromosome) names of the ranges. |
-| `ranges` | The start and end positions. |
-| `strand` | Strand of each range. |
-| `mcols` (a.k.a. `elementMetadata`) | The metadata columns. |
-| `seqlevels` | The set of possible sequence names. |
-| `seqinfo` | The `Seqinfo` (sequence names and lengths). |
-| `start`, `end`, `width` | Get or set the range bounds or width. |
-| `shift`, `resize`, `flank` | Reshape each range on its own (intra-range). |
-| `reduce`, `disjoin`, `gaps`, `coverage` | Summarize a set of ranges together (inter-range). |
-| `subset`, `[`, `[[`, `$` | Subset or extract elements. |
-| `sort` | Sort the ranges. |
+```{r}
+#| label: fig-ops-overview
+#| echo: false
+#| fig-cap: "The single-set range operations at a glance: in each panel the grey ranges are the input and the blue ranges are the result. `shift` slides, `resize` standardises width, `flank` takes the region beside each range (strand-aware, so the two strands flank opposite ends), `reduce` merges overlaps, `disjoin` cuts into non-overlapping pieces, and `gaps` returns what is left uncovered."
+mt  <- GRanges("chr1", IRanges(c(2, 8, 20), c(10, 14, 26)))
+mts <- GRanges("chr1", IRanges(c(4, 20), c(12, 26)), strand = c("+", "-"))
+.lanes <- function(gr, base) {
+  b <- as.integer(IRanges::disjointBins(ranges(gr)))
+  data.frame(xmin = start(gr) - .5, xmax = end(gr) + .5, y = base + (b - 1) * 0.95)
+}
+.mini <- function(after, title, input = mt) {
+  xl <- range(c(start(input), end(input), start(after), end(after))) + c(-2, 2)
+  df <- rbind(cbind(.lanes(input, 3), role = "input"),
+              cbind(.lanes(after, 1), role = "result"))
+  ggplot(df) +
+    geom_rect(aes(xmin = xmin, xmax = xmax, ymin = y - .42, ymax = y + .42, fill = role),
+              colour = "grey25", linewidth = .3) +
+    annotate("text", x = xl[1], y = 3, label = "in",  hjust = 0, size = 2.6, colour = "grey40") +
+    annotate("text", x = xl[1], y = 1, label = "out", hjust = 0, size = 2.6, colour = "grey40") +
+    scale_fill_manual(values = c(input = "grey80", result = "#4C72B0"), guide = "none") +
+    coord_cartesian(xlim = xl, ylim = c(0, 4.2)) +
+    labs(title = title, x = NULL, y = NULL) +
+    theme_void(base_size = 10) +
+    theme(plot.title = element_text(size = 10, face = "bold", hjust = .5))
+}
+(.mini(shift(mt, 5), "shift") | .mini(resize(mt, 6, fix = "center"), "resize") |
+   .mini(flank(mts, 4), "flank", input = mts)) /
+(.mini(reduce(mt), "reduce") | .mini(disjoin(mt), "disjoin") | .mini(gaps(mt), "gaps"))
+```
 
-: Accessing and manipulating a single `GRanges`. {#tbl-single-granges-methods}
+**Accessors** pull pieces out of a `GRanges`:
 
-| Method | Description |
-|--------|-------------|
-| `findOverlaps` | Find overlaps between two sets of ranges. |
-| `countOverlaps` | Count, per query range, how many subject ranges it overlaps. |
-| `subsetByOverlaps` | Keep only the query ranges that overlap the subject. |
-| `nearest`, `distanceToNearest` | Nearest subject range to each query (with distance). |
+| Accessor | Returns |
+|----------|---------|
+| `length` | Number of ranges in the object |
+| `seqnames` | Chromosome of each range |
+| `ranges`, `start`, `end`, `width` | The coordinates, and the widths |
+| `strand` | Strand (`+`, `-`, or `*`) of each range |
+| `mcols` (a.k.a. `elementMetadata`) | The metadata columns (right of the `|`) |
+| `seqlevels`, `seqinfo` | Sequence names, and names + lengths |
+| `[`, `subset`, `sort` | Subset, filter, or sort the ranges |
 
-: Comparing and combining two `GRanges` objects. {#tbl-multiple-granges-methods}
+: Accessors for a `GRanges`. {#tbl-granges-accessors}
+
+**Operations** transform or relate ranges. They fall into three families: those
+that reshape each range on its own (*intra-range*), those that summarize a set
+together (*inter-range*), and those that relate *two* sets (*between-set*).
+
+| Operation | Family | What it does | Biological example |
+|-----------|--------|--------------|--------------------|
+| `shift` | intra-range | Slide each range by a fixed offset | Apply the Tn5 +4/-5 shift to ATAC-seq reads |
+| `resize` | intra-range | Set each range to a fixed width (anchor with `fix`) | Fixed-width windows on peak summits for motif scanning |
+| `flank` | intra-range | Region beside each range (strand-aware) | Take the promoter just upstream of a gene |
+| `reduce` | inter-range | Merge overlapping or adjacent ranges | Collapse a gene's exons into its exonic footprint; merge replicate peaks |
+| `disjoin` | inter-range | Cut into non-overlapping pieces | Partition a locus so each read counts once |
+| `gaps` | inter-range | The bases *not* covered | Introns from exons; intergenic regions from genes |
+| `coverage` | inter-range | Per-base count of overlapping ranges | Pile reads into ChIP-seq/ATAC peaks; per-exon RNA-seq depth |
+| `findOverlaps`, `%over%` | between-set | Which query ranges hit which subject ranges | Which peaks fall in a promoter? |
+| `countOverlaps` | between-set | How many subject ranges each query hits | Count reads per gene |
+| `subsetByOverlaps` | between-set | Keep query ranges overlapping the subject | Keep variants inside exons |
+| `nearest`, `distanceToNearest` | between-set | Closest subject range to each query (+ distance) | Annotate each peak with its nearest gene/TSS |
+| `union`, `intersect`, `setdiff` | between-set | Set arithmetic on two range sets | Reproducible peaks (`intersect`); condition-specific peaks (`setdiff`) |
+
+: Range operations, by family, with a biological use for each. {#tbl-granges-operations}
 
 
 ## Summary
@@ -704,9 +941,9 @@ chapter puts these tools to work on a real peak set imported from file, and the
 
 ## Exercises
 
-These reuse the objects built earlier in the chapter: the 10-range `gr`, its
-3-range subset `g`, and the `grl` `GRangesList`. Run the chapter's chunks first
-so those objects exist.
+These reuse the objects built earlier in the chapter: the 10-range `gr`, the small
+single-chromosome toy `g` and its companion `g2`, and the `grl` `GRangesList`. Run
+the chapter's chunks first so those objects exist.
 
 **1. Read the structure.** Without running any code, which of these belong to the
 *left* of the `|` in a `GRanges` (the coordinates) and which to the *right* (the
@@ -775,7 +1012,7 @@ strand participates in the overlap test, so a `+` query range will not overlap a
 `-` subject range unless you set `ignore.strand = TRUE`.
 :::
 
-**5. Nearest with distance.** Use `distanceToNearest(g, gr)` and pull out the
+**5. Nearest with distance.** Use `distanceToNearest(g, g2)` and pull out the
 `distance` metadata column with `mcols(...)$distance`. What does a distance of 0
 tell you?
 
@@ -783,12 +1020,12 @@ tell you?
 ## Solution
 
 ```{r ex-distance}
-hits <- distanceToNearest(g, gr)
+hits <- distanceToNearest(g, g2)
 mcols(hits)$distance
 ```
 
-A distance of 0 means the nearest range overlaps or directly touches the query
-range — here every range in `g` is also present in `gr`, so each finds itself at
-distance 0.
+A distance of 0 means the query range overlaps or directly touches its nearest
+neighbour — the ranges of `g` that sit on top of `g2` report 0, while the rest
+report the base-pair gap to the closest range in `g2`.
 :::
 
