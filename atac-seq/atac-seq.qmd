@@ -40,6 +40,7 @@ ATAC-seq mini-analysis.
 - `r Biocpkg('GenomicAlignments')`
 - `r Biocpkg('rtracklayer')`
 - `r Biocpkg('heatmaps')`
+- `r Biocpkg('TxDb.Hsapiens.UCSC.hg19.knownGene')` (a large annotation download; install once with `BiocManager::install()`)
 
 ## What you'll learn
 
@@ -58,9 +59,9 @@ After working through this chapter, you'll be able to:
 ## Background
 
 Chromatin accessibility assays measure the extent to which DNA is open and accessible.
-Such assays now use high throughput sequencing as a quantitative readout. DNAse assays, first using microarrays[@Crawford2006-nt] and then DNAse-Seq [@Crawford2006-bk], requires a larger amount of DNA and is labor-indensive and has been largely supplanted by ATAC-Seq [@Buenrostro2013-dz]. 
+Such assays now use high throughput sequencing as a quantitative readout. DNase assays — first using microarrays [@Crawford2006-nt] and then DNase-seq [@Crawford2006-bk] — require more input DNA and are labor-intensive, and have been largely supplanted by ATAC-seq [@Buenrostro2013-dz].
 
-The Assay for Transposase Accessible Chromatin with high-throughput sequencing (ATAC-seq) method maps chromatin accessibility genome-wide. This method quantifies DNA accessibility with a hyperactive Tn5 transposase that cuts and inserts sequencing adapters into regions of chromatin that are accessible. High throughput sequencing of fragments produced by the process map to regions of increased accessibility, transcription factor binding sites, and nucleosome positioning. The method is both fast and sensitive and can be used as a replacement for DNAse _and_ MNase. 
+The Assay for Transposase Accessible Chromatin with high-throughput sequencing (ATAC-seq) method maps chromatin accessibility genome-wide. This method quantifies DNA accessibility with a hyperactive Tn5 transposase that cuts and inserts sequencing adapters into regions of chromatin that are accessible. High-throughput sequencing of the fragments produced maps these to regions of increased accessibility, transcription-factor binding sites, and nucleosome positioning. The method is both fast and sensitive and can be used as a replacement for DNase _and_ MNase.
 
 
 An early review of chromatin accessibility assays [@Tsompana2014-yh] compares the use cases, pros and cons, and expected signals from each of the most common approaches (@fig-chromatin-assays).
@@ -72,7 +73,7 @@ An early review of chromatin accessibility assays [@Tsompana2014-yh] compares th
 knitr::include_graphics("imgs/chromatin_accessibility_buck.png")
 ```
 
-The first manuscript describing the ATAC-seq protocol showed how ATAC-seq data "line up" with other data types such as ChIP-seq and DNase-seq (@fig-greenleaf-multimodal). It also highlighted how fragment length correlates with specific genomic regions and characteristics [@Buenrostro2013-dz, Figure 3].
+The first manuscript describing the ATAC-seq protocol showed how ATAC-seq data "line up" with other data types such as ChIP-seq and DNase-seq (@fig-greenleaf-multimodal). It also highlighted how fragment length correlates with specific genomic regions and characteristics [@Buenrostro2013-dz, Figure 2].
 
 ```{r}
 #| label: fig-greenleaf-multimodal
@@ -114,12 +115,12 @@ The _Bioconductor_ project includes several infrastructure packages for dealing 
 | Package  | Use cases |
 |---|---|
 | `r Biocpkg('Rsamtools')`  | low level access to FASTQ, VCF, SAM, BAM, BCF formats   |
-| `r Biocpkg('GenomicRanges')`  | Container and methods for handling genomic reagions   |
+| `r Biocpkg('GenomicRanges')`  | Container and methods for handling genomic regions   |
 | `r Biocpkg('GenomicFeatures')`  | Work with transcript databases, gff, gtf and BED formats  |
 | `r Biocpkg('GenomicAlignments')` | Reader for BAM format |
 | `r Biocpkg('rtracklayer')` | import and export multiple UCSC file formats including BigWig and Bed |
 
-Table: Commonly used Bioconductor and their high-level use cases.
+Table: Commonly used Bioconductor packages and their high-level use cases.
 
 As noted above, the output of an ATAC-seq experiment is a BAM file. Because paired-end sequencing is the standard for ATAC-seq, `readGAlignmentPairs()` is the right function to read it.
 
@@ -275,11 +276,8 @@ Because active promoters are nucleosome-free right at the transcription start si
 
 We loaded the BAM file with insert sizes (`isize`), so we can read fragment lengths straight off that column. The insert size is the same (in absolute value) for the `first` and `second` read of a pair, so we'll just use `first`.
 
-```{r results='hide'}
-GenomicAlignments::first(greenleaf)
-mcols(GenomicAlignments::first(greenleaf))
-class(mcols(GenomicAlignments::first(greenleaf)))
-head(mcols(GenomicAlignments::first(greenleaf))$isize)
+```{r}
+# Pull the insert size (fragment length) off the first read of each pair.
 fraglengths <- abs(mcols(GenomicAlignments::first(greenleaf))$isize)
 ```
 
@@ -288,7 +286,7 @@ Now we can look at the distribution of fragment lengths. The `density()` functio
 ```{r}
 #| label: fig-fraglength-density
 #| fig-cap: "Fragment-length (insert-size) density for our ATAC-seq reads."
-plot(density(fraglengths, bw = 0.05), xlim = c(0, 1000))
+plot(density(fraglengths), xlim = c(0, 1000))
 ```
 
 A `ggplot2` version of the same distribution (@fig-fraglength-ggplot) makes the periodic structure easier to read:
@@ -432,14 +430,7 @@ If you work extensively with ATAC-seq, Thomas Carroll's workshop is an excellent
 
 Feel free to work through it. The `r Biocpkg('ATACseqQC')` package vignette also offers a great deal beyond quality control, and several more ATAC-seq packages are available in _Bioconductor_.
 
-## MACS2 {.unnumbered}
-
-The MACS2 package is a commonly-used package for calling peaks. Installation
-and other details are available[^macs].
-
-[^macs]: https://github.com/taoliu/MACS
-
-```
-pip install macs2
-```
+Calling peaks on the coverage itself — finding the significant pileups rather than
+just plotting them — is most often done outside R with
+[MACS](https://github.com/macs3-project/MACS) (`pip install macs2`).
 
