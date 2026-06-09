@@ -12,6 +12,16 @@ name: R-CMD-check
 
 permissions: read-all
 
+# Serialize runs per ref so a newer commit supersedes an older one. Without this,
+# two pushes to main close together (e.g. two PRs merged seconds apart) each run
+# `quarto publish gh-pages`, and whichever finishes last wins — so an older
+# commit's render can clobber a newer one's published site. Cancelling the
+# in-progress run on the same ref guarantees the newest commit is what publishes.
+# The ref-keyed group also coalesces rapid pushes to a single PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
