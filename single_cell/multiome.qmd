@@ -75,11 +75,11 @@ Rather than download and reprocess the raw 10x files, we use the curated copy fr
 ```{r}
 #| label: load-packages
 #| message: false
-library(SingleCellMultiModal)
-library(MultiAssayExperiment)
-library(SingleCellExperiment)
-library(scater)
-library(scran)
+library(SingleCellMultiModal)   # the curated 10x PBMC multiome dataset
+library(MultiAssayExperiment)   # the multi-modal container
+library(SingleCellExperiment)   # each modality is an SCE
+library(Seurat)                 # WNN joint embedding lives here
+library(Signac)                 # ATAC processing (TF-IDF / LSI) and ChromatinAssay
 ```
 
 A single call fetches the data (the first time, it downloads from Bioconductor's ExperimentHub and caches locally; afterwards it loads from the cache):
@@ -106,45 +106,144 @@ sce.rna
 sce.atac
 ```
 
-<!--
-================================================================================
-DRAFT BOUNDARY — Commit 1 ends here (conceptual framing + data load, validated API).
-The sections below are the planned analytical arc for Commit 1; the joint-
-integration tooling (MOFA2 vs a lighter pure-R joint embedding) is an open
-decision with dependency/image-rebuild cost — see chapter plan discussion.
-Commit 2 will add the unpaired / diagonal label-transfer section.
-================================================================================
--->
+## From Bioconductor to Seurat: building the joint object
 
-## Processing each modality on its own terms
+The joint-embedding method we'll use — **weighted nearest neighbors (WNN)** — lives in the Seurat/Signac ecosystem, which is the de-facto standard for paired multiome. So our first practical step is to bridge our `MultiAssayExperiment` into a Seurat object: the RNA counts become a standard expression assay, and the ATAC peak counts become a Signac **`ChromatinAssay`**. This Bioconductor→Seurat hand-off is worth learning in its own right — you will reach for it constantly, because single-cell data routinely arrives in one ecosystem and the method you want lives in the other.
+
+```{r}
+#| label: to-seurat
+# RNA becomes a standard expression assay.
+pbmc <- CreateSeuratObject(counts = counts(sce.rna), assay = "RNA")
+
+# ATAC becomes a ChromatinAssay. Signac expects peak identifiers shaped like
+# "chr1-9776-10668"; `sep` tells it how the peak rownames are punctuated.
+# (Verify the peak-name format of the loaded object and adjust `sep` if needed.)
+pbmc[["ATAC"]] <- CreateChromatinAssay(counts = counts(sce.atac), sep = c(":", "-"))
+pbmc
+```
 
 ::: {.callout-note}
-The per-modality processing below mirrors the RNA workflow from the
-[scRNA-seq chapter](setup.qmd) for the expression side, and introduces
-**TF-IDF + LSI** for the accessibility side — the standard reduction for the
-sparse, near-binary ATAC peak matrix. Code to be finalized against the loaded
-object in the next drafting pass.
+## We deliberately skip the fragment file
+
+The raw 10x multiome ships a large *fragments* file (every ATAC fragment, genome-wide). The curated dataset gives us the *peak* matrix instead, so we build the `ChromatinAssay` without fragments. WNN needs only the per-modality reductions, so this costs us nothing here — but it does mean genome-browser coverage tracks and fragment-based gene-activity scores aren't available in this chapter. We don't need them for the joint embedding.
 :::
 
-### RNA: log-normalize, select features, reduce
+### RNA reduction: the familiar recipe
 
-*(Brief — this is the standard scRNA workflow from the previous chapter: library-size normalization, highly variable gene selection, PCA, UMAP. We keep it short and reference back rather than re-teaching it.)*
+The expression side is exactly the workflow from the [scRNA-seq chapter](setup.qmd) — normalize, pick highly variable genes, scale, and reduce with PCA:
 
-### ATAC: why log-PCA is wrong here, and what to do instead
+```{r}
+#| label: rna-reduction
+DefaultAssay(pbmc) <- "RNA"
+pbmc <- NormalizeData(pbmc)
+pbmc <- FindVariableFeatures(pbmc, nfeatures = 3000)
+pbmc <- ScaleData(pbmc)
+pbmc <- RunPCA(pbmc, reduction.name = "pca")
+```
 
-*(The conceptual payoff section: the peak matrix is sparse and effectively binary, so the log-normalize-then-PCA recipe from RNA does not apply. Introduce **TF-IDF** (term frequency–inverse document frequency: up-weight peaks that are informative because they are accessible in few cells) followed by **LSI** (latent semantic indexing — an SVD of the TF-IDF matrix). Show the few-line mechanism rather than hiding it in a black-box call, in the spirit of the bulk-ATAC chapter.)*
+### ATAC reduction: why not PCA, and what TF-IDF + LSI do instead
 
-## A joint embedding: using both views at once
+The accessibility side needs a different reduction, and the reason is the structure of the data. Recall that the peak matrix is **sparse and nearly binary**: a cell has at most a couple of copies of any locus, so most entries are 0 and the rest are small. Log-normalization-then-PCA, which works well for the graded counts of RNA, is a poor fit for this on/off signal.
 
-*(The core of the chapter. Build one representation of each cell that draws on RNA and ATAC together, then cluster on it and compare against RNA-only and ATAC-only embeddings — showing where the joint view resolves cell types that either modality alone blurs. Method choice — MOFA2 factors vs. a lighter pure-R concatenated-LSI/PCA embedding vs. illustrating the WNN concept — is the open tooling decision noted above.)*
+The standard reduction for ATAC is **TF-IDF followed by LSI**:
 
-## Downstream: from open chromatin to regulation
+- **TF-IDF** (term frequency–inverse document frequency, borrowed from text analysis, where "documents" are cells and "terms" are peaks) up-weights peaks that are informative *because* they are accessible in only a few cells, and down-weights peaks open everywhere. It is how we let rare, cell-type-defining peaks carry more signal than ubiquitous ones.
+- **LSI** (latent semantic indexing) is then just a singular value decomposition of the TF-IDF matrix — the accessibility analogue of PCA.
 
-*(Where the biology pays off, and what vertical integration uniquely enables: transcription-factor motif activity with `chromVAR`, and peak-to-gene links that connect a specific open enhancer to the expression of the gene it regulates — in the same cells.)*
+```{r}
+#| label: atac-reduction
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- FindTopFeatures(pbmc, min.cutoff = 5)   # keep peaks seen in >= 5 cells
+pbmc <- RunTFIDF(pbmc)                           # normalize
+pbmc <- RunSVD(pbmc, reduction.name = "lsi")     # the SVD that makes it "LSI"
+```
+
+There is one wrinkle worth teaching because it trips people up: the **first LSI component usually captures sequencing depth, not biology** — cells with more total fragments score high on it regardless of type. We check this and, if so, exclude component 1 from everything downstream (using dimensions `2:n` instead of `1:n`):
+
+```{r}
+#| label: lsi-depthcor
+DepthCor(pbmc, reduction = "lsi")
+```
+
+## A joint embedding with weighted nearest neighbors
+
+Here is the heart of vertical integration. We have two reductions of the same cells — a PCA from RNA and an LSI from ATAC — and we want **one** representation that uses both. The naive approach (just glue the two sets of components together) treats every cell as trusting both modalities equally. But that is rarely true: for some cells the RNA cleanly says "T cell" while the ATAC is murky, and for others the reverse.
+
+**WNN** handles exactly this. For *each individual cell* it learns a pair of weights — how much to trust RNA versus ATAC — by asking which modality better predicts that cell's near neighbors. It then builds a single neighbor graph from the weighted combination. The output is a joint graph we can embed (UMAP) and cluster, where each cell's contribution from each modality is tuned to that cell.
+
+```{r}
+#| label: wnn
+pbmc <- FindMultiModalNeighbors(
+  pbmc,
+  reduction.list = list("pca", "lsi"),
+  dims.list = list(1:50, 2:40),        # RNA PCA 1:50; ATAC LSI drops component 1
+  modality.weight.name = "RNA.weight"
+)
+
+pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap")
+pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, resolution = 0.8)
+```
+
+### What did the joint view buy us?
+
+The payoff is clearest when we put all three embeddings side by side — RNA alone, ATAC alone, and the WNN joint view — and look for cell populations that one modality blurs but the other (and so the joint view) resolves:
+
+```{r}
+#| label: single-modality-umaps
+pbmc <- RunUMAP(pbmc, reduction = "pca", dims = 1:50, reduction.name = "rna.umap")
+pbmc <- RunUMAP(pbmc, reduction = "lsi", dims = 2:40, reduction.name = "atac.umap")
+```
+
+```{r}
+#| label: compare-umaps
+#| fig-width: 12
+#| fig-height: 4
+p1 <- DimPlot(pbmc, reduction = "rna.umap")  + ggtitle("RNA only")
+p2 <- DimPlot(pbmc, reduction = "atac.umap") + ggtitle("ATAC only")
+p3 <- DimPlot(pbmc, reduction = "wnn.umap")  + ggtitle("WNN (joint)")
+p1 + p2 + p3
+```
+
+We can also look directly at what WNN learned — the per-cell modality weights. Plotting the RNA weight by cluster shows *which cell types lean on expression and which lean on accessibility* to define themselves:
+
+```{r}
+#| label: modality-weights
+VlnPlot(pbmc, features = "RNA.weight", group.by = "seurat_clusters", pt.size = 0)
+```
+
+## Downstream: linking a peak to the gene it regulates
+
+The unique payoff of *paired* data is that we can connect a specific open region to a specific gene's expression **in the same cells**. The honest, transparent way to see the idea is to compute it by hand for one locus: take a cell-type marker gene, find the accessible peaks near it, and ask whether a peak's accessibility *tracks* the gene's expression across cells. A peak that does is a candidate regulatory element for that gene.
+
+We'll use `MS4A1` (CD20), a canonical B-cell marker. We need its genomic location, which we pull from an Ensembl annotation:
+
+```{r}
+#| label: peak-gene-link
+#| eval: false
+library(EnsDb.Hsapiens.v86)
+
+# 1. Locate MS4A1 and define a +/- 100 kb window around it.
+# 2. Find ATAC peaks overlapping that window (peaks already carry coordinates).
+# 3. Spearman-correlate each peak's accessibility against MS4A1 expression
+#    across all cells; the highest-correlating peaks are candidate enhancers.
+#
+# This hand-rolled correlation is the transparent core of what Signac's
+# LinkPeaks() does with added GC/background correction — which needs a BSgenome
+# and the fragment file we deliberately skipped. Code finalized on first render.
+```
+
+::: {.callout-tip}
+## Where this goes next
+Production tools formalize this step: `Signac::LinkPeaks()` adds GC-content and background correction (at the cost of a `BSgenome` and the fragment file), and full gene-regulatory-network methods (SCENIC+, Pando) chain peak→gene links with transcription-factor motifs to reconstruct regulatory circuits. We compute the bare correlation here so the *concept* is unmistakable.
+:::
 
 ## Summary
 
-*(To be written once the analytical sections are final.)*
+- **RNA and ATAC are complementary**: expression is the output, accessibility is the regulatory wiring — and a cell can open a locus before it transcribes the gene.
+- **Know your integration shape first.** This was a **vertical** problem: a multiome assay handed us the cell correspondence, so the task was to *combine* two views, not to *match* cells.
+- **The two modalities live in different feature spaces** (genes vs. peaks), and the sparse, near-binary ATAC matrix needs **TF-IDF + LSI**, not the log-PCA recipe used for RNA — and its first LSI component usually encodes depth, not biology.
+- **WNN** builds a single embedding by learning, per cell, how much to trust each modality — recovering structure that either modality alone can blur.
+- **Paired data uniquely lets you link peaks to genes** in the same cells, the first step toward reconstructing regulatory logic.
 
 ## What's next: the unpaired case
 
