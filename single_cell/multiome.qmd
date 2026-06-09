@@ -1,0 +1,151 @@
+---
+title: "Integrating single-cell ATAC and RNA"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
+---
+
+A single-cell RNA experiment tells you what each cell *is doing*: which genes it is actively transcribing, right now, in the moment it was captured. A single-cell ATAC experiment tells you something different and complementary — which stretches of the genome are *open for business*. ATAC-seq finds the regions of chromatin a cell has unpacked from its tightly wound default state: promoters it has switched on, enhancers it is using, the regulatory switches it has flipped. Expression is the output; accessibility is the wiring that produces it. Measure only one and you are reading half the circuit.
+
+Why does the wiring matter if you can already see the output? Because a cell often opens a regulatory region *before*, or *without*, transcribing the gene it controls. A stem cell on the verge of becoming a blood cell can unlock the enhancers of blood-cell genes while those genes are still essentially silent — the chromatin is poised, the decision half-made, but the RNA hasn't caught up yet. Accessibility therefore carries information about a cell's *trajectory and regulatory state* that expression alone misses: which transcription factors are active, which enhancers drive which genes, where a cell is heading rather than only where it is.
+
+The technology that makes this concrete is the **multiome** assay (here, 10x Genomics' Single Cell Multiome ATAC + Gene Expression), which measures *both* RNA and open chromatin in the *same nucleus*. That "same nucleus" is the crucial part. With separate experiments you can only compare populations — the average RNA of one batch of cells against the average accessibility of another. With a multiome you can ask a cause-and-effect question inside a single cell: *this* enhancer is open, and *this* gene, which it controls, is expressed, in this very cell. That is what lets you move from cataloguing cell types to reconstructing the regulatory logic that defines them.
+
+This chapter is about **integration**: combining the two modalities into one coherent analysis instead of two parallel ones. We will build the intuition for what integration means, why it is harder than it sounds, and then do it hands-on with a public 10x PBMC multiome dataset that ships ready-to-use as a Bioconductor `MultiAssayExperiment`.
+
+## What you'll learn
+
+- Why chromatin accessibility (ATAC) and gene expression (RNA) are complementary readouts of the same cell, and what each one uniquely tells you.
+- The three shapes of single-cell integration — **vertical**, **diagonal**, and **mosaic** — and how knowing which one you have decides which methods apply.
+- The **feature-space problem**: RNA is measured over genes, ATAC over genomic peaks, and why that mismatch is the central obstacle to integration.
+- The **bridges** that connect the two spaces: gene-activity scores, peak-to-gene links, and transcription-factor motif activity.
+- How to load and explore a real multiome dataset as a `MultiAssayExperiment` of two `SingleCellExperiment`s, and process each modality on its own terms.
+- How to build a **joint embedding** that uses both modalities at once, and what it buys you over either modality alone.
+
+This chapter builds directly on the [single-cell RNA-seq chapter](setup.qmd) (the `SingleCellExperiment`, normalization, HVGs, PCA/UMAP, clustering) and on the [bulk ATAC-seq chapter](../atac-seq/atac-seq.qmd) (peaks, fragments, what accessibility *is*). If either is hazy, skim it first — we lean on both.
+
+## Two views of the same cell
+
+It helps to be precise about what each assay actually counts.
+
+- **scRNA-seq** counts transcripts and assigns them to **genes**. A cell becomes a vector of ~20,000–30,000 gene counts. High counts for a gene mean that gene is being transcribed.
+- **scATAC-seq** counts sequencing fragments that fall in accessible chromatin and assigns them to **peaks** — genomic intervals (typically a few hundred base pairs) that are open across many cells. A cell becomes a vector of counts over ~100,000+ peaks. A nonzero count for a peak means that region was accessible in that cell.
+
+Two consequences follow immediately, and they drive everything else in the chapter:
+
+1. **The two modalities live in different feature spaces.** One is indexed by genes, the other by genomic coordinates. You cannot simply stack a gene-by-cell matrix on top of a peak-by-cell matrix and call it integrated — the rows mean different things.
+2. **ATAC data is sparse and nearly binary.** Each cell has at most two copies of any locus, so a peak is essentially "seen" or "not seen" in a given cell. The peak matrix is far sparser than the RNA matrix, which changes how we normalize and reduce it (more on this below — it is why ATAC uses TF-IDF and LSI rather than the log-normalization + PCA you used for RNA).
+
+## What "integration" means: vertical, diagonal, mosaic
+
+"Integrate the ATAC with the RNA" can mean several genuinely different problems, and the single most useful thing you can do before reaching for a tool is to figure out *which one you have*. The cleanest way to organize them (after @argelaguet2021computational) is by **what the two datasets share**:
+
+| Shape | What's shared | Typical source | The hard part |
+|---|---|---|---|
+| **Vertical** | the *same cells*, different modalities | 10x **Multiome** (RNA + ATAC per nucleus) | nothing to match — just *combine* the two views well |
+| **Diagonal** | different cells, different modalities | a scRNA run and a *separate* scATAC run | you must **infer** which cells correspond |
+| **Mosaic** | partial overlap | some cells multiome, some single-modality | bridge the measured and the missing |
+
+The distinction is not academic — it changes the method entirely:
+
+- In **vertical** integration the correspondence is *handed to you*. Cell 5's RNA and cell 5's ATAC are the same cell, by construction. The task is to learn a single representation that respects both views — a *joint embedding*. This is the easier, intuition-building case, and where we start.
+- In **diagonal** integration there is no correspondence at all. You have RNA for one set of cells and ATAC for a different set, and nothing tells you that an RNA cell and an ATAC cell are "the same kind." You must *infer* the alignment, almost always by projecting both into a shared feature space (the bridges below) and matching. This is the case that forces you to understand *why* integration is hard, and we return to it in the next chapter using label transfer.
+
+Your collaborators will bring you both. Someone with a 10x Multiome run has a vertical problem. Someone who ran scRNA last year and scATAC this year — same tissue, different cells — has a diagonal one. Same words, "integrate ATAC with RNA," completely different machinery.
+
+## The feature-space problem and the bridges
+
+Because RNA lives in gene space and ATAC in peak space, every integration method needs a **bridge** that puts the two modalities into a common frame. There are three bridges worth knowing, and they are not interchangeable — each answers a different question:
+
+- **Gene-activity scores.** Summarize a gene's accessibility by summing the ATAC signal over its body and promoter (or, better, distance-weighted nearby peaks). This *casts ATAC into gene space*, so an ATAC cell can be compared to an RNA cell gene-for-gene. It is crude — accessibility is not expression — but it is the workhorse bridge for *aligning* unpaired datasets and for *annotating* ATAC cells from an RNA reference.
+- **Peak-to-gene links.** Correlate a peak's accessibility against a gene's expression *across cells*. A peak whose opening tracks a gene's expression is a candidate regulatory element for that gene. This is less a bridge for alignment than a *biological result* — it is how you discover enhancer→gene wiring, and it needs paired (or pseudobulked) data to compute.
+- **Motif / TF activity.** Collapse the tens of thousands of peaks into the handful of transcription factors whose binding motifs they contain (e.g. with `chromVAR`). This turns the unwieldy peak space into a small, interpretable space of TF activities — and TFs are the natural currency for connecting open chromatin back to the genes it regulates.
+
+Keep these three straight and most of the integration literature snaps into focus: methods differ mainly in *which bridge they use* and *whether they need the cells to be paired*.
+
+## The data: 10x PBMC multiome
+
+We'll use a public 10x Genomics dataset of roughly 10,000 peripheral blood mononuclear cells (PBMCs) from a healthy donor, profiled with the Single Cell Multiome assay so that every nucleus has both an RNA and an ATAC measurement. It is a good teaching set: PBMCs contain well-characterized, easily recognized immune cell types (T cells, B cells, monocytes, NK cells), so we have strong priors about what the answer should look like.
+
+Rather than download and reprocess the raw 10x files, we use the curated copy from the Bioconductor `SingleCellMultiModal` package, which delivers the dataset as a `MultiAssayExperiment` — the natural container for "several assays measured on the same cells," and the multi-modal generalization of the `SummarizedExperiment`/`SingleCellExperiment` classes you have already met.
+
+```{r}
+#| label: load-packages
+#| message: false
+library(SingleCellMultiModal)
+library(MultiAssayExperiment)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+```
+
+A single call fetches the data (the first time, it downloads from Bioconductor's ExperimentHub and caches locally; afterwards it loads from the cache):
+
+```{r}
+#| label: load-data
+mae <- scMultiome("pbmc_10x", modes = "*", dry.run = FALSE, format = "MTX")
+mae
+```
+
+The object bundles two experiments measured on the **same 10,032 cells**:
+
+- `rna` — a `SingleCellExperiment` of gene expression counts (~36,500 genes).
+- `atac` — a `SingleCellExperiment` of peak accessibility counts (~108,000 peaks).
+
+Because they share the same cells, the `MultiAssayExperiment` keeps their column (cell) metadata aligned for us — this is exactly the bookkeeping that makes *vertical* integration tractable. We pull out the two modalities to work with each on its own terms:
+
+```{r}
+#| label: split-modalities
+sce.rna  <- experiments(mae)[["rna"]]
+sce.atac <- experiments(mae)[["atac"]]
+
+sce.rna
+sce.atac
+```
+
+<!--
+================================================================================
+DRAFT BOUNDARY — Commit 1 ends here (conceptual framing + data load, validated API).
+The sections below are the planned analytical arc for Commit 1; the joint-
+integration tooling (MOFA2 vs a lighter pure-R joint embedding) is an open
+decision with dependency/image-rebuild cost — see chapter plan discussion.
+Commit 2 will add the unpaired / diagonal label-transfer section.
+================================================================================
+-->
+
+## Processing each modality on its own terms
+
+::: {.callout-note}
+The per-modality processing below mirrors the RNA workflow from the
+[scRNA-seq chapter](setup.qmd) for the expression side, and introduces
+**TF-IDF + LSI** for the accessibility side — the standard reduction for the
+sparse, near-binary ATAC peak matrix. Code to be finalized against the loaded
+object in the next drafting pass.
+:::
+
+### RNA: log-normalize, select features, reduce
+
+*(Brief — this is the standard scRNA workflow from the previous chapter: library-size normalization, highly variable gene selection, PCA, UMAP. We keep it short and reference back rather than re-teaching it.)*
+
+### ATAC: why log-PCA is wrong here, and what to do instead
+
+*(The conceptual payoff section: the peak matrix is sparse and effectively binary, so the log-normalize-then-PCA recipe from RNA does not apply. Introduce **TF-IDF** (term frequency–inverse document frequency: up-weight peaks that are informative because they are accessible in few cells) followed by **LSI** (latent semantic indexing — an SVD of the TF-IDF matrix). Show the few-line mechanism rather than hiding it in a black-box call, in the spirit of the bulk-ATAC chapter.)*
+
+## A joint embedding: using both views at once
+
+*(The core of the chapter. Build one representation of each cell that draws on RNA and ATAC together, then cluster on it and compare against RNA-only and ATAC-only embeddings — showing where the joint view resolves cell types that either modality alone blurs. Method choice — MOFA2 factors vs. a lighter pure-R concatenated-LSI/PCA embedding vs. illustrating the WNN concept — is the open tooling decision noted above.)*
+
+## Downstream: from open chromatin to regulation
+
+*(Where the biology pays off, and what vertical integration uniquely enables: transcription-factor motif activity with `chromVAR`, and peak-to-gene links that connect a specific open enhancer to the expression of the gene it regulates — in the same cells.)*
+
+## Summary
+
+*(To be written once the analytical sections are final.)*
+
+## What's next: the unpaired case
+
+This chapter handled the *vertical* problem, where the multiome assay handed us the cell correspondence for free. The harder and very common case is *diagonal* integration — a separate scRNA dataset and scATAC dataset with no shared cells — where we must infer the correspondence ourselves. The [next chapter](#) tackles it with **anchor-based label transfer**, and uses a clever trick: we take this very multiome dataset, *throw away* the pairing, and try to recover it — giving us a known ground truth to grade the integration against.
