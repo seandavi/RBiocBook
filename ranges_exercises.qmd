@@ -6,11 +6,6 @@ author:
     affiliation: University of Colorado<br/>Anschutz School of Medicine
     affiliation-url: https://medschool.cuanschutz.edu/
     email: seandavi@gmail.com
-format:
-  html:
-    code-fold: true
-    code-summary: "Show the answer"
-    code-tools: true
 ---
 
 ```{r init, include=FALSE}
@@ -35,9 +30,9 @@ ever have a peak file of your own — peak calls, enhancer regions, and so on �
 can read it into a `GRanges` the same way the ChIP-seq chapter does, with
 `rtracklayer::import()`.)
 
-Each exercise below is a short prompt followed by a folded solution. Try the
-prompt yourself first; then click **Show the answer** to reveal the code *and* its
-output, with a sentence or two on what to notice.
+Each exercise below is a short prompt. Try it yourself first; then expand the
+**Solution** box to reveal the code, its output, and a sentence or two on what to
+notice.
 
 ## What you'll learn
 
@@ -63,6 +58,9 @@ to know it as a `GRanges` object.
 `goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz`
 and load it into a variable named `dnase`.
 
+::: {.callout-note collapse="true"}
+## Solution
+
 ```{r dnase}
 library(AnnotationHub)
 # GenomicRanges gives us the GRanges accessors and overlap/resize operators;
@@ -78,8 +76,12 @@ dnase <- query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK56
 The `query()` call returns a one-row hub listing, and `[[1]]` downloads that one
 record and hands you the object itself. AnnotationHub caches the download, so a
 second `[[1]]` is instant.
+:::
 
 **What kind of object did you get?** Print it and ask for its class.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 dnase
@@ -89,8 +91,12 @@ class(dnase)
 It's a `GRanges` — the same class you built by hand in the ranges chapter, only
 this one was pulled from a public archive. Printing it shows the seqnames, ranges,
 strand, and a block of metadata columns.
+:::
 
 **What metadata is attached?** The per-range metadata lives in the `mcols`.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 head(mcols(dnase))
@@ -99,9 +105,13 @@ head(mcols(dnase))
 These columns are the extra fields from the original narrowPeak file — things like
 the signal value and score for each peak. They ride along with every range so you
 never lose the link between a location and its data.
+:::
 
 **How many peaks are on each chromosome?** `seqnames()` returns the chromosome of
 every peak; `table()` tallies them.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 # Show the busiest 25 chromosomes; the full list includes many empty contigs.
@@ -110,8 +120,12 @@ sort(table(seqnames(dnase)), decreasing = TRUE)[1:25]
 
 Each count is the number of DNase peaks called on that chromosome. Bigger
 chromosomes generally carry more peaks, but accessibility varies by chromosome too.
+:::
 
 **How wide are the peaks?** Summarize the `width()` of every range.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 summary(width(dnase))
@@ -119,9 +133,13 @@ summary(width(dnase))
 
 The summary gives you the min, median, mean, and max peak width in base pairs. A
 tight distribution around a couple hundred bp is typical for a DNase peak caller.
+:::
 
 **What sequence names were used — `chr1` or just `1`?** Look at the `seqlevels`
 and the `seqlevelsStyle`, then switch the style to Ensembl and look again.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 head(seqlevels(dnase), 25)   # first 25 of many contigs
@@ -136,6 +154,7 @@ The object started in **UCSC** style (`chr1`, `chr2`, …). Assigning a new
 `seqlevelsStyle` rewrites every sequence name in place — after the switch the same
 chromosomes are now named `1`, `2`, … in **Ensembl** style. Nothing about the
 ranges changed, only the labels.
+:::
 
 ::: {.callout-warning}
 ## The `chr` gotcha that silently returns zero overlaps
@@ -152,6 +171,9 @@ models.
 **How much of the genome do the peaks cover?** Assuming the peaks don't overlap,
 sum their widths and divide by the total genome length.
 
+::: {.callout-note collapse="true"}
+## Solution
+
 ```{r}
 sum(width(dnase))
 sum(seqlengths(dnase))
@@ -162,6 +184,7 @@ The first number is the total base pairs of open chromatin called; the second is
 the size of the genome. Their ratio — a small fraction of a percent — tells you
 that accessible chromatin is a tiny slice of the whole genome, which is exactly
 why these regions are interesting.
+:::
 
 ## Exercise 2: compare two replicates
 
@@ -172,13 +195,20 @@ replicates agree.
 **Load the second replicate** (`...wgEncodeUwDnaseK562PkRep2.narrowPeak.gz`) as
 `dnase2`.
 
+::: {.callout-note collapse="true"}
+## Solution
+
 ```{r}
 query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz")
 # Again, a single matching record — grab it with [[1]].
 dnase2 <- query(ah, "goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz")[[1]]
 ```
+:::
 
 **How many peaks are in each replicate?** Compare the lengths.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 length(dnase)
@@ -188,8 +218,12 @@ length(dnase2)
 The two replicates call a broadly similar number of peaks. A wildly different
 count between replicates would be a red flag that something went wrong in one of
 the experiments.
+:::
 
 **How wide are the `dnase2` peaks?**
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 summary(width(dnase2))
@@ -197,8 +231,12 @@ summary(width(dnase2))
 
 The width distribution looks much like the first replicate's — another reassuring
 sign of reproducibility.
+:::
 
 **What proportion of the genome does `dnase2` cover?** Same calculation as before.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 sum(width(dnase2)) / sum(seqlengths(dnase2))
@@ -206,10 +244,14 @@ sum(width(dnase2)) / sum(seqlengths(dnase2))
 
 A comparable coverage fraction to replicate 1, as you'd hope for two runs of the
 same assay.
+:::
 
 **How many `dnase` peaks overlap a `dnase2` peak?** The `%over%` operator returns
 a logical vector — `TRUE` for each `dnase` peak that hits at least one `dnase2`
 peak — so summing it counts the overlapping peaks.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 sum(dnase %over% dnase2)
@@ -218,10 +260,14 @@ sum(dnase %over% dnase2)
 A high overlap count is the quantitative version of "the replicates agree": the
 same regions of open chromatin show up both times. This is the kind of number you
 would report when arguing that a peak set is trustworthy.
+:::
 
 **Expand every peak by 50 bp on each end.** Suppose your peak caller was too
 strict and you want peaks 100 bp wider. Use `resize()` with `fix="center"` so the
 expansion is symmetric, and call the result `dnase_wide`.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 w <- width(dnase)
@@ -233,6 +279,7 @@ all(width(dnase_wide) == w + 100)   # every peak is exactly 100 bp wider
 `resize()` sets each range to a new width; `fix="center"` keeps the midpoint fixed
 so the peak grows 50 bp in each direction. The `all(...)` check confirms every
 peak ended up exactly 100 bp larger.
+:::
 
 ## Exercise 3: DNase sites relative to gene promoters
 
@@ -253,6 +300,9 @@ BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")
 **Load the genes from the TxDb.** Attach the package, grab the `TxDb` object, and
 pull out the genes. What class is the result, and how many genes are there?
 
+::: {.callout-note collapse="true"}
+## Solution
+
 ```{r}
 library("TxDb.Hsapiens.UCSC.hg19.knownGene")
 kg <- TxDb.Hsapiens.UCSC.hg19.knownGene
@@ -264,10 +314,14 @@ length(gx)
 `genes()` returns a `GRanges` — one range per gene, in UCSC (`chr1`) style to match
 the genome it was built on. The length tells you how many genes the annotation
 contains.
+:::
 
 **Get promoter regions with `flank()`.** Read `?flank`. The promoter sits *upstream*
 of a gene, so flanking each gene by 2 kb on its upstream side gives a first
 approximation.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 head(flank(gx, 2000))
@@ -276,10 +330,14 @@ head(flank(gx, 2000))
 `flank()` returns a new range immediately upstream of each gene — strand-aware, so
 "upstream" means the correct direction for genes on either strand. These are
 2 kb-wide candidate promoter regions.
+:::
 
 **Do the same thing with `promoters()`.** The TxDb knows where transcripts start,
 so `promoters()` builds promoter regions directly (see `?promoters` for the default
 window).
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 proms <- promoters(kg)
@@ -288,11 +346,15 @@ proms <- promoters(kg)
 `promoters()` is the purpose-built tool: it returns a promoter window around each
 transcript's start site without you having to reason about strand and flanking
 yourself.
+:::
 
 **Do these promoters overlap each other?** Genes are dense, and nearby
 transcripts share promoter neighborhoods, so many of these windows will overlap.
 `countOverlaps()` of the set against itself counts how many promoters each one
 touches.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 summary(countOverlaps(proms))
@@ -302,10 +364,14 @@ Every promoter overlaps at least itself (count ≥ 1), and the larger counts sho
 that promoters pile up on top of one another — overlapping transcripts and
 alternative start sites. That redundancy is a problem if we want clean,
 non-double-counted regions.
+:::
 
 **Collapse overlapping promoters with `reduce()`.** `reduce()` merges every group
 of overlapping ranges into a single contiguous region, giving us a tidy set of
 promoter regions to test against.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 # reduce() takes all overlapping ranges and collapses each cluster
@@ -318,10 +384,14 @@ summary(countOverlaps(prom_regions))
 
 After `reduce()`, the self-overlap count is 1 everywhere — confirming the regions
 no longer overlap each other and can be treated as a clean, non-redundant set.
+:::
 
 **Count DNase sites that overlap a promoter region.** Here is where the
 `seqlevelsStyle` warning above comes due: we switched `dnase` to Ensembl (`1`) in
 Exercise 1, but the gene models are UCSC (`chr1`). Watch what happens.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 # dnase is still in Ensembl style from Exercise 1, while
@@ -338,10 +408,14 @@ The first count is **zero** — not because the data disagree, but because `chr1
 and `1` never match. After switching `dnase` back to UCSC style, the same overlap
 query returns a large, sensible count. This is the silent bug from the warning,
 caught and fixed. (`dnase2` was never reassigned, so it was UCSC-style all along.)
+:::
 
 **Is that overlap surprising?** If DNase sites and promoters were placed
 *independently* on the genome, how many overlaps would you expect by chance?
 Compare that expectation to what you observed.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 # Use one consistent genome size. Some contigs have unknown (NA) lengths,
@@ -358,6 +432,7 @@ That gap is the biology: DNase hypersensitive sites are **not** scattered at
 random — they concentrate at promoters, exactly where regulatory machinery opens
 up the chromatin. The overlap count is meaningful precisely because it dwarfs the
 null expectation.
+:::
 
 ## Exercise 4: enrichment of histone marks at CpG islands
 
@@ -396,16 +471,23 @@ cpg <- query(ah, c("cpg", "UCSC", "hg19"))[[1]]
 **How many `H3K4me1` peaks overlap a CpG island?** Start with the simple `%over%`
 count, as in Exercise 2.
 
+::: {.callout-note collapse="true"}
+## Solution
+
 ```{r}
 sum(h3k4me1 %over% cpg)
 ```
 
 That's the number of `H3K4me1` peaks touching at least one CpG island — a quick
 first look at the association.
+:::
 
 **How many *bases* overlap?** A peak count ignores how much of each peak overlaps.
 `intersect()` returns the overlapping regions themselves, so summing their widths
 gives the total overlapping base pairs.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 # intersect() returns only the overlapping stretches as a new range set;
@@ -415,12 +497,16 @@ sum(width(intersect(h3k4me1, cpg)))
 
 This is a finer measure than the peak count: it tells you how many base pairs the
 two sets actually share, not just how many peaks touch.
+:::
 
 **Turn that into an enrichment score.** Broad marks cover more bases and so overlap
 CpG islands more just by being big. To correct for that, normalize the shared bases
 by the *total* bases covered by either set (their `union`). The result is a
 Jaccard-style ratio between 0 and 1: the fraction of the combined footprint that
 both sets share.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 sum(width(union(h3k4me1, cpg)))
@@ -431,8 +517,13 @@ sum(width(intersect(h3k4me1, cpg))) / sum(width(union(h3k4me1, cpg)))
 A score near 0 means the two sets barely co-occur; a score near 1 means they cover
 almost exactly the same ground. Because the denominator grows with peak breadth,
 this score lets you compare a broad mark and a narrow mark on equal footing.
+:::
 
-**Wrap it in a function** so you can score any pair of range sets.
+**Wrap it in a function** so you can score any pair of range sets, then try it on
+`H3K4me1` and the CpG islands.
+
+::: {.callout-note collapse="true"}
+## Solution
 
 ```{r}
 range_enrichment_score <- function(r1, r2) {
@@ -443,8 +534,7 @@ range_enrichment_score <- function(r1, r2) {
 ```
 
 The function is just the intersect-over-union calculation with names: `i` for the
-shared bases, `u` for the combined footprint. Give it a try on `H3K4me1` and the
-CpG islands:
+shared bases, `u` for the combined footprint. Give it a try:
 
 ```{r}
 range_enrichment_score(h3k4me1, cpg)
@@ -453,6 +543,7 @@ range_enrichment_score(h3k4me1, cpg)
 You get back the same normalized score as before. Now you can call
 `range_enrichment_score()` on any two `GRanges` — try the other histone marks
 against `cpg` and see which one is most enriched at CpG islands.
+:::
 
 ## Summary
 
