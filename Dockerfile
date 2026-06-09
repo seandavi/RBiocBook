@@ -22,11 +22,25 @@ RUN apt-get update \
 # DESCRIPTION Depends: is the single source of truth, kept honest by
 # tools/check-deps.R. Version constraints are stripped with regex character
 # classes (no backslashes, so this survives every quoting layer).
+#
+# BiocManager::install() treats a failed *download* as a warning, not an error,
+# so a transient mirror hiccup (e.g. a 504 on one binary) would otherwise leave
+# a package missing while the build still exits 0 — a silently broken image.
+# Guard against that: retry only the still-missing packages a few times to ride
+# out transient failures, then HARD-FAIL the build if anything is still absent.
 COPY DESCRIPTION /tmp/DESCRIPTION
-RUN Rscript -e 'deps <- read.dcf("/tmp/DESCRIPTION")[1, "Depends"]; \
+RUN Rscript -e 'options(timeout = 600); \
+      deps <- read.dcf("/tmp/DESCRIPTION")[1, "Depends"]; \
       deps <- trimws(gsub("[(].*?[)]", "", strsplit(deps, ",")[[1]])); \
       deps <- deps[deps != "" & deps != "R"]; \
-      BiocManager::install(deps, update = FALSE, ask = FALSE, Ncpus = parallel::detectCores())' \
+      for (attempt in 1:3) { \
+        missing <- setdiff(deps, rownames(installed.packages())); \
+        if (!length(missing)) break; \
+        message(sprintf("Dependency install attempt %d: %d package(s) remaining", attempt, length(missing))); \
+        BiocManager::install(missing, update = FALSE, ask = FALSE, Ncpus = parallel::detectCores()); \
+      }; \
+      missing <- setdiff(deps, rownames(installed.packages())); \
+      if (length(missing)) stop(sprintf("Image build aborted: %d declared package(s) failed to install: %s", length(missing), paste(missing, collapse = ", ")))' \
   && rm /tmp/DESCRIPTION
 
 # Quarto CLI + TinyTeX (PDF) + quartobot (pre-render hook declared in _quarto.yml).
