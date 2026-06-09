@@ -253,22 +253,46 @@ VlnPlot(pbmc, features = "RNA.weight", group.by = "seurat_clusters", pt.size = 0
 
 The unique payoff of *paired* data is that we can connect a specific open region to a specific gene's expression **in the same cells**. The honest, transparent way to see the idea is to compute it by hand for one locus: take a cell-type marker gene, find the accessible peaks near it, and ask whether a peak's accessibility *tracks* the gene's expression across cells. A peak that does is a candidate regulatory element for that gene.
 
-We'll use `MS4A1` (CD20), a canonical B-cell marker. We need its genomic location, which we pull from an Ensembl annotation:
+We'll use `MS4A1` (CD20), a canonical B-cell marker. The logic is three steps: find the gene, find the peaks near it, then correlate.
+
+**Step 1 — locate the gene.** We pull MS4A1's coordinates from an Ensembl annotation and relabel its chromosome in the `chr11` (UCSC) style the ATAC peaks use, then widen to a ±100 kb window — wide enough to catch enhancers, which often sit well outside the gene body:
 
 ```{r}
-#| label: peak-gene-link
-#| eval: false
+#| label: peak-gene-locate
+#| message: false
 library(EnsDb.Hsapiens.v86)
 
-# 1. Locate MS4A1 and define a +/- 100 kb window around it.
-# 2. Find ATAC peaks overlapping that window (peaks already carry coordinates).
-# 3. Spearman-correlate each peak's accessibility against MS4A1 expression
-#    across all cells; the highest-correlating peaks are candidate enhancers.
-#
-# This hand-rolled correlation is the transparent core of what Signac's
-# LinkPeaks() does with added GC/background correction — which needs a BSgenome
-# and the fragment file we deliberately skipped. Code finalized on first render.
+gene <- "MS4A1"
+all.genes <- genes(EnsDb.Hsapiens.v86)              # every gene, as a GRanges
+gene.gr   <- all.genes[all.genes$gene_name == gene] # subset to MS4A1
+seqlevelsStyle(gene.gr) <- "UCSC"                   # "11" -> "chr11"
+window <- resize(gene.gr, width = width(gene.gr) + 2e5, fix = "center")
+window
 ```
+
+**Step 2 — find nearby peaks.** The `ChromatinAssay` carries each peak's coordinates, so we ask which peaks fall inside the window. We index back into the assay's own peak names so the identifiers match exactly:
+
+```{r}
+#| label: peak-gene-overlap
+peak.gr  <- granges(pbmc[["ATAC"]])
+idx      <- queryHits(findOverlaps(peak.gr, window))
+peak.ids <- rownames(pbmc[["ATAC"]])[idx]
+length(peak.ids)                                    # how many peaks sit near MS4A1?
+```
+
+**Step 3 — correlate accessibility with expression.** For each nearby peak we compute the Spearman correlation, across all 10,032 cells, between that peak's accessibility and MS4A1's expression. A peak whose opening rises and falls *with* the gene's expression is a candidate regulatory element for it:
+
+```{r}
+#| label: peak-gene-correlate
+#| warning: false
+acc  <- GetAssayData(pbmc, assay = "ATAC", slot = "data")[peak.ids, , drop = FALSE]
+expr <- GetAssayData(pbmc, assay = "RNA",  slot = "data")[gene, ]
+
+peak.cor <- apply(acc, 1, function(a) cor(a, expr, method = "spearman"))
+sort(peak.cor, decreasing = TRUE)[1:10]             # the top candidate links
+```
+
+The most strongly correlated peak is typically the gene's own promoter; the others are candidate enhancers that open in the same cells that express MS4A1 — precisely the sort of regulatory link that only *paired* measurement, in the same cells, can reveal.
 
 ::: {.callout-tip}
 ## Where this goes next
