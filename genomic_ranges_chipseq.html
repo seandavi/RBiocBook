@@ -795,7 +795,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 
 </header><p>CTCF is one of the most important architectural proteins in the human genome. It binds thousands of sites across the chromosomes, where it helps fold DNA into loops and marks the boundaries between active and silent regions. So a natural question for a biologist is: <strong>where does CTCF actually bind?</strong></p>
 <p>A ChIP-seq experiment answers that question by handing you a list of genomic intervals — the <em>peaks</em> where the protein was detected. In this chapter you’ll take a real CTCF peak set from the ENCODE project, load it into R, and learn the tools you need to explore it: how genomic coordinates are stored on disk, how to import them, and how to ask questions like “how wide are these peaks?” and “where exactly is the center of each one?”</p>
-<p>The previous chapter, <em>Genomic ranges and features</em>, built <code>GRanges</code> objects by hand and worked through the full catalog of range operations (set operations, overlaps, nearest-feature searches, gene models) systematically. This chapter puts those tools to work on a <strong>real dataset</strong>, focusing on what a hand-built example can’t show you: file formats, importing, and exploring an actual peak set. Here we keep our hands on real data.</p>
+<p>The previous chapter, <em>Genomic ranges and features</em>, built <code>GRanges</code> objects by hand and worked through the full catalog of range operations (set operations, overlaps, nearest-feature searches, gene models) systematically. This chapter puts those tools to work on a <strong>real dataset</strong>, focusing on what a hand-built example can’t show you: file formats, importing, and exploring an actual peak set.</p>
 <section id="what-youll-learn" class="level2" data-number="35.1"><h2 data-number="35.1" class="anchored" data-anchor-id="what-youll-learn">
 <span class="header-section-number">35.1</span> What you’ll learn</h2>
 <ul>
@@ -835,11 +835,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <span class="header-section-number">35.3</span> Loading the libraries</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="importing-the-ctcf-peaks" class="level2 page-columns page-full" data-number="35.4"><h2 data-number="35.4" class="anchored" data-anchor-id="importing-the-ctcf-peaks">
 <span class="header-section-number">35.4</span> Importing the CTCF peaks</h2>
@@ -932,7 +928,7 @@ cols(
 </div>
 </section><section id="looking-inside-a-granges" class="level2 page-columns page-full" data-number="35.5"><h2 data-number="35.5" class="anchored" data-anchor-id="looking-inside-a-granges">
 <span class="header-section-number">35.5</span> Looking inside a GRanges</h2>
-<p>A <code>GRanges</code> keeps the <em>ranges</em> (chromosome, start, end, strand) separate from the <em>metadata</em> (everything else). You pull each part out with an accessor function.</p>
+<p>You met these accessors in the previous chapter; here they are again, this time pulling information out of the peaks you just imported. The <em>ranges</em> (chromosome, start, end, strand) come out with their own accessors, and everything else (the <em>metadata</em>) comes out with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span>         <span class="co"># how many peaks?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -958,7 +954,7 @@ Levels(26): chr2 chr20 chr15 ... chr1_KI270714v1_random chrUn_GL000219v1</code><
 <pre><code>[1] 216 216 216 216 216 216</code></pre>
 </div>
 </div>
-<p>So this file contains 43865 CTCF peaks. The widths vary, but let’s look at the whole distribution rather than the first six values:</p>
+<p>So this file contains 43865 CTCF peaks. Notice the comment on <code>width</code>: it is <code>end - start + 1</code>, not <code>end - start</code>. Because <code>GRanges</code> coordinates are 1-based and <em>inclusive</em>, both endpoints count — the very same span the 0-based BED file wrote as <code>end - start</code>. The widths vary, but let’s look at the whole distribution rather than the first six values:</p>
 <div class="cell page-columns page-full">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"CTCF peak widths"</span>, xlab <span class="op">=</span> <span class="st">"Width (bp)"</span>, col <span class="op">=</span> <span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1051,17 +1047,17 @@ Figure&nbsp;35.2: Distribution of CTCF peak signal values. Most peaks are weak; 
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peak_starts</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span></span>
 <span><span class="va">peak_ends</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span></span>
-<span><span class="va">peak_centers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span></span>
+<span><span class="va">peak_centers</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">peak_centers</span>, <span class="fl">5</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 238305432  49982815  39921124   6708382 136646065</code></pre>
+<pre><code>[1] 238305432  49982814  39921124   6708382 136646064</code></pre>
 </div>
 </div>
 <p><code>peak_centers</code> now holds the midpoint of every peak, ready to anchor a window.</p>
 </section><section id="reshaping-ranges" class="level2" data-number="35.8"><h2 data-number="35.8" class="anchored" data-anchor-id="reshaping-ranges">
 <span class="header-section-number">35.8</span> Reshaping ranges</h2>
-<p>Three functions cover most of the range-reshaping you’ll do on a peak set: <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift()</a></code> slides a range, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code> changes its width, and <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> builds a neighbouring region. They all return a new <code>GRanges</code> and leave the original untouched.</p>
+<p>You met <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> in the previous chapter. Here is what they do to a <em>real</em> peak set — the operations behind sliding a window, building fixed-width windows for motif analysis, and grabbing the DNA beside a peak. As before, each returns a new <code>GRanges</code> and leaves the original untouched.</p>
 <section id="shifting" class="level3" data-number="35.8.1"><h3 data-number="35.8.1" class="anchored" data-anchor-id="shifting">
 <span class="header-section-number">35.8.1</span> Shifting</h3>
 <p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift()</a></code> moves every range by a fixed number of bases without changing its width:</p>
@@ -1149,7 +1145,7 @@ Figure&nbsp;35.2: Distribution of CTCF peak signal values. Most peaks are weak; 
   seqinfo: 26 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>The flanking range is the 1000 bp sitting immediately before the start of the first peak — the kind of window you might scan for a neighbouring promoter.</p>
+<p>The flanking range is the 1000 bp sitting immediately before the start of the first peak — the kind of window you might scan for a neighboring promoter.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1306,10 +1302,10 @@ Figure&nbsp;35.4: How often each coverage depth occurs across the simulated chro
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">centers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">centers</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">ctcf_peaks</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">centers</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The center is the start plus half the width. (You could also use <code>start(resize(ctcf_peaks, width = 1, fix = "center"))</code> to let <code>GRanges</code> do the arithmetic.)</p>
+<p>The center is the midpoint of the start and end. (You could also use <code>start(resize(ctcf_peaks, width = 1, fix = "center"))</code> to let <code>GRanges</code> do the arithmetic.)</p>
 </div>
 </div>
 </div>

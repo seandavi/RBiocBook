@@ -770,8 +770,9 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   </ul>
 </li>
   <li><a href="#gene-models" id="toc-gene-models" class="nav-link" data-scroll-target="#gene-models"><span class="header-section-number">34.5</span> Gene models</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">34.6</span> Summary</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">34.7</span> Exercises</a></li>
+  <li><a href="#sec-granges-methods" id="toc-sec-granges-methods" class="nav-link" data-scroll-target="#sec-granges-methods"><span class="header-section-number">34.6</span> Quick reference: GRanges methods</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">34.7</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">34.8</span> Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/genomic_ranges.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/genomic_ranges.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -848,211 +849,48 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The Bioconductor <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> package is a comprehensive toolkit designed to handle and manipulate genomic intervals and variables systematized on these intervals <span class="citation" data-cites="lawrence_software_2013">(<a href="references.html#ref-lawrence_software_2013" role="doc-biblioref">Lawrence et al. 2013</a>)</span>. Developed by Bioconductor, this package simplifies the complexity of managing genomic data, facilitating the efficient exploration, manipulation, and visualization of such data. GenomicRanges aids in dealing with the challenges of genomic data, including its massive size, intricate relationships, and high dimensionality.</p>
-<p>The GenomicRanges package in Bioconductor covers a wide range of use cases related to the management and analysis of genomic data. Here are some key examples:</p>
-<ul>
-<li><dl>
-<dt>Genomic Feature Manipulation</dt>
-<dd>
-The GenomicRanges and GRanges classes can be used to represent and manipulate various genomic features such as genes, transcripts, exons, or single-nucleotide polymorphisms (SNPs). Users can query, subset, resize, shift, or sort these features based on their genomic coordinates.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Genomic Interval Operations</dt>
-<dd>
-The GenomicRanges package provides functions for performing operations on genomic intervals, such as finding overlaps, nearest neighbors, or disjoint intervals. These operations are fundamental to many types of genomic data analyses, such as identifying genes that overlap with ChIP-seq peaks, or finding variants that are in close proximity to each other.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Alignments and Coverage</dt>
-<dd>
-The GAlignments and GAlignmentPairs classes can be used to represent alignments of sequencing reads to a reference genome, such as those produced by a read aligner. Users can then compute coverage of these alignments over genomic ranges of interest, which is a common task in RNA-seq or ChIP-seq analysis.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Annotation and Metadata Handling</dt>
-<dd>
-The metadata column of a GRanges object can be used to store various types of annotation data associated with genomic ranges, such as gene names, gene biotypes, or experimental scores. This makes it easy to perform analyses that integrate genomic coordinates with other types of biological information.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Genome Arithmetic</dt>
-<dd>
-The GenomicRanges package supports a version of “genome arithmetic”, which includes set operations (union, intersection, set difference) as well as other operations (like coverage, complement, or reduction) that are adapted to the specificities of genomic data.
-</dd>
-</dl></li>
-<li><dl>
-<dt>Efficient Data Handling</dt>
-<dd>
-The CompressedGRangesList class provides a space-efficient way to represent a large list of GRanges objects, which is particularly useful when working with large genomic datasets, such as whole-genome sequencing data.
-</dd>
-</dl></li>
-</ul>
-<p>The GenomicRanges package in Bioconductor uses the S4 class system (see <a href="#tbl-genomic-ranges-classes" class="quarto-xref">Table&nbsp;<span>34.1</span></a>), which is a part of the methods package in R. The S4 system is a more rigorous and formal approach to object-oriented programming in R, providing enhanced capabilities for object design and function dispatch.</p>
-<div id="tbl-genomic-ranges-classes" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-tbl-colwidths="[20,40,40]">
+<p>The Bioconductor <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> package <span class="citation" data-cites="lawrence_software_2013">(<a href="references.html#ref-lawrence_software_2013" role="doc-biblioref">Lawrence et al. 2013</a>)</span> gives you the <code>GRanges</code> container for genomic intervals together with a vocabulary of fast operations on them — subsetting, resizing, overlap, nearest-neighbor, and genome arithmetic. The rest of this chapter introduces both by example, building small objects by hand so you can see exactly what each operation does.</p>
+<p><code>GRanges</code> is built on R’s <strong>S4</strong> class system, so each object carries dedicated slots — <code>seqnames</code>, <code>ranges</code>, <code>strand</code>, and metadata — with methods that operate on them. Three related containers show up throughout the chapter:</p>
+<div id="tbl-genomic-ranges-classes" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-tbl figure page-columns page-full"><div aria-describedby="tbl-genomic-ranges-classes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="table">
 <colgroup>
 <col style="width: 20%">
-<col style="width: 40%">
-<col style="width: 40%">
+<col style="width: 42%">
+<col style="width: 37%">
 </colgroup>
 <thead><tr class="header">
-<th>Class Name</th>
-<th>Description</th>
-<th>Potential Use</th>
+<th>Class</th>
+<th>What it holds</th>
+<th>Typical use</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>GRanges</td>
-<td>Represents a collection of genomic ranges and associated variables.</td>
-<td>ChipSeq peaks, CpG islands, etc.</td>
+<td><code>GRanges</code></td>
+<td>a set of genomic ranges plus metadata</td>
+<td>ChIP-seq peaks, CpG islands, genes</td>
 </tr>
 <tr class="even">
-<td>GRangesList</td>
-<td>Represents a list of GenomicRanges objects.</td>
-<td>transcript models (exons, introns)</td>
+<td><code>GRangesList</code></td>
+<td>a list of <code>GRanges</code> objects</td>
+<td>exons grouped by transcript</td>
 </tr>
 <tr class="odd">
-<td>RangesList</td>
-<td>Represents a list of Ranges objects.</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>IRanges</td>
-<td>Represents a collection of integer ranges.</td>
-<td>used mainly to <em>build</em> GRanges, etc.</td>
-</tr>
-<tr class="odd">
-<td>GPos</td>
-<td>Represents genomic positions.</td>
-<td>SNPs or other single-nucleotide locations</td>
-</tr>
-<tr class="even">
-<td>GAlignments</td>
-<td>Represents alignments against a reference genome.</td>
-<td>Sequence read locations from a BAM file</td>
-</tr>
-<tr class="odd">
-<td>GAlignmentPairs</td>
-<td>Represents pairs of alignments, typically representing a single fragment of DNA.</td>
-<td>Paired-end sequence alignments</td>
+<td><code>IRanges</code></td>
+<td>plain integer ranges</td>
+<td>the building block inside a <code>GRanges</code>
+</td>
 </tr>
 </tbody>
 </table>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-tbl margin-caption" id="tbl-genomic-ranges-classes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;34.1: Classes within the GenomicRanges package. Each class has a slightly different use case.
+Table&nbsp;34.1: The containers used in this chapter.
 </figcaption></figure>
 </div>
-<p>In the context of the GenomicRanges package, the S4 class system allows for the creation of complex, structured data objects that can effectively encapsulate genomic intervals and associated data. This system enables the package to handle the complexity and intricacy of genomic data.</p>
-<p>For example, the GenomicRanges class in the package is an S4 class that combines several basic data types into a composite object. It includes slots for sequence names (seqnames), ranges (start and end positions), strand information, and metadata. Each slot in the S4 class corresponds to a specific component of the genomic data, and methods (see <a href="#tbl-single-granges-methods" class="quarto-xref">Table&nbsp;<span>34.2</span></a> and <a href="#tbl-multiple-granges-methods" class="quarto-xref">Table&nbsp;<span>34.3</span></a>) can be defined to interact with these slots in a structured and predictable way.</p>
-<div id="tbl-single-granges-methods" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-float-tbl figure page-columns page-full"><div aria-describedby="tbl-single-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 79%">
-</colgroup>
-<thead><tr class="header">
-<th><strong>Method</strong></th>
-<th><strong>Description</strong></th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><strong>length</strong></td>
-<td>Returns the number of ranges in the GRanges object.</td>
-</tr>
-<tr class="even">
-<td><strong>seqnames</strong></td>
-<td>Retrieves the sequence names of the ranges.</td>
-</tr>
-<tr class="odd">
-<td><strong>ranges</strong></td>
-<td>Retrieves the start and end positions of the ranges.</td>
-</tr>
-<tr class="even">
-<td><strong>strand</strong></td>
-<td>Retrieves the strand information of the ranges.</td>
-</tr>
-<tr class="odd">
-<td><strong>elementMetadata</strong></td>
-<td>Retrieves the metadata associated with the ranges.</td>
-</tr>
-<tr class="even">
-<td><strong>seqlevels</strong></td>
-<td>Returns the levels of the factor that the seqnames slot is derived from.</td>
-</tr>
-<tr class="odd">
-<td><strong>seqinfo</strong></td>
-<td>Retrieves the Seqinfo (sequence information) object associated with the GRanges object.</td>
-</tr>
-<tr class="even">
-<td><strong>start, end, width</strong></td>
-<td>Retrieve or set the start or end positions, or the width of the ranges.</td>
-</tr>
-<tr class="odd">
-<td><strong>resize</strong></td>
-<td>Resizes the ranges.</td>
-</tr>
-<tr class="even">
-<td><strong>subset, [, [[, $</strong></td>
-<td>Subset or extract elements from the GRanges object.</td>
-</tr>
-<tr class="odd">
-<td><strong>sort</strong></td>
-<td>Sorts the GRanges object.</td>
-</tr>
-<tr class="even">
-<td><strong>shift</strong></td>
-<td>Shifts the ranges by a certain number of base pairs.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-tbl margin-caption" id="tbl-single-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;34.2: Methods for accessing, manipulating single objects
-</figcaption></figure>
-</div>
-<p>The S4 class system also supports inheritance, which allows for the creation of specialized subclasses that share certain characteristics with a parent class but have additional features or behaviors.</p>
-<p>The S4 system’s formalism and rigor make it well-suited to the complexities of bioinformatics and genomic data analysis. It allows for the creation of robust, reliable code that can handle complex data structures and operations, making it a key part of the GenomicRanges package and other Bioconductor packages.</p>
-<div id="tbl-multiple-granges-methods" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-float-tbl figure page-columns page-full"><div aria-describedby="tbl-multiple-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 79%">
-</colgroup>
-<thead><tr class="header">
-<th><strong>Method</strong></th>
-<th><strong>Description</strong></th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><strong>findOverlaps</strong></td>
-<td>Finds overlaps between different sets of ranges.</td>
-</tr>
-<tr class="even">
-<td><strong>countOverlaps</strong></td>
-<td>Counts overlaps between different sets of ranges.</td>
-</tr>
-<tr class="odd">
-<td><strong>subsetByOverlaps</strong></td>
-<td>Subsets the ranges based on overlaps.</td>
-</tr>
-<tr class="even">
-<td><strong>distanceToNearest</strong></td>
-<td>Computes the distance to the nearest range in another set of ranges.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-tbl margin-caption" id="tbl-multiple-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;34.3: Methods for comparing and combining multiple GenomicRanges-class objects
-</figcaption></figure>
-</div>
+<p>A compact cheat-sheet of the accessor and operation methods is collected under <a href="#sec-granges-methods">Quick reference</a> at the end of the chapter; we meet each one in context first.</p>
 <p>To get going, we can construct a <code>GRanges</code> object by hand as an example.</p>
-<p>The <code>GRanges</code> class represents a collection of genomic ranges that each have a single start and end location on the genome. It can be used to store the location of genomic features such as contiguous binding sites, transcripts, and exons. These objects can be created by using the GRanges constructor function. The following code just creates a <code>GRanges</code> object from scratch.</p>
+<p>The <code>GRanges</code> class represents a collection of genomic ranges that each have a single start and end location on the genome. It can be used to store the location of genomic features such as contiguous binding sites, transcripts, and exons. These objects can be created by using the GRanges constructor function. The following code creates one from scratch. (The <code><a href="https://rdrr.io/pkg/S4Vectors/man/Rle-class.html">Rle()</a></code> calls in it simply repeat each value a given number of times — a compact “run-length” shorthand we return to under <em>coverage</em> later.)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span></span>
 <span>    seqnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Rle-class.html">Rle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"chr1"</span>, <span class="st">"chr3"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -1159,7 +997,7 @@ i         9  0.111111
 j        10  0.000000</code></pre>
 </div>
 </div>
-<p>Since the <code>class</code> of <code>mcols(gr)</code> is DFrame, we can use our <code>DataFrame</code> approaches to work with the data.</p>
+<p>Since the <code>class</code> of <code>mcols(gr)</code> is DFrame, we can use the <code>DataFrame</code> (Bioconductor’s data-frame-like table) approaches to work with the data.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">$</span><span class="va">score</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1300,7 +1138,7 @@ j        10  0.000000</code></pre>
 <span class="header-section-number">34.2.2</span> Interval operations on one GRanges object</h3>
 <section id="intra-range-methods" class="level4" data-number="34.2.2.1"><h4 data-number="34.2.2.1" class="anchored" data-anchor-id="intra-range-methods">
 <span class="header-section-number">34.2.2.1</span> Intra-range methods</h4>
-<p>The methods described in this section work <em>one-region-at-a-time</em> and are, therefore, called “intra-region” methods. Methods that work across all regions are described below in the <a href="#inter-range-methods">Inter-range methods</a> section.</p>
+<p>The methods described in this section work <em>one-region-at-a-time</em> and are, therefore, called “intra-range” methods. Methods that work across all regions are described below in the <a href="#inter-range-methods">Inter-range methods</a> section.</p>
 <p>The <code>GRanges</code> class has accessors for the “ranges” part of the data. For example:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Make a smaller GRanges subset</span></span>
@@ -1522,7 +1360,7 @@ integer-Rle of length 0 with 0 runs
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>There is extensive additional help available or by looking at the vignettes in at the <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> pages.</p>
+<p>There is extensive additional help in the vignettes at the <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> pages.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="op">?</span><span class="va">GRanges</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1532,13 +1370,13 @@ integer-Rle of length 0 with 0 runs
 </div>
 </section></section><section id="grangeslist" class="level2 page-columns page-full" data-number="34.3"><h2 data-number="34.3" class="anchored" data-anchor-id="grangeslist">
 <span class="header-section-number">34.3</span> GRangesList</h2>
-<p>Some important genomic features, such as spliced transcripts that are are comprised of exons, are inherently compound structures. Such a feature makes much more sense when expressed as a compound object such as a GRangesList. If we think of each transcript as a set of exons, each transcript would be summarized as a <code>GRanges</code> object. However, if we have multiple transcripts, we want to keep them separate, with each transcript holding its own exons. A <code>GRangesList</code> is a list of <code>GRanges</code> objects. Continuing with the transcripts idea, a <code>GRangesList</code> can contain all the transcripts and their exons; each transcript is one element in the list.</p>
+<p>Some important genomic features, such as spliced transcripts that are comprised of exons, are inherently compound structures. Such a feature makes much more sense when expressed as a compound object such as a GRangesList. If we think of each transcript as a set of exons, each transcript would be summarized as a <code>GRanges</code> object. However, if we have multiple transcripts, we want to keep them separate, with each transcript holding its own exons. A <code>GRangesList</code> is a list of <code>GRanges</code> objects. Continuing with the transcripts idea, a <code>GRangesList</code> can contain all the transcripts and their exons; each transcript is one element in the list.</p>
 <div id="fig-granges-list-structure" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-granges-list-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/granges_list_structure.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;34.2: The structure of a GRangesList, which is a list of GRanges objects. While the analogy is not perfect, a GRangesList behaves a bit like a list. Each element in the GRangesList is a Granges object. A common use case for a GRangesList is to store a list of transcripts, each of which have exons as the regions in the GRanges."><img src="images/granges_list_structure.png" class="img-fluid figure-img"></a>
+<a href="images/granges_list_structure.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;34.2: The structure of a GRangesList, which is a list of GRanges objects. While the analogy is not perfect, a GRangesList behaves a bit like a list. Each element in the GRangesList is a GRanges object. A common use case for a GRangesList is to store a list of transcripts, each of which have exons as the regions in the GRanges."><img src="images/granges_list_structure.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-granges-list-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;34.2: The structure of a GRangesList, which is a <code>list</code> of GRanges objects. While the analogy is not perfect, a <code>GRangesList</code> behaves a bit like a list. Each element in the <code>GRangesList</code> <em>is</em> a <code>Granges</code> object. A common use case for a <code>GRangesList</code> is to store a list of transcripts, each of which have exons as the regions in the <code>GRanges</code>.
+Figure&nbsp;34.2: The structure of a GRangesList, which is a <code>list</code> of GRanges objects. While the analogy is not perfect, a <code>GRangesList</code> behaves a bit like a list. Each element in the <code>GRangesList</code> <em>is</em> a <code>GRanges</code> object. A common use case for a <code>GRangesList</code> is to store a list of transcripts, each of which have exons as the regions in the <code>GRanges</code>.
 </figcaption></figure>
 </div>
 <p>Whenever genomic features consist of multiple ranges that are grouped by a parent feature, they can be represented as a GRangesList object. Consider the simple example of the two transcript GRangesList below created using the GRangesList constructor.</p>
@@ -1760,7 +1598,7 @@ The function returns a Hits (see <code><a href="https://rdrr.io/pkg/S4Vectors/ma
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>As you might expect, the <code>countOverlaps</code> method counts the regions in the second <code>GRanges</code> that overlap with those that overlap with each element of the first.</p>
+<p>As you might expect, the <code>countOverlaps</code> method counts, for each range in the first <code>GRanges</code>, how many ranges in the second it overlaps.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps</a></span><span class="op">(</span><span class="va">gr1</span>, <span class="va">gr2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1898,7 +1736,8 @@ Figure&nbsp;34.3: A graphical representation of range operations demonstrated on
 </figcaption></figure>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb111"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb111"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># install once: BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene")</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span><span class="op">)</span></span>
 <span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>transcripts</code> function returns a <code>GRanges</code> object with the transcripts for all genes in the database.</p>
@@ -1997,8 +1836,124 @@ Figure&nbsp;34.3: A graphical representation of range operations demonstrated on
 <p><code>exons(txdb)</code> gives you a flat <code>GRanges</code> of every exon. When you instead want the exons <em>grouped by the transcript they belong to</em> — a <code>GRangesList</code>, one element per transcript — use <code>exonsBy(txdb, by = "tx")</code>. That is the natural object for counting reads per transcript and is exactly the <code>GRangesList</code> structure we built by hand earlier.</p>
 </div>
 </div>
-</section><section id="summary" class="level2" data-number="34.6"><h2 data-number="34.6" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">34.6</span> Summary</h2>
+</section><section id="sec-granges-methods" class="level2 page-columns page-full" data-number="34.6"><h2 data-number="34.6" class="anchored" data-anchor-id="sec-granges-methods">
+<span class="header-section-number">34.6</span> Quick reference: GRanges methods</h2>
+<p>Every method below was introduced by example earlier in the chapter; this is a compact place to look them back up.</p>
+<div id="tbl-single-granges-methods" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-tbl figure page-columns page-full"><div aria-describedby="tbl-single-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 61%">
+</colgroup>
+<thead><tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>length</code></td>
+<td>Number of ranges in the object.</td>
+</tr>
+<tr class="even">
+<td><code>seqnames</code></td>
+<td>Sequence (chromosome) names of the ranges.</td>
+</tr>
+<tr class="odd">
+<td><code>ranges</code></td>
+<td>The start and end positions.</td>
+</tr>
+<tr class="even">
+<td><code>strand</code></td>
+<td>Strand of each range.</td>
+</tr>
+<tr class="odd">
+<td>
+<code>mcols</code> (a.k.a. <code>elementMetadata</code>)</td>
+<td>The metadata columns.</td>
+</tr>
+<tr class="even">
+<td><code>seqlevels</code></td>
+<td>The set of possible sequence names.</td>
+</tr>
+<tr class="odd">
+<td><code>seqinfo</code></td>
+<td>The <code>Seqinfo</code> (sequence names and lengths).</td>
+</tr>
+<tr class="even">
+<td>
+<code>start</code>, <code>end</code>, <code>width</code>
+</td>
+<td>Get or set the range bounds or width.</td>
+</tr>
+<tr class="odd">
+<td>
+<code>shift</code>, <code>resize</code>, <code>flank</code>
+</td>
+<td>Reshape each range on its own (intra-range).</td>
+</tr>
+<tr class="even">
+<td>
+<code>reduce</code>, <code>disjoin</code>, <code>gaps</code>, <code>coverage</code>
+</td>
+<td>Summarize a set of ranges together (inter-range).</td>
+</tr>
+<tr class="odd">
+<td>
+<code>subset</code>, <code>[</code>, <code>[[</code>, <code>$</code>
+</td>
+<td>Subset or extract elements.</td>
+</tr>
+<tr class="even">
+<td><code>sort</code></td>
+<td>Sort the ranges.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-tbl margin-caption" id="tbl-single-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.2: Accessing and manipulating a single <code>GRanges</code>.
+</figcaption></figure>
+</div>
+<div id="tbl-multiple-granges-methods" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-tbl figure page-columns page-full"><div aria-describedby="tbl-multiple-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 61%">
+</colgroup>
+<thead><tr class="header">
+<th>Method</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>findOverlaps</code></td>
+<td>Find overlaps between two sets of ranges.</td>
+</tr>
+<tr class="even">
+<td><code>countOverlaps</code></td>
+<td>Count, per query range, how many subject ranges it overlaps.</td>
+</tr>
+<tr class="odd">
+<td><code>subsetByOverlaps</code></td>
+<td>Keep only the query ranges that overlap the subject.</td>
+</tr>
+<tr class="even">
+<td>
+<code>nearest</code>, <code>distanceToNearest</code>
+</td>
+<td>Nearest subject range to each query (with distance).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-tbl margin-caption" id="tbl-multiple-granges-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.3: Comparing and combining two <code>GRanges</code> objects.
+</figcaption></figure>
+</div>
+</section><section id="summary" class="level2" data-number="34.7"><h2 data-number="34.7" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">34.7</span> Summary</h2>
 <p>You now have a working vocabulary for genomic locations.</p>
 <ul>
 <li>A <strong><code>GRanges</code></strong> object holds a set of ranges. Coordinates (<code>seqnames</code>, <code>ranges</code>, <code>strand</code>) sit to the left of the <code>|</code>; optional metadata reached with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code> sits to the right. You can build one from scratch or coerce a <code>data.frame</code> with <code>as(df, "GRanges")</code>.</li>
@@ -2010,8 +1965,8 @@ Figure&nbsp;34.3: A graphical representation of range operations demonstrated on
 <li>A <strong><code>TxDb</code></strong> package (here <a href="http://bioconductor.org/packages/TxDb.Hsapiens.UCSC.hg38.knownGene.html"><code>TxDb.Hsapiens.UCSC.hg38.knownGene</code></a>) hands you real gene, transcript, and exon models as <code>GRanges</code>, so every operation above applies to genome-scale annotation with no new syntax.</li>
 </ul>
 <p>Next, the <a href="./genomic_ranges_chipseq.html">Genomic ranges with real ChIP-seq peaks</a> chapter puts these tools to work on a real peak set imported from file, and the <em>Ranges Exercises</em> then turn you loose on published ENCODE data.</p>
-</section><section id="exercises" class="level2" data-number="34.7"><h2 data-number="34.7" class="anchored" data-anchor-id="exercises">
-<span class="header-section-number">34.7</span> Exercises</h2>
+</section><section id="exercises" class="level2" data-number="34.8"><h2 data-number="34.8" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">34.8</span> Exercises</h2>
 <p>These reuse the objects built earlier in the chapter: the 10-range <code>gr</code>, its 3-range subset <code>g</code>, and the <code>grl</code> <code>GRangesList</code>. Run the chapter’s chunks first so those objects exist.</p>
 <p><strong>1. Read the structure.</strong> Without running any code, which of these belong to the <em>left</em> of the <code>|</code> in a <code>GRanges</code> (the coordinates) and which to the <em>right</em> (the metadata): <code>strand</code>, <code>score</code>, <code>seqnames</code>, <code>GC</code>, <code>width</code>?</p>
 <div class="callout callout-style-default callout-note callout-titled">

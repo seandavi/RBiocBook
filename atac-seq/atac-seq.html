@@ -759,7 +759,6 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">37.9</span> Exercises</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">37.10</span> Summary</a></li>
   <li><a href="#additional-work" id="toc-additional-work" class="nav-link" data-scroll-target="#additional-work"><span class="header-section-number">37.11</span> Additional work</a></li>
-  <li><a href="#macs2" id="toc-macs2" class="nav-link" data-scroll-target="#macs2">MACS2</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/atac-seq/atac-seq.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/atac-seq/atac-seq.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -818,6 +817,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <li><em><a href="https://bioconductor.org/packages/3.23/GenomicAlignments">GenomicAlignments</a></em></li>
 <li><em><a href="https://bioconductor.org/packages/3.23/rtracklayer">rtracklayer</a></em></li>
 <li><em><a href="https://bioconductor.org/packages/3.23/heatmaps">heatmaps</a></em></li>
+<li>
+<em><a href="https://bioconductor.org/packages/3.23/TxDb.Hsapiens.UCSC.hg19.knownGene">TxDb.Hsapiens.UCSC.hg19.knownGene</a></em> (a large annotation download; install once with <code><a href="https://bioconductor.github.io/BiocManager/reference/install.html">BiocManager::install()</a></code>)</li>
 </ul></section><section id="what-youll-learn" class="level2" data-number="37.1"><h2 data-number="37.1" class="anchored" data-anchor-id="what-youll-learn">
 <span class="header-section-number">37.1</span> What you’ll learn</h2>
 <p>After working through this chapter, you’ll be able to:</p>
@@ -829,8 +830,8 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <li>Export a coverage track as a BigWig file for viewing in IGV.</li>
 </ul></section><section id="background" class="level2 page-columns page-full" data-number="37.2"><h2 data-number="37.2" class="anchored" data-anchor-id="background">
 <span class="header-section-number">37.2</span> Background</h2>
-<p>Chromatin accessibility assays measure the extent to which DNA is open and accessible. Such assays now use high throughput sequencing as a quantitative readout. DNAse assays, first using microarrays<span class="citation" data-cites="Crawford2006-nt">(<a href="../references.html#ref-Crawford2006-nt" role="doc-biblioref">Crawford, Davis, et al. 2006</a>)</span> and then DNAse-Seq <span class="citation" data-cites="Crawford2006-bk">(<a href="../references.html#ref-Crawford2006-bk" role="doc-biblioref">Crawford, Holt, et al. 2006</a>)</span>, requires a larger amount of DNA and is labor-indensive and has been largely supplanted by ATAC-Seq <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>.</p>
-<p>The Assay for Transposase Accessible Chromatin with high-throughput sequencing (ATAC-seq) method maps chromatin accessibility genome-wide. This method quantifies DNA accessibility with a hyperactive Tn5 transposase that cuts and inserts sequencing adapters into regions of chromatin that are accessible. High throughput sequencing of fragments produced by the process map to regions of increased accessibility, transcription factor binding sites, and nucleosome positioning. The method is both fast and sensitive and can be used as a replacement for DNAse <em>and</em> MNase.</p>
+<p>Chromatin accessibility assays measure the extent to which DNA is open and accessible. Such assays now use high throughput sequencing as a quantitative readout. DNase assays — first using microarrays <span class="citation" data-cites="Crawford2006-nt">(<a href="../references.html#ref-Crawford2006-nt" role="doc-biblioref">Crawford, Davis, et al. 2006</a>)</span> and then DNase-seq <span class="citation" data-cites="Crawford2006-bk">(<a href="../references.html#ref-Crawford2006-bk" role="doc-biblioref">Crawford, Holt, et al. 2006</a>)</span> — require more input DNA and are labor-intensive, and have been largely supplanted by ATAC-seq <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013</a>)</span>.</p>
+<p>The Assay for Transposase Accessible Chromatin with high-throughput sequencing (ATAC-seq) method maps chromatin accessibility genome-wide. This method quantifies DNA accessibility with a hyperactive Tn5 transposase that cuts and inserts sequencing adapters into regions of chromatin that are accessible. High-throughput sequencing of the fragments produced maps these to regions of increased accessibility, transcription-factor binding sites, and nucleosome positioning. The method is both fast and sensitive and can be used as a replacement for DNase <em>and</em> MNase.</p>
 <p>An early review of chromatin accessibility assays <span class="citation" data-cites="Tsompana2014-yh">(<a href="../references.html#ref-Tsompana2014-yh" role="doc-biblioref">Tsompana and Buck 2014</a>)</span> compares the use cases, pros and cons, and expected signals from each of the most common approaches (<a href="#fig-chromatin-assays" class="quarto-xref">Figure&nbsp;<span>37.1</span></a>).</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
@@ -844,7 +845,7 @@ Figure&nbsp;37.1: Chromatin accessibility methods, compared. Representative DNA 
 </div>
 </div>
 </div>
-<p>The first manuscript describing the ATAC-seq protocol showed how ATAC-seq data “line up” with other data types such as ChIP-seq and DNase-seq (<a href="#fig-greenleaf-multimodal" class="quarto-xref">Figure&nbsp;<span>37.2</span></a>). It also highlighted how fragment length correlates with specific genomic regions and characteristics <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013, fig. 3</a>)</span>.</p>
+<p>The first manuscript describing the ATAC-seq protocol showed how ATAC-seq data “line up” with other data types such as ChIP-seq and DNase-seq (<a href="#fig-greenleaf-multimodal" class="quarto-xref">Figure&nbsp;<span>37.2</span></a>). It also highlighted how fragment length correlates with specific genomic regions and characteristics <span class="citation" data-cites="Buenrostro2013-dz">(<a href="../references.html#ref-Buenrostro2013-dz" role="doc-biblioref">Buenrostro et al. 2013, fig. 2</a>)</span>.</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="fig-greenleaf-multimodal" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -890,7 +891,7 @@ Figure&nbsp;37.3: A BAM file in text form. The output of <code>samtools view</co
 <span class="header-section-number">37.4</span> Working with sequencing data in Bioconductor</h2>
 <p>The <em>Bioconductor</em> project includes several infrastructure packages for dealing with ranges (sequence name, start, end, +/- strand) on sequences <span class="citation" data-cites="Lawrence2013-he">(<a href="../references.html#ref-Lawrence2013-he" role="doc-biblioref">Lawrence et al. 2013</a>)</span> as well as capabilities with working with Fastq files directly <span class="citation" data-cites="morgan2016rsamtools">(<a href="../references.html#ref-morgan2016rsamtools" role="doc-biblioref">Morgan et al. 2016</a>)</span>.</p>
 <table class="table">
-<caption>Commonly used Bioconductor and their high-level use cases.</caption>
+<caption>Commonly used Bioconductor packages and their high-level use cases.</caption>
 <thead><tr class="header">
 <th>Package</th>
 <th>Use cases</th>
@@ -902,7 +903,7 @@ Figure&nbsp;37.3: A BAM file in text form. The output of <code>samtools view</co
 </tr>
 <tr class="even">
 <td><em><a href="https://bioconductor.org/packages/3.23/GenomicRanges">GenomicRanges</a></em></td>
-<td>Container and methods for handling genomic reagions</td>
+<td>Container and methods for handling genomic regions</td>
 </tr>
 <tr class="odd">
 <td><em><a href="https://bioconductor.org/packages/3.23/GenomicFeatures">GenomicFeatures</a></em></td>
@@ -1122,15 +1123,12 @@ Figure&nbsp;37.7: Relationship between fragment length and nucleosome number, fr
 </div>
 <p>We loaded the BAM file with insert sizes (<code>isize</code>), so we can read fragment lengths straight off that column. The insert size is the same (in absolute value) for the <code>first</code> and <code>second</code> read of a pair, so we’ll just use <code>first</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">isize</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Pull the insert size (fragment length) off the first read of each pair.</span></span>
 <span><span class="va">fraglengths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="fu">GenomicAlignments</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Pairs-class.html">first</a></span><span class="op">(</span><span class="va">greenleaf</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">isize</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now we can look at the distribution of fragment lengths. The <code><a href="https://rdrr.io/r/stats/density.html">density()</a></code> function gives a smoothed version (<a href="#fig-fraglength-density" class="quarto-xref">Figure&nbsp;<span>37.8</span></a>).</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html">density</a></span><span class="op">(</span><span class="va">fraglengths</span>, bw <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html">density</a></span><span class="op">(</span><span class="va">fraglengths</span><span class="op">)</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-fraglength-density" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-fraglength-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1380,9 +1378,7 @@ attr(,"package")
 <li><a href="https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html" class="uri">https://rockefelleruniversity.github.io/RU_ATAC_Workshop.html</a></li>
 </ul>
 <p>Feel free to work through it. The <em><a href="https://bioconductor.org/packages/3.23/ATACseqQC">ATACseqQC</a></em> package vignette also offers a great deal beyond quality control, and several more ATAC-seq packages are available in <em>Bioconductor</em>.</p>
-</section><section id="macs2" class="level2 unnumbered page-columns page-full"><h2 class="unnumbered anchored" data-anchor-id="macs2">MACS2</h2>
-<p>The MACS2 package is a commonly-used package for calling peaks. Installation and other details are available<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;https://github.com/taoliu/MACS</p></div></div><pre><code>pip install macs2</code></pre>
+<p>Calling peaks on the coverage itself — finding the significant pileups rather than just plotting them — is most often done outside R with <a href="https://github.com/macs3-project/MACS">MACS</a> (<code>pip install macs2</code>).</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
