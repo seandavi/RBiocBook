@@ -58,86 +58,36 @@ fewer thing to track once you stay inside Bioconductor.
 ```{r loadlib}
 library(GenomicRanges)
 ```
-The Bioconductor `r Biocpkg("GenomicRanges")` package is a comprehensive toolkit designed to handle and manipulate genomic intervals and variables systematized on these intervals [@lawrence_software_2013]. Developed by Bioconductor, this package simplifies the complexity of managing genomic data, facilitating the efficient exploration, manipulation, and visualization of such data. GenomicRanges aids in dealing with the challenges of genomic data, including its massive size, intricate relationships, and high dimensionality.
+The Bioconductor `r Biocpkg("GenomicRanges")` package [@lawrence_software_2013]
+gives you the `GRanges` container for genomic intervals together with a vocabulary
+of fast operations on them — subsetting, resizing, overlap, nearest-neighbor, and
+genome arithmetic. The rest of this chapter introduces both by example, building
+small objects by hand so you can see exactly what each operation does.
 
-The GenomicRanges package in Bioconductor covers a wide range of use cases related to the management and analysis of genomic data. Here are some key examples:
+`GRanges` is built on R's **S4** class system, so each object carries dedicated
+slots — `seqnames`, `ranges`, `strand`, and metadata — with methods that operate
+on them. Three related containers show up throughout the chapter:
 
-* Genomic Feature Manipulation
-  : The GenomicRanges and GRanges classes can be used to represent and manipulate various genomic features such as genes, transcripts, exons, or single-nucleotide polymorphisms (SNPs). Users can query, subset, resize, shift, or sort these features based on their genomic coordinates.
-* Genomic Interval Operations
-  : The GenomicRanges package provides functions for performing operations on genomic intervals, such as finding overlaps, nearest neighbors, or disjoint intervals. These operations are fundamental to many types of genomic data analyses, such as identifying genes that overlap with ChIP-seq peaks, or finding variants that are in close proximity to each other.
-* Alignments and Coverage
-  : The GAlignments and GAlignmentPairs classes can be used to represent alignments of sequencing reads to a reference genome, such as those produced by a read aligner. Users can then compute coverage of these alignments over genomic ranges of interest, which is a common task in RNA-seq or ChIP-seq analysis.
-* Annotation and Metadata Handling
-  : The metadata column of a GRanges object can be used to store various types of annotation data associated with genomic ranges, such as gene names, gene biotypes, or experimental scores. This makes it easy to perform analyses that integrate genomic coordinates with other types of biological information.
-* Genome Arithmetic
-  : The GenomicRanges package supports a version of "genome arithmetic", which includes set operations (union, intersection, set difference) as well as other operations (like coverage, complement, or reduction) that are adapted to the specificities of genomic data.
-* Efficient Data Handling
-  : The CompressedGRangesList class provides a space-efficient way to represent a large list of GRanges objects, which is particularly useful when working with large genomic datasets, such as whole-genome sequencing data.
+| Class | What it holds | Typical use |
+|-------|---------------|-------------|
+| `GRanges` | a set of genomic ranges plus metadata | ChIP-seq peaks, CpG islands, genes |
+| `GRangesList` | a list of `GRanges` objects | exons grouped by transcript |
+| `IRanges` | plain integer ranges | the building block inside a `GRanges` |
 
-The GenomicRanges package in Bioconductor uses the S4 class system (see @tbl-genomic-ranges-classes), which is a part of the methods package in R. The S4 system is a more rigorous and formal approach to object-oriented programming in R, providing enhanced capabilities for object design and function dispatch.
+: The containers used in this chapter. {#tbl-genomic-ranges-classes}
 
-|Class Name           |Description                                                                     |Potential Use |
-|---------------------|--------------------------------------------------------------------------------|------|
-|GRanges              |Represents a collection of genomic ranges and associated variables.             |ChipSeq peaks, CpG islands, etc. |
-|GRangesList          |Represents a list of GenomicRanges objects.                                     |transcript models (exons, introns) |
-|RangesList           |Represents a list of Ranges objects.                                            |  |
-|IRanges              |Represents a collection of integer ranges.                                      |used mainly to *build* GRanges, etc. |
-|GPos                 |Represents genomic positions.                                                   |SNPs or other single-nucleotide locations |
-|GAlignments          |Represents alignments against a reference genome.                               |Sequence read locations from a BAM file |
-|GAlignmentPairs      |Represents pairs of alignments, typically representing a single fragment of DNA.|Paired-end sequence alignments |
-
-: Classes within the GenomicRanges package. Each class has a slightly different use case.  {#tbl-genomic-ranges-classes}{tbl-colwidths="[20,40,40]"}
-
-In the context of the GenomicRanges package, the S4 class system allows for the creation of complex, structured data objects that can effectively encapsulate genomic intervals and associated data. This system enables the package to handle the complexity and intricacy of genomic data.
-
-For example, the GenomicRanges class in the package is an S4 class that combines several basic data types into a composite object. It includes slots for sequence names (seqnames), ranges (start and end positions), strand information, and metadata. Each slot in the S4 class corresponds to a specific component of the genomic data, and methods (see @tbl-single-granges-methods and @tbl-multiple-granges-methods) can be defined to interact with these slots in a structured and predictable way.
-
-| **Method**            | **Description**                                                                         |
-|-----------------------|-----------------------------------------------------------------------------------------|
-| **length**            | Returns the number of ranges in the GRanges object.                                     |
-| **seqnames**          | Retrieves the sequence names of the ranges.                                             |
-| **ranges**            | Retrieves the start and end positions of the ranges.                                    |
-| **strand**            | Retrieves the strand information of the ranges.                                         |
-| **elementMetadata**   | Retrieves the metadata associated with the ranges.                                      |
-| **seqlevels**         | Returns the levels of the factor that the seqnames slot is derived from.                |
-| **seqinfo**           | Retrieves the Seqinfo (sequence information) object associated with the GRanges object. |
-| **start, end, width** | Retrieve or set the start or end positions, or the width of the ranges.                 |
-| **resize**            | Resizes the ranges.                                                                     |
-| **subset, [, [[, $**  | Subset or extract elements from the GRanges object.                                     |
-| **sort**              | Sorts the GRanges object.                                                               |
-| **shift**             | Shifts the ranges by a certain number of base pairs.                                    |
-
-: Methods for accessing, manipulating single objects {#tbl-single-granges-methods}
-
-The S4 class system also supports inheritance, which allows for the creation of specialized subclasses that share certain characteristics with a parent class but have additional features or behaviors.
-
-The S4 system's formalism and rigor make it well-suited to the complexities of bioinformatics and genomic data analysis. It allows for the creation of robust, reliable code that can handle complex data structures and operations, making it a key part of the GenomicRanges package and other Bioconductor packages.
-
-
-
-| **Method**            | **Description**                                                                         |
-|-----------------------|-----------------------------------------------------------------------------------------|
-| **findOverlaps**      | Finds overlaps between different sets of ranges.                                        |
-| **countOverlaps**     | Counts overlaps between different sets of ranges.                                       |
-| **subsetByOverlaps**  | Subsets the ranges based on overlaps.                                                   |
-| **distanceToNearest** | Computes the distance to the nearest range in another set of ranges.                    |
-
-: Methods for comparing and combining multiple GenomicRanges-class objects {#tbl-multiple-granges-methods}
-
-
-
-
-
-
+A compact cheat-sheet of the accessor and operation methods is collected under
+[Quick reference](#sec-granges-methods) at the end of the chapter; we meet each one
+in context first.
 
 To get going, we can construct a `GRanges` object by hand as an example.
 
 The `GRanges` class represents a collection of genomic ranges that each have a single start
 and end location on the genome. It can be used to store the location of genomic features
 such as contiguous binding sites, transcripts, and exons. These objects can be created by
-using the GRanges constructor function. The following code just creates a `GRanges` object 
-from scratch.
+using the GRanges constructor function. The following code creates one from scratch. (The `Rle()` calls in it simply
+repeat each value a given number of times — a compact "run-length" shorthand we
+return to under *coverage* later.)
 
 ```{r mkexample}
 gr <- GRanges(
@@ -191,7 +141,7 @@ class(mcols(gr))
 mcols(gr)
 ```
 
-Since the `class` of `mcols(gr)` is `r class(mcols(gr))`, we can use our `DataFrame` approaches to 
+Since the `class` of `mcols(gr)` is `r class(mcols(gr))`, we can use the `DataFrame` (Bioconductor's data-frame-like table) approaches to
 work with the data.
 
 ```{r mcols-df-methods}
@@ -268,7 +218,7 @@ tail(gr,n=2)
 #### Intra-range methods
 
 The methods described in this section work *one-region-at-a-time* and are, therefore, called
-"intra-region" methods. Methods that work across all regions are described below 
+"intra-range" methods. Methods that work across all regions are described below 
 in the [Inter-range methods] section.
 
 The `GRanges` class has accessors for the "ranges" part of the data. For example:
@@ -402,8 +352,8 @@ GenomicRanges::intersect(g, g2)
 GenomicRanges::setdiff(g, g2)
 ```
 
-There is extensive additional help available or by looking at the vignettes
-in at the `r Biocpkg("GenomicRanges")` pages.
+There is extensive additional help in the vignettes at the
+`r Biocpkg("GenomicRanges")` pages.
 
 ```{r helppagesgr,eval=FALSE}
 ?GRanges
@@ -419,7 +369,7 @@ methods(class="GRanges")
 
 ## GRangesList
 
-Some important genomic features, such as spliced transcripts that are are comprised of exons,
+Some important genomic features, such as spliced transcripts that are comprised of exons,
 are inherently compound structures. Such a feature makes much more sense when expressed
 as a compound object such as a GRangesList. If we think of each transcript as a set of exons,
 each transcript would be summarized as a `GRanges` object. However, if we have multiple transcripts,
@@ -427,7 +377,7 @@ we want to keep them separate, with each transcript holding its own exons. A `GR
 is a list of `GRanges` objects. Continuing with the transcripts idea, a `GRangesList`
 can contain all the transcripts and their exons; each transcript is one element in the list.
 
-![The structure of a GRangesList, which is a `list` of GRanges objects. While the analogy is not perfect, a `GRangesList` behaves a bit like a list. Each element in the `GRangesList` *is* a `Granges` object. A common use case for a `GRangesList` is to store a list of transcripts, each of which have exons as the regions in the `GRanges`. ](images/granges_list_structure.png){#fig-granges-list-structure}
+![The structure of a GRangesList, which is a `list` of GRanges objects. While the analogy is not perfect, a `GRangesList` behaves a bit like a list. Each element in the `GRangesList` *is* a `GRanges` object. A common use case for a `GRangesList` is to store a list of transcripts, each of which have exons as the regions in the `GRanges`. ](images/granges_list_structure.png){#fig-granges-list-structure}
 
 
 Whenever genomic features consist of multiple
@@ -544,9 +494,8 @@ gr1[queryHits(overlaps)]
 gr2[subjectHits(overlaps)]
 ```
 
-As you might expect, the `countOverlaps` method counts the regions in the
-second `GRanges` that overlap with those that overlap
-with each element of the first.
+As you might expect, the `countOverlaps` method counts, for each range in the
+first `GRanges`, how many ranges in the second it overlaps.
 
 ```{r countoverlaps}
 countOverlaps(gr1, gr2)
@@ -652,6 +601,7 @@ chapter apply directly.
 ![A graphical representation of range operations demonstrated on a gene model.](images/range_operations_diagram.png){#fig-range-operations}
 
 ```{r}
+# install once: BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene")
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
 ```
@@ -695,6 +645,38 @@ per transcript — use `exonsBy(txdb, by = "tx")`. That is the natural object fo
 counting reads per transcript and is exactly the `GRangesList` structure we built
 by hand earlier.
 :::
+
+## Quick reference: GRanges methods {#sec-granges-methods}
+
+Every method below was introduced by example earlier in the chapter; this is a
+compact place to look them back up.
+
+| Method | Description |
+|--------|-------------|
+| `length` | Number of ranges in the object. |
+| `seqnames` | Sequence (chromosome) names of the ranges. |
+| `ranges` | The start and end positions. |
+| `strand` | Strand of each range. |
+| `mcols` (a.k.a. `elementMetadata`) | The metadata columns. |
+| `seqlevels` | The set of possible sequence names. |
+| `seqinfo` | The `Seqinfo` (sequence names and lengths). |
+| `start`, `end`, `width` | Get or set the range bounds or width. |
+| `shift`, `resize`, `flank` | Reshape each range on its own (intra-range). |
+| `reduce`, `disjoin`, `gaps`, `coverage` | Summarize a set of ranges together (inter-range). |
+| `subset`, `[`, `[[`, `$` | Subset or extract elements. |
+| `sort` | Sort the ranges. |
+
+: Accessing and manipulating a single `GRanges`. {#tbl-single-granges-methods}
+
+| Method | Description |
+|--------|-------------|
+| `findOverlaps` | Find overlaps between two sets of ranges. |
+| `countOverlaps` | Count, per query range, how many subject ranges it overlaps. |
+| `subsetByOverlaps` | Keep only the query ranges that overlap the subject. |
+| `nearest`, `distanceToNearest` | Nearest subject range to each query (with distance). |
+
+: Comparing and combining two `GRanges` objects. {#tbl-multiple-granges-methods}
+
 
 ## Summary
 

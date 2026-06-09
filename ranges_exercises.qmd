@@ -15,7 +15,7 @@ format:
 
 ```{r init, include=FALSE}
 library(knitr)
-opts_chunk$set(cache=TRUE, message=FALSE)
+opts_chunk$set(cache=TRUE, message=FALSE, R.options=list(max.print=50))
 ```
 
 The two ranges chapters — *Genomic ranges and features* and *Genomic ranges with
@@ -93,7 +93,7 @@ strand, and a block of metadata columns.
 **What metadata is attached?** The per-range metadata lives in the `mcols`.
 
 ```{r}
-mcols(dnase)
+head(mcols(dnase))
 ```
 
 These columns are the extra fields from the original narrowPeak file — things like
@@ -104,7 +104,8 @@ never lose the link between a location and its data.
 every peak; `table()` tallies them.
 
 ```{r}
-table(seqnames(dnase))
+# Show the busiest 25 chromosomes; the full list includes many empty contigs.
+sort(table(seqnames(dnase)), decreasing = TRUE)[1:25]
 ```
 
 Each count is the number of DNase peaks called on that chromosome. Bigger
@@ -123,11 +124,12 @@ tight distribution around a couple hundred bp is typical for a DNase peak caller
 and the `seqlevelsStyle`, then switch the style to Ensembl and look again.
 
 ```{r}
-seqlevels(dnase)
+head(seqlevels(dnase), 25)   # first 25 of many contigs
+length(seqlevels(dnase))     # how many sequence names in all
 seqlevelsStyle(dnase)
 seqlevelsStyle(dnase) <- "ensembl"
 seqlevelsStyle(dnase)
-seqlevels(dnase)
+head(seqlevels(dnase), 25)   # same chromosomes, now in Ensembl style
 ```
 
 The object started in **UCSC** style (`chr1`, `chr2`, …). Assigning a new
@@ -138,7 +140,7 @@ ranges changed, only the labels.
 ::: {.callout-warning}
 ## The `chr` gotcha that silently returns zero overlaps
 
-`seqlevelsStyle` matters enormously the moment you compare two objects. Overlap
+`seqlevelsStyle` matters the moment you compare two objects. Overlap
 operations match on the *exact* sequence name, so a peak on `chr1` will **never**
 overlap a region on `1` — R reports zero overlaps and raises no error. If an
 overlap count comes back suspiciously at zero, the first thing to check is whether
@@ -224,12 +226,13 @@ expansion is symmetric, and call the result `dnase_wide`.
 ```{r}
 w <- width(dnase)
 dnase_wide <- resize(dnase, width = w + 100, fix = "center")
-width(dnase_wide)
+head(width(dnase_wide))             # first few widened peaks
+all(width(dnase_wide) == w + 100)   # every peak is exactly 100 bp wider
 ```
 
 `resize()` sets each range to a new width; `fix="center"` keeps the midpoint fixed
-so the peak grows 50 bp in each direction. Comparing `width(dnase_wide)` to the
-original widths confirms every peak is exactly 100 bp larger.
+so the peak grows 50 bp in each direction. The `all(...)` check confirms every
+peak ended up exactly 100 bp larger.
 
 ## Exercise 3: DNase sites relative to gene promoters
 
@@ -242,10 +245,9 @@ You'll need the `TxDb.Hsapiens.UCSC.hg19.knownGene` transcript database. If it
 isn't already installed, install it once (this is a one-time setup step, not part
 of the analysis):
 
-```
+```r
+# one-time setup, not part of the analysis
 BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")
-library("TxDb.Hsapiens.UCSC.hg19.knownGene")
-kg <- TxDb.Hsapiens.UCSC.hg19.knownGene
 ```
 
 **Load the genes from the TxDb.** Attach the package, grab the `TxDb` object, and
@@ -268,7 +270,7 @@ of a gene, so flanking each gene by 2 kb on its upstream side gives a first
 approximation.
 
 ```{r}
-flank(gx, 2000)
+head(flank(gx, 2000))
 ```
 
 `flank()` returns a new range immediately upstream of each gene — strand-aware, so
@@ -342,11 +344,13 @@ caught and fixed. (`dnase2` was never reassigned, so it was UCSC-style all along
 Compare that expectation to what you observed.
 
 ```{r}
-prop_proms <- sum(width(prom_regions)) / sum(seqlengths(prom_regions))
-prop_dnase <- sum(width(dnase)) / sum(seqlengths(prom_regions))
-# Under independence, the expected number of DNase peaks landing in a
-# promoter is (fraction of genome that is promoter) times the number of peaks.
-prop_proms * prop_dnase * length(dnase)
+# Use one consistent genome size. Some contigs have unknown (NA) lengths,
+# so drop those when summing.
+genome_bp <- sum(as.numeric(seqlengths(gx)), na.rm = TRUE)
+prop_proms <- sum(width(prom_regions)) / genome_bp
+# Under independence, the expected number of DNase peaks landing in a promoter
+# is (fraction of the genome that is promoter) times the number of peaks.
+prop_proms * length(dnase)
 ```
 
 The expected-by-chance number is far smaller than the count you actually observed.
@@ -363,8 +367,9 @@ on. In this exercise you'll ask how much each mark **overlaps CpG islands** — 
 build a small reusable enrichment score along the way.
 
 The data again comes from `AnnotationHub`. ENCODE published these histone ChIP-seq
-peak calls as BED files; the hub serves them as `GRanges`. We've already found the
-right hub IDs, so you can load each mark directly.
+peak calls as BED files; the hub serves them as `GRanges`. Each mark's query
+matches several records, so to keep things moving we've already picked the right
+hub IDs and you can load each mark directly.
 
 ```{r}
 library(AnnotationHub)

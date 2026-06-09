@@ -25,7 +25,7 @@ hand and worked through the full catalog of range operations (set operations,
 overlaps, nearest-feature searches, gene models) systematically. This chapter
 puts those tools to work on a **real dataset**, focusing on what a hand-built
 example can't show you: file formats, importing, and exploring an actual peak
-set. Here we keep our hands on real data.
+set.
 
 ## What you'll learn
 
@@ -77,10 +77,6 @@ yourself on the raw file and being off by one.
 ```{r setup, message=FALSE, warning=FALSE}
 library(rtracklayer)
 library(GenomicRanges)
-library(ggplot2)
-library(dplyr)
-
-theme_set(theme_minimal())
 ```
 
 ## Importing the CTCF peaks
@@ -128,8 +124,10 @@ columns of the `GRanges`, where you can reach them with `$`.
 
 ## Looking inside a GRanges
 
-A `GRanges` keeps the *ranges* (chromosome, start, end, strand) separate from the
-*metadata* (everything else). You pull each part out with an accessor function.
+You met these accessors in the previous chapter; here they are again, this time
+pulling information out of the peaks you just imported. The *ranges* (chromosome,
+start, end, strand) come out with their own accessors, and everything else (the
+*metadata*) comes out with `mcols()`.
 
 ```{r granges-accessors}
 length(ctcf_peaks)         # how many peaks?
@@ -139,8 +137,11 @@ head(end(ctcf_peaks))      # end positions
 head(width(ctcf_peaks))    # width = end - start + 1
 ```
 
-So this file contains `r length(ctcf_peaks)` CTCF peaks. The widths vary, but
-let's look at the whole distribution rather than the first six values:
+So this file contains `r length(ctcf_peaks)` CTCF peaks. Notice the comment on
+`width`: it is `end - start + 1`, not `end - start`. Because `GRanges` coordinates
+are 1-based and *inclusive*, both endpoints count — the very same span the 0-based
+BED file wrote as `end - start`. The widths vary, but let's look at the whole
+distribution rather than the first six values:
 
 ```{r peak-widths}
 #| label: fig-peak-widths
@@ -211,7 +212,7 @@ fixed-width windows are usually built around it.
 ```{r starts-ends}
 peak_starts  <- start(ctcf_peaks)
 peak_ends    <- end(ctcf_peaks)
-peak_centers <- start(ctcf_peaks) + width(ctcf_peaks) / 2
+peak_centers <- (start(ctcf_peaks) + end(ctcf_peaks)) / 2
 
 head(peak_centers, 5)
 ```
@@ -220,10 +221,10 @@ head(peak_centers, 5)
 
 ## Reshaping ranges
 
-Three functions cover most of the range-reshaping you'll do on a peak set:
-`shift()` slides a range, `resize()` changes its width, and `flank()` builds a
-neighbouring region. They all return a new `GRanges` and leave the original
-untouched.
+You met `shift()`, `resize()`, and `flank()` in the previous chapter. Here is what
+they do to a *real* peak set — the operations behind sliding a window, building
+fixed-width windows for motif analysis, and grabbing the DNA beside a peak. As
+before, each returns a new `GRanges` and leaves the original untouched.
 
 ### Shifting
 
@@ -269,7 +270,7 @@ upstream_1kb[1]
 ```
 
 The flanking range is the 1000 bp sitting immediately before the start of the
-first peak — the kind of window you might scan for a neighbouring promoter.
+first peak — the kind of window you might scan for a neighboring promoter.
 
 ::: {.callout-note}
 ## Overlaps and grouped operations: see the previous chapter
@@ -380,10 +381,10 @@ or function that does the job.
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r ex-centers, eval=FALSE}
-   centers <- start(ctcf_peaks) + width(ctcf_peaks) / 2
+   centers <- (start(ctcf_peaks) + end(ctcf_peaks)) / 2
    median(centers)
    ```
-   The center is the start plus half the width. (You could also use
+   The center is the midpoint of the start and end. (You could also use
    `start(resize(ctcf_peaks, width = 1, fix = "center"))` to let `GRanges` do the
    arithmetic.)
    :::
