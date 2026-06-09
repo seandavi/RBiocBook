@@ -115,10 +115,18 @@ The joint-embedding method we'll use â€” **weighted nearest neighbors (WNN)** â€
 # RNA becomes a standard expression assay.
 pbmc <- CreateSeuratObject(counts = counts(sce.rna), assay = "RNA")
 
-# ATAC becomes a ChromatinAssay. Signac expects peak identifiers shaped like
-# "chr1-9776-10668"; `sep` tells it how the peak rownames are punctuated.
-# (Verify the peak-name format of the loaded object and adjust `sep` if needed.)
-pbmc[["ATAC"]] <- CreateChromatinAssay(counts = counts(sce.atac), sep = c(":", "-"))
+# ATAC becomes a ChromatinAssay, which identifies each peak by its genomic
+# coordinates. Peaks can reach us two ways: as a GRanges in the SCE's rowRanges,
+# or encoded in the rownames as coordinate strings like "chr1:9776-10668". We
+# prefer the GRanges when present and fall back to parsing the rownames.
+atac.counts <- counts(sce.atac)
+peak.ranges <- tryCatch(rowRanges(sce.atac), error = function(e) NULL)
+
+pbmc[["ATAC"]] <- if (is(peak.ranges, "GRanges") && length(peak.ranges) == nrow(atac.counts)) {
+  CreateChromatinAssay(counts = atac.counts, ranges = peak.ranges)
+} else {
+  CreateChromatinAssay(counts = atac.counts, sep = c(":", "-"))
+}
 pbmc
 ```
 
@@ -180,7 +188,7 @@ pbmc <- FindMultiModalNeighbors(
   modality.weight.name = "RNA.weight"
 )
 
-pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap")
+pbmc <- RunUMAP(pbmc, nn.name = "weighted.nn", assay = "RNA", reduction.name = "wnn.umap")
 pbmc <- FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, resolution = 0.8)
 ```
 
