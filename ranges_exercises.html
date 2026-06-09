@@ -7113,28 +7113,11 @@ attr(,"package")
 <p>Each variable holds the peak calls from one ChIP-seq experiment pulling down that histone mark. Now grab the hg19 CpG islands the same way:</p>
 <div class="cell">
 <details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cpg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query</a></span><span class="op">(</span><span class="va">ah</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"cpg"</span>, <span class="st">"UCSC"</span>, <span class="st">"hg19"</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details><div class="cell-output cell-output-stderr">
-<pre><code>Warning: download failed
-  web resource path: 'https://annotationhub.bioconductor.org/fetch/5086'
-  local file path: '/github/home/.cache/R/AnnotationHub/eab34d5cf24_5086'
-  reason: HTTP 500 Internal Server Error.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: bfcadd() failed; resource removed
-  rid: BFC10
-  fpath: 'https://annotationhub.bioconductor.org/fetch/5086'
-  reason: download failed</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: download failed
-  hub path: 'https://annotationhub.bioconductor.org/fetch/5086'
-  cache resource: 'AH5086 : 5086'
-  reason: bfcadd() failed; see warnings()</code></pre>
-</div>
+</details>
 </div>
 <p><strong>How many <code>H3K4me1</code> peaks overlap a CpG island?</strong> Start with the simple <code>%over%</code> count, as in Exercise 2.</p>
 <div class="cell">
-<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">h3k4me1</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">cpg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">h3k4me1</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">cpg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 21123</code></pre>
 </div>
@@ -7142,7 +7125,7 @@ attr(,"package")
 <p>That’s the number of <code>H3K4me1</code> peaks touching at least one CpG island — a quick first look at the association.</p>
 <p><strong>How many <em>bases</em> overlap?</strong> A peak count ignores how much of each peak overlaps. <code><a href="https://generics.r-lib.org/reference/setops.html">intersect()</a></code> returns the overlapping regions themselves, so summing their widths gives the total overlapping base pairs.</p>
 <div class="cell">
-<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># intersect() returns only the overlapping stretches as a new range set;</span></span>
+<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># intersect() returns only the overlapping stretches as a new range set;</span></span>
 <span><span class="co"># summing their widths gives the total bases of overlap.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
@@ -7152,11 +7135,11 @@ attr(,"package")
 <p>This is a finer measure than the peak count: it tells you how many base pairs the two sets actually share, not just how many peaks touch.</p>
 <p><strong>Turn that into an enrichment score.</strong> Broad marks cover more bases and so overlap CpG islands more just by being big. To correct for that, normalize the shared bases by the <em>total</em> bases covered by either set (their <code>union</code>). The result is a Jaccard-style ratio between 0 and 1: the fraction of the combined footprint that both sets share.</p>
 <div class="cell">
-<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 79640291</code></pre>
 </div>
-<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize the overlap by the combined coverage of both sets.</span></span>
+<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize the overlap by the combined coverage of both sets.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1323699</code></pre>
@@ -7165,7 +7148,7 @@ attr(,"package")
 <p>A score near 0 means the two sets barely co-occur; a score near 1 means they cover almost exactly the same ground. Because the denominator grows with peak breadth, this score lets you compare a broad mark and a narrow mark on equal footing.</p>
 <p><strong>Wrap it in a function</strong> so you can score any pair of range sets.</p>
 <div class="cell">
-<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">range_enrichment_score</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span> <span class="op">{</span></span>
+<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">range_enrichment_score</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">i</span> <span class="op">/</span> <span class="va">u</span><span class="op">)</span></span>
@@ -7174,7 +7157,7 @@ attr(,"package")
 </div>
 <p>The function is just the intersect-over-union calculation with names: <code>i</code> for the shared bases, <code>u</code> for the combined footprint. Give it a try on <code>H3K4me1</code> and the CpG islands:</p>
 <div class="cell">
-<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">range_enrichment_score</span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold"><summary>Show the answer</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">range_enrichment_score</span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details><div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1323699</code></pre>
 </div>
@@ -7674,477 +7657,477 @@ attr(,"package")
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb85" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Ranges Exercises"</span></span>
-<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span></span>
-<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a><span class="co">  - name: Sean Davis</span></span>
-<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a><span class="co">    url: https://seandavi.github.io/</span></span>
-<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliation: University of Colorado&lt;br/&gt;Anschutz School of Medicine</span></span>
-<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliation-url: https://medschool.cuanschutz.edu/</span></span>
-<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a><span class="co">    email: seandavi@gmail.com</span></span>
-<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb85-11"><a href="#cb85-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb85-12"><a href="#cb85-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-summary: "Show the answer"</span></span>
-<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
-<span id="cb85-14"><a href="#cb85-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb85-15"><a href="#cb85-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-16"><a href="#cb85-16" aria-hidden="true" tabindex="-1"></a><span class="in">```{r init, include=FALSE}</span></span>
-<span id="cb85-17"><a href="#cb85-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
-<span id="cb85-18"><a href="#cb85-18" aria-hidden="true" tabindex="-1"></a>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">cache=</span><span class="cn">TRUE</span>, <span class="at">message=</span><span class="cn">FALSE</span>)</span>
-<span id="cb85-19"><a href="#cb85-19" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-20"><a href="#cb85-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-21"><a href="#cb85-21" aria-hidden="true" tabindex="-1"></a>The two ranges chapters — *Genomic ranges and features* and *Genomic ranges with</span>
-<span id="cb85-22"><a href="#cb85-22" aria-hidden="true" tabindex="-1"></a>real ChIP-seq peaks* — walked you through the <span class="in">`GenomicRanges`</span> toolkit on small</span>
-<span id="cb85-23"><a href="#cb85-23" aria-hidden="true" tabindex="-1"></a>hand-built objects and a single real peak set. This chapter is their hands-on</span>
-<span id="cb85-24"><a href="#cb85-24" aria-hidden="true" tabindex="-1"></a>companion. Here you'll point those same tools at *real* ENCODE data and answer</span>
-<span id="cb85-25"><a href="#cb85-25" aria-hidden="true" tabindex="-1"></a>the kinds of questions a genomicist actually asks: How many peaks did this</span>
-<span id="cb85-26"><a href="#cb85-26" aria-hidden="true" tabindex="-1"></a>experiment call? How wide are they? Do two replicates agree? Are open-chromatin</span>
-<span id="cb85-27"><a href="#cb85-27" aria-hidden="true" tabindex="-1"></a>regions enriched near gene promoters? Is one set of histone marks enriched at CpG</span>
-<span id="cb85-28"><a href="#cb85-28" aria-hidden="true" tabindex="-1"></a>islands?</span>
-<span id="cb85-29"><a href="#cb85-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-30"><a href="#cb85-30" aria-hidden="true" tabindex="-1"></a>The data comes from the <span class="co">[</span><span class="ot">ENCODE project</span><span class="co">](https://www.encodeproject.org/)</span> via the</span>
-<span id="cb85-31"><a href="#cb85-31" aria-hidden="true" tabindex="-1"></a><span class="in">`AnnotationHub`</span> package. ENCODE published these datasets as BED-style files;</span>
-<span id="cb85-32"><a href="#cb85-32" aria-hidden="true" tabindex="-1"></a>AnnotationHub has packaged them into ready-to-use <span class="in">`GRanges`</span> objects, so you can</span>
-<span id="cb85-33"><a href="#cb85-33" aria-hidden="true" tabindex="-1"></a>load one with a single line instead of downloading and parsing a file. (If you</span>
-<span id="cb85-34"><a href="#cb85-34" aria-hidden="true" tabindex="-1"></a>ever have a peak file of your own — peak calls, enhancer regions, and so on — you</span>
-<span id="cb85-35"><a href="#cb85-35" aria-hidden="true" tabindex="-1"></a>can read it into a <span class="in">`GRanges`</span> the same way the ChIP-seq chapter does, with</span>
-<span id="cb85-36"><a href="#cb85-36" aria-hidden="true" tabindex="-1"></a><span class="in">`rtracklayer::import()`</span>.)</span>
-<span id="cb85-37"><a href="#cb85-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-38"><a href="#cb85-38" aria-hidden="true" tabindex="-1"></a>Each exercise below is a short prompt followed by a folded solution. Try the</span>
-<span id="cb85-39"><a href="#cb85-39" aria-hidden="true" tabindex="-1"></a>prompt yourself first; then click **Show the answer** to reveal the code *and* its</span>
-<span id="cb85-40"><a href="#cb85-40" aria-hidden="true" tabindex="-1"></a>output, with a sentence or two on what to notice.</span>
-<span id="cb85-41"><a href="#cb85-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-42"><a href="#cb85-42" aria-hidden="true" tabindex="-1"></a><span class="fu">## What you'll learn</span></span>
-<span id="cb85-43"><a href="#cb85-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-44"><a href="#cb85-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Query <span class="in">`AnnotationHub`</span> to find and load a published dataset as a <span class="in">`GRanges`</span>.</span>
-<span id="cb85-45"><a href="#cb85-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Inspect a <span class="in">`GRanges`</span> — its class, its metadata columns, and its per-chromosome</span>
-<span id="cb85-46"><a href="#cb85-46" aria-hidden="true" tabindex="-1"></a>  peak counts.</span>
-<span id="cb85-47"><a href="#cb85-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Measure and summarize peak widths, and compute how much of the genome a peak set</span>
-<span id="cb85-48"><a href="#cb85-48" aria-hidden="true" tabindex="-1"></a>  covers.</span>
-<span id="cb85-49"><a href="#cb85-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Read and switch the <span class="in">`seqlevelsStyle`</span> of an object (the <span class="in">`chr1`</span> vs <span class="in">`1`</span> naming</span>
-<span id="cb85-50"><a href="#cb85-50" aria-hidden="true" tabindex="-1"></a>  convention) and recognize the silent bug a mismatch causes.</span>
-<span id="cb85-51"><a href="#cb85-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Compute overlaps between two range sets with <span class="in">`%over%`</span>, and reshape ranges with</span>
-<span id="cb85-52"><a href="#cb85-52" aria-hidden="true" tabindex="-1"></a>  <span class="in">`resize()`</span>, <span class="in">`flank()`</span>, <span class="in">`promoters()`</span>, and <span class="in">`reduce()`</span>.</span>
-<span id="cb85-53"><a href="#cb85-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quantify how enriched one set of ranges is inside another with intersect/union.</span>
-<span id="cb85-54"><a href="#cb85-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-55"><a href="#cb85-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 1: explore a DNase peak set</span></span>
-<span id="cb85-56"><a href="#cb85-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-57"><a href="#cb85-57" aria-hidden="true" tabindex="-1"></a>DNase-seq finds **open chromatin** — stretches of DNA that are accessible to the</span>
-<span id="cb85-58"><a href="#cb85-58" aria-hidden="true" tabindex="-1"></a>DNase enzyme, which is where regulatory machinery tends to sit. In this exercise</span>
-<span id="cb85-59"><a href="#cb85-59" aria-hidden="true" tabindex="-1"></a>you'll load one DNase hypersensitivity peak set from the K562 cell line and get</span>
-<span id="cb85-60"><a href="#cb85-60" aria-hidden="true" tabindex="-1"></a>to know it as a <span class="in">`GRanges`</span> object.</span>
-<span id="cb85-61"><a href="#cb85-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-62"><a href="#cb85-62" aria-hidden="true" tabindex="-1"></a>**Find and load the peak set.** Use <span class="in">`AnnotationHub`</span> to find the record</span>
-<span id="cb85-63"><a href="#cb85-63" aria-hidden="true" tabindex="-1"></a><span class="in">`goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz`</span></span>
-<span id="cb85-64"><a href="#cb85-64" aria-hidden="true" tabindex="-1"></a>and load it into a variable named <span class="in">`dnase`</span>.</span>
-<span id="cb85-65"><a href="#cb85-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-66"><a href="#cb85-66" aria-hidden="true" tabindex="-1"></a><span class="in">```{r dnase}</span></span>
-<span id="cb85-67"><a href="#cb85-67" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AnnotationHub)</span>
-<span id="cb85-68"><a href="#cb85-68" aria-hidden="true" tabindex="-1"></a><span class="co"># GenomicRanges gives us the GRanges accessors and overlap/resize operators;</span></span>
-<span id="cb85-69"><a href="#cb85-69" aria-hidden="true" tabindex="-1"></a><span class="co"># GenomeInfoDb provides the seqlevels()/seqlevelsStyle() machinery used below.</span></span>
-<span id="cb85-70"><a href="#cb85-70" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GenomicRanges)</span>
-<span id="cb85-71"><a href="#cb85-71" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GenomeInfoDb)</span>
-<span id="cb85-72"><a href="#cb85-72" aria-hidden="true" tabindex="-1"></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span>
-<span id="cb85-73"><a href="#cb85-73" aria-hidden="true" tabindex="-1"></a><span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz"</span>)</span>
-<span id="cb85-74"><a href="#cb85-74" aria-hidden="true" tabindex="-1"></a><span class="co"># The query above matches exactly one record, so we grab it with [[1]].</span></span>
-<span id="cb85-75"><a href="#cb85-75" aria-hidden="true" tabindex="-1"></a>dnase <span class="ot">&lt;-</span> <span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz"</span>)[[<span class="dv">1</span>]]</span>
-<span id="cb85-76"><a href="#cb85-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-77"><a href="#cb85-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-78"><a href="#cb85-78" aria-hidden="true" tabindex="-1"></a>The <span class="in">`query()`</span> call returns a one-row hub listing, and <span class="in">`[[1]]`</span> downloads that one</span>
-<span id="cb85-79"><a href="#cb85-79" aria-hidden="true" tabindex="-1"></a>record and hands you the object itself. AnnotationHub caches the download, so a</span>
-<span id="cb85-80"><a href="#cb85-80" aria-hidden="true" tabindex="-1"></a>second <span class="in">`[[1]]`</span> is instant.</span>
-<span id="cb85-81"><a href="#cb85-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-82"><a href="#cb85-82" aria-hidden="true" tabindex="-1"></a>**What kind of object did you get?** Print it and ask for its class.</span>
-<span id="cb85-83"><a href="#cb85-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-86"><a href="#cb85-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-87"><a href="#cb85-87" aria-hidden="true" tabindex="-1"></a>dnase</span>
-<span id="cb85-88"><a href="#cb85-88" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(dnase)</span>
-<span id="cb85-89"><a href="#cb85-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-90"><a href="#cb85-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-91"><a href="#cb85-91" aria-hidden="true" tabindex="-1"></a>It's a <span class="in">`GRanges`</span> — the same class you built by hand in the ranges chapter, only</span>
-<span id="cb85-92"><a href="#cb85-92" aria-hidden="true" tabindex="-1"></a>this one was pulled from a public archive. Printing it shows the seqnames, ranges,</span>
-<span id="cb85-93"><a href="#cb85-93" aria-hidden="true" tabindex="-1"></a>strand, and a block of metadata columns.</span>
-<span id="cb85-94"><a href="#cb85-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-95"><a href="#cb85-95" aria-hidden="true" tabindex="-1"></a>**What metadata is attached?** The per-range metadata lives in the <span class="in">`mcols`</span>.</span>
-<span id="cb85-96"><a href="#cb85-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-99"><a href="#cb85-99" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-100"><a href="#cb85-100" aria-hidden="true" tabindex="-1"></a><span class="fu">mcols</span>(dnase)</span>
-<span id="cb85-101"><a href="#cb85-101" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-102"><a href="#cb85-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-103"><a href="#cb85-103" aria-hidden="true" tabindex="-1"></a>These columns are the extra fields from the original narrowPeak file — things like</span>
-<span id="cb85-104"><a href="#cb85-104" aria-hidden="true" tabindex="-1"></a>the signal value and score for each peak. They ride along with every range so you</span>
-<span id="cb85-105"><a href="#cb85-105" aria-hidden="true" tabindex="-1"></a>never lose the link between a location and its data.</span>
-<span id="cb85-106"><a href="#cb85-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-107"><a href="#cb85-107" aria-hidden="true" tabindex="-1"></a>**How many peaks are on each chromosome?** <span class="in">`seqnames()`</span> returns the chromosome of</span>
-<span id="cb85-108"><a href="#cb85-108" aria-hidden="true" tabindex="-1"></a>every peak; <span class="in">`table()`</span> tallies them.</span>
-<span id="cb85-109"><a href="#cb85-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-112"><a href="#cb85-112" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-113"><a href="#cb85-113" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">seqnames</span>(dnase))</span>
-<span id="cb85-114"><a href="#cb85-114" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-115"><a href="#cb85-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-116"><a href="#cb85-116" aria-hidden="true" tabindex="-1"></a>Each count is the number of DNase peaks called on that chromosome. Bigger</span>
-<span id="cb85-117"><a href="#cb85-117" aria-hidden="true" tabindex="-1"></a>chromosomes generally carry more peaks, but accessibility varies by chromosome too.</span>
-<span id="cb85-118"><a href="#cb85-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-119"><a href="#cb85-119" aria-hidden="true" tabindex="-1"></a>**How wide are the peaks?** Summarize the <span class="in">`width()`</span> of every range.</span>
-<span id="cb85-120"><a href="#cb85-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-123"><a href="#cb85-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-124"><a href="#cb85-124" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">width</span>(dnase))</span>
-<span id="cb85-125"><a href="#cb85-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-126"><a href="#cb85-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-127"><a href="#cb85-127" aria-hidden="true" tabindex="-1"></a>The summary gives you the min, median, mean, and max peak width in base pairs. A</span>
-<span id="cb85-128"><a href="#cb85-128" aria-hidden="true" tabindex="-1"></a>tight distribution around a couple hundred bp is typical for a DNase peak caller.</span>
-<span id="cb85-129"><a href="#cb85-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-130"><a href="#cb85-130" aria-hidden="true" tabindex="-1"></a>**What sequence names were used — `chr1` or just `1`?** Look at the <span class="in">`seqlevels`</span></span>
-<span id="cb85-131"><a href="#cb85-131" aria-hidden="true" tabindex="-1"></a>and the <span class="in">`seqlevelsStyle`</span>, then switch the style to Ensembl and look again.</span>
-<span id="cb85-132"><a href="#cb85-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-135"><a href="#cb85-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-136"><a href="#cb85-136" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevels</span>(dnase)</span>
-<span id="cb85-137"><a href="#cb85-137" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase)</span>
-<span id="cb85-138"><a href="#cb85-138" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase) <span class="ot">&lt;-</span> <span class="st">"ensembl"</span></span>
-<span id="cb85-139"><a href="#cb85-139" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase)</span>
-<span id="cb85-140"><a href="#cb85-140" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevels</span>(dnase)</span>
-<span id="cb85-141"><a href="#cb85-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-142"><a href="#cb85-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-143"><a href="#cb85-143" aria-hidden="true" tabindex="-1"></a>The object started in **UCSC** style (<span class="in">`chr1`</span>, <span class="in">`chr2`</span>, …). Assigning a new</span>
-<span id="cb85-144"><a href="#cb85-144" aria-hidden="true" tabindex="-1"></a><span class="in">`seqlevelsStyle`</span> rewrites every sequence name in place — after the switch the same</span>
-<span id="cb85-145"><a href="#cb85-145" aria-hidden="true" tabindex="-1"></a>chromosomes are now named <span class="in">`1`</span>, <span class="in">`2`</span>, … in **Ensembl** style. Nothing about the</span>
-<span id="cb85-146"><a href="#cb85-146" aria-hidden="true" tabindex="-1"></a>ranges changed, only the labels.</span>
-<span id="cb85-147"><a href="#cb85-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-148"><a href="#cb85-148" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
-<span id="cb85-149"><a href="#cb85-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## The `chr` gotcha that silently returns zero overlaps</span></span>
-<span id="cb85-150"><a href="#cb85-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-151"><a href="#cb85-151" aria-hidden="true" tabindex="-1"></a><span class="in">`seqlevelsStyle`</span> matters enormously the moment you compare two objects. Overlap</span>
-<span id="cb85-152"><a href="#cb85-152" aria-hidden="true" tabindex="-1"></a>operations match on the *exact* sequence name, so a peak on `chr1` will **never**</span>
-<span id="cb85-153"><a href="#cb85-153" aria-hidden="true" tabindex="-1"></a>overlap a region on <span class="in">`1`</span> — R reports zero overlaps and raises no error. If an</span>
-<span id="cb85-154"><a href="#cb85-154" aria-hidden="true" tabindex="-1"></a>overlap count comes back suspiciously at zero, the first thing to check is whether</span>
-<span id="cb85-155"><a href="#cb85-155" aria-hidden="true" tabindex="-1"></a>both objects share the same <span class="in">`seqlevelsStyle`</span>. We switched to Ensembl here to</span>
-<span id="cb85-156"><a href="#cb85-156" aria-hidden="true" tabindex="-1"></a>practice; in Exercise 3 we'll switch back before comparing against UCSC-style gene</span>
-<span id="cb85-157"><a href="#cb85-157" aria-hidden="true" tabindex="-1"></a>models.</span>
-<span id="cb85-158"><a href="#cb85-158" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb85-159"><a href="#cb85-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-160"><a href="#cb85-160" aria-hidden="true" tabindex="-1"></a>**How much of the genome do the peaks cover?** Assuming the peaks don't overlap,</span>
-<span id="cb85-161"><a href="#cb85-161" aria-hidden="true" tabindex="-1"></a>sum their widths and divide by the total genome length.</span>
-<span id="cb85-162"><a href="#cb85-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-165"><a href="#cb85-165" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-166"><a href="#cb85-166" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(dnase))</span>
-<span id="cb85-167"><a href="#cb85-167" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">seqlengths</span>(dnase))</span>
-<span id="cb85-168"><a href="#cb85-168" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(dnase)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(dnase))</span>
-<span id="cb85-169"><a href="#cb85-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-170"><a href="#cb85-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-171"><a href="#cb85-171" aria-hidden="true" tabindex="-1"></a>The first number is the total base pairs of open chromatin called; the second is</span>
-<span id="cb85-172"><a href="#cb85-172" aria-hidden="true" tabindex="-1"></a>the size of the genome. Their ratio — a small fraction of a percent — tells you</span>
-<span id="cb85-173"><a href="#cb85-173" aria-hidden="true" tabindex="-1"></a>that accessible chromatin is a tiny slice of the whole genome, which is exactly</span>
-<span id="cb85-174"><a href="#cb85-174" aria-hidden="true" tabindex="-1"></a>why these regions are interesting.</span>
-<span id="cb85-175"><a href="#cb85-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-176"><a href="#cb85-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 2: compare two replicates</span></span>
-<span id="cb85-177"><a href="#cb85-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-178"><a href="#cb85-178" aria-hidden="true" tabindex="-1"></a>A good experiment is reproducible. ENCODE ran the DNase assay twice on K562, so we</span>
-<span id="cb85-179"><a href="#cb85-179" aria-hidden="true" tabindex="-1"></a>have a second replicate. In this exercise you'll load it and ask how well the two</span>
-<span id="cb85-180"><a href="#cb85-180" aria-hidden="true" tabindex="-1"></a>replicates agree.</span>
-<span id="cb85-181"><a href="#cb85-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-182"><a href="#cb85-182" aria-hidden="true" tabindex="-1"></a>**Load the second replicate** (<span class="in">`...wgEncodeUwDnaseK562PkRep2.narrowPeak.gz`</span>) as</span>
-<span id="cb85-183"><a href="#cb85-183" aria-hidden="true" tabindex="-1"></a><span class="in">`dnase2`</span>.</span>
-<span id="cb85-184"><a href="#cb85-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-187"><a href="#cb85-187" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-188"><a href="#cb85-188" aria-hidden="true" tabindex="-1"></a><span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz"</span>)</span>
-<span id="cb85-189"><a href="#cb85-189" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, a single matching record — grab it with [[1]].</span></span>
-<span id="cb85-190"><a href="#cb85-190" aria-hidden="true" tabindex="-1"></a>dnase2 <span class="ot">&lt;-</span> <span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz"</span>)[[<span class="dv">1</span>]]</span>
-<span id="cb85-191"><a href="#cb85-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-192"><a href="#cb85-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-193"><a href="#cb85-193" aria-hidden="true" tabindex="-1"></a>**How many peaks are in each replicate?** Compare the lengths.</span>
-<span id="cb85-194"><a href="#cb85-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-197"><a href="#cb85-197" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-198"><a href="#cb85-198" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(dnase)</span>
-<span id="cb85-199"><a href="#cb85-199" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(dnase2)</span>
-<span id="cb85-200"><a href="#cb85-200" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-201"><a href="#cb85-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-202"><a href="#cb85-202" aria-hidden="true" tabindex="-1"></a>The two replicates call a broadly similar number of peaks. A wildly different</span>
-<span id="cb85-203"><a href="#cb85-203" aria-hidden="true" tabindex="-1"></a>count between replicates would be a red flag that something went wrong in one of</span>
-<span id="cb85-204"><a href="#cb85-204" aria-hidden="true" tabindex="-1"></a>the experiments.</span>
-<span id="cb85-205"><a href="#cb85-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-206"><a href="#cb85-206" aria-hidden="true" tabindex="-1"></a>**How wide are the `dnase2` peaks?**</span>
-<span id="cb85-207"><a href="#cb85-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-210"><a href="#cb85-210" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-211"><a href="#cb85-211" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">width</span>(dnase2))</span>
-<span id="cb85-212"><a href="#cb85-212" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-213"><a href="#cb85-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-214"><a href="#cb85-214" aria-hidden="true" tabindex="-1"></a>The width distribution looks much like the first replicate's — another reassuring</span>
-<span id="cb85-215"><a href="#cb85-215" aria-hidden="true" tabindex="-1"></a>sign of reproducibility.</span>
-<span id="cb85-216"><a href="#cb85-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-217"><a href="#cb85-217" aria-hidden="true" tabindex="-1"></a>**What proportion of the genome does `dnase2` cover?** Same calculation as before.</span>
-<span id="cb85-218"><a href="#cb85-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-221"><a href="#cb85-221" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-222"><a href="#cb85-222" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(dnase2)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(dnase2))</span>
-<span id="cb85-223"><a href="#cb85-223" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-224"><a href="#cb85-224" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-225"><a href="#cb85-225" aria-hidden="true" tabindex="-1"></a>A comparable coverage fraction to replicate 1, as you'd hope for two runs of the</span>
-<span id="cb85-226"><a href="#cb85-226" aria-hidden="true" tabindex="-1"></a>same assay.</span>
-<span id="cb85-227"><a href="#cb85-227" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-228"><a href="#cb85-228" aria-hidden="true" tabindex="-1"></a>**How many `dnase` peaks overlap a `dnase2` peak?** The <span class="in">`%over%`</span> operator returns</span>
-<span id="cb85-229"><a href="#cb85-229" aria-hidden="true" tabindex="-1"></a>a logical vector — <span class="in">`TRUE`</span> for each <span class="in">`dnase`</span> peak that hits at least one <span class="in">`dnase2`</span></span>
-<span id="cb85-230"><a href="#cb85-230" aria-hidden="true" tabindex="-1"></a>peak — so summing it counts the overlapping peaks.</span>
-<span id="cb85-231"><a href="#cb85-231" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-234"><a href="#cb85-234" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-235"><a href="#cb85-235" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase <span class="sc">%over%</span> dnase2)</span>
-<span id="cb85-236"><a href="#cb85-236" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-237"><a href="#cb85-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-238"><a href="#cb85-238" aria-hidden="true" tabindex="-1"></a>A high overlap count is the quantitative version of "the replicates agree": the</span>
-<span id="cb85-239"><a href="#cb85-239" aria-hidden="true" tabindex="-1"></a>same regions of open chromatin show up both times. This is the kind of number you</span>
-<span id="cb85-240"><a href="#cb85-240" aria-hidden="true" tabindex="-1"></a>would report when arguing that a peak set is trustworthy.</span>
-<span id="cb85-241"><a href="#cb85-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-242"><a href="#cb85-242" aria-hidden="true" tabindex="-1"></a>**Expand every peak by 50 bp on each end.** Suppose your peak caller was too</span>
-<span id="cb85-243"><a href="#cb85-243" aria-hidden="true" tabindex="-1"></a>strict and you want peaks 100 bp wider. Use <span class="in">`resize()`</span> with <span class="in">`fix="center"`</span> so the</span>
-<span id="cb85-244"><a href="#cb85-244" aria-hidden="true" tabindex="-1"></a>expansion is symmetric, and call the result <span class="in">`dnase_wide`</span>.</span>
-<span id="cb85-245"><a href="#cb85-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-248"><a href="#cb85-248" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-249"><a href="#cb85-249" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">width</span>(dnase)</span>
-<span id="cb85-250"><a href="#cb85-250" aria-hidden="true" tabindex="-1"></a>dnase_wide <span class="ot">&lt;-</span> <span class="fu">resize</span>(dnase, <span class="at">width =</span> w <span class="sc">+</span> <span class="dv">100</span>, <span class="at">fix =</span> <span class="st">"center"</span>)</span>
-<span id="cb85-251"><a href="#cb85-251" aria-hidden="true" tabindex="-1"></a><span class="fu">width</span>(dnase_wide)</span>
-<span id="cb85-252"><a href="#cb85-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-253"><a href="#cb85-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-254"><a href="#cb85-254" aria-hidden="true" tabindex="-1"></a><span class="in">`resize()`</span> sets each range to a new width; <span class="in">`fix="center"`</span> keeps the midpoint fixed</span>
-<span id="cb85-255"><a href="#cb85-255" aria-hidden="true" tabindex="-1"></a>so the peak grows 50 bp in each direction. Comparing <span class="in">`width(dnase_wide)`</span> to the</span>
-<span id="cb85-256"><a href="#cb85-256" aria-hidden="true" tabindex="-1"></a>original widths confirms every peak is exactly 100 bp larger.</span>
-<span id="cb85-257"><a href="#cb85-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-258"><a href="#cb85-258" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 3: DNase sites relative to gene promoters</span></span>
-<span id="cb85-259"><a href="#cb85-259" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-260"><a href="#cb85-260" aria-hidden="true" tabindex="-1"></a>Open chromatin should cluster near where genes are regulated — especially at</span>
-<span id="cb85-261"><a href="#cb85-261" aria-hidden="true" tabindex="-1"></a>**promoters**, the regions just upstream of a gene's start. In this exercise</span>
-<span id="cb85-262"><a href="#cb85-262" aria-hidden="true" tabindex="-1"></a>you'll build promoter regions from a gene model and ask whether the DNase sites</span>
-<span id="cb85-263"><a href="#cb85-263" aria-hidden="true" tabindex="-1"></a>land there more than chance would predict.</span>
-<span id="cb85-264"><a href="#cb85-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-265"><a href="#cb85-265" aria-hidden="true" tabindex="-1"></a>You'll need the <span class="in">`TxDb.Hsapiens.UCSC.hg19.knownGene`</span> transcript database. If it</span>
-<span id="cb85-266"><a href="#cb85-266" aria-hidden="true" tabindex="-1"></a>isn't already installed, install it once (this is a one-time setup step, not part</span>
-<span id="cb85-267"><a href="#cb85-267" aria-hidden="true" tabindex="-1"></a>of the analysis):</span>
-<span id="cb85-268"><a href="#cb85-268" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-269"><a href="#cb85-269" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-270"><a href="#cb85-270" aria-hidden="true" tabindex="-1"></a><span class="in">BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")</span></span>
-<span id="cb85-271"><a href="#cb85-271" aria-hidden="true" tabindex="-1"></a><span class="in">library("TxDb.Hsapiens.UCSC.hg19.knownGene")</span></span>
-<span id="cb85-272"><a href="#cb85-272" aria-hidden="true" tabindex="-1"></a><span class="in">kg &lt;- TxDb.Hsapiens.UCSC.hg19.knownGene</span></span>
-<span id="cb85-273"><a href="#cb85-273" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-274"><a href="#cb85-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-275"><a href="#cb85-275" aria-hidden="true" tabindex="-1"></a>**Load the genes from the TxDb.** Attach the package, grab the <span class="in">`TxDb`</span> object, and</span>
-<span id="cb85-276"><a href="#cb85-276" aria-hidden="true" tabindex="-1"></a>pull out the genes. What class is the result, and how many genes are there?</span>
-<span id="cb85-277"><a href="#cb85-277" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-280"><a href="#cb85-280" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-281"><a href="#cb85-281" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"TxDb.Hsapiens.UCSC.hg19.knownGene"</span>)</span>
-<span id="cb85-282"><a href="#cb85-282" aria-hidden="true" tabindex="-1"></a>kg <span class="ot">&lt;-</span> TxDb.Hsapiens.UCSC.hg19.knownGene</span>
-<span id="cb85-283"><a href="#cb85-283" aria-hidden="true" tabindex="-1"></a>gx <span class="ot">&lt;-</span> <span class="fu">genes</span>(kg)</span>
-<span id="cb85-284"><a href="#cb85-284" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(gx)</span>
-<span id="cb85-285"><a href="#cb85-285" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(gx)</span>
-<span id="cb85-286"><a href="#cb85-286" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-287"><a href="#cb85-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-288"><a href="#cb85-288" aria-hidden="true" tabindex="-1"></a><span class="in">`genes()`</span> returns a <span class="in">`GRanges`</span> — one range per gene, in UCSC (<span class="in">`chr1`</span>) style to match</span>
-<span id="cb85-289"><a href="#cb85-289" aria-hidden="true" tabindex="-1"></a>the genome it was built on. The length tells you how many genes the annotation</span>
-<span id="cb85-290"><a href="#cb85-290" aria-hidden="true" tabindex="-1"></a>contains.</span>
-<span id="cb85-291"><a href="#cb85-291" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-292"><a href="#cb85-292" aria-hidden="true" tabindex="-1"></a>**Get promoter regions with `flank()`.** Read <span class="in">`?flank`</span>. The promoter sits *upstream*</span>
-<span id="cb85-293"><a href="#cb85-293" aria-hidden="true" tabindex="-1"></a>of a gene, so flanking each gene by 2 kb on its upstream side gives a first</span>
-<span id="cb85-294"><a href="#cb85-294" aria-hidden="true" tabindex="-1"></a>approximation.</span>
-<span id="cb85-295"><a href="#cb85-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-298"><a href="#cb85-298" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-299"><a href="#cb85-299" aria-hidden="true" tabindex="-1"></a><span class="fu">flank</span>(gx, <span class="dv">2000</span>)</span>
-<span id="cb85-300"><a href="#cb85-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-301"><a href="#cb85-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-302"><a href="#cb85-302" aria-hidden="true" tabindex="-1"></a><span class="in">`flank()`</span> returns a new range immediately upstream of each gene — strand-aware, so</span>
-<span id="cb85-303"><a href="#cb85-303" aria-hidden="true" tabindex="-1"></a>"upstream" means the correct direction for genes on either strand. These are</span>
-<span id="cb85-304"><a href="#cb85-304" aria-hidden="true" tabindex="-1"></a>2 kb-wide candidate promoter regions.</span>
-<span id="cb85-305"><a href="#cb85-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-306"><a href="#cb85-306" aria-hidden="true" tabindex="-1"></a>**Do the same thing with `promoters()`.** The TxDb knows where transcripts start,</span>
-<span id="cb85-307"><a href="#cb85-307" aria-hidden="true" tabindex="-1"></a>so <span class="in">`promoters()`</span> builds promoter regions directly (see <span class="in">`?promoters`</span> for the default</span>
-<span id="cb85-308"><a href="#cb85-308" aria-hidden="true" tabindex="-1"></a>window).</span>
-<span id="cb85-309"><a href="#cb85-309" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-312"><a href="#cb85-312" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-313"><a href="#cb85-313" aria-hidden="true" tabindex="-1"></a>proms <span class="ot">&lt;-</span> <span class="fu">promoters</span>(kg)</span>
-<span id="cb85-314"><a href="#cb85-314" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-315"><a href="#cb85-315" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-316"><a href="#cb85-316" aria-hidden="true" tabindex="-1"></a><span class="in">`promoters()`</span> is the purpose-built tool: it returns a promoter window around each</span>
-<span id="cb85-317"><a href="#cb85-317" aria-hidden="true" tabindex="-1"></a>transcript's start site without you having to reason about strand and flanking</span>
-<span id="cb85-318"><a href="#cb85-318" aria-hidden="true" tabindex="-1"></a>yourself.</span>
-<span id="cb85-319"><a href="#cb85-319" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-320"><a href="#cb85-320" aria-hidden="true" tabindex="-1"></a>**Do these promoters overlap each other?** Genes are dense, and nearby</span>
-<span id="cb85-321"><a href="#cb85-321" aria-hidden="true" tabindex="-1"></a>transcripts share promoter neighborhoods, so many of these windows will overlap.</span>
-<span id="cb85-322"><a href="#cb85-322" aria-hidden="true" tabindex="-1"></a><span class="in">`countOverlaps()`</span> of the set against itself counts how many promoters each one</span>
-<span id="cb85-323"><a href="#cb85-323" aria-hidden="true" tabindex="-1"></a>touches.</span>
-<span id="cb85-324"><a href="#cb85-324" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-327"><a href="#cb85-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-328"><a href="#cb85-328" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">countOverlaps</span>(proms))</span>
-<span id="cb85-329"><a href="#cb85-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-330"><a href="#cb85-330" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-331"><a href="#cb85-331" aria-hidden="true" tabindex="-1"></a>Every promoter overlaps at least itself (count ≥ 1), and the larger counts show</span>
-<span id="cb85-332"><a href="#cb85-332" aria-hidden="true" tabindex="-1"></a>that promoters pile up on top of one another — overlapping transcripts and</span>
-<span id="cb85-333"><a href="#cb85-333" aria-hidden="true" tabindex="-1"></a>alternative start sites. That redundancy is a problem if we want clean,</span>
-<span id="cb85-334"><a href="#cb85-334" aria-hidden="true" tabindex="-1"></a>non-double-counted regions.</span>
-<span id="cb85-335"><a href="#cb85-335" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-336"><a href="#cb85-336" aria-hidden="true" tabindex="-1"></a>**Collapse overlapping promoters with `reduce()`.** <span class="in">`reduce()`</span> merges every group</span>
-<span id="cb85-337"><a href="#cb85-337" aria-hidden="true" tabindex="-1"></a>of overlapping ranges into a single contiguous region, giving us a tidy set of</span>
-<span id="cb85-338"><a href="#cb85-338" aria-hidden="true" tabindex="-1"></a>promoter regions to test against.</span>
-<span id="cb85-339"><a href="#cb85-339" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-342"><a href="#cb85-342" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-343"><a href="#cb85-343" aria-hidden="true" tabindex="-1"></a><span class="co"># reduce() takes all overlapping ranges and collapses each cluster</span></span>
-<span id="cb85-344"><a href="#cb85-344" aria-hidden="true" tabindex="-1"></a><span class="co"># into one region spanning the whole cluster.</span></span>
-<span id="cb85-345"><a href="#cb85-345" aria-hidden="true" tabindex="-1"></a>prom_regions <span class="ot">&lt;-</span> <span class="fu">reduce</span>(proms)</span>
-<span id="cb85-346"><a href="#cb85-346" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-347"><a href="#cb85-347" aria-hidden="true" tabindex="-1"></a><span class="co"># After reducing, each region overlaps only itself.</span></span>
-<span id="cb85-348"><a href="#cb85-348" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">countOverlaps</span>(prom_regions))</span>
-<span id="cb85-349"><a href="#cb85-349" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-350"><a href="#cb85-350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-351"><a href="#cb85-351" aria-hidden="true" tabindex="-1"></a>After <span class="in">`reduce()`</span>, the self-overlap count is 1 everywhere — confirming the regions</span>
-<span id="cb85-352"><a href="#cb85-352" aria-hidden="true" tabindex="-1"></a>no longer overlap each other and can be treated as a clean, non-redundant set.</span>
-<span id="cb85-353"><a href="#cb85-353" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-354"><a href="#cb85-354" aria-hidden="true" tabindex="-1"></a>**Count DNase sites that overlap a promoter region.** Here is where the</span>
-<span id="cb85-355"><a href="#cb85-355" aria-hidden="true" tabindex="-1"></a><span class="in">`seqlevelsStyle`</span> warning above comes due: we switched <span class="in">`dnase`</span> to Ensembl (<span class="in">`1`</span>) in</span>
-<span id="cb85-356"><a href="#cb85-356" aria-hidden="true" tabindex="-1"></a>Exercise 1, but the gene models are UCSC (<span class="in">`chr1`</span>). Watch what happens.</span>
-<span id="cb85-357"><a href="#cb85-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-360"><a href="#cb85-360" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-361"><a href="#cb85-361" aria-hidden="true" tabindex="-1"></a><span class="co"># dnase is still in Ensembl style from Exercise 1, while</span></span>
-<span id="cb85-362"><a href="#cb85-362" aria-hidden="true" tabindex="-1"></a><span class="co"># prom_regions is UCSC style — so this first count is misleadingly zero.</span></span>
-<span id="cb85-363"><a href="#cb85-363" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase <span class="sc">%over%</span> prom_regions)</span>
-<span id="cb85-364"><a href="#cb85-364" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-365"><a href="#cb85-365" aria-hidden="true" tabindex="-1"></a><span class="co"># Switch dnase back to UCSC so the sequence names match, then recount.</span></span>
-<span id="cb85-366"><a href="#cb85-366" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase) <span class="ot">&lt;-</span> <span class="st">"UCSC"</span></span>
-<span id="cb85-367"><a href="#cb85-367" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase <span class="sc">%over%</span> prom_regions)</span>
-<span id="cb85-368"><a href="#cb85-368" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase2 <span class="sc">%over%</span> prom_regions)</span>
-<span id="cb85-369"><a href="#cb85-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-370"><a href="#cb85-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-371"><a href="#cb85-371" aria-hidden="true" tabindex="-1"></a>The first count is **zero** — not because the data disagree, but because <span class="in">`chr1`</span></span>
-<span id="cb85-372"><a href="#cb85-372" aria-hidden="true" tabindex="-1"></a>and <span class="in">`1`</span> never match. After switching <span class="in">`dnase`</span> back to UCSC style, the same overlap</span>
-<span id="cb85-373"><a href="#cb85-373" aria-hidden="true" tabindex="-1"></a>query returns a large, sensible count. This is the silent bug from the warning,</span>
-<span id="cb85-374"><a href="#cb85-374" aria-hidden="true" tabindex="-1"></a>caught and fixed. (<span class="in">`dnase2`</span> was never reassigned, so it was UCSC-style all along.)</span>
-<span id="cb85-375"><a href="#cb85-375" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-376"><a href="#cb85-376" aria-hidden="true" tabindex="-1"></a>**Is that overlap surprising?** If DNase sites and promoters were placed</span>
-<span id="cb85-377"><a href="#cb85-377" aria-hidden="true" tabindex="-1"></a>*independently* on the genome, how many overlaps would you expect by chance?</span>
-<span id="cb85-378"><a href="#cb85-378" aria-hidden="true" tabindex="-1"></a>Compare that expectation to what you observed.</span>
-<span id="cb85-379"><a href="#cb85-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-382"><a href="#cb85-382" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-383"><a href="#cb85-383" aria-hidden="true" tabindex="-1"></a>prop_proms <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(prom_regions)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(prom_regions))</span>
-<span id="cb85-384"><a href="#cb85-384" aria-hidden="true" tabindex="-1"></a>prop_dnase <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(dnase)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(prom_regions))</span>
-<span id="cb85-385"><a href="#cb85-385" aria-hidden="true" tabindex="-1"></a><span class="co"># Under independence, the expected number of DNase peaks landing in a</span></span>
-<span id="cb85-386"><a href="#cb85-386" aria-hidden="true" tabindex="-1"></a><span class="co"># promoter is (fraction of genome that is promoter) times the number of peaks.</span></span>
-<span id="cb85-387"><a href="#cb85-387" aria-hidden="true" tabindex="-1"></a>prop_proms <span class="sc">*</span> prop_dnase <span class="sc">*</span> <span class="fu">length</span>(dnase)</span>
-<span id="cb85-388"><a href="#cb85-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-389"><a href="#cb85-389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-390"><a href="#cb85-390" aria-hidden="true" tabindex="-1"></a>The expected-by-chance number is far smaller than the count you actually observed.</span>
-<span id="cb85-391"><a href="#cb85-391" aria-hidden="true" tabindex="-1"></a>That gap is the biology: DNase hypersensitive sites are **not** scattered at</span>
-<span id="cb85-392"><a href="#cb85-392" aria-hidden="true" tabindex="-1"></a>random — they concentrate at promoters, exactly where regulatory machinery opens</span>
-<span id="cb85-393"><a href="#cb85-393" aria-hidden="true" tabindex="-1"></a>up the chromatin. The overlap count is meaningful precisely because it dwarfs the</span>
-<span id="cb85-394"><a href="#cb85-394" aria-hidden="true" tabindex="-1"></a>null expectation.</span>
-<span id="cb85-395"><a href="#cb85-395" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-396"><a href="#cb85-396" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 4: enrichment of histone marks at CpG islands</span></span>
-<span id="cb85-397"><a href="#cb85-397" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-398"><a href="#cb85-398" aria-hidden="true" tabindex="-1"></a>Histone modifications mark functional regions of the genome: <span class="in">`H3K4me3`</span> flags active</span>
-<span id="cb85-399"><a href="#cb85-399" aria-hidden="true" tabindex="-1"></a>promoters, <span class="in">`H3K4me1`</span> flags enhancers, <span class="in">`H3K27me3`</span> flags repressed regions, and so</span>
-<span id="cb85-400"><a href="#cb85-400" aria-hidden="true" tabindex="-1"></a>on. In this exercise you'll ask how much each mark **overlaps CpG islands** — and</span>
-<span id="cb85-401"><a href="#cb85-401" aria-hidden="true" tabindex="-1"></a>build a small reusable enrichment score along the way.</span>
-<span id="cb85-402"><a href="#cb85-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-403"><a href="#cb85-403" aria-hidden="true" tabindex="-1"></a>The data again comes from <span class="in">`AnnotationHub`</span>. ENCODE published these histone ChIP-seq</span>
-<span id="cb85-404"><a href="#cb85-404" aria-hidden="true" tabindex="-1"></a>peak calls as BED files; the hub serves them as <span class="in">`GRanges`</span>. We've already found the</span>
-<span id="cb85-405"><a href="#cb85-405" aria-hidden="true" tabindex="-1"></a>right hub IDs, so you can load each mark directly.</span>
-<span id="cb85-406"><a href="#cb85-406" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-409"><a href="#cb85-409" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-410"><a href="#cb85-410" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AnnotationHub)</span>
-<span id="cb85-411"><a href="#cb85-411" aria-hidden="true" tabindex="-1"></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span>
-<span id="cb85-412"><a href="#cb85-412" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-413"><a href="#cb85-413" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-414"><a href="#cb85-414" aria-hidden="true" tabindex="-1"></a>Here are the <span class="in">`GRanges`</span> for four histone marks plus one extra <span class="in">`H3K4me3`</span> replicate:</span>
-<span id="cb85-415"><a href="#cb85-415" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-418"><a href="#cb85-418" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-419"><a href="#cb85-419" aria-hidden="true" tabindex="-1"></a>h3k4me1 <span class="ot">&lt;-</span> ah[[<span class="st">"AH25832"</span>]]</span>
-<span id="cb85-420"><a href="#cb85-420" aria-hidden="true" tabindex="-1"></a>h3k4me3 <span class="ot">&lt;-</span> ah[[<span class="st">"AH25833"</span>]]</span>
-<span id="cb85-421"><a href="#cb85-421" aria-hidden="true" tabindex="-1"></a>h3k9ac <span class="ot">&lt;-</span> ah[[<span class="st">"AH25834"</span>]]</span>
-<span id="cb85-422"><a href="#cb85-422" aria-hidden="true" tabindex="-1"></a>h3k27me3 <span class="ot">&lt;-</span> ah[[<span class="st">"AH25835"</span>]]</span>
-<span id="cb85-423"><a href="#cb85-423" aria-hidden="true" tabindex="-1"></a>h3k4me3_2 <span class="ot">&lt;-</span> ah[[<span class="st">"AH27284"</span>]]</span>
-<span id="cb85-424"><a href="#cb85-424" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-425"><a href="#cb85-425" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-426"><a href="#cb85-426" aria-hidden="true" tabindex="-1"></a>Each variable holds the peak calls from one ChIP-seq experiment pulling down that</span>
-<span id="cb85-427"><a href="#cb85-427" aria-hidden="true" tabindex="-1"></a>histone mark. Now grab the hg19 CpG islands the same way:</span>
-<span id="cb85-428"><a href="#cb85-428" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-431"><a href="#cb85-431" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-432"><a href="#cb85-432" aria-hidden="true" tabindex="-1"></a>cpg <span class="ot">&lt;-</span> <span class="fu">query</span>(ah, <span class="fu">c</span>(<span class="st">"cpg"</span>, <span class="st">"UCSC"</span>, <span class="st">"hg19"</span>))[[<span class="dv">1</span>]]</span>
-<span id="cb85-433"><a href="#cb85-433" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-434"><a href="#cb85-434" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-435"><a href="#cb85-435" aria-hidden="true" tabindex="-1"></a>**How many `H3K4me1` peaks overlap a CpG island?** Start with the simple <span class="in">`%over%`</span></span>
-<span id="cb85-436"><a href="#cb85-436" aria-hidden="true" tabindex="-1"></a>count, as in Exercise 2.</span>
-<span id="cb85-437"><a href="#cb85-437" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-440"><a href="#cb85-440" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-441"><a href="#cb85-441" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(h3k4me1 <span class="sc">%over%</span> cpg)</span>
-<span id="cb85-442"><a href="#cb85-442" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-443"><a href="#cb85-443" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-444"><a href="#cb85-444" aria-hidden="true" tabindex="-1"></a>That's the number of <span class="in">`H3K4me1`</span> peaks touching at least one CpG island — a quick</span>
-<span id="cb85-445"><a href="#cb85-445" aria-hidden="true" tabindex="-1"></a>first look at the association.</span>
-<span id="cb85-446"><a href="#cb85-446" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-447"><a href="#cb85-447" aria-hidden="true" tabindex="-1"></a>**How many *bases* overlap?** A peak count ignores how much of each peak overlaps.</span>
-<span id="cb85-448"><a href="#cb85-448" aria-hidden="true" tabindex="-1"></a><span class="in">`intersect()`</span> returns the overlapping regions themselves, so summing their widths</span>
-<span id="cb85-449"><a href="#cb85-449" aria-hidden="true" tabindex="-1"></a>gives the total overlapping base pairs.</span>
-<span id="cb85-450"><a href="#cb85-450" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-453"><a href="#cb85-453" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-454"><a href="#cb85-454" aria-hidden="true" tabindex="-1"></a><span class="co"># intersect() returns only the overlapping stretches as a new range set;</span></span>
-<span id="cb85-455"><a href="#cb85-455" aria-hidden="true" tabindex="-1"></a><span class="co"># summing their widths gives the total bases of overlap.</span></span>
-<span id="cb85-456"><a href="#cb85-456" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">intersect</span>(h3k4me1, cpg)))</span>
-<span id="cb85-457"><a href="#cb85-457" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-458"><a href="#cb85-458" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-459"><a href="#cb85-459" aria-hidden="true" tabindex="-1"></a>This is a finer measure than the peak count: it tells you how many base pairs the</span>
-<span id="cb85-460"><a href="#cb85-460" aria-hidden="true" tabindex="-1"></a>two sets actually share, not just how many peaks touch.</span>
-<span id="cb85-461"><a href="#cb85-461" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-462"><a href="#cb85-462" aria-hidden="true" tabindex="-1"></a>**Turn that into an enrichment score.** Broad marks cover more bases and so overlap</span>
-<span id="cb85-463"><a href="#cb85-463" aria-hidden="true" tabindex="-1"></a>CpG islands more just by being big. To correct for that, normalize the shared bases</span>
-<span id="cb85-464"><a href="#cb85-464" aria-hidden="true" tabindex="-1"></a>by the *total* bases covered by either set (their <span class="in">`union`</span>). The result is a</span>
-<span id="cb85-465"><a href="#cb85-465" aria-hidden="true" tabindex="-1"></a>Jaccard-style ratio between 0 and 1: the fraction of the combined footprint that</span>
-<span id="cb85-466"><a href="#cb85-466" aria-hidden="true" tabindex="-1"></a>both sets share.</span>
-<span id="cb85-467"><a href="#cb85-467" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-470"><a href="#cb85-470" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-471"><a href="#cb85-471" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">union</span>(h3k4me1, cpg)))</span>
-<span id="cb85-472"><a href="#cb85-472" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize the overlap by the combined coverage of both sets.</span></span>
-<span id="cb85-473"><a href="#cb85-473" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">intersect</span>(h3k4me1, cpg))) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">union</span>(h3k4me1, cpg)))</span>
-<span id="cb85-474"><a href="#cb85-474" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-475"><a href="#cb85-475" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-476"><a href="#cb85-476" aria-hidden="true" tabindex="-1"></a>A score near 0 means the two sets barely co-occur; a score near 1 means they cover</span>
-<span id="cb85-477"><a href="#cb85-477" aria-hidden="true" tabindex="-1"></a>almost exactly the same ground. Because the denominator grows with peak breadth,</span>
-<span id="cb85-478"><a href="#cb85-478" aria-hidden="true" tabindex="-1"></a>this score lets you compare a broad mark and a narrow mark on equal footing.</span>
-<span id="cb85-479"><a href="#cb85-479" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-480"><a href="#cb85-480" aria-hidden="true" tabindex="-1"></a>**Wrap it in a function** so you can score any pair of range sets.</span>
-<span id="cb85-481"><a href="#cb85-481" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-484"><a href="#cb85-484" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-485"><a href="#cb85-485" aria-hidden="true" tabindex="-1"></a>range_enrichment_score <span class="ot">&lt;-</span> <span class="cf">function</span>(r1, r2) {</span>
-<span id="cb85-486"><a href="#cb85-486" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">intersect</span>(r1, r2)))</span>
-<span id="cb85-487"><a href="#cb85-487" aria-hidden="true" tabindex="-1"></a>  u <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">union</span>(r1, r2)))</span>
-<span id="cb85-488"><a href="#cb85-488" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(i <span class="sc">/</span> u)</span>
-<span id="cb85-489"><a href="#cb85-489" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb85-490"><a href="#cb85-490" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-491"><a href="#cb85-491" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-492"><a href="#cb85-492" aria-hidden="true" tabindex="-1"></a>The function is just the intersect-over-union calculation with names: <span class="in">`i`</span> for the</span>
-<span id="cb85-493"><a href="#cb85-493" aria-hidden="true" tabindex="-1"></a>shared bases, <span class="in">`u`</span> for the combined footprint. Give it a try on <span class="in">`H3K4me1`</span> and the</span>
-<span id="cb85-494"><a href="#cb85-494" aria-hidden="true" tabindex="-1"></a>CpG islands:</span>
-<span id="cb85-495"><a href="#cb85-495" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-498"><a href="#cb85-498" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb85-499"><a href="#cb85-499" aria-hidden="true" tabindex="-1"></a><span class="fu">range_enrichment_score</span>(h3k4me1, cpg)</span>
-<span id="cb85-500"><a href="#cb85-500" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb85-501"><a href="#cb85-501" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-502"><a href="#cb85-502" aria-hidden="true" tabindex="-1"></a>You get back the same normalized score as before. Now you can call</span>
-<span id="cb85-503"><a href="#cb85-503" aria-hidden="true" tabindex="-1"></a><span class="in">`range_enrichment_score()`</span> on any two <span class="in">`GRanges`</span> — try the other histone marks</span>
-<span id="cb85-504"><a href="#cb85-504" aria-hidden="true" tabindex="-1"></a>against <span class="in">`cpg`</span> and see which one is most enriched at CpG islands.</span>
-<span id="cb85-505"><a href="#cb85-505" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-506"><a href="#cb85-506" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
-<span id="cb85-507"><a href="#cb85-507" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-508"><a href="#cb85-508" aria-hidden="true" tabindex="-1"></a>You've now run the core range-analysis workflow end to end on real ENCODE data.</span>
-<span id="cb85-509"><a href="#cb85-509" aria-hidden="true" tabindex="-1"></a>You can:</span>
-<span id="cb85-510"><a href="#cb85-510" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-511"><a href="#cb85-511" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Find and load** a published dataset from <span class="in">`AnnotationHub`</span> as a <span class="in">`GRanges`</span>, and</span>
-<span id="cb85-512"><a href="#cb85-512" aria-hidden="true" tabindex="-1"></a>  inspect its class, metadata, and per-chromosome peak counts.</span>
-<span id="cb85-513"><a href="#cb85-513" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Measure** peak widths and compute the fraction of the genome a peak set covers.</span>
-<span id="cb85-514"><a href="#cb85-514" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Read and switch `seqlevelsStyle`**, and — just as important — recognize the</span>
-<span id="cb85-515"><a href="#cb85-515" aria-hidden="true" tabindex="-1"></a>  silent zero-overlap bug a <span class="in">`chr1`</span>-vs-<span class="in">`1`</span> mismatch causes.</span>
-<span id="cb85-516"><a href="#cb85-516" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Compare range sets** with `%over%`, and **reshape** ranges with <span class="in">`resize()`</span>,</span>
-<span id="cb85-517"><a href="#cb85-517" aria-hidden="true" tabindex="-1"></a>  <span class="in">`flank()`</span>, <span class="in">`promoters()`</span>, and <span class="in">`reduce()`</span>.</span>
-<span id="cb85-518"><a href="#cb85-518" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Quantify enrichment** of one set inside another with an intersect-over-union</span>
-<span id="cb85-519"><a href="#cb85-519" aria-hidden="true" tabindex="-1"></a>  score.</span>
-<span id="cb85-520"><a href="#cb85-520" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-521"><a href="#cb85-521" aria-hidden="true" tabindex="-1"></a>For the underlying concepts — how <span class="in">`GRanges`</span> objects are built, the full catalog of</span>
-<span id="cb85-522"><a href="#cb85-522" aria-hidden="true" tabindex="-1"></a>set operations and overlap methods, and the coordinate-system details — return to</span>
-<span id="cb85-523"><a href="#cb85-523" aria-hidden="true" tabindex="-1"></a>the *Genomic ranges and features* chapter. For the real-data import workflow with</span>
-<span id="cb85-524"><a href="#cb85-524" aria-hidden="true" tabindex="-1"></a><span class="in">`rtracklayer`</span>, see *Genomic ranges with real ChIP-seq peaks*. This chapter was the</span>
-<span id="cb85-525"><a href="#cb85-525" aria-hidden="true" tabindex="-1"></a>place to put those tools to work.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Ranges Exercises"</span></span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span></span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a><span class="co">  - name: Sean Davis</span></span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a><span class="co">    url: https://seandavi.github.io/</span></span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliation: University of Colorado&lt;br/&gt;Anschutz School of Medicine</span></span>
+<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliation-url: https://medschool.cuanschutz.edu/</span></span>
+<span id="cb82-8"><a href="#cb82-8" aria-hidden="true" tabindex="-1"></a><span class="co">    email: seandavi@gmail.com</span></span>
+<span id="cb82-9"><a href="#cb82-9" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb82-10"><a href="#cb82-10" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb82-11"><a href="#cb82-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb82-12"><a href="#cb82-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-summary: "Show the answer"</span></span>
+<span id="cb82-13"><a href="#cb82-13" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb82-14"><a href="#cb82-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb82-15"><a href="#cb82-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-16"><a href="#cb82-16" aria-hidden="true" tabindex="-1"></a><span class="in">```{r init, include=FALSE}</span></span>
+<span id="cb82-17"><a href="#cb82-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb82-18"><a href="#cb82-18" aria-hidden="true" tabindex="-1"></a>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">cache=</span><span class="cn">TRUE</span>, <span class="at">message=</span><span class="cn">FALSE</span>)</span>
+<span id="cb82-19"><a href="#cb82-19" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-20"><a href="#cb82-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-21"><a href="#cb82-21" aria-hidden="true" tabindex="-1"></a>The two ranges chapters — *Genomic ranges and features* and *Genomic ranges with</span>
+<span id="cb82-22"><a href="#cb82-22" aria-hidden="true" tabindex="-1"></a>real ChIP-seq peaks* — walked you through the <span class="in">`GenomicRanges`</span> toolkit on small</span>
+<span id="cb82-23"><a href="#cb82-23" aria-hidden="true" tabindex="-1"></a>hand-built objects and a single real peak set. This chapter is their hands-on</span>
+<span id="cb82-24"><a href="#cb82-24" aria-hidden="true" tabindex="-1"></a>companion. Here you'll point those same tools at *real* ENCODE data and answer</span>
+<span id="cb82-25"><a href="#cb82-25" aria-hidden="true" tabindex="-1"></a>the kinds of questions a genomicist actually asks: How many peaks did this</span>
+<span id="cb82-26"><a href="#cb82-26" aria-hidden="true" tabindex="-1"></a>experiment call? How wide are they? Do two replicates agree? Are open-chromatin</span>
+<span id="cb82-27"><a href="#cb82-27" aria-hidden="true" tabindex="-1"></a>regions enriched near gene promoters? Is one set of histone marks enriched at CpG</span>
+<span id="cb82-28"><a href="#cb82-28" aria-hidden="true" tabindex="-1"></a>islands?</span>
+<span id="cb82-29"><a href="#cb82-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-30"><a href="#cb82-30" aria-hidden="true" tabindex="-1"></a>The data comes from the <span class="co">[</span><span class="ot">ENCODE project</span><span class="co">](https://www.encodeproject.org/)</span> via the</span>
+<span id="cb82-31"><a href="#cb82-31" aria-hidden="true" tabindex="-1"></a><span class="in">`AnnotationHub`</span> package. ENCODE published these datasets as BED-style files;</span>
+<span id="cb82-32"><a href="#cb82-32" aria-hidden="true" tabindex="-1"></a>AnnotationHub has packaged them into ready-to-use <span class="in">`GRanges`</span> objects, so you can</span>
+<span id="cb82-33"><a href="#cb82-33" aria-hidden="true" tabindex="-1"></a>load one with a single line instead of downloading and parsing a file. (If you</span>
+<span id="cb82-34"><a href="#cb82-34" aria-hidden="true" tabindex="-1"></a>ever have a peak file of your own — peak calls, enhancer regions, and so on — you</span>
+<span id="cb82-35"><a href="#cb82-35" aria-hidden="true" tabindex="-1"></a>can read it into a <span class="in">`GRanges`</span> the same way the ChIP-seq chapter does, with</span>
+<span id="cb82-36"><a href="#cb82-36" aria-hidden="true" tabindex="-1"></a><span class="in">`rtracklayer::import()`</span>.)</span>
+<span id="cb82-37"><a href="#cb82-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-38"><a href="#cb82-38" aria-hidden="true" tabindex="-1"></a>Each exercise below is a short prompt followed by a folded solution. Try the</span>
+<span id="cb82-39"><a href="#cb82-39" aria-hidden="true" tabindex="-1"></a>prompt yourself first; then click **Show the answer** to reveal the code *and* its</span>
+<span id="cb82-40"><a href="#cb82-40" aria-hidden="true" tabindex="-1"></a>output, with a sentence or two on what to notice.</span>
+<span id="cb82-41"><a href="#cb82-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-42"><a href="#cb82-42" aria-hidden="true" tabindex="-1"></a><span class="fu">## What you'll learn</span></span>
+<span id="cb82-43"><a href="#cb82-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-44"><a href="#cb82-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Query <span class="in">`AnnotationHub`</span> to find and load a published dataset as a <span class="in">`GRanges`</span>.</span>
+<span id="cb82-45"><a href="#cb82-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Inspect a <span class="in">`GRanges`</span> — its class, its metadata columns, and its per-chromosome</span>
+<span id="cb82-46"><a href="#cb82-46" aria-hidden="true" tabindex="-1"></a>  peak counts.</span>
+<span id="cb82-47"><a href="#cb82-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Measure and summarize peak widths, and compute how much of the genome a peak set</span>
+<span id="cb82-48"><a href="#cb82-48" aria-hidden="true" tabindex="-1"></a>  covers.</span>
+<span id="cb82-49"><a href="#cb82-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Read and switch the <span class="in">`seqlevelsStyle`</span> of an object (the <span class="in">`chr1`</span> vs <span class="in">`1`</span> naming</span>
+<span id="cb82-50"><a href="#cb82-50" aria-hidden="true" tabindex="-1"></a>  convention) and recognize the silent bug a mismatch causes.</span>
+<span id="cb82-51"><a href="#cb82-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Compute overlaps between two range sets with <span class="in">`%over%`</span>, and reshape ranges with</span>
+<span id="cb82-52"><a href="#cb82-52" aria-hidden="true" tabindex="-1"></a>  <span class="in">`resize()`</span>, <span class="in">`flank()`</span>, <span class="in">`promoters()`</span>, and <span class="in">`reduce()`</span>.</span>
+<span id="cb82-53"><a href="#cb82-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quantify how enriched one set of ranges is inside another with intersect/union.</span>
+<span id="cb82-54"><a href="#cb82-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-55"><a href="#cb82-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 1: explore a DNase peak set</span></span>
+<span id="cb82-56"><a href="#cb82-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-57"><a href="#cb82-57" aria-hidden="true" tabindex="-1"></a>DNase-seq finds **open chromatin** — stretches of DNA that are accessible to the</span>
+<span id="cb82-58"><a href="#cb82-58" aria-hidden="true" tabindex="-1"></a>DNase enzyme, which is where regulatory machinery tends to sit. In this exercise</span>
+<span id="cb82-59"><a href="#cb82-59" aria-hidden="true" tabindex="-1"></a>you'll load one DNase hypersensitivity peak set from the K562 cell line and get</span>
+<span id="cb82-60"><a href="#cb82-60" aria-hidden="true" tabindex="-1"></a>to know it as a <span class="in">`GRanges`</span> object.</span>
+<span id="cb82-61"><a href="#cb82-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-62"><a href="#cb82-62" aria-hidden="true" tabindex="-1"></a>**Find and load the peak set.** Use <span class="in">`AnnotationHub`</span> to find the record</span>
+<span id="cb82-63"><a href="#cb82-63" aria-hidden="true" tabindex="-1"></a><span class="in">`goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz`</span></span>
+<span id="cb82-64"><a href="#cb82-64" aria-hidden="true" tabindex="-1"></a>and load it into a variable named <span class="in">`dnase`</span>.</span>
+<span id="cb82-65"><a href="#cb82-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-66"><a href="#cb82-66" aria-hidden="true" tabindex="-1"></a><span class="in">```{r dnase}</span></span>
+<span id="cb82-67"><a href="#cb82-67" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AnnotationHub)</span>
+<span id="cb82-68"><a href="#cb82-68" aria-hidden="true" tabindex="-1"></a><span class="co"># GenomicRanges gives us the GRanges accessors and overlap/resize operators;</span></span>
+<span id="cb82-69"><a href="#cb82-69" aria-hidden="true" tabindex="-1"></a><span class="co"># GenomeInfoDb provides the seqlevels()/seqlevelsStyle() machinery used below.</span></span>
+<span id="cb82-70"><a href="#cb82-70" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GenomicRanges)</span>
+<span id="cb82-71"><a href="#cb82-71" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GenomeInfoDb)</span>
+<span id="cb82-72"><a href="#cb82-72" aria-hidden="true" tabindex="-1"></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span>
+<span id="cb82-73"><a href="#cb82-73" aria-hidden="true" tabindex="-1"></a><span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz"</span>)</span>
+<span id="cb82-74"><a href="#cb82-74" aria-hidden="true" tabindex="-1"></a><span class="co"># The query above matches exactly one record, so we grab it with [[1]].</span></span>
+<span id="cb82-75"><a href="#cb82-75" aria-hidden="true" tabindex="-1"></a>dnase <span class="ot">&lt;-</span> <span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz"</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb82-76"><a href="#cb82-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-77"><a href="#cb82-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-78"><a href="#cb82-78" aria-hidden="true" tabindex="-1"></a>The <span class="in">`query()`</span> call returns a one-row hub listing, and <span class="in">`[[1]]`</span> downloads that one</span>
+<span id="cb82-79"><a href="#cb82-79" aria-hidden="true" tabindex="-1"></a>record and hands you the object itself. AnnotationHub caches the download, so a</span>
+<span id="cb82-80"><a href="#cb82-80" aria-hidden="true" tabindex="-1"></a>second <span class="in">`[[1]]`</span> is instant.</span>
+<span id="cb82-81"><a href="#cb82-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-82"><a href="#cb82-82" aria-hidden="true" tabindex="-1"></a>**What kind of object did you get?** Print it and ask for its class.</span>
+<span id="cb82-83"><a href="#cb82-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-86"><a href="#cb82-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-87"><a href="#cb82-87" aria-hidden="true" tabindex="-1"></a>dnase</span>
+<span id="cb82-88"><a href="#cb82-88" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(dnase)</span>
+<span id="cb82-89"><a href="#cb82-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-90"><a href="#cb82-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-91"><a href="#cb82-91" aria-hidden="true" tabindex="-1"></a>It's a <span class="in">`GRanges`</span> — the same class you built by hand in the ranges chapter, only</span>
+<span id="cb82-92"><a href="#cb82-92" aria-hidden="true" tabindex="-1"></a>this one was pulled from a public archive. Printing it shows the seqnames, ranges,</span>
+<span id="cb82-93"><a href="#cb82-93" aria-hidden="true" tabindex="-1"></a>strand, and a block of metadata columns.</span>
+<span id="cb82-94"><a href="#cb82-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-95"><a href="#cb82-95" aria-hidden="true" tabindex="-1"></a>**What metadata is attached?** The per-range metadata lives in the <span class="in">`mcols`</span>.</span>
+<span id="cb82-96"><a href="#cb82-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-99"><a href="#cb82-99" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-100"><a href="#cb82-100" aria-hidden="true" tabindex="-1"></a><span class="fu">mcols</span>(dnase)</span>
+<span id="cb82-101"><a href="#cb82-101" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-102"><a href="#cb82-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-103"><a href="#cb82-103" aria-hidden="true" tabindex="-1"></a>These columns are the extra fields from the original narrowPeak file — things like</span>
+<span id="cb82-104"><a href="#cb82-104" aria-hidden="true" tabindex="-1"></a>the signal value and score for each peak. They ride along with every range so you</span>
+<span id="cb82-105"><a href="#cb82-105" aria-hidden="true" tabindex="-1"></a>never lose the link between a location and its data.</span>
+<span id="cb82-106"><a href="#cb82-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-107"><a href="#cb82-107" aria-hidden="true" tabindex="-1"></a>**How many peaks are on each chromosome?** <span class="in">`seqnames()`</span> returns the chromosome of</span>
+<span id="cb82-108"><a href="#cb82-108" aria-hidden="true" tabindex="-1"></a>every peak; <span class="in">`table()`</span> tallies them.</span>
+<span id="cb82-109"><a href="#cb82-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-112"><a href="#cb82-112" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-113"><a href="#cb82-113" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">seqnames</span>(dnase))</span>
+<span id="cb82-114"><a href="#cb82-114" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-115"><a href="#cb82-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-116"><a href="#cb82-116" aria-hidden="true" tabindex="-1"></a>Each count is the number of DNase peaks called on that chromosome. Bigger</span>
+<span id="cb82-117"><a href="#cb82-117" aria-hidden="true" tabindex="-1"></a>chromosomes generally carry more peaks, but accessibility varies by chromosome too.</span>
+<span id="cb82-118"><a href="#cb82-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-119"><a href="#cb82-119" aria-hidden="true" tabindex="-1"></a>**How wide are the peaks?** Summarize the <span class="in">`width()`</span> of every range.</span>
+<span id="cb82-120"><a href="#cb82-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-123"><a href="#cb82-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-124"><a href="#cb82-124" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">width</span>(dnase))</span>
+<span id="cb82-125"><a href="#cb82-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-126"><a href="#cb82-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-127"><a href="#cb82-127" aria-hidden="true" tabindex="-1"></a>The summary gives you the min, median, mean, and max peak width in base pairs. A</span>
+<span id="cb82-128"><a href="#cb82-128" aria-hidden="true" tabindex="-1"></a>tight distribution around a couple hundred bp is typical for a DNase peak caller.</span>
+<span id="cb82-129"><a href="#cb82-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-130"><a href="#cb82-130" aria-hidden="true" tabindex="-1"></a>**What sequence names were used — `chr1` or just `1`?** Look at the <span class="in">`seqlevels`</span></span>
+<span id="cb82-131"><a href="#cb82-131" aria-hidden="true" tabindex="-1"></a>and the <span class="in">`seqlevelsStyle`</span>, then switch the style to Ensembl and look again.</span>
+<span id="cb82-132"><a href="#cb82-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-135"><a href="#cb82-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-136"><a href="#cb82-136" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevels</span>(dnase)</span>
+<span id="cb82-137"><a href="#cb82-137" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase)</span>
+<span id="cb82-138"><a href="#cb82-138" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase) <span class="ot">&lt;-</span> <span class="st">"ensembl"</span></span>
+<span id="cb82-139"><a href="#cb82-139" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase)</span>
+<span id="cb82-140"><a href="#cb82-140" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevels</span>(dnase)</span>
+<span id="cb82-141"><a href="#cb82-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-142"><a href="#cb82-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-143"><a href="#cb82-143" aria-hidden="true" tabindex="-1"></a>The object started in **UCSC** style (<span class="in">`chr1`</span>, <span class="in">`chr2`</span>, …). Assigning a new</span>
+<span id="cb82-144"><a href="#cb82-144" aria-hidden="true" tabindex="-1"></a><span class="in">`seqlevelsStyle`</span> rewrites every sequence name in place — after the switch the same</span>
+<span id="cb82-145"><a href="#cb82-145" aria-hidden="true" tabindex="-1"></a>chromosomes are now named <span class="in">`1`</span>, <span class="in">`2`</span>, … in **Ensembl** style. Nothing about the</span>
+<span id="cb82-146"><a href="#cb82-146" aria-hidden="true" tabindex="-1"></a>ranges changed, only the labels.</span>
+<span id="cb82-147"><a href="#cb82-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-148"><a href="#cb82-148" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb82-149"><a href="#cb82-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## The `chr` gotcha that silently returns zero overlaps</span></span>
+<span id="cb82-150"><a href="#cb82-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-151"><a href="#cb82-151" aria-hidden="true" tabindex="-1"></a><span class="in">`seqlevelsStyle`</span> matters enormously the moment you compare two objects. Overlap</span>
+<span id="cb82-152"><a href="#cb82-152" aria-hidden="true" tabindex="-1"></a>operations match on the *exact* sequence name, so a peak on `chr1` will **never**</span>
+<span id="cb82-153"><a href="#cb82-153" aria-hidden="true" tabindex="-1"></a>overlap a region on <span class="in">`1`</span> — R reports zero overlaps and raises no error. If an</span>
+<span id="cb82-154"><a href="#cb82-154" aria-hidden="true" tabindex="-1"></a>overlap count comes back suspiciously at zero, the first thing to check is whether</span>
+<span id="cb82-155"><a href="#cb82-155" aria-hidden="true" tabindex="-1"></a>both objects share the same <span class="in">`seqlevelsStyle`</span>. We switched to Ensembl here to</span>
+<span id="cb82-156"><a href="#cb82-156" aria-hidden="true" tabindex="-1"></a>practice; in Exercise 3 we'll switch back before comparing against UCSC-style gene</span>
+<span id="cb82-157"><a href="#cb82-157" aria-hidden="true" tabindex="-1"></a>models.</span>
+<span id="cb82-158"><a href="#cb82-158" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb82-159"><a href="#cb82-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-160"><a href="#cb82-160" aria-hidden="true" tabindex="-1"></a>**How much of the genome do the peaks cover?** Assuming the peaks don't overlap,</span>
+<span id="cb82-161"><a href="#cb82-161" aria-hidden="true" tabindex="-1"></a>sum their widths and divide by the total genome length.</span>
+<span id="cb82-162"><a href="#cb82-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-165"><a href="#cb82-165" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-166"><a href="#cb82-166" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(dnase))</span>
+<span id="cb82-167"><a href="#cb82-167" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">seqlengths</span>(dnase))</span>
+<span id="cb82-168"><a href="#cb82-168" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(dnase)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(dnase))</span>
+<span id="cb82-169"><a href="#cb82-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-170"><a href="#cb82-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-171"><a href="#cb82-171" aria-hidden="true" tabindex="-1"></a>The first number is the total base pairs of open chromatin called; the second is</span>
+<span id="cb82-172"><a href="#cb82-172" aria-hidden="true" tabindex="-1"></a>the size of the genome. Their ratio — a small fraction of a percent — tells you</span>
+<span id="cb82-173"><a href="#cb82-173" aria-hidden="true" tabindex="-1"></a>that accessible chromatin is a tiny slice of the whole genome, which is exactly</span>
+<span id="cb82-174"><a href="#cb82-174" aria-hidden="true" tabindex="-1"></a>why these regions are interesting.</span>
+<span id="cb82-175"><a href="#cb82-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-176"><a href="#cb82-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 2: compare two replicates</span></span>
+<span id="cb82-177"><a href="#cb82-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-178"><a href="#cb82-178" aria-hidden="true" tabindex="-1"></a>A good experiment is reproducible. ENCODE ran the DNase assay twice on K562, so we</span>
+<span id="cb82-179"><a href="#cb82-179" aria-hidden="true" tabindex="-1"></a>have a second replicate. In this exercise you'll load it and ask how well the two</span>
+<span id="cb82-180"><a href="#cb82-180" aria-hidden="true" tabindex="-1"></a>replicates agree.</span>
+<span id="cb82-181"><a href="#cb82-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-182"><a href="#cb82-182" aria-hidden="true" tabindex="-1"></a>**Load the second replicate** (<span class="in">`...wgEncodeUwDnaseK562PkRep2.narrowPeak.gz`</span>) as</span>
+<span id="cb82-183"><a href="#cb82-183" aria-hidden="true" tabindex="-1"></a><span class="in">`dnase2`</span>.</span>
+<span id="cb82-184"><a href="#cb82-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-187"><a href="#cb82-187" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-188"><a href="#cb82-188" aria-hidden="true" tabindex="-1"></a><span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz"</span>)</span>
+<span id="cb82-189"><a href="#cb82-189" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, a single matching record — grab it with [[1]].</span></span>
+<span id="cb82-190"><a href="#cb82-190" aria-hidden="true" tabindex="-1"></a>dnase2 <span class="ot">&lt;-</span> <span class="fu">query</span>(ah, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz"</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb82-191"><a href="#cb82-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-192"><a href="#cb82-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-193"><a href="#cb82-193" aria-hidden="true" tabindex="-1"></a>**How many peaks are in each replicate?** Compare the lengths.</span>
+<span id="cb82-194"><a href="#cb82-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-197"><a href="#cb82-197" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-198"><a href="#cb82-198" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(dnase)</span>
+<span id="cb82-199"><a href="#cb82-199" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(dnase2)</span>
+<span id="cb82-200"><a href="#cb82-200" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-201"><a href="#cb82-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-202"><a href="#cb82-202" aria-hidden="true" tabindex="-1"></a>The two replicates call a broadly similar number of peaks. A wildly different</span>
+<span id="cb82-203"><a href="#cb82-203" aria-hidden="true" tabindex="-1"></a>count between replicates would be a red flag that something went wrong in one of</span>
+<span id="cb82-204"><a href="#cb82-204" aria-hidden="true" tabindex="-1"></a>the experiments.</span>
+<span id="cb82-205"><a href="#cb82-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-206"><a href="#cb82-206" aria-hidden="true" tabindex="-1"></a>**How wide are the `dnase2` peaks?**</span>
+<span id="cb82-207"><a href="#cb82-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-210"><a href="#cb82-210" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-211"><a href="#cb82-211" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">width</span>(dnase2))</span>
+<span id="cb82-212"><a href="#cb82-212" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-213"><a href="#cb82-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-214"><a href="#cb82-214" aria-hidden="true" tabindex="-1"></a>The width distribution looks much like the first replicate's — another reassuring</span>
+<span id="cb82-215"><a href="#cb82-215" aria-hidden="true" tabindex="-1"></a>sign of reproducibility.</span>
+<span id="cb82-216"><a href="#cb82-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-217"><a href="#cb82-217" aria-hidden="true" tabindex="-1"></a>**What proportion of the genome does `dnase2` cover?** Same calculation as before.</span>
+<span id="cb82-218"><a href="#cb82-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-221"><a href="#cb82-221" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-222"><a href="#cb82-222" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(dnase2)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(dnase2))</span>
+<span id="cb82-223"><a href="#cb82-223" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-224"><a href="#cb82-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-225"><a href="#cb82-225" aria-hidden="true" tabindex="-1"></a>A comparable coverage fraction to replicate 1, as you'd hope for two runs of the</span>
+<span id="cb82-226"><a href="#cb82-226" aria-hidden="true" tabindex="-1"></a>same assay.</span>
+<span id="cb82-227"><a href="#cb82-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-228"><a href="#cb82-228" aria-hidden="true" tabindex="-1"></a>**How many `dnase` peaks overlap a `dnase2` peak?** The <span class="in">`%over%`</span> operator returns</span>
+<span id="cb82-229"><a href="#cb82-229" aria-hidden="true" tabindex="-1"></a>a logical vector — <span class="in">`TRUE`</span> for each <span class="in">`dnase`</span> peak that hits at least one <span class="in">`dnase2`</span></span>
+<span id="cb82-230"><a href="#cb82-230" aria-hidden="true" tabindex="-1"></a>peak — so summing it counts the overlapping peaks.</span>
+<span id="cb82-231"><a href="#cb82-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-234"><a href="#cb82-234" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-235"><a href="#cb82-235" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase <span class="sc">%over%</span> dnase2)</span>
+<span id="cb82-236"><a href="#cb82-236" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-237"><a href="#cb82-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-238"><a href="#cb82-238" aria-hidden="true" tabindex="-1"></a>A high overlap count is the quantitative version of "the replicates agree": the</span>
+<span id="cb82-239"><a href="#cb82-239" aria-hidden="true" tabindex="-1"></a>same regions of open chromatin show up both times. This is the kind of number you</span>
+<span id="cb82-240"><a href="#cb82-240" aria-hidden="true" tabindex="-1"></a>would report when arguing that a peak set is trustworthy.</span>
+<span id="cb82-241"><a href="#cb82-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-242"><a href="#cb82-242" aria-hidden="true" tabindex="-1"></a>**Expand every peak by 50 bp on each end.** Suppose your peak caller was too</span>
+<span id="cb82-243"><a href="#cb82-243" aria-hidden="true" tabindex="-1"></a>strict and you want peaks 100 bp wider. Use <span class="in">`resize()`</span> with <span class="in">`fix="center"`</span> so the</span>
+<span id="cb82-244"><a href="#cb82-244" aria-hidden="true" tabindex="-1"></a>expansion is symmetric, and call the result <span class="in">`dnase_wide`</span>.</span>
+<span id="cb82-245"><a href="#cb82-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-248"><a href="#cb82-248" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-249"><a href="#cb82-249" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">width</span>(dnase)</span>
+<span id="cb82-250"><a href="#cb82-250" aria-hidden="true" tabindex="-1"></a>dnase_wide <span class="ot">&lt;-</span> <span class="fu">resize</span>(dnase, <span class="at">width =</span> w <span class="sc">+</span> <span class="dv">100</span>, <span class="at">fix =</span> <span class="st">"center"</span>)</span>
+<span id="cb82-251"><a href="#cb82-251" aria-hidden="true" tabindex="-1"></a><span class="fu">width</span>(dnase_wide)</span>
+<span id="cb82-252"><a href="#cb82-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-253"><a href="#cb82-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-254"><a href="#cb82-254" aria-hidden="true" tabindex="-1"></a><span class="in">`resize()`</span> sets each range to a new width; <span class="in">`fix="center"`</span> keeps the midpoint fixed</span>
+<span id="cb82-255"><a href="#cb82-255" aria-hidden="true" tabindex="-1"></a>so the peak grows 50 bp in each direction. Comparing <span class="in">`width(dnase_wide)`</span> to the</span>
+<span id="cb82-256"><a href="#cb82-256" aria-hidden="true" tabindex="-1"></a>original widths confirms every peak is exactly 100 bp larger.</span>
+<span id="cb82-257"><a href="#cb82-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-258"><a href="#cb82-258" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 3: DNase sites relative to gene promoters</span></span>
+<span id="cb82-259"><a href="#cb82-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-260"><a href="#cb82-260" aria-hidden="true" tabindex="-1"></a>Open chromatin should cluster near where genes are regulated — especially at</span>
+<span id="cb82-261"><a href="#cb82-261" aria-hidden="true" tabindex="-1"></a>**promoters**, the regions just upstream of a gene's start. In this exercise</span>
+<span id="cb82-262"><a href="#cb82-262" aria-hidden="true" tabindex="-1"></a>you'll build promoter regions from a gene model and ask whether the DNase sites</span>
+<span id="cb82-263"><a href="#cb82-263" aria-hidden="true" tabindex="-1"></a>land there more than chance would predict.</span>
+<span id="cb82-264"><a href="#cb82-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-265"><a href="#cb82-265" aria-hidden="true" tabindex="-1"></a>You'll need the <span class="in">`TxDb.Hsapiens.UCSC.hg19.knownGene`</span> transcript database. If it</span>
+<span id="cb82-266"><a href="#cb82-266" aria-hidden="true" tabindex="-1"></a>isn't already installed, install it once (this is a one-time setup step, not part</span>
+<span id="cb82-267"><a href="#cb82-267" aria-hidden="true" tabindex="-1"></a>of the analysis):</span>
+<span id="cb82-268"><a href="#cb82-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-269"><a href="#cb82-269" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-270"><a href="#cb82-270" aria-hidden="true" tabindex="-1"></a><span class="in">BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")</span></span>
+<span id="cb82-271"><a href="#cb82-271" aria-hidden="true" tabindex="-1"></a><span class="in">library("TxDb.Hsapiens.UCSC.hg19.knownGene")</span></span>
+<span id="cb82-272"><a href="#cb82-272" aria-hidden="true" tabindex="-1"></a><span class="in">kg &lt;- TxDb.Hsapiens.UCSC.hg19.knownGene</span></span>
+<span id="cb82-273"><a href="#cb82-273" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-274"><a href="#cb82-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-275"><a href="#cb82-275" aria-hidden="true" tabindex="-1"></a>**Load the genes from the TxDb.** Attach the package, grab the <span class="in">`TxDb`</span> object, and</span>
+<span id="cb82-276"><a href="#cb82-276" aria-hidden="true" tabindex="-1"></a>pull out the genes. What class is the result, and how many genes are there?</span>
+<span id="cb82-277"><a href="#cb82-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-280"><a href="#cb82-280" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-281"><a href="#cb82-281" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"TxDb.Hsapiens.UCSC.hg19.knownGene"</span>)</span>
+<span id="cb82-282"><a href="#cb82-282" aria-hidden="true" tabindex="-1"></a>kg <span class="ot">&lt;-</span> TxDb.Hsapiens.UCSC.hg19.knownGene</span>
+<span id="cb82-283"><a href="#cb82-283" aria-hidden="true" tabindex="-1"></a>gx <span class="ot">&lt;-</span> <span class="fu">genes</span>(kg)</span>
+<span id="cb82-284"><a href="#cb82-284" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(gx)</span>
+<span id="cb82-285"><a href="#cb82-285" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(gx)</span>
+<span id="cb82-286"><a href="#cb82-286" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-287"><a href="#cb82-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-288"><a href="#cb82-288" aria-hidden="true" tabindex="-1"></a><span class="in">`genes()`</span> returns a <span class="in">`GRanges`</span> — one range per gene, in UCSC (<span class="in">`chr1`</span>) style to match</span>
+<span id="cb82-289"><a href="#cb82-289" aria-hidden="true" tabindex="-1"></a>the genome it was built on. The length tells you how many genes the annotation</span>
+<span id="cb82-290"><a href="#cb82-290" aria-hidden="true" tabindex="-1"></a>contains.</span>
+<span id="cb82-291"><a href="#cb82-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-292"><a href="#cb82-292" aria-hidden="true" tabindex="-1"></a>**Get promoter regions with `flank()`.** Read <span class="in">`?flank`</span>. The promoter sits *upstream*</span>
+<span id="cb82-293"><a href="#cb82-293" aria-hidden="true" tabindex="-1"></a>of a gene, so flanking each gene by 2 kb on its upstream side gives a first</span>
+<span id="cb82-294"><a href="#cb82-294" aria-hidden="true" tabindex="-1"></a>approximation.</span>
+<span id="cb82-295"><a href="#cb82-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-298"><a href="#cb82-298" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-299"><a href="#cb82-299" aria-hidden="true" tabindex="-1"></a><span class="fu">flank</span>(gx, <span class="dv">2000</span>)</span>
+<span id="cb82-300"><a href="#cb82-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-301"><a href="#cb82-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-302"><a href="#cb82-302" aria-hidden="true" tabindex="-1"></a><span class="in">`flank()`</span> returns a new range immediately upstream of each gene — strand-aware, so</span>
+<span id="cb82-303"><a href="#cb82-303" aria-hidden="true" tabindex="-1"></a>"upstream" means the correct direction for genes on either strand. These are</span>
+<span id="cb82-304"><a href="#cb82-304" aria-hidden="true" tabindex="-1"></a>2 kb-wide candidate promoter regions.</span>
+<span id="cb82-305"><a href="#cb82-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-306"><a href="#cb82-306" aria-hidden="true" tabindex="-1"></a>**Do the same thing with `promoters()`.** The TxDb knows where transcripts start,</span>
+<span id="cb82-307"><a href="#cb82-307" aria-hidden="true" tabindex="-1"></a>so <span class="in">`promoters()`</span> builds promoter regions directly (see <span class="in">`?promoters`</span> for the default</span>
+<span id="cb82-308"><a href="#cb82-308" aria-hidden="true" tabindex="-1"></a>window).</span>
+<span id="cb82-309"><a href="#cb82-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-312"><a href="#cb82-312" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-313"><a href="#cb82-313" aria-hidden="true" tabindex="-1"></a>proms <span class="ot">&lt;-</span> <span class="fu">promoters</span>(kg)</span>
+<span id="cb82-314"><a href="#cb82-314" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-315"><a href="#cb82-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-316"><a href="#cb82-316" aria-hidden="true" tabindex="-1"></a><span class="in">`promoters()`</span> is the purpose-built tool: it returns a promoter window around each</span>
+<span id="cb82-317"><a href="#cb82-317" aria-hidden="true" tabindex="-1"></a>transcript's start site without you having to reason about strand and flanking</span>
+<span id="cb82-318"><a href="#cb82-318" aria-hidden="true" tabindex="-1"></a>yourself.</span>
+<span id="cb82-319"><a href="#cb82-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-320"><a href="#cb82-320" aria-hidden="true" tabindex="-1"></a>**Do these promoters overlap each other?** Genes are dense, and nearby</span>
+<span id="cb82-321"><a href="#cb82-321" aria-hidden="true" tabindex="-1"></a>transcripts share promoter neighborhoods, so many of these windows will overlap.</span>
+<span id="cb82-322"><a href="#cb82-322" aria-hidden="true" tabindex="-1"></a><span class="in">`countOverlaps()`</span> of the set against itself counts how many promoters each one</span>
+<span id="cb82-323"><a href="#cb82-323" aria-hidden="true" tabindex="-1"></a>touches.</span>
+<span id="cb82-324"><a href="#cb82-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-327"><a href="#cb82-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-328"><a href="#cb82-328" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">countOverlaps</span>(proms))</span>
+<span id="cb82-329"><a href="#cb82-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-330"><a href="#cb82-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-331"><a href="#cb82-331" aria-hidden="true" tabindex="-1"></a>Every promoter overlaps at least itself (count ≥ 1), and the larger counts show</span>
+<span id="cb82-332"><a href="#cb82-332" aria-hidden="true" tabindex="-1"></a>that promoters pile up on top of one another — overlapping transcripts and</span>
+<span id="cb82-333"><a href="#cb82-333" aria-hidden="true" tabindex="-1"></a>alternative start sites. That redundancy is a problem if we want clean,</span>
+<span id="cb82-334"><a href="#cb82-334" aria-hidden="true" tabindex="-1"></a>non-double-counted regions.</span>
+<span id="cb82-335"><a href="#cb82-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-336"><a href="#cb82-336" aria-hidden="true" tabindex="-1"></a>**Collapse overlapping promoters with `reduce()`.** <span class="in">`reduce()`</span> merges every group</span>
+<span id="cb82-337"><a href="#cb82-337" aria-hidden="true" tabindex="-1"></a>of overlapping ranges into a single contiguous region, giving us a tidy set of</span>
+<span id="cb82-338"><a href="#cb82-338" aria-hidden="true" tabindex="-1"></a>promoter regions to test against.</span>
+<span id="cb82-339"><a href="#cb82-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-342"><a href="#cb82-342" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-343"><a href="#cb82-343" aria-hidden="true" tabindex="-1"></a><span class="co"># reduce() takes all overlapping ranges and collapses each cluster</span></span>
+<span id="cb82-344"><a href="#cb82-344" aria-hidden="true" tabindex="-1"></a><span class="co"># into one region spanning the whole cluster.</span></span>
+<span id="cb82-345"><a href="#cb82-345" aria-hidden="true" tabindex="-1"></a>prom_regions <span class="ot">&lt;-</span> <span class="fu">reduce</span>(proms)</span>
+<span id="cb82-346"><a href="#cb82-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-347"><a href="#cb82-347" aria-hidden="true" tabindex="-1"></a><span class="co"># After reducing, each region overlaps only itself.</span></span>
+<span id="cb82-348"><a href="#cb82-348" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">countOverlaps</span>(prom_regions))</span>
+<span id="cb82-349"><a href="#cb82-349" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-350"><a href="#cb82-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-351"><a href="#cb82-351" aria-hidden="true" tabindex="-1"></a>After <span class="in">`reduce()`</span>, the self-overlap count is 1 everywhere — confirming the regions</span>
+<span id="cb82-352"><a href="#cb82-352" aria-hidden="true" tabindex="-1"></a>no longer overlap each other and can be treated as a clean, non-redundant set.</span>
+<span id="cb82-353"><a href="#cb82-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-354"><a href="#cb82-354" aria-hidden="true" tabindex="-1"></a>**Count DNase sites that overlap a promoter region.** Here is where the</span>
+<span id="cb82-355"><a href="#cb82-355" aria-hidden="true" tabindex="-1"></a><span class="in">`seqlevelsStyle`</span> warning above comes due: we switched <span class="in">`dnase`</span> to Ensembl (<span class="in">`1`</span>) in</span>
+<span id="cb82-356"><a href="#cb82-356" aria-hidden="true" tabindex="-1"></a>Exercise 1, but the gene models are UCSC (<span class="in">`chr1`</span>). Watch what happens.</span>
+<span id="cb82-357"><a href="#cb82-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-360"><a href="#cb82-360" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-361"><a href="#cb82-361" aria-hidden="true" tabindex="-1"></a><span class="co"># dnase is still in Ensembl style from Exercise 1, while</span></span>
+<span id="cb82-362"><a href="#cb82-362" aria-hidden="true" tabindex="-1"></a><span class="co"># prom_regions is UCSC style — so this first count is misleadingly zero.</span></span>
+<span id="cb82-363"><a href="#cb82-363" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase <span class="sc">%over%</span> prom_regions)</span>
+<span id="cb82-364"><a href="#cb82-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-365"><a href="#cb82-365" aria-hidden="true" tabindex="-1"></a><span class="co"># Switch dnase back to UCSC so the sequence names match, then recount.</span></span>
+<span id="cb82-366"><a href="#cb82-366" aria-hidden="true" tabindex="-1"></a><span class="fu">seqlevelsStyle</span>(dnase) <span class="ot">&lt;-</span> <span class="st">"UCSC"</span></span>
+<span id="cb82-367"><a href="#cb82-367" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase <span class="sc">%over%</span> prom_regions)</span>
+<span id="cb82-368"><a href="#cb82-368" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(dnase2 <span class="sc">%over%</span> prom_regions)</span>
+<span id="cb82-369"><a href="#cb82-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-370"><a href="#cb82-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-371"><a href="#cb82-371" aria-hidden="true" tabindex="-1"></a>The first count is **zero** — not because the data disagree, but because <span class="in">`chr1`</span></span>
+<span id="cb82-372"><a href="#cb82-372" aria-hidden="true" tabindex="-1"></a>and <span class="in">`1`</span> never match. After switching <span class="in">`dnase`</span> back to UCSC style, the same overlap</span>
+<span id="cb82-373"><a href="#cb82-373" aria-hidden="true" tabindex="-1"></a>query returns a large, sensible count. This is the silent bug from the warning,</span>
+<span id="cb82-374"><a href="#cb82-374" aria-hidden="true" tabindex="-1"></a>caught and fixed. (<span class="in">`dnase2`</span> was never reassigned, so it was UCSC-style all along.)</span>
+<span id="cb82-375"><a href="#cb82-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-376"><a href="#cb82-376" aria-hidden="true" tabindex="-1"></a>**Is that overlap surprising?** If DNase sites and promoters were placed</span>
+<span id="cb82-377"><a href="#cb82-377" aria-hidden="true" tabindex="-1"></a>*independently* on the genome, how many overlaps would you expect by chance?</span>
+<span id="cb82-378"><a href="#cb82-378" aria-hidden="true" tabindex="-1"></a>Compare that expectation to what you observed.</span>
+<span id="cb82-379"><a href="#cb82-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-382"><a href="#cb82-382" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-383"><a href="#cb82-383" aria-hidden="true" tabindex="-1"></a>prop_proms <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(prom_regions)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(prom_regions))</span>
+<span id="cb82-384"><a href="#cb82-384" aria-hidden="true" tabindex="-1"></a>prop_dnase <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(dnase)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">seqlengths</span>(prom_regions))</span>
+<span id="cb82-385"><a href="#cb82-385" aria-hidden="true" tabindex="-1"></a><span class="co"># Under independence, the expected number of DNase peaks landing in a</span></span>
+<span id="cb82-386"><a href="#cb82-386" aria-hidden="true" tabindex="-1"></a><span class="co"># promoter is (fraction of genome that is promoter) times the number of peaks.</span></span>
+<span id="cb82-387"><a href="#cb82-387" aria-hidden="true" tabindex="-1"></a>prop_proms <span class="sc">*</span> prop_dnase <span class="sc">*</span> <span class="fu">length</span>(dnase)</span>
+<span id="cb82-388"><a href="#cb82-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-389"><a href="#cb82-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-390"><a href="#cb82-390" aria-hidden="true" tabindex="-1"></a>The expected-by-chance number is far smaller than the count you actually observed.</span>
+<span id="cb82-391"><a href="#cb82-391" aria-hidden="true" tabindex="-1"></a>That gap is the biology: DNase hypersensitive sites are **not** scattered at</span>
+<span id="cb82-392"><a href="#cb82-392" aria-hidden="true" tabindex="-1"></a>random — they concentrate at promoters, exactly where regulatory machinery opens</span>
+<span id="cb82-393"><a href="#cb82-393" aria-hidden="true" tabindex="-1"></a>up the chromatin. The overlap count is meaningful precisely because it dwarfs the</span>
+<span id="cb82-394"><a href="#cb82-394" aria-hidden="true" tabindex="-1"></a>null expectation.</span>
+<span id="cb82-395"><a href="#cb82-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-396"><a href="#cb82-396" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 4: enrichment of histone marks at CpG islands</span></span>
+<span id="cb82-397"><a href="#cb82-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-398"><a href="#cb82-398" aria-hidden="true" tabindex="-1"></a>Histone modifications mark functional regions of the genome: <span class="in">`H3K4me3`</span> flags active</span>
+<span id="cb82-399"><a href="#cb82-399" aria-hidden="true" tabindex="-1"></a>promoters, <span class="in">`H3K4me1`</span> flags enhancers, <span class="in">`H3K27me3`</span> flags repressed regions, and so</span>
+<span id="cb82-400"><a href="#cb82-400" aria-hidden="true" tabindex="-1"></a>on. In this exercise you'll ask how much each mark **overlaps CpG islands** — and</span>
+<span id="cb82-401"><a href="#cb82-401" aria-hidden="true" tabindex="-1"></a>build a small reusable enrichment score along the way.</span>
+<span id="cb82-402"><a href="#cb82-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-403"><a href="#cb82-403" aria-hidden="true" tabindex="-1"></a>The data again comes from <span class="in">`AnnotationHub`</span>. ENCODE published these histone ChIP-seq</span>
+<span id="cb82-404"><a href="#cb82-404" aria-hidden="true" tabindex="-1"></a>peak calls as BED files; the hub serves them as <span class="in">`GRanges`</span>. We've already found the</span>
+<span id="cb82-405"><a href="#cb82-405" aria-hidden="true" tabindex="-1"></a>right hub IDs, so you can load each mark directly.</span>
+<span id="cb82-406"><a href="#cb82-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-409"><a href="#cb82-409" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-410"><a href="#cb82-410" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AnnotationHub)</span>
+<span id="cb82-411"><a href="#cb82-411" aria-hidden="true" tabindex="-1"></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span>
+<span id="cb82-412"><a href="#cb82-412" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-413"><a href="#cb82-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-414"><a href="#cb82-414" aria-hidden="true" tabindex="-1"></a>Here are the <span class="in">`GRanges`</span> for four histone marks plus one extra <span class="in">`H3K4me3`</span> replicate:</span>
+<span id="cb82-415"><a href="#cb82-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-418"><a href="#cb82-418" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-419"><a href="#cb82-419" aria-hidden="true" tabindex="-1"></a>h3k4me1 <span class="ot">&lt;-</span> ah[[<span class="st">"AH25832"</span>]]</span>
+<span id="cb82-420"><a href="#cb82-420" aria-hidden="true" tabindex="-1"></a>h3k4me3 <span class="ot">&lt;-</span> ah[[<span class="st">"AH25833"</span>]]</span>
+<span id="cb82-421"><a href="#cb82-421" aria-hidden="true" tabindex="-1"></a>h3k9ac <span class="ot">&lt;-</span> ah[[<span class="st">"AH25834"</span>]]</span>
+<span id="cb82-422"><a href="#cb82-422" aria-hidden="true" tabindex="-1"></a>h3k27me3 <span class="ot">&lt;-</span> ah[[<span class="st">"AH25835"</span>]]</span>
+<span id="cb82-423"><a href="#cb82-423" aria-hidden="true" tabindex="-1"></a>h3k4me3_2 <span class="ot">&lt;-</span> ah[[<span class="st">"AH27284"</span>]]</span>
+<span id="cb82-424"><a href="#cb82-424" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-425"><a href="#cb82-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-426"><a href="#cb82-426" aria-hidden="true" tabindex="-1"></a>Each variable holds the peak calls from one ChIP-seq experiment pulling down that</span>
+<span id="cb82-427"><a href="#cb82-427" aria-hidden="true" tabindex="-1"></a>histone mark. Now grab the hg19 CpG islands the same way:</span>
+<span id="cb82-428"><a href="#cb82-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-431"><a href="#cb82-431" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-432"><a href="#cb82-432" aria-hidden="true" tabindex="-1"></a>cpg <span class="ot">&lt;-</span> <span class="fu">query</span>(ah, <span class="fu">c</span>(<span class="st">"cpg"</span>, <span class="st">"UCSC"</span>, <span class="st">"hg19"</span>))[[<span class="dv">1</span>]]</span>
+<span id="cb82-433"><a href="#cb82-433" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-434"><a href="#cb82-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-435"><a href="#cb82-435" aria-hidden="true" tabindex="-1"></a>**How many `H3K4me1` peaks overlap a CpG island?** Start with the simple <span class="in">`%over%`</span></span>
+<span id="cb82-436"><a href="#cb82-436" aria-hidden="true" tabindex="-1"></a>count, as in Exercise 2.</span>
+<span id="cb82-437"><a href="#cb82-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-440"><a href="#cb82-440" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-441"><a href="#cb82-441" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(h3k4me1 <span class="sc">%over%</span> cpg)</span>
+<span id="cb82-442"><a href="#cb82-442" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-443"><a href="#cb82-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-444"><a href="#cb82-444" aria-hidden="true" tabindex="-1"></a>That's the number of <span class="in">`H3K4me1`</span> peaks touching at least one CpG island — a quick</span>
+<span id="cb82-445"><a href="#cb82-445" aria-hidden="true" tabindex="-1"></a>first look at the association.</span>
+<span id="cb82-446"><a href="#cb82-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-447"><a href="#cb82-447" aria-hidden="true" tabindex="-1"></a>**How many *bases* overlap?** A peak count ignores how much of each peak overlaps.</span>
+<span id="cb82-448"><a href="#cb82-448" aria-hidden="true" tabindex="-1"></a><span class="in">`intersect()`</span> returns the overlapping regions themselves, so summing their widths</span>
+<span id="cb82-449"><a href="#cb82-449" aria-hidden="true" tabindex="-1"></a>gives the total overlapping base pairs.</span>
+<span id="cb82-450"><a href="#cb82-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-453"><a href="#cb82-453" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-454"><a href="#cb82-454" aria-hidden="true" tabindex="-1"></a><span class="co"># intersect() returns only the overlapping stretches as a new range set;</span></span>
+<span id="cb82-455"><a href="#cb82-455" aria-hidden="true" tabindex="-1"></a><span class="co"># summing their widths gives the total bases of overlap.</span></span>
+<span id="cb82-456"><a href="#cb82-456" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">intersect</span>(h3k4me1, cpg)))</span>
+<span id="cb82-457"><a href="#cb82-457" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-458"><a href="#cb82-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-459"><a href="#cb82-459" aria-hidden="true" tabindex="-1"></a>This is a finer measure than the peak count: it tells you how many base pairs the</span>
+<span id="cb82-460"><a href="#cb82-460" aria-hidden="true" tabindex="-1"></a>two sets actually share, not just how many peaks touch.</span>
+<span id="cb82-461"><a href="#cb82-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-462"><a href="#cb82-462" aria-hidden="true" tabindex="-1"></a>**Turn that into an enrichment score.** Broad marks cover more bases and so overlap</span>
+<span id="cb82-463"><a href="#cb82-463" aria-hidden="true" tabindex="-1"></a>CpG islands more just by being big. To correct for that, normalize the shared bases</span>
+<span id="cb82-464"><a href="#cb82-464" aria-hidden="true" tabindex="-1"></a>by the *total* bases covered by either set (their <span class="in">`union`</span>). The result is a</span>
+<span id="cb82-465"><a href="#cb82-465" aria-hidden="true" tabindex="-1"></a>Jaccard-style ratio between 0 and 1: the fraction of the combined footprint that</span>
+<span id="cb82-466"><a href="#cb82-466" aria-hidden="true" tabindex="-1"></a>both sets share.</span>
+<span id="cb82-467"><a href="#cb82-467" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-470"><a href="#cb82-470" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-471"><a href="#cb82-471" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">union</span>(h3k4me1, cpg)))</span>
+<span id="cb82-472"><a href="#cb82-472" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize the overlap by the combined coverage of both sets.</span></span>
+<span id="cb82-473"><a href="#cb82-473" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">intersect</span>(h3k4me1, cpg))) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">union</span>(h3k4me1, cpg)))</span>
+<span id="cb82-474"><a href="#cb82-474" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-475"><a href="#cb82-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-476"><a href="#cb82-476" aria-hidden="true" tabindex="-1"></a>A score near 0 means the two sets barely co-occur; a score near 1 means they cover</span>
+<span id="cb82-477"><a href="#cb82-477" aria-hidden="true" tabindex="-1"></a>almost exactly the same ground. Because the denominator grows with peak breadth,</span>
+<span id="cb82-478"><a href="#cb82-478" aria-hidden="true" tabindex="-1"></a>this score lets you compare a broad mark and a narrow mark on equal footing.</span>
+<span id="cb82-479"><a href="#cb82-479" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-480"><a href="#cb82-480" aria-hidden="true" tabindex="-1"></a>**Wrap it in a function** so you can score any pair of range sets.</span>
+<span id="cb82-481"><a href="#cb82-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-484"><a href="#cb82-484" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-485"><a href="#cb82-485" aria-hidden="true" tabindex="-1"></a>range_enrichment_score <span class="ot">&lt;-</span> <span class="cf">function</span>(r1, r2) {</span>
+<span id="cb82-486"><a href="#cb82-486" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">intersect</span>(r1, r2)))</span>
+<span id="cb82-487"><a href="#cb82-487" aria-hidden="true" tabindex="-1"></a>  u <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">width</span>(<span class="fu">union</span>(r1, r2)))</span>
+<span id="cb82-488"><a href="#cb82-488" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(i <span class="sc">/</span> u)</span>
+<span id="cb82-489"><a href="#cb82-489" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb82-490"><a href="#cb82-490" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-491"><a href="#cb82-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-492"><a href="#cb82-492" aria-hidden="true" tabindex="-1"></a>The function is just the intersect-over-union calculation with names: <span class="in">`i`</span> for the</span>
+<span id="cb82-493"><a href="#cb82-493" aria-hidden="true" tabindex="-1"></a>shared bases, <span class="in">`u`</span> for the combined footprint. Give it a try on <span class="in">`H3K4me1`</span> and the</span>
+<span id="cb82-494"><a href="#cb82-494" aria-hidden="true" tabindex="-1"></a>CpG islands:</span>
+<span id="cb82-495"><a href="#cb82-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-498"><a href="#cb82-498" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb82-499"><a href="#cb82-499" aria-hidden="true" tabindex="-1"></a><span class="fu">range_enrichment_score</span>(h3k4me1, cpg)</span>
+<span id="cb82-500"><a href="#cb82-500" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb82-501"><a href="#cb82-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-502"><a href="#cb82-502" aria-hidden="true" tabindex="-1"></a>You get back the same normalized score as before. Now you can call</span>
+<span id="cb82-503"><a href="#cb82-503" aria-hidden="true" tabindex="-1"></a><span class="in">`range_enrichment_score()`</span> on any two <span class="in">`GRanges`</span> — try the other histone marks</span>
+<span id="cb82-504"><a href="#cb82-504" aria-hidden="true" tabindex="-1"></a>against <span class="in">`cpg`</span> and see which one is most enriched at CpG islands.</span>
+<span id="cb82-505"><a href="#cb82-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-506"><a href="#cb82-506" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
+<span id="cb82-507"><a href="#cb82-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-508"><a href="#cb82-508" aria-hidden="true" tabindex="-1"></a>You've now run the core range-analysis workflow end to end on real ENCODE data.</span>
+<span id="cb82-509"><a href="#cb82-509" aria-hidden="true" tabindex="-1"></a>You can:</span>
+<span id="cb82-510"><a href="#cb82-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-511"><a href="#cb82-511" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Find and load** a published dataset from <span class="in">`AnnotationHub`</span> as a <span class="in">`GRanges`</span>, and</span>
+<span id="cb82-512"><a href="#cb82-512" aria-hidden="true" tabindex="-1"></a>  inspect its class, metadata, and per-chromosome peak counts.</span>
+<span id="cb82-513"><a href="#cb82-513" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Measure** peak widths and compute the fraction of the genome a peak set covers.</span>
+<span id="cb82-514"><a href="#cb82-514" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Read and switch `seqlevelsStyle`**, and — just as important — recognize the</span>
+<span id="cb82-515"><a href="#cb82-515" aria-hidden="true" tabindex="-1"></a>  silent zero-overlap bug a <span class="in">`chr1`</span>-vs-<span class="in">`1`</span> mismatch causes.</span>
+<span id="cb82-516"><a href="#cb82-516" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Compare range sets** with `%over%`, and **reshape** ranges with <span class="in">`resize()`</span>,</span>
+<span id="cb82-517"><a href="#cb82-517" aria-hidden="true" tabindex="-1"></a>  <span class="in">`flank()`</span>, <span class="in">`promoters()`</span>, and <span class="in">`reduce()`</span>.</span>
+<span id="cb82-518"><a href="#cb82-518" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Quantify enrichment** of one set inside another with an intersect-over-union</span>
+<span id="cb82-519"><a href="#cb82-519" aria-hidden="true" tabindex="-1"></a>  score.</span>
+<span id="cb82-520"><a href="#cb82-520" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-521"><a href="#cb82-521" aria-hidden="true" tabindex="-1"></a>For the underlying concepts — how <span class="in">`GRanges`</span> objects are built, the full catalog of</span>
+<span id="cb82-522"><a href="#cb82-522" aria-hidden="true" tabindex="-1"></a>set operations and overlap methods, and the coordinate-system details — return to</span>
+<span id="cb82-523"><a href="#cb82-523" aria-hidden="true" tabindex="-1"></a>the *Genomic ranges and features* chapter. For the real-data import workflow with</span>
+<span id="cb82-524"><a href="#cb82-524" aria-hidden="true" tabindex="-1"></a><span class="in">`rtracklayer`</span>, see *Genomic ranges with real ChIP-seq peaks*. This chapter was the</span>
+<span id="cb82-525"><a href="#cb82-525" aria-hidden="true" tabindex="-1"></a>place to put those tools to work.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
