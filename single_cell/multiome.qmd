@@ -255,7 +255,7 @@ The unique payoff of *paired* data is that we can connect a specific open region
 
 We'll use `MS4A1` (CD20), a canonical B-cell marker. The logic is three steps: find the gene, find the peaks near it, then correlate.
 
-**Step 1 — locate the gene.** We pull MS4A1's coordinates from an Ensembl annotation and relabel its chromosome in the `chr11` (UCSC) style the ATAC peaks use, then widen to a ±100 kb window — wide enough to catch enhancers, which often sit well outside the gene body:
+**Step 1 — locate the gene.** We pull MS4A1's coordinates from an Ensembl annotation and relabel its chromosome in the `chr11` (UCSC) style the ATAC peaks use, then widen to a ±100 kb window — wide enough to catch enhancers, which often sit well outside the gene body. One wrinkle: many gene symbols match *two* rows in Ensembl — the real `protein_coding` gene plus an `LRG_gene` curated-reference duplicate at the same locus. We keep only the protein-coding row so every peak is counted once:
 
 ```{r}
 #| label: peak-gene-locate
@@ -264,7 +264,8 @@ library(EnsDb.Hsapiens.v86)
 
 gene <- "MS4A1"
 all.genes <- genes(EnsDb.Hsapiens.v86)              # every gene, as a GRanges
-gene.gr   <- all.genes[all.genes$gene_name == gene] # subset to MS4A1
+gene.gr   <- all.genes[all.genes$gene_name == gene &
+                       all.genes$gene_biotype == "protein_coding"] # one row
 seqlevelsStyle(gene.gr) <- "UCSC"                   # "11" -> "chr11"
 window <- resize(gene.gr, width = width(gene.gr) + 2e5, fix = "center")
 window
