@@ -1,0 +1,323 @@
+---
+title: "Label transfer: annotating scATAC-seq from an scRNA-seq reference"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
+---
+
+In the [previous chapter](multiome.qmd) the multiome assay handed us a gift: RNA and ATAC measured in the *same* nucleus, so the correspondence between the two modalities was free. This chapter is about the harder, and far more common, situation where that gift is missing. You ran scRNA-seq on one batch of cells last year and scATAC-seq on a different batch this year; or you have a beautifully annotated scRNA-seq atlas and a fresh scATAC-seq dataset you need to make sense of. The two datasets share a tissue but *not a single cell*. The question becomes: can we use the well-understood transcriptomic data to put names on the chromatin-accessibility cells?
+
+This is **label transfer**, and it is the workhorse of *diagonal* integration. The idea is to treat the annotated scRNA-seq data as a **reference** and the scATAC-seq data as a **query**, then carry the reference's cell-type labels across to the query. Doing so forces us to confront, head-on, the thing the multiome chapter let us ignore: with no shared cells, we have to *infer* which query cells correspond to which reference cells — across two completely different feature spaces.
+
+We will build the method up from its two key ideas — **casting ATAC into gene space** and **anchors** — and then do something the standard tutorials cannot: because we will *simulate* the unpaired problem by un-pairing a real multiome dataset, we will know the true answer and can **measure how much information is lost** when we give up the pairing.
+
+## What you'll learn
+
+- Why *diagonal* (unpaired) integration is harder than the *vertical* (paired) case, and what "label transfer" means.
+- How to bridge the feature-space gap with **gene activity** — and a small catalog of the ways accessibility is turned into a gene-level signal (and what each trades off).
+- How **anchors** (mutual nearest neighbors across datasets) let labels flow from a reference to a query.
+- How to run the Seurat/Signac label-transfer pipeline (`FindTransferAnchors` + `TransferData`) from a Bioconductor starting point.
+- How to **quantify the information lost** going from paired to unpaired analysis, by grading transferred labels against a known ground truth.
+
+This chapter builds on the [multiome chapter](multiome.qmd) (the `MultiAssayExperiment`, TF-IDF/LSI, the Bioconductor→Seurat bridge) and the [scRNA-seq chapter](setup.qmd) (clustering, markers). For the broader method landscape, see @argelaguet2021computational and @vandereyken2023methods.
+
+## Why unpaired is the hard case
+
+It is worth being precise about *why* we cannot just reuse the multiome recipe. There, the two assays were aligned cell-for-cell, so "integration" only meant combining two views of known-corresponding cells. Here we face two gaps at once:
+
+1. **No cell correspondence.** Nothing tells us that a given ATAC cell and a given RNA cell are "the same kind." We must infer the alignment from the data.
+2. **Different feature spaces.** RNA is measured over *genes*; ATAC over *peaks* (genomic intervals). We cannot compare a gene vector to a peak vector directly — they are not even the same length, and the coordinates mean different things.
+
+The strategy that resolves both is to **project the two datasets into a single shared space** and then find corresponding cells there. The shared space is *gene space*: RNA already lives there, so we only need to cast ATAC into it. That bridge is **gene activity**.
+
+## Bridging the gap: gene activity (and its variants)
+
+A gene's accessibility ought to say *something* about whether it is expressed — open promoters and enhancers are a precondition for transcription. **Gene activity** turns that intuition into a number: for each gene, in each cell, summarize the ATAC signal in and around the gene into a single value that stands in for "how expressed is this gene likely to be." That recasts the ATAC cells as vectors over *genes*, directly comparable to the RNA cells.
+
+The catch — and it is worth stating plainly — is that **gene activity is a proxy, and a rough one**. Accessibility is not expression; a poised-but-silent enhancer looks "active." So every gene-activity method is an approximation, and they differ mainly in one design choice: *which regulatory DNA do I credit to a gene, and how does that credit fall off with distance?* @fig-geneactivity sketches the three you will meet most often.
+
+![**Estimating gene activity from chromatin accessibility.** A gene's "activity" is built from the accessible peaks in its vicinity; the methods differ in how far that neighborhood reaches and how credit decays with distance. **(A)** Sum the peaks over the gene body plus a short promoter window (here, −2 kb). This is the simplest scheme, it needs nothing but the peak matrix, and it is the one we use in this chapter; its blind spot is the **distal enhancer**, which falls outside the window. **(B)** Weight *every* peak by its distance from the transcription start site (TSS), so distal elements still contribute but count for less (the gene-score model popularized by ArchR, @granja2021archr; the regulatory-potential model in MAESTRO, @wang2020maestro, is similar). **(C)** Attribute distal peaks to a gene by learning, from the data, which peaks are *co-accessible* with its promoter across cells (Cicero, @pliner2018cicero). All three are approximations of an already-heuristic proxy — accessibility is not expression — so treat gene activity as a way to *align* datasets, not as a quantitative readout. Schematic; methods after @stuart2021signac, @granja2021archr, and @pliner2018cicero.](imgs/gene-activity-approximation.svg){#fig-geneactivity}
+
+We use **(A)**, gene-body + promoter summation, for two honest reasons: it is the most transparent (you can compute it in a few lines and see exactly what it does), and it needs only the peak matrix — no fragment file, which our curated dataset does not include. The cost is real (we miss distal enhancers), and at the end of the chapter we will *measure* part of that cost rather than wave at it.
+
+## How labels travel: anchors
+
+Once both datasets live in gene space, how do labels actually move from reference to query? Through **anchors**.
+
+An anchor is a pair of cells — one in the reference, one in the query — that are **mutual nearest neighbors**: the query cell is among the reference cell's closest matches *and* vice versa. Such a pair is a small "Rosetta stone": strong evidence that these two cells are the same biological type, even though they came from different experiments and assays. Find enough anchors and you can translate the reference's labels onto the whole query, weighting each query cell's prediction by the anchors nearest to it [@stuart2019comprehensive]. @fig-anchors shows the flow.
+
+![**Anchor-based label transfer, in two steps.** A well-annotated **scRNA-seq reference** (solid, colored by cell type) and an unlabeled **scATAC-seq query** (gray) are projected into a shared gene-activity space; the two datasets have their own structure (note the different arrangements). Mutual-nearest-neighbor cell pairs across the datasets form **anchors** (dashed lines). *Step 1 (transfer):* each query cell inherits the cell-type label of the reference cells it anchors to — shown by recoloring the query cells as hatched cell-type fills. *Step 2 (merge):* with labels in hand, the two assays can be analyzed as one integrated dataset (solid = RNA, hatched = ATAC). Schematic; method after @stuart2019comprehensive.](imgs/anchor-label-transfer.svg){#fig-anchors}
+
+### Finding the shared space: CCA (and rPCA)
+
+There is a subtlety hiding in "project both datasets into a shared space": *which* shared space? You met **PCA** in the RNA chapter — it finds the directions of greatest variance *within a single dataset*. That is the wrong tool for matching two datasets, because the biggest source of variance within the ATAC gene-activity data and the biggest within the RNA data need not point the same way; each is dominated by its own technical quirks. We want directions the two datasets *share*.
+
+**Canonical correlation analysis (CCA)** finds exactly those. Where PCA asks "along what axis does *this* dataset spread out the most?", CCA asks "along what pair of axes — one in each dataset — do the two datasets *co-vary* the most?" It seeks the signal the two datasets have in common and ignores the parts of each that have no counterpart in the other.
+
+An analogy: two people photograph the same city, one in summer and one in winter, with different cameras. Run PCA on either person's photos and you recover what varies *within that set* — season, lighting, lens — which is useless for matching a summer photo to a winter one. CCA instead surfaces what the two sets *agree on*: the buildings, the street grid, the stable structure that lets you say "this photo and that one are the same corner." Those agreed-upon axes are the shared space in which anchors are found.
+
+CCA is *aggressive* — it works hard to align the two datasets, which is what you want for cross-modality data, where the shared signal is genuinely weak and buried. The flip side is that it can over-correct, forcing together things that should stay apart. A more conservative alternative, **reciprocal PCA (rPCA)**, projects each dataset into the *other's* PCA space and looks for anchors there; it aligns less forcefully, runs faster, and is the usual choice for very large references or when over-integration is a worry — at the cost of finding fewer anchors when the shared signal is subtle. For the cross-modality transfer here we use CCA (it is the right default when the modalities differ this much); rPCA is the lever to reach for if a transfer looks over-merged.
+
+## The setup: borrow ground truth from the multiome data
+
+Here is the trick that makes this chapter more than a recipe. Real unpaired data has no answer key — that is the whole problem. But a *multiome* dataset does: we know, cell by cell, which ATAC profile goes with which RNA profile. So we will take the 10x PBMC multiome data from the previous chapter, **split it into an RNA dataset and an ATAC dataset, and then pretend we don't know the pairing.** We run label transfer as if the two were unrelated experiments — and then un-blind ourselves and check each ATAC cell's transferred label against the cell type of its *true* RNA partner.
+
+That gives us a rare thing: a direct, quantitative measurement of **how much we lose by going unpaired**. Let's build it.
+
+```{r}
+#| label: load-packages
+#| message: false
+library(SingleCellMultiModal)
+library(MultiAssayExperiment)
+library(SingleCellExperiment)
+library(Seurat)
+library(Signac)
+library(EnsDb.Hsapiens.v86)
+library(GenomicRanges)    # peak/gene coordinate operations (resize, findOverlaps)
+library(GenomeInfoDb)     # keepStandardChromosomes(), seqlevelsStyle()
+library(Matrix)
+library(ggplot2)
+library(patchwork)
+```
+
+```{r}
+#| label: load-data
+mae <- scMultiome("pbmc_10x", modes = "*", dry.run = FALSE, format = "MTX")
+sce.rna  <- experiments(mae)[["rna"]]
+sce.atac <- experiments(mae)[["atac"]]
+```
+
+### The reference: annotate the RNA
+
+We process the RNA exactly as in the scRNA-seq chapter — normalize, find variable genes, reduce, and cluster — and then give each cluster a name from its dominant canonical marker. Those names are our **reference labels**; because the cells are paired, they are *also* the ground-truth answer key for the ATAC cells.
+
+```{r}
+#| label: rna-reference
+#| message: false
+rna <- CreateSeuratObject(counts = counts(sce.rna), assay = "RNA")
+rna <- NormalizeData(rna)
+rna <- FindVariableFeatures(rna, nfeatures = 2000)
+rna <- ScaleData(rna)
+rna <- RunPCA(rna, npcs = 30)
+rna <- FindNeighbors(rna, dims = 1:30)
+rna <- FindClusters(rna, resolution = 0.6)
+```
+
+Clustering groups cells that look alike, but the groups come out numbered (`0`, `1`, `2`, …), not named. To turn those numbers into cell-type names we use a small, transparent rule: score a panel of canonical PBMC markers, and label each cluster by whichever marker is, on average, highest within it. A production reference would be annotated far more carefully — many markers, expert curation — but this is enough to give us believable labels to transfer and, crucially, to grade against.
+
+We start from a *candidate* panel: one well-known marker per cell type we might expect in blood.
+
+```{r}
+#| label: rna-markers-panel
+panel <- c(`CD4 T` = "IL7R", `CD8 T` = "CD8A", B = "MS4A1", NK = "GNLY",
+           Mono = "LYZ", DC = "FCER1A", Platelet = "PPBP")
+panel <- panel[panel %in% rownames(rna)]   # keep only markers actually in the data
+panel
+```
+
+This panel is a *menu*, not a guarantee — and that distinction explains something you'll notice in a moment. Each cluster is assigned the single type whose marker wins the argmax, so a type appears in the final labels **only if some cluster expresses its marker most strongly**. Two consequences follow:
+
+- **Not every listed type will appear.** Rare populations like platelets or dendritic cells may be too few to form their own cluster at this resolution; their marker never wins, and the label is simply never used. We deliberately list more markers than we expect to recover.
+- **One type can claim several clusters.** T cells often split into multiple clusters that all score highest on `IL7R` or `CD8A`, so several clusters collapse onto the same name.
+
+Now we compute each marker's average (normalized) expression within each cluster, and read off the winner per cluster:
+
+```{r}
+#| label: rna-label
+expr <- GetAssayData(rna, assay = "RNA", layer = "data")[panel, , drop = FALSE]
+cl   <- rna$seurat_clusters
+avg  <- sapply(levels(cl), function(g) rowMeans(expr[, cl == g, drop = FALSE]))
+
+cluster.type <- setNames(names(panel)[apply(avg, 2, which.max)], colnames(avg))
+cluster.type            # which cell type each numbered cluster became
+```
+
+The `cluster.type` vector is the key to the puzzle above: you can read off directly which clusters folded into which type — and which menu items went unused. Finally we map the cluster labels back onto the individual cells (dropping the names so the assignment is by position, not by barcode); @tbl-celltype-counts shows how many cells each recovered type ends up with.
+
+```{r}
+#| label: tbl-celltype-counts
+#| tbl-cap: "Cells per recovered cell type in the RNA reference — the labels we transfer to the ATAC query and grade against. Types from the marker panel that no cluster claimed do not appear."
+rna$celltype <- factor(unname(cluster.type[as.character(cl)]))
+knitr::kable(as.data.frame(table(rna$celltype), responseName = "cells"),
+             col.names = c("cell type", "cells"))
+```
+
+### The query: build gene activity from peaks
+
+Now the ATAC side. To compare ATAC cells to RNA cells at all, we must cast accessibility into *gene* space — the **(A)** gene-activity score from @fig-geneactivity: for each gene, sum the accessibility of the peaks in its body and promoter. Everything in this subsection builds toward that one matrix.
+
+The first ingredient is a definition of each gene's *region* — the stretch of genome whose peaks we will credit to it. We pull gene coordinates from an Ensembl annotation and tidy them in four steps, each for a concrete reason:
+
+- keep **protein-coding** genes only — non-coding genes mostly add noise to an expression proxy;
+- restrict to the **standard chromosomes** — drop the scaffolds and patch contigs the peaks never use;
+- relabel chromosomes to the **`chr1` (UCSC) style** the peaks use — otherwise `chr1` and `1` won't overlap;
+- **extend each gene 2 kb upstream** of its start, so the region includes the **promoter**, where much of the cell-type-defining accessibility actually sits.
+
+```{r}
+#| label: gene-regions
+#| message: false
+genes.gr <- genes(EnsDb.Hsapiens.v86)
+genes.gr <- genes.gr[genes.gr$gene_biotype == "protein_coding" & genes.gr$gene_name != ""]
+genes.gr <- keepStandardChromosomes(genes.gr, pruning.mode = "coarse")
+seqlevelsStyle(genes.gr) <- "UCSC"                       # "1" -> "chr1"
+# resize with fix = "end" holds the 3' end and grows the 5' end (strand-aware),
+# so we add 2 kb of promoter upstream of each gene's start
+genes.ext <- suppressWarnings(trim(resize(genes.gr, width = width(genes.gr) + 2000, fix = "end")))
+```
+
+With gene regions defined, we turn the peak matrix into a Signac object and pull out the peaks' own genomic coordinates:
+
+```{r}
+#| label: gene-activity-object
+atac <- CreateChromatinAssay(counts = counts(sce.atac), sep = c(":", "-"))
+atac <- CreateSeuratObject(counts = atac, assay = "ATAC")
+peaks.gr <- granges(atac[["ATAC"]])
+```
+
+Now the aggregation. We *could* loop over all ~20,000 genes, find each one's overlapping peaks, and sum them — but that is slow and clumsy. A single **sparse matrix multiply** does the whole thing at once, and the trick is worth understanding because it shows up all over genomics.
+
+The idea: build a **gene × peak membership matrix** `M`, where `M[g, p] = 1` if peak `p` overlaps gene `g`'s region, and `0` otherwise. `findOverlaps` hands us exactly the (gene, peak) pairs to set to 1, which we drop into a sparse matrix (storing only the 1s — the vast majority of entries are 0):
+
+```{r}
+#| label: gene-activity-membership
+ov <- findOverlaps(peaks.gr, genes.ext)
+gene_factor <- factor(genes.ext$gene_name)
+membership <- sparseMatrix(
+  i = as.integer(gene_factor)[subjectHits(ov)],   # gene (row) for each overlap
+  j = queryHits(ov),                              # peak (column) for each overlap
+  x = 1,
+  dims = c(nlevels(gene_factor), length(peaks.gr)),
+  dimnames = list(levels(gene_factor), NULL)
+)
+dim(membership)                                   # genes x peaks
+```
+
+Here is why multiplying does what we want. Matrix multiplication computes, for each gene `g` and cell `c`, the sum over peaks `p` of `M[g, p] × counts[p, c]`. Since `M[g, p]` is 1 only for peaks belonging to gene `g`, that sum is *exactly* "the total accessibility, in cell `c`, of all of gene `g`'s peaks" — the gene-activity score. One `%*%` replaces the whole loop:
+
+```{r}
+#| label: gene-activity-multiply
+peak.counts <- GetAssayData(atac, assay = "ATAC", layer = "counts")   # peaks x cells
+activity    <- membership %*% peak.counts                             # genes x cells
+
+atac[["ACTIVITY"]] <- CreateAssayObject(counts = activity)
+atac <- NormalizeData(atac, assay = "ACTIVITY")
+```
+
+The `ACTIVITY` assay now describes each ATAC cell in *gene* space, directly comparable to the RNA reference.
+
+We also give the ATAC cells their own LSI embedding (TF-IDF + SVD, as in the previous chapter); the transfer step uses it to weight predictions, and we'll use its UMAP to view the result.
+
+```{r}
+#| label: atac-lsi
+#| message: false
+DefaultAssay(atac) <- "ATAC"
+atac <- FindTopFeatures(atac, min.cutoff = 5)
+atac <- RunTFIDF(atac)
+atac <- RunSVD(atac)
+atac <- RunUMAP(atac, reduction = "lsi", dims = 2:30, reduction.name = "umap.atac")
+```
+
+#### Does the bridge carry signal?
+
+Before transferring anything, a sanity check: if gene activity is a useful proxy, then a B-cell marker's *activity* should be elevated in the cells that are truly B cells. We can check because we secretly hold the truth (the paired RNA label); @fig-bridge-activity does exactly that for `MS4A1`:
+
+```{r}
+#| label: fig-bridge-activity
+#| fig-cap: "Sanity check on the gene-activity bridge: `MS4A1` (a B-cell marker) gene activity, grouped by each ATAC cell's true cell type. Activity concentrated in the true B cells confirms the peak-based proxy carries real cell-type signal before we rely on it for transfer."
+atac$truth <- rna$celltype[Cells(atac)]      # the paired RNA label = ground truth
+DefaultAssay(atac) <- "ACTIVITY"
+VlnPlot(atac, features = "MS4A1", group.by = "truth", pt.size = 0) +
+  ggtitle("MS4A1 gene activity by true cell type")
+```
+
+### Transfer the labels
+
+Both datasets now live in gene space — the RNA reference in real expression, the ATAC query in gene activity — so we can finally find anchors and move labels. This is two steps: find the anchors, then transfer along them.
+
+`FindTransferAnchors` does the matching, and three of its arguments earn comment:
+
+- `reference`/`query` plus their assays point it at RNA expression and ATAC `ACTIVITY`;
+- `features` restricts anchoring to genes that are *both* informative in the reference (its variable features) *and* present in the activity matrix — there is no value in anchoring on a gene we can't measure on both sides;
+- `reduction = "cca"` selects canonical correlation analysis, the cross-modality choice motivated above.
+
+```{r}
+#| label: find-anchors
+#| message: false
+DefaultAssay(rna)  <- "RNA"
+DefaultAssay(atac) <- "ACTIVITY"
+
+anchors <- FindTransferAnchors(
+  reference = rna, query = atac,
+  reference.assay = "RNA", query.assay = "ACTIVITY",
+  features = intersect(VariableFeatures(rna), rownames(atac[["ACTIVITY"]])),
+  reduction = "cca"
+)
+```
+
+`TransferData` then carries the reference's `celltype` labels across those anchors: each query cell's predicted label is a weighted vote of the anchors near it. The subtle argument is `weight.reduction` — *how* we measure "near." We weight by the ATAC cells' own **LSI** embedding (dropping component 1, as before), so neighbourhoods are judged in the query's native, higher-quality accessibility space rather than the noisier gene-activity proxy used for anchoring.
+
+```{r}
+#| label: transfer-data
+pred <- TransferData(anchorset = anchors, refdata = rna$celltype,
+                     weight.reduction = atac[["lsi"]], dims = 2:30)
+atac <- AddMetaData(atac, metadata = pred)
+```
+
+Each ATAC cell now has a `predicted.id` (its transferred label) and a `prediction.score.max` (how confident the transfer was). @fig-predicted-umap shows the transferred labels on the ATAC cells' own UMAP, beside the truth:
+
+```{r}
+#| label: fig-predicted-umap
+#| fig-width: 11
+#| fig-height: 4.5
+#| fig-cap: "scATAC-seq cells on their own (LSI) UMAP. **Left:** the labels transferred from the RNA reference. **Right:** the true cell types (each ATAC cell's paired RNA label, which the transfer never saw). Where the two panels agree, label transfer recovered the right answer from accessibility alone; where they disagree — typically at the boundaries between related types — is the information lost by going unpaired."
+p1 <- DimPlot(atac, reduction = "umap.atac", group.by = "predicted.id", label = TRUE, repel = TRUE) +
+  ggtitle("Transferred labels (from ATAC)") + NoLegend()
+p2 <- DimPlot(atac, reduction = "umap.atac", group.by = "truth", label = TRUE, repel = TRUE) +
+  ggtitle("True labels (from paired RNA)") + NoLegend()
+p1 + p2
+```
+
+## How much did we lose? Grading against the truth
+
+Because every ATAC cell's true type is known, we can score the transfer directly. The headline number is the fraction of cells whose transferred label matches the truth:
+
+```{r}
+#| label: accuracy
+accuracy <- mean(atac$predicted.id == as.character(atac$truth))
+round(accuracy, 3)
+```
+
+A single accuracy hides *where* the method succeeds and fails, though, and that pattern is the real lesson. A **confusion matrix** — true type in rows, predicted type in columns, each row scaled to sum to 1 — shows exactly which types transfer cleanly and which get confused for each other (@fig-confusion):
+
+```{r}
+#| label: fig-confusion
+#| fig-width: 7
+#| fig-height: 6
+#| fig-cap: "Row-normalized confusion matrix for the transferred labels (rows: true cell type from the paired RNA; columns: label predicted from ATAC gene activity). A perfect transfer would put all mass on the diagonal. Off-diagonal mass shows the characteristic failures of unpaired, gene-activity-based transfer: abundant, transcriptionally-distinct types (B, monocytes) recover well, while closely related states — especially CD4 vs CD8 T cells — are the hardest to tell apart from accessibility alone, because the gene-body proxy blurs exactly the fine distinctions that separate them."
+cm <- table(truth = atac$truth, predicted = atac$predicted.id)
+cm.norm <- sweep(cm, 1, rowSums(cm), "/")
+cm.df <- as.data.frame(cm.norm)
+
+ggplot(cm.df, aes(predicted, truth, fill = Freq)) +
+  geom_tile(color = "grey90") +
+  geom_text(aes(label = ifelse(Freq >= 0.01, sprintf("%.2f", Freq), "")), size = 3) +
+  scale_fill_gradient(low = "white", high = "#2166ac", limits = c(0, 1), name = "row\nfraction") +
+  labs(x = "predicted from ATAC", y = "true (from RNA)") +
+  coord_equal() +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+This is the "information loss" made concrete. With *paired* multiome data (previous chapter), every one of these cells had its RNA and ATAC read together, and cell type was never in doubt. Throwing away the pairing and reconstructing the labels from accessibility alone costs us the cells in the off-diagonal — and that cost is not spread evenly. It concentrates exactly where you'd predict: among **rare populations** (few anchors to lean on) and **transcriptionally similar types** (whose distinguishing genes are precisely the ones a coarse gene-body proxy smears together). The strongly distinct, abundant types come through nearly intact.
+
+Two levers would narrow the gap, and both point back to earlier discussions: a **better gene-activity model** (the distance-weighted or co-accessibility variants in @fig-geneactivity, which recover distal regulatory signal the gene-body sum discards), and, if available, the **fragment file** (enabling the full `Signac::GeneActivity()` and richer features). Neither makes unpaired analysis as good as paired — but the gap is a quantity you can now measure for your own data, rather than guess at.
+
+## Summary
+
+- **Diagonal (unpaired) integration** has no cell correspondence and two different feature spaces; **label transfer** solves it by projecting both datasets into a shared **gene space** and carrying labels from an annotated reference to a query.
+- **Gene activity** is the bridge — a proxy for expression built from nearby accessibility. Methods (@fig-geneactivity) differ in how far they reach and how they weight distance; we used the transparent, fragment-free gene-body + promoter sum, at the cost of distal enhancers.
+- **Anchors** (mutual nearest neighbors across datasets, found with CCA) are the conduit along which labels travel [@stuart2019comprehensive].
+- By **un-pairing a multiome dataset** we kept an answer key, letting us *measure* the information lost going from paired to unpaired — loss that concentrates in rare and transcriptionally similar cell types, and that a better gene-activity model or fragment-level data would partly recover.
