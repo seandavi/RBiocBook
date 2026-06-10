@@ -66,6 +66,35 @@ jobs:
           target: gh-pages
           render: false
 
+      - name: Commit regenerated _freeze back to main
+        # `execute: freeze: auto` reuses committed _freeze/ and only re-executes a
+        # chapter when its source changed. This step persists whatever quarto just
+        # regenerated, so the NEXT render reuses it instead of re-executing the
+        # (slow) chapters from scratch — keeping CI and publishes fast and the
+        # executed results deterministic and version-controlled.
+        #
+        # Push-to-main only. No infinite loop: pushes made with GITHUB_TOKEN do not
+        # trigger new workflow runs, and the bot commit is tagged [skip ci] as a
+        # belt-and-suspenders guard. A no-op when nothing re-executed (the common
+        # case). The job already grants contents: write.
+        if: github.event_name == 'push'
+        run: |
+          if [ -z "$(git status --porcelain -- _freeze)" ]; then
+            echo "No _freeze changes to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _freeze
+          git commit -m "chore(freeze): cache regenerated execution results [skip ci]"
+          # Fast-forward in the common case; if main advanced mid-render, merge
+          # (never rebase) and retry. cancel-in-progress usually preempts this race.
+          git push origin "HEAD:${GITHUB_REF_NAME}" || {
+            git fetch origin "${GITHUB_REF_NAME}"
+            git merge --no-edit "origin/${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          }
+
   # Fast HTML-only Netlify deploy preview for PRs. Runs alongside (not instead of)
   # the full R-CMD-check job, so pdf/epub breakage is still caught on the PR.
   preview-render:
