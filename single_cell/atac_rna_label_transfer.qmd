@@ -135,12 +135,14 @@ cluster.type <- setNames(names(panel)[apply(avg, 2, which.max)], colnames(avg))
 cluster.type            # which cell type each numbered cluster became
 ```
 
-The `cluster.type` vector is the key to the puzzle above: you can read off directly which clusters folded into which type — and which menu items went unused. Finally we map the cluster labels back onto the individual cells (dropping the names so the assignment is by position, not by barcode):
+The `cluster.type` vector is the key to the puzzle above: you can read off directly which clusters folded into which type — and which menu items went unused. Finally we map the cluster labels back onto the individual cells (dropping the names so the assignment is by position, not by barcode); @tbl-celltype-counts shows how many cells each recovered type ends up with.
 
 ```{r}
-#| label: rna-assign
+#| label: tbl-celltype-counts
+#| tbl-cap: "Cells per recovered cell type in the RNA reference — the labels we transfer to the ATAC query and grade against. Types from the marker panel that no cluster claimed do not appear."
 rna$celltype <- factor(unname(cluster.type[as.character(cl)]))
-table(rna$celltype)     # cells per recovered cell type
+knitr::kable(as.data.frame(table(rna$celltype), responseName = "cells"),
+             col.names = c("cell type", "cells"))
 ```
 
 ### The query: build gene activity from peaks
@@ -220,10 +222,11 @@ atac <- RunUMAP(atac, reduction = "lsi", dims = 2:30, reduction.name = "umap.ata
 
 #### Does the bridge carry signal?
 
-Before transferring anything, a sanity check: if gene activity is a useful proxy, then a B-cell marker's *activity* should be elevated in the cells that are truly B cells. We can check because we secretly hold the truth (the paired RNA label):
+Before transferring anything, a sanity check: if gene activity is a useful proxy, then a B-cell marker's *activity* should be elevated in the cells that are truly B cells. We can check because we secretly hold the truth (the paired RNA label); @fig-bridge-activity does exactly that for `MS4A1`:
 
 ```{r}
-#| label: bridge-check
+#| label: fig-bridge-activity
+#| fig-cap: "Sanity check on the gene-activity bridge: `MS4A1` (a B-cell marker) gene activity, grouped by each ATAC cell's true cell type. Activity concentrated in the true B cells confirms the peak-based proxy carries real cell-type signal before we rely on it for transfer."
 atac$truth <- rna$celltype[Cells(atac)]      # the paired RNA label = ground truth
 DefaultAssay(atac) <- "ACTIVITY"
 VlnPlot(atac, features = "MS4A1", group.by = "truth", pt.size = 0) +
@@ -263,10 +266,10 @@ pred <- TransferData(anchorset = anchors, refdata = rna$celltype,
 atac <- AddMetaData(atac, metadata = pred)
 ```
 
-Each ATAC cell now has a `predicted.id` (its transferred label) and a `prediction.score.max` (how confident the transfer was). Let's see the transferred labels on the ATAC cells' own UMAP, beside the truth:
+Each ATAC cell now has a `predicted.id` (its transferred label) and a `prediction.score.max` (how confident the transfer was). @fig-predicted-umap shows the transferred labels on the ATAC cells' own UMAP, beside the truth:
 
 ```{r}
-#| label: predicted-umap
+#| label: fig-predicted-umap
 #| fig-width: 11
 #| fig-height: 4.5
 #| fig-cap: "scATAC-seq cells on their own (LSI) UMAP. **Left:** the labels transferred from the RNA reference. **Right:** the true cell types (each ATAC cell's paired RNA label, which the transfer never saw). Where the two panels agree, label transfer recovered the right answer from accessibility alone; where they disagree — typically at the boundaries between related types — is the information lost by going unpaired."
@@ -287,10 +290,10 @@ accuracy <- mean(atac$predicted.id == as.character(atac$truth))
 round(accuracy, 3)
 ```
 
-A single accuracy hides *where* the method succeeds and fails, though, and that pattern is the real lesson. A **confusion matrix** — true type in rows, predicted type in columns, each row scaled to sum to 1 — shows exactly which types transfer cleanly and which get confused for each other:
+A single accuracy hides *where* the method succeeds and fails, though, and that pattern is the real lesson. A **confusion matrix** — true type in rows, predicted type in columns, each row scaled to sum to 1 — shows exactly which types transfer cleanly and which get confused for each other (@fig-confusion):
 
 ```{r}
-#| label: confusion
+#| label: fig-confusion
 #| fig-width: 7
 #| fig-height: 6
 #| fig-cap: "Row-normalized confusion matrix for the transferred labels (rows: true cell type from the paired RNA; columns: label predicted from ATAC gene activity). A perfect transfer would put all mass on the diagonal. Off-diagonal mass shows the characteristic failures of unpaired, gene-activity-based transfer: abundant, transcriptionally-distinct types (B, monocytes) recover well, while closely related states — especially CD4 vs CD8 T cells — are the hardest to tell apart from accessibility alone, because the gene-body proxy blurs exactly the fine distinctions that separate them."
