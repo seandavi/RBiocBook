@@ -106,29 +106,53 @@ rna <- FindNeighbors(rna, dims = 1:30)
 rna <- FindClusters(rna, resolution = 0.6)
 ```
 
-To name the clusters, we score a small panel of canonical PBMC markers and label each cluster by whichever marker is highest on average within it. This is deliberately simple and transparent (a real reference would be annotated more carefully), but it is enough to give us believable cell-type labels to transfer and grade against.
+Clustering groups cells that look alike, but the groups come out numbered (`0`, `1`, `2`, …), not named. To turn those numbers into cell-type names we use a small, transparent rule: score a panel of canonical PBMC markers, and label each cluster by whichever marker is, on average, highest within it. A production reference would be annotated far more carefully — many markers, expert curation — but this is enough to give us believable labels to transfer and, crucially, to grade against.
+
+We start from a *candidate* panel: one well-known marker per cell type we might expect in blood.
+
+```{r}
+#| label: rna-markers-panel
+panel <- c(`CD4 T` = "IL7R", `CD8 T` = "CD8A", B = "MS4A1", NK = "GNLY",
+           Mono = "LYZ", DC = "FCER1A", Platelet = "PPBP")
+panel <- panel[panel %in% rownames(rna)]   # keep only markers actually in the data
+panel
+```
+
+This panel is a *menu*, not a guarantee — and that distinction explains something you'll notice in a moment. Each cluster is assigned the single type whose marker wins the argmax, so a type appears in the final labels **only if some cluster expresses its marker most strongly**. Two consequences follow:
+
+- **Not every listed type will appear.** Rare populations like platelets or dendritic cells may be too few to form their own cluster at this resolution; their marker never wins, and the label is simply never used. We deliberately list more markers than we expect to recover.
+- **One type can claim several clusters.** T cells often split into multiple clusters that all score highest on `IL7R` or `CD8A`, so several clusters collapse onto the same name.
+
+Now we compute each marker's average (normalized) expression within each cluster, and read off the winner per cluster:
 
 ```{r}
 #| label: rna-label
-panel <- c(`CD4 T` = "IL7R", `CD8 T` = "CD8A", B = "MS4A1", NK = "GNLY",
-           Mono = "LYZ", DC = "FCER1A", Platelet = "PPBP")
-panel <- panel[panel %in% rownames(rna)]
-
 expr <- GetAssayData(rna, assay = "RNA", layer = "data")[panel, , drop = FALSE]
 cl   <- rna$seurat_clusters
 avg  <- sapply(levels(cl), function(g) rowMeans(expr[, cl == g, drop = FALSE]))
 
 cluster.type <- setNames(names(panel)[apply(avg, 2, which.max)], colnames(avg))
-# look up each cell's cluster label, then drop the names so it assigns by position
+cluster.type            # which cell type each numbered cluster became
+```
+
+The `cluster.type` vector is the key to the puzzle above: you can read off directly which clusters folded into which type — and which menu items went unused. Finally we map the cluster labels back onto the individual cells (dropping the names so the assignment is by position, not by barcode):
+
+```{r}
+#| label: rna-assign
 rna$celltype <- factor(unname(cluster.type[as.character(cl)]))
-table(rna$celltype)
+table(rna$celltype)     # cells per recovered cell type
 ```
 
 ### The query: build gene activity from peaks
 
-Now the ATAC side. First we turn the peak matrix into a Signac object, then compute the **(A)** gene-activity score from @fig-geneactivity: for each gene, sum the accessibility of peaks falling in its body or promoter.
+Now the ATAC side. To compare ATAC cells to RNA cells at all, we must cast accessibility into *gene* space — the **(A)** gene-activity score from @fig-geneactivity: for each gene, sum the accessibility of the peaks in its body and promoter. Everything in this subsection builds toward that one matrix.
 
-We get gene coordinates from an Ensembl annotation, keep protein-coding genes on the standard chromosomes, relabel to the `chr1` (UCSC) style the peaks use, and extend each gene 2 kb upstream to include its promoter:
+The first ingredient is a definition of each gene's *region* — the stretch of genome whose peaks we will credit to it. We pull gene coordinates from an Ensembl annotation and tidy them in four steps, each for a concrete reason:
+
+- keep **protein-coding** genes only — non-coding genes mostly add noise to an expression proxy;
+- restrict to the **standard chromosomes** — drop the scaffolds and patch contigs the peaks never use;
+- relabel chromosomes to the **`chr1` (UCSC) style** the peaks use — otherwise `chr1` and `1` won't overlap;
+- **extend each gene 2 kb upstream** of its start, so the region includes the **promoter**, where much of the cell-type-defining accessibility actually sits.
 
 ```{r}
 #| label: gene-regions
@@ -136,33 +160,51 @@ We get gene coordinates from an Ensembl annotation, keep protein-coding genes on
 genes.gr <- genes(EnsDb.Hsapiens.v86)
 genes.gr <- genes.gr[genes.gr$gene_biotype == "protein_coding" & genes.gr$gene_name != ""]
 genes.gr <- keepStandardChromosomes(genes.gr, pruning.mode = "coarse")
-seqlevelsStyle(genes.gr) <- "UCSC"
+seqlevelsStyle(genes.gr) <- "UCSC"                       # "1" -> "chr1"
+# resize with fix = "end" holds the 3' end and grows the 5' end (strand-aware),
+# so we add 2 kb of promoter upstream of each gene's start
 genes.ext <- suppressWarnings(trim(resize(genes.gr, width = width(genes.gr) + 2000, fix = "end")))
 ```
 
-The aggregation itself is a single sparse matrix multiply, and it is worth seeing why. Build a **gene × peak membership matrix** that is 1 wherever a peak overlaps a gene's region; multiplying it by the **peak × cell** count matrix sums, for each gene and cell, the counts of all its overlapping peaks — the gene-activity matrix in one step.
+With gene regions defined, we turn the peak matrix into a Signac object and pull out the peaks' own genomic coordinates:
 
 ```{r}
-#| label: gene-activity
+#| label: gene-activity-object
 atac <- CreateChromatinAssay(counts = counts(sce.atac), sep = c(":", "-"))
 atac <- CreateSeuratObject(counts = atac, assay = "ATAC")
 peaks.gr <- granges(atac[["ATAC"]])
+```
 
+Now the aggregation. We *could* loop over all ~20,000 genes, find each one's overlapping peaks, and sum them — but that is slow and clumsy. A single **sparse matrix multiply** does the whole thing at once, and the trick is worth understanding because it shows up all over genomics.
+
+The idea: build a **gene × peak membership matrix** `M`, where `M[g, p] = 1` if peak `p` overlaps gene `g`'s region, and `0` otherwise. `findOverlaps` hands us exactly the (gene, peak) pairs to set to 1, which we drop into a sparse matrix (storing only the 1s — the vast majority of entries are 0):
+
+```{r}
+#| label: gene-activity-membership
 ov <- findOverlaps(peaks.gr, genes.ext)
 gene_factor <- factor(genes.ext$gene_name)
 membership <- sparseMatrix(
-  i = as.integer(gene_factor)[subjectHits(ov)],   # gene index
-  j = queryHits(ov),                              # peak index
+  i = as.integer(gene_factor)[subjectHits(ov)],   # gene (row) for each overlap
+  j = queryHits(ov),                              # peak (column) for each overlap
   x = 1,
   dims = c(nlevels(gene_factor), length(peaks.gr)),
   dimnames = list(levels(gene_factor), NULL)
 )
-peak.counts <- GetAssayData(atac, assay = "ATAC", layer = "counts")
-activity <- membership %*% peak.counts            # gene x cell
+dim(membership)                                   # genes x peaks
+```
+
+Here is why multiplying does what we want. Matrix multiplication computes, for each gene `g` and cell `c`, the sum over peaks `p` of `M[g, p] × counts[p, c]`. Since `M[g, p]` is 1 only for peaks belonging to gene `g`, that sum is *exactly* "the total accessibility, in cell `c`, of all of gene `g`'s peaks" — the gene-activity score. One `%*%` replaces the whole loop:
+
+```{r}
+#| label: gene-activity-multiply
+peak.counts <- GetAssayData(atac, assay = "ATAC", layer = "counts")   # peaks x cells
+activity    <- membership %*% peak.counts                             # genes x cells
 
 atac[["ACTIVITY"]] <- CreateAssayObject(counts = activity)
 atac <- NormalizeData(atac, assay = "ACTIVITY")
 ```
+
+The `ACTIVITY` assay now describes each ATAC cell in *gene* space, directly comparable to the RNA reference.
 
 We also give the ATAC cells their own LSI embedding (TF-IDF + SVD, as in the previous chapter); the transfer step uses it to weight predictions, and we'll use its UMAP to view the result.
 
@@ -190,10 +232,16 @@ VlnPlot(atac, features = "MS4A1", group.by = "truth", pt.size = 0) +
 
 ### Transfer the labels
 
-Now the transfer itself. `FindTransferAnchors` finds the anchors across the two datasets in gene space (using CCA), and `TransferData` carries the reference `celltype` labels onto the query, weighting each query cell's prediction by its LSI neighborhood.
+Both datasets now live in gene space — the RNA reference in real expression, the ATAC query in gene activity — so we can finally find anchors and move labels. This is two steps: find the anchors, then transfer along them.
+
+`FindTransferAnchors` does the matching, and three of its arguments earn comment:
+
+- `reference`/`query` plus their assays point it at RNA expression and ATAC `ACTIVITY`;
+- `features` restricts anchoring to genes that are *both* informative in the reference (its variable features) *and* present in the activity matrix — there is no value in anchoring on a gene we can't measure on both sides;
+- `reduction = "cca"` selects canonical correlation analysis, the cross-modality choice motivated above.
 
 ```{r}
-#| label: transfer
+#| label: find-anchors
 #| message: false
 DefaultAssay(rna)  <- "RNA"
 DefaultAssay(atac) <- "ACTIVITY"
@@ -204,7 +252,12 @@ anchors <- FindTransferAnchors(
   features = intersect(VariableFeatures(rna), rownames(atac[["ACTIVITY"]])),
   reduction = "cca"
 )
+```
 
+`TransferData` then carries the reference's `celltype` labels across those anchors: each query cell's predicted label is a weighted vote of the anchors near it. The subtle argument is `weight.reduction` — *how* we measure "near." We weight by the ATAC cells' own **LSI** embedding (dropping component 1, as before), so neighbourhoods are judged in the query's native, higher-quality accessibility space rather than the noisier gene-activity proxy used for anchoring.
+
+```{r}
+#| label: transfer-data
 pred <- TransferData(anchorset = anchors, refdata = rna$celltype,
                      weight.reduction = atac[["lsi"]], dims = 2:30)
 atac <- AddMetaData(atac, metadata = pred)
