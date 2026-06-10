@@ -51,7 +51,15 @@ An anchor is a pair of cells — one in the reference, one in the query — that
 
 ![**Anchor-based label transfer, in two steps.** A well-annotated **scRNA-seq reference** (solid, colored by cell type) and an unlabeled **scATAC-seq query** (gray) are projected into a shared gene-activity space; the two datasets have their own structure (note the different arrangements). Mutual-nearest-neighbor cell pairs across the datasets form **anchors** (dashed lines). *Step 1 (transfer):* each query cell inherits the cell-type label of the reference cells it anchors to — shown by recoloring the query cells as hatched cell-type fills. *Step 2 (merge):* with labels in hand, the two assays can be analyzed as one integrated dataset (solid = RNA, hatched = ATAC). Schematic; method after @stuart2019comprehensive.](imgs/anchor-label-transfer.svg){#fig-anchors}
 
-A practical detail worth flagging: when crossing modalities, Seurat finds anchors using **canonical correlation analysis (CCA)** rather than PCA. CCA looks for the axes along which the two datasets vary *in a correlated way* — the shared "language" — which is exactly what you want when the two datasets are noisy, differently-scaled views of the same biology.
+### Finding the shared space: CCA (and rPCA)
+
+There is a subtlety hiding in "project both datasets into a shared space": *which* shared space? You met **PCA** in the RNA chapter — it finds the directions of greatest variance *within a single dataset*. That is the wrong tool for matching two datasets, because the biggest source of variance within the ATAC gene-activity data and the biggest within the RNA data need not point the same way; each is dominated by its own technical quirks. We want directions the two datasets *share*.
+
+**Canonical correlation analysis (CCA)** finds exactly those. Where PCA asks "along what axis does *this* dataset spread out the most?", CCA asks "along what pair of axes — one in each dataset — do the two datasets *co-vary* the most?" It seeks the signal the two datasets have in common and ignores the parts of each that have no counterpart in the other.
+
+An analogy: two people photograph the same city, one in summer and one in winter, with different cameras. Run PCA on either person's photos and you recover what varies *within that set* — season, lighting, lens — which is useless for matching a summer photo to a winter one. CCA instead surfaces what the two sets *agree on*: the buildings, the street grid, the stable structure that lets you say "this photo and that one are the same corner." Those agreed-upon axes are the shared space in which anchors are found.
+
+CCA is *aggressive* — it works hard to align the two datasets, which is what you want for cross-modality data, where the shared signal is genuinely weak and buried. The flip side is that it can over-correct, forcing together things that should stay apart. A more conservative alternative, **reciprocal PCA (rPCA)**, projects each dataset into the *other's* PCA space and looks for anchors there; it aligns less forcefully, runs faster, and is the usual choice for very large references or when over-integration is a worry — at the cost of finding fewer anchors when the shared signal is subtle. For the cross-modality transfer here we use CCA (it is the right default when the modalities differ this much); rPCA is the lever to reach for if a transfer looks over-merged.
 
 ## The setup: borrow ground truth from the multiome data
 
@@ -109,7 +117,8 @@ cl   <- rna$seurat_clusters
 avg  <- sapply(levels(cl), function(g) rowMeans(expr[, cl == g, drop = FALSE]))
 
 cluster.type <- setNames(names(panel)[apply(avg, 2, which.max)], colnames(avg))
-rna$celltype <- factor(cluster.type[as.character(cl)])
+# look up each cell's cluster label, then drop the names so it assigns by position
+rna$celltype <- factor(unname(cluster.type[as.character(cl)]))
 table(rna$celltype)
 ```
 
