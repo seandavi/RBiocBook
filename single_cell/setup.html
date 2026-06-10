@@ -722,6 +722,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Integrating single-cell ATAC and RNA</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../single_cell/atac_rna_label_transfer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Label transfer: annotating scATAC-seq from an scRNA-seq reference</span></span></a>
+  </div>
+</li>
       </ul>
 </li>
         <li class="sidebar-item">
@@ -1185,9 +1191,9 @@ See help("Deprecated")</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>nn.clusters
   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 
- 63 101 192  40  87 114  83 102  69  67  61 253 137 107 188 200  96  73 104  58 
- 21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40 
- 90  68  70 103  54  53  34  62  57  32  32  17  20  12  19  18  15  28   9  17 </code></pre>
+ 89 296 153  40 102 192  63  69 143  96 314 133  97  71  91  70  69 112  47  91 
+ 21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38 
+101  63  54  36  62  34  42  59  32  39  20  28  15  18  16  19  17  12 </code></pre>
 </div>
 </div>
 <p>The <code><a href="https://rdrr.io/pkg/scran/man/clusterCells.html">clusterCells()</a></code> function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells">popularized by the Seurat package</a>. It builds a nearest-neighbor graph and then finds communities within this graph. The resulting clusters often correspond to distinct cell types or states. The <code>use.dimred = "TSNE"</code> argument specifies that we want to use the t-SNE coordinates for clustering. This is an important choice because t-SNE captures local structure and can reveal distinct cell populations that may not be apparent in the original high-dimensional space. There are other clustering methods available, such as k-means or hierarchical clustering, but graph-based clustering is particularly effective for single-cell data due to its ability to handle complex, non-linear relationships.</p>
@@ -1340,18 +1346,18 @@ Figure&nbsp;38.6
 <div class="cell-output cell-output-stdout">
 <pre><code>nn.clusters
   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 
- 63 101 192  40  87 114  83 102  69  67  61 253 137 107 188 200  96  73 104  58 
- 21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40 
- 90  68  70 103  54  53  34  62  57  32  32  17  20  12  19  18  15  28   9  17 </code></pre>
+ 89 296 153  40 102 192  63  69 143  96 314 133  97  71  91  70  69 112  47  91 
+ 21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38 
+101  63  54  36  62  34  42  59  32  39  20  28  15  18  16  19  17  12 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span><span class="op">)</span>   <span class="co"># number of clusters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 40</code></pre>
+<pre><code>[1] 38</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span><span class="op">)</span> <span class="co"># the most populous cluster</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>12 
-12 </code></pre>
+<pre><code>11 
+11 </code></pre>
 </div>
 </div>
 <p><code><a href="https://rdrr.io/r/base/table.html">table()</a></code> counts cells per cluster; <code>length(unique(...))</code> turns that into the number of groups. The largest cluster is usually an abundant cell type rather than a rare one.</p>
