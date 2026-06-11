@@ -70,7 +70,7 @@ methylation and histone-mark chapters return to each idea and add a new twist.
 You met the `mlr3` building blocks in [The mlr3verse](mlr3verse_intro.qmd); here
 is the one-paragraph reminder so you can keep your eyes on the biology. Every
 analysis in these worked-example chapters follows the same four-step rhythm
-(@fig-mlr3-ecosystem):
+(@fig-mlr3-objects):
 
 1. **Task** — bundle your data with the name of the column you want to predict
    (the *target*). Classification tasks predict a category; regression tasks
@@ -81,8 +81,8 @@ analysis in these worked-example chapters follows the same four-step rhythm
 4. **Measure** — score the predictions with `msrs()`, e.g. accuracy for
    classification or R² for regression.
 
-```{r fig-mlr3-ecosystem, echo=FALSE, fig.cap='The mlr3 ecosystem. A consistent set of objects — tasks, learners, measures, and resampling strategies — that snap together the same way for every algorithm.', dpi=100}
-knitr::include_graphics("../images/mlr3_ecosystem.png")
+```{r fig-mlr3-objects, echo=FALSE, fig.cap='The four mlr3 building blocks and how they fit together. A **Learner** (the algorithm) trains on a **Task** (the data plus the target column), the fitted model makes **predictions** on held-out samples, and a **Measure** scores them. A **Resampling** strategy wraps the whole flow, repeating it over different train/validation splits so the score reflects performance on data the model never saw. Swapping one algorithm for another changes only the Learner — every other block stays the same.', dpi=100}
+knitr::include_graphics("../images/mlr3_objects.png")
 ```
 
 The power of `mlr3` is that this rhythm is *identical* no matter which algorithm
@@ -200,6 +200,26 @@ se_small <- se[order(sds, decreasing = TRUE)[1:200],
                colData(se)$characteristics_ch1.1 == 'normal: no']
 # remove genes with no gene symbol
 se_small <- se_small[rowData(se_small)$Gene.Symbol != '', ]
+```
+
+Plotting that vector of per-gene variability shows why such an aggressive cut is
+reasonable (@fig-gene-variance): the great majority of genes barely vary from sample
+to sample (the tall spike on the left), and only a thin tail of genes carry real
+variation. Keeping the 200 most variable genes means keeping just the right edge of
+that tail.
+
+```{r}
+#| label: fig-gene-variance
+#| fig-cap: "How variable is each gene across the samples? The histogram shows the standard deviation of every gene's expression. Most genes pile up at low variability (left) — they hardly change between tumours, so they cannot help tell cancer types apart. A small minority, in the long right tail, vary a lot. The dashed line is the cutoff for the 200 most-variable genes; we keep only the genes to its right and discard the rest as uninformative."
+library(ggplot2)
+cutoff <- sort(sds, decreasing = TRUE)[200]
+ggplot(data.frame(sd = sds), aes(sd)) +
+  geom_histogram(bins = 60, fill = "#dae8fc", colour = "#6c8ebf", linewidth = 0.2) +
+  geom_vline(xintercept = cutoff, linetype = "dashed", colour = "#b85450", linewidth = 0.8) +
+  annotate("text", x = cutoff, y = Inf, label = "  top 200 genes →", hjust = 0, vjust = 1.8,
+           colour = "#b85450", size = 3.3) +
+  labs(x = "Per-gene standard deviation across samples", y = "Number of genes") +
+  theme_bw()
 ```
 
 To make the data easier to work with, we use one of the `rowData` columns (the
@@ -365,6 +385,8 @@ Trees are easy to visualize when they are small. This one has only a couple of
 splits, which makes the decision logic easy to follow.
 
 ```{r}
+#| label: fig-tree-cancer
+#| fig-cap: "The fitted classification tree. Each internal node tests whether one gene's expression lies above or below a learned threshold; following the branches that match a tumour leads to a leaf that predicts its cancer type, with the bar showing the class mix of training samples that reached that leaf. Because this tree has only a couple of splits, the rule it learned is easy to read — a handful of marker genes separate most of the cancer types."
 library(mlr3viz)
 library(ggparty)
 autoplot(learner, type = 'ggparty')

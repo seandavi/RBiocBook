@@ -114,6 +114,26 @@ Each row is a person, each `cg…` column is the methylation level at one CpG si
 and `Age` is what we want to predict. Because the target is a *number*, this is a
 **regression** task — so we use `as_task_regr()`.
 
+Before modelling, it is worth *seeing* the signal we are banking on. @fig-meth-signal
+plots the four CpG sites whose methylation tracks age most closely. Each point is a
+person; the red line is a straight-line trend.
+
+```{r}
+#| label: fig-meth-signal
+#| fig-cap: "The biological signal behind an epigenetic clock. Each panel is one CpG site: a person's methylation level at that site (vertical) against their chronological age (horizontal), with a linear trend in red. At some sites methylation creeps *up* with age and at others it drifts *down*, but in every case the relationship is steady and roughly linear. That steady, age-linked drift is exactly the signal a regression model exploits — and the sites with the tightest trend make the most useful features."
+cpg_cols <- setdiff(names(meth_age), "Age")
+cors <- sapply(cpg_cols, function(cg) cor(meth_age[[cg]], meth_age$Age))
+top  <- names(sort(abs(cors), decreasing = TRUE))[1:4]
+long <- do.call(rbind, lapply(top, function(cg)
+  data.frame(cpg = cg, methylation = meth_age[[cg]], age = meth_age$Age)))
+ggplot(long, aes(age, methylation)) +
+  geom_point(alpha = 0.5, size = 0.9) +
+  geom_smooth(method = "lm", se = FALSE, colour = "#b85450", linewidth = 0.9) +
+  facet_wrap(~ cpg, scales = "free_y") +
+  labs(x = "Chronological age (years)", y = "Methylation level") +
+  theme_bw()
+```
+
 ```{r}
 task <- as_task_regr(meth_age, target = 'Age')
 ```
@@ -142,13 +162,30 @@ learner <- lrn("regr.lm")
 learner$train(task, row_ids = train_set)
 ```
 
-After fitting a linear model, the standard **diagnostic plots**
-(@fig-regression-diagnostic) help check whether the model's assumptions hold.
+After fitting a linear model it pays to *check* it, not just trust it. Calling
+`plot()` on the fitted model draws four standard **diagnostic plots**
+(@fig-regression-diagnostic), each a different test of an assumption that linear
+regression quietly makes. They all revolve around the **residuals** — the leftover
+errors, the gap between a person's true age and the age the model predicted for them.
+If the model has captured the real pattern, those residuals should look like
+featureless random scatter; any *structure* left in them is a clue that something the
+model isn't capturing.
 
-```{r fig-regression-diagnostic, fig.cap="Regression diagnostic plots. Top left: residuals vs. fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs. leverage."}
+```{r}
+#| label: fig-regression-diagnostic
+#| fig-cap: "Regression diagnostic plots, produced by calling `plot()` on the fitted `lm` model. **Top-left — Residuals vs Fitted:** the residuals plotted against the model's predictions. You want a shapeless horizontal band centred on zero with the red trend line roughly flat; a curve or a funnel shape signals a missed nonlinear relationship or a spread that changes across the range. **Top-right — Normal Q-Q:** checks whether the residuals are normally distributed. The points should hug the diagonal; systematic departures, especially at the two ends, mean heavy tails or outliers. **Bottom-left — Scale-Location:** the same residuals as the first panel but showing their *size*. A flat red line means the errors have roughly constant spread (homoscedasticity); an upward slope means the model is more precise at some ages than others. **Bottom-right — Residuals vs Leverage:** flags individual people with outsized influence on the fit. Points pushed toward the right (high leverage) and beyond the dashed Cook's-distance contours deserve a look, because a single such point can tilt the entire line."
 par(mfrow = c(2, 2))
 plot(learner$model)
 ```
+
+For our methylation clock, read the four panels together: are the residuals
+**patternless** (top-left), roughly **normal** (top-right), of **even spread**
+across the age range (bottom-left), and free of any **single dominating sample**
+(bottom-right)? Mild wobbles in any of these are normal and rarely cause for alarm.
+Strong structure, on the other hand — a clear curve, a fanning-out, a lone point far
+from the pack — would be the data telling you that a straight line is the wrong shape,
+and that a transformation or a more flexible model (like the tree and forest we try
+next) might serve better.
 
 ### Predict
 
@@ -170,6 +207,8 @@ A scatter plot of truth versus prediction makes the fit visible: a perfect model
 would put every point on the diagonal.
 
 ```{r}
+#| label: fig-meth-lm
+#| fig-cap: "Linear-regression predictions on the **training** set: predicted age (vertical) against true age (horizontal), one point per person, with the blue least-squares line. A perfect model would place every point on the 45° diagonal; the tighter the cloud hugs that line, the better the fit. A straight-line model spreads its predictions continuously across the age range."
 ggplot(pred_train, aes(x = truth, y = response)) +
     geom_point() +
     geom_smooth(method = 'lm')
@@ -224,6 +263,8 @@ The discreteness is obvious in the scatter plot: predictions stack up into
 horizontal bands, one per leaf.
 
 ```{r}
+#| label: fig-meth-tree
+#| fig-cap: "Regression-tree predictions on the training set. Because a single tree gives every person who lands in a given leaf the *same* predicted age, the points stack into horizontal bands — one band per leaf. That blocky, discrete behaviour is a poor match for a smoothly varying quantity like age."
 ggplot(pred_train, aes(x = truth, y = response)) +
     geom_point() +
     geom_smooth(method = 'lm')
@@ -269,6 +310,8 @@ pred_train
 ```
 
 ```{r}
+#| label: fig-meth-rf
+#| fig-cap: "Random-forest predictions on the training set. Averaging over many trees fills in the gaps between a single tree's discrete leaves, so the predicted ages now vary smoothly and scatter around the diagonal instead of collapsing into horizontal bands."
 ggplot(pred_train, aes(x = truth, y = response)) +
     geom_point() +
     geom_smooth(method = 'lm')

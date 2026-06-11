@@ -277,7 +277,39 @@ The relationship between model complexity and performance tends to follow a U
 shape. Very simple models do badly because they underfit. As you add complexity,
 performance improves as the model captures more of the real signal. But past an
 optimal point, extra complexity starts fitting noise, and performance on new data
-gets worse again.
+gets worse again. @fig-bias-variance draws this out — the two curves are the heart
+of the whole chapter.
+
+```{r}
+#| label: fig-bias-variance
+#| fig-cap: "The bias–variance tradeoff. As a model is allowed to grow more complex (left to right), its error on the *training* data keeps falling — given enough flexibility it eventually fits the data it has already seen almost perfectly. But error on *new* data follows a U: it drops while the model is still learning real signal, reaches a minimum at the **sweet spot**, then climbs again as the extra flexibility starts fitting noise. **Underfitting** is the high-error region on the left, where the model is too simple for either set; **overfitting** is the right, where the widening gap between the low training error and the rising new-data error gives the problem away. The model that generalizes best sits at the bottom of the U — not the one with the smallest training error."
+#| code-fold: true
+library(ggplot2)
+complexity <- seq(0.5, 10, length.out = 300)
+train_err  <- 0.85 / (complexity^0.75) + 0.04         # falls monotonically
+test_err   <- 0.85 / complexity + 0.018 * complexity  # U-shaped
+df <- data.frame(
+  complexity = rep(complexity, 2),
+  error      = c(train_err, test_err),
+  set        = rep(c("Training error", "Error on new data"), each = length(complexity))
+)
+best <- complexity[which.min(test_err)]
+ggplot(df, aes(complexity, error, colour = set)) +
+  geom_vline(xintercept = best, linetype = "dashed", colour = "grey55") +
+  geom_line(linewidth = 1.2) +
+  annotate("text", x = best, y = 0.60, label = "sweet spot", colour = "grey30",
+           fontface = "italic", size = 3.4) +
+  annotate("text", x = 1.0, y = 0.70, label = "underfitting", colour = "grey30",
+           hjust = 0, size = 3.4) +
+  annotate("text", x = 9.6, y = 0.40, label = "overfitting", colour = "grey30",
+           hjust = 1, size = 3.4) +
+  scale_colour_manual(values = c("Training error"   = "#6c8ebf",
+                                 "Error on new data" = "#b85450")) +
+  labs(x = "Model complexity →", y = "Prediction error →", colour = NULL) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(),
+        legend.position = "top", panel.grid.minor = element_blank())
+```
 
 ::: {.callout-tip}
 ## Detecting overfitting
@@ -299,11 +331,87 @@ to slip. **Feature selection** trims the input down to the variables that actual
 matter — often crucial in genomics, where you may start with tens of thousands of
 genes.
 
-The **bias–variance tradeoff** is the theory behind all of this. *Bias* is
-systematic error from a model that is too simple to capture the truth. *Variance*
-is sensitivity to the particular training sample you happened to draw. High-bias
-models underfit; high-variance models overfit. The model that generalizes best is
-the one that balances these two competing sources of error.
+The **bias–variance tradeoff** is the theory behind all of this, and the cleanest
+way to feel it is a thought experiment. Imagine you could repeat your whole study
+many times over — each time recruiting a *fresh* sample of patients from the same
+population and refitting your model from scratch. Two very different kinds of error
+can show up across those repeats.
+
+**Bias** is the error that survives the repetition: the part the model gets wrong
+*systematically*, the same way every time, no matter which sample it drew. It is the
+signature of a model too simple to capture the real relationship. Picture trying to
+fit a straight line to an epigenetic clock whose methylation-versus-age relationship
+genuinely curves — every sample produces a line that misses the bend in the same
+direction. The model is the wrong *shape*, so more data cannot rescue it. High bias
+is underfitting.
+
+**Variance** is the opposite failure: how much the fitted model *jumps around* from
+one sample to the next. A very flexible model — a deep decision tree, say — will
+contort itself to the particular handful of patients it trained on, fitting their
+noise as if it were signal. Give it a different sample of the same size and you get a
+noticeably *different* model that makes different predictions for the very same new
+patient. The model is too sensitive to the luck of the draw. High variance is
+overfitting.
+
+A dartboard makes the contrast concrete. A high-**bias** thrower lands every dart in
+a tight cluster, but off to one side of the bullseye — consistent, and consistently
+wrong. A high-**variance** thrower sprays darts all around the board — occasionally
+dead-on, but unreliable. You want neither: you want a tight cluster *at* the centre.
+
+Here is the catch that makes it a *tradeoff*: pushing one error down tends to push
+the other up. A simpler model has low variance but high bias; a more complex one
+trades the reverse. The model that generalizes best is the one that balances these
+two competing sources of error. @fig-bias-variance-decomp shows why: the error on
+new data is essentially bias plus variance, and because one falls as the other rises,
+their sum traces the very U we saw above.
+
+```{r}
+#| label: fig-bias-variance-decomp
+#| fig-cap: "The bias–variance decomposition of prediction error. As model complexity grows (left to right), **bias²** falls — a more flexible model can follow the true pattern more faithfully — while **variance** rises, because the model grows more sensitive to the particular training sample it happened to see. The error on new data is essentially their sum (**total error**, plus a fixed floor of irreducible noise), so it traces a U: dropping while falling bias dominates, then climbing once growing variance takes over. The best model sits at the bottom of that U — the **optimum model complexity** — not at the extreme of either curve. This is the *same* U as the previous figure, now taken apart into the two forces that create it: the left arm is high-bias underfitting, the right arm is high-variance overfitting."
+#| code-fold: true
+library(ggplot2)
+x        <- seq(0, 10, length.out = 400)
+bias2    <- exp(-0.5 * x)              # high for simple models, falls with complexity
+variance <- 0.01 * exp(0.5 * x)        # low for simple models, rises with complexity
+floor    <- 0.12                       # irreducible error (noise we can never remove)
+total    <- bias2 + variance + floor   # expected error on new data
+opt      <- x[which.min(total)]        # complexity that minimises total error
+
+df <- data.frame(
+  x     = rep(x, 3),
+  error = c(total, variance, bias2),
+  curve = factor(rep(c("Total error", "Variance", "Bias²"), each = length(x)),
+                 levels = c("Total error", "Variance", "Bias²"))
+)
+cols <- c("Total error" = "#1a1a1a", "Variance" = "#3a9aa5", "Bias²" = "#a8322a")
+
+ggplot(df, aes(x, error, colour = curve)) +
+  # axes drawn as arrows, like a hand-sketched schematic
+  annotate("segment", x = 0, xend = 0, y = 0, yend = 1.72,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"), linewidth = 0.5) +
+  annotate("segment", x = 0, xend = 10.7, y = 0, yend = 0,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"), linewidth = 0.5) +
+  # optimum complexity marker
+  annotate("segment", x = opt, xend = opt, y = 0, yend = 1.5,
+           linetype = "dotted", colour = "grey25", linewidth = 0.5) +
+  annotate("point", x = opt, y = 0, shape = 21, fill = "white",
+           colour = "black", size = 2.6, stroke = 0.7) +
+  annotate("text", x = opt - 0.18, y = 1.02, label = "Optimum Model Complexity",
+           angle = 90, fontface = "italic", size = 3.2, colour = "grey20") +
+  geom_line(linewidth = 1.1) +
+  # curve labels
+  annotate("text", x = 6.1,  y = 1.34, label = "Total Error", colour = cols[["Total error"]], size = 3.8) +
+  annotate("text", x = 8.9,  y = 0.78, label = "Variance",    colour = cols[["Variance"]],    size = 3.8) +
+  annotate("text", x = 8.9,  y = 0.14, label = "Bias²",  colour = cols[["Bias²"]],  size = 3.8) +
+  scale_colour_manual(values = cols) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  coord_cartesian(xlim = c(-0.8, 10.9), ylim = c(-0.2, 1.8), clip = "off") +
+  annotate("text", x = 5.3, y = -0.16, label = "Model Complexity", size = 4) +
+  annotate("text", x = -0.62, y = 0.85, label = "Error", angle = 90, size = 4) +
+  theme_void() +
+  theme(legend.position = "none", plot.margin = margin(6, 12, 8, 18))
+```
 
 ## Cross-validation and model selection
 
@@ -316,7 +424,29 @@ on which samples happen to land in which set.
 *k* equal parts (folds). You then train the model *k* times; each time, one fold
 is held out for validation and the other *k* − 1 are used for training. Averaging
 the *k* resulting scores gives a much steadier estimate of model quality than any
-single split.
+single split. @fig-kfold shows the rotation for *k* = 5.
+
+```{r}
+#| label: fig-kfold
+#| fig-cap: "Five-fold cross-validation. The training data is divided into five equal folds. Across five rounds, each fold takes its turn as the held-out validation set (orange) while the model trains on the other four (blue). Every sample is used for validation exactly once, and averaging the five validation scores gives a steadier, less luck-dependent estimate of performance than any single train–validation split. Note that the *test* set is not shown here — it sits untouched outside this whole procedure, reserved for the final evaluation."
+#| code-fold: true
+library(ggplot2)
+k <- 5
+grid <- expand.grid(fold = 1:k, round = 1:k)
+grid$role <- ifelse(grid$fold == grid$round, "Validation", "Train")
+ggplot(grid, aes(x = fold, y = round, fill = role)) +
+  geom_tile(colour = "white", linewidth = 3) +
+  geom_text(aes(label = role), size = 2.9, colour = "grey25") +
+  scale_fill_manual(values = c("Train" = "#dae8fc", "Validation" = "#ffe6cc")) +
+  scale_x_continuous(breaks = 1:k, labels = paste("Fold", 1:k), position = "top",
+                     expand = c(0, 0)) +
+  scale_y_reverse(breaks = 1:k, labels = paste("Round", 1:k), expand = c(0, 0)) +
+  coord_equal() +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  theme_minimal() +
+  theme(legend.position = "none", panel.grid = element_blank(),
+        axis.text = element_text(colour = "grey25"))
+```
 
 Five-fold and ten-fold cross-validation are the usual choices, trading off
 computation against reliability. *Leave-one-out* cross-validation is the extreme
