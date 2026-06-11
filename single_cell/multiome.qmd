@@ -255,7 +255,7 @@ The unique payoff of *paired* data is that we can connect a specific open region
 
 We'll use `MS4A1` (CD20), a canonical B-cell marker. The logic is three steps: find the gene, find the peaks near it, then correlate.
 
-**Step 1 — locate the gene.** We pull MS4A1's coordinates from an Ensembl annotation and relabel its chromosome in the `chr11` (UCSC) style the ATAC peaks use, then widen to a ±100 kb window — wide enough to catch enhancers, which often sit well outside the gene body:
+**Step 1 — locate the gene.** We pull MS4A1's coordinates from an Ensembl annotation and relabel its chromosome in the `chr11` (UCSC) style the ATAC peaks use, then widen to a ±100 kb window — wide enough to catch enhancers, which often sit well outside the gene body. One wrinkle: many gene symbols match *two* rows in Ensembl — the real `protein_coding` gene plus an `LRG_gene` curated-reference duplicate at the same locus. We keep only the protein-coding row so every peak is counted once:
 
 ```{r}
 #| label: peak-gene-locate
@@ -264,7 +264,8 @@ library(EnsDb.Hsapiens.v86)
 
 gene <- "MS4A1"
 all.genes <- genes(EnsDb.Hsapiens.v86)              # every gene, as a GRanges
-gene.gr   <- all.genes[all.genes$gene_name == gene] # subset to MS4A1
+gene.gr   <- all.genes[all.genes$gene_name == gene &
+                       all.genes$gene_biotype == "protein_coding"] # one row
 seqlevelsStyle(gene.gr) <- "UCSC"                   # "11" -> "chr11"
 window <- resize(gene.gr, width = width(gene.gr) + 2e5, fix = "center")
 window
@@ -293,6 +294,36 @@ sort(peak.cor, decreasing = TRUE)[1:10]             # the top candidate links
 ```
 
 The most strongly correlated peak is typically the gene's own promoter; the others are candidate enhancers that open in the same cells that express MS4A1 — precisely the sort of regulatory link that only *paired* measurement, in the same cells, can reveal.
+
+A correlation coefficient is a single number; it helps to *see* what it summarizes. Below we plot, cell by cell, MS4A1 expression against accessibility — for the promoter peak (the strongest link) and, for contrast, a nearby peak whose accessibility is essentially uncorrelated with expression. Single-cell data are sparse, so most cells register *neither* signal and pile up at the origin; rather than overplot ~10,000 semi-transparent points we bin them into a 2-D histogram with a log-scaled colour:
+
+```{r}
+#| label: peak-gene-scatter
+#| warning: false
+#| fig-width: 9
+#| fig-height: 4
+#| fig-cap: "Per-cell ATAC accessibility (x) versus MS4A1 expression (y) across all 10,032 cells, binned into a 2-D histogram with a log-scaled colour. **Left — the promoter peak:** a distinct population of cells (the B cells) is high in *both* modalities, and it is this joint high–high cloud that drives the positive Spearman correlation. **Right — a nearby peak with ρ ≈ 0:** the accessible cells (spread along the x-axis at zero expression) and the expressing cells (spread up the y-axis at zero accessibility) are largely *different* cells, so the two signals never coincide. The bright bin at the origin is the majority of cells in which neither modality was detected — the pervasive dropout of single-cell assays, and the reason a density view is clearer here than a raw scatterplot."
+library(ggplot2)
+library(patchwork)
+
+top.peak  <- names(sort(peak.cor, decreasing = TRUE))[1] # strongest link (promoter)
+null.peak <- names(peak.cor)[which.min(abs(peak.cor))]   # nearby peak, no link
+
+link_panel <- function(peak, tag) {
+  df <- data.frame(accessibility = acc[peak, ], expression = expr)
+  ggplot(df, aes(accessibility, expression)) +
+    geom_bin2d(bins = 40) +
+    scale_fill_viridis_c(trans = "log10", name = "cells") +
+    labs(title = tag,
+         subtitle = sprintf("%s  (Spearman ρ = %.2f)", peak, peak.cor[peak]),
+         x = "ATAC accessibility (TF-IDF)",
+         y = "MS4A1 expression (log-normalised)") +
+    theme_minimal(base_size = 10)
+}
+
+link_panel(top.peak,  "Promoter: accessibility tracks expression") +
+  link_panel(null.peak, "Nearby peak: no link")
+```
 
 ::: {.callout-tip}
 ## Where this goes next
