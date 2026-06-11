@@ -162,13 +162,30 @@ learner <- lrn("regr.lm")
 learner$train(task, row_ids = train_set)
 ```
 
-After fitting a linear model, the standard **diagnostic plots**
-(@fig-regression-diagnostic) help check whether the model's assumptions hold.
+After fitting a linear model it pays to *check* it, not just trust it. Calling
+`plot()` on the fitted model draws four standard **diagnostic plots**
+(@fig-regression-diagnostic), each a different test of an assumption that linear
+regression quietly makes. They all revolve around the **residuals** — the leftover
+errors, the gap between a person's true age and the age the model predicted for them.
+If the model has captured the real pattern, those residuals should look like
+featureless random scatter; any *structure* left in them is a clue that something the
+model isn't capturing.
 
-```{r fig-regression-diagnostic, fig.cap="Regression diagnostic plots. Top left: residuals vs. fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs. leverage."}
+```{r}
+#| label: fig-regression-diagnostic
+#| fig-cap: "Regression diagnostic plots, produced by calling `plot()` on the fitted `lm` model. **Top-left — Residuals vs Fitted:** the residuals plotted against the model's predictions. You want a shapeless horizontal band centred on zero with the red trend line roughly flat; a curve or a funnel shape signals a missed nonlinear relationship or a spread that changes across the range. **Top-right — Normal Q-Q:** checks whether the residuals are normally distributed. The points should hug the diagonal; systematic departures, especially at the two ends, mean heavy tails or outliers. **Bottom-left — Scale-Location:** the same residuals as the first panel but showing their *size*. A flat red line means the errors have roughly constant spread (homoscedasticity); an upward slope means the model is more precise at some ages than others. **Bottom-right — Residuals vs Leverage:** flags individual people with outsized influence on the fit. Points pushed toward the right (high leverage) and beyond the dashed Cook's-distance contours deserve a look, because a single such point can tilt the entire line."
 par(mfrow = c(2, 2))
 plot(learner$model)
 ```
+
+For our methylation clock, read the four panels together: are the residuals
+**patternless** (top-left), roughly **normal** (top-right), of **even spread**
+across the age range (bottom-left), and free of any **single dominating sample**
+(bottom-right)? Mild wobbles in any of these are normal and rarely cause for alarm.
+Strong structure, on the other hand — a clear curve, a fanning-out, a lone point far
+from the pack — would be the data telling you that a straight line is the wrong shape,
+and that a transformation or a more flexible model (like the tree and forest we try
+next) might serve better.
 
 ### Predict
 
