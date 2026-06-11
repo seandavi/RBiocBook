@@ -80,9 +80,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-709e903f7486fc15c5f7f9cf283d35df.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-89274b6a7b026c87465810c35957e583.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-6dd28c7963e21d618ae16e7ac0413509.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-89274b6a7b026c87465810c35957e583.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-9fe7af23de747b2ab7192c628daeeef8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-3131ab7eab2c22f581520a6cc2f0c160.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
@@ -891,12 +891,39 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 </div>
 </div>
 <p>Each row is a person, each <code>cg…</code> column is the methylation level at one CpG site, and <code>Age</code> is what we want to predict. Because the target is a <em>number</em>, this is a <strong>regression</strong> task — so we use <code><a href="https://mlr3.mlr-org.com/reference/as_task_regr.html">as_task_regr()</a></code>.</p>
+<p>Before modelling, it is worth <em>seeing</em> the signal we are banking on. <a href="#fig-meth-signal" class="quarto-xref">Figure&nbsp;<span>28.1</span></a> plots the four CpG sites whose methylation tracks age most closely. Each point is a person; the red line is a straight-line trend.</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cpg_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">meth_age</span><span class="op">)</span>, <span class="st">"Age"</span><span class="op">)</span></span>
+<span><span class="va">cors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">cpg_cols</span>, <span class="kw">function</span><span class="op">(</span><span class="va">cg</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">meth_age</span><span class="op">[[</span><span class="va">cg</span><span class="op">]</span><span class="op">]</span>, <span class="va">meth_age</span><span class="op">$</span><span class="va">Age</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">top</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">cors</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="va">long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">top</span>, <span class="kw">function</span><span class="op">(</span><span class="va">cg</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>cpg <span class="op">=</span> <span class="va">cg</span>, methylation <span class="op">=</span> <span class="va">meth_age</span><span class="op">[[</span><span class="va">cg</span><span class="op">]</span><span class="op">]</span>, age <span class="op">=</span> <span class="va">meth_age</span><span class="op">$</span><span class="va">Age</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">methylation</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span>, size <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, colour <span class="op">=</span> <span class="st">"#b85450"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">cpg</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Chronological age (years)"</span>, y <span class="op">=</span> <span class="st">"Methylation level"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-meth-signal" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-meth-signal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="ml_methylation_age_files/figure-html/fig-meth-signal-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;28.1: The biological signal behind an epigenetic clock. Each panel is one CpG site: a person’s methylation level at that site (vertical) against their chronological age (horizontal), with a linear trend in red. At some sites methylation creeps up with age and at others it drifts down, but in every case the relationship is steady and roughly linear. That steady, age-linked drift is exactly the signal a regression model exploits — and the sites with the tightest trend make the most useful features."><img src="ml_methylation_age_files/figure-html/fig-meth-signal-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-meth-signal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.1: The biological signal behind an epigenetic clock. Each panel is one CpG site: a person’s methylation level at that site (vertical) against their chronological age (horizontal), with a linear trend in red. At some sites methylation creeps <em>up</em> with age and at others it drifts <em>down</em>, but in every case the relationship is steady and roughly linear. That steady, age-linked drift is exactly the signal a regression model exploits — and the sites with the tightest trend make the most useful features.
+</figcaption></figure>
+</div>
+</div>
+</div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/as_task_regr.html">as_task_regr</a></span><span class="op">(</span><span class="va">meth_age</span>, target <span class="op">=</span> <span class="st">'Age'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/as_task_regr.html">as_task_regr</a></span><span class="op">(</span><span class="va">meth_age</span>, target <span class="op">=</span> <span class="st">'Age'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We split into training and test sets exactly as in the <a href="../machine_learning/ml_cancer.html">cancer example</a>, seeding for reproducibility.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
 <span><span class="va">train_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="fl">0.67</span> <span class="op">*</span> <span class="va">task</span><span class="op">$</span><span class="va">nrow</span><span class="op">)</span></span>
 <span><span class="va">test_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html">setdiff</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="va">row_ids</span>, <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -904,39 +931,40 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <span class="header-section-number">28.4</span> Linear regression</h2>
 <p>We start with the simplest regression model: a straight-line fit relating methylation to age.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.lm"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.lm"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="train" class="level3 page-columns page-full" data-number="28.4.1"><h3 data-number="28.4.1" class="anchored" data-anchor-id="train">
 <span class="header-section-number">28.4.1</span> Train</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>After fitting a linear model, the standard <strong>diagnostic plots</strong> (<a href="#fig-regression-diagnostic" class="quarto-xref">Figure&nbsp;<span>28.1</span></a>) help check whether the model’s assumptions hold.</p>
+<p>After fitting a linear model it pays to <em>check</em> it, not just trust it. Calling <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot()</a></code> on the fitted model draws four standard <strong>diagnostic plots</strong> (<a href="#fig-regression-diagnostic" class="quarto-xref">Figure&nbsp;<span>28.2</span></a>), each a different test of an assumption that linear regression quietly makes. They all revolve around the <strong>residuals</strong> — the leftover errors, the gap between a person’s true age and the age the model predicted for them. If the model has captured the real pattern, those residuals should look like featureless random scatter; any <em>structure</em> left in them is a clue that something the model isn’t capturing.</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">learner</span><span class="op">$</span><span class="va">model</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display page-columns page-full">
 <div id="fig-regression-diagnostic" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-regression-diagnostic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;28.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs.&nbsp;leverage."><img src="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;28.2: Regression diagnostic plots, produced by calling plot() on the fitted lm model. Top-left — Residuals vs Fitted: the residuals plotted against the model’s predictions. You want a shapeless horizontal band centred on zero with the red trend line roughly flat; a curve or a funnel shape signals a missed nonlinear relationship or a spread that changes across the range. Top-right — Normal Q-Q: checks whether the residuals are normally distributed. The points should hug the diagonal; systematic departures, especially at the two ends, mean heavy tails or outliers. Bottom-left — Scale-Location: the same residuals as the first panel but showing their size. A flat red line means the errors have roughly constant spread (homoscedasticity); an upward slope means the model is more precise at some ages than others. Bottom-right — Residuals vs Leverage: flags individual people with outsized influence on the fit. Points pushed toward the right (high leverage) and beyond the dashed Cook’s-distance contours deserve a look, because a single such point can tilt the entire line."><img src="ml_methylation_age_files/figure-html/fig-regression-diagnostic-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-regression-diagnostic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;28.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitted values (look for no pattern). Top right: normal Q-Q plot (points should follow the line). Bottom left: scale-location. Bottom right: residuals vs.&nbsp;leverage.
+Figure&nbsp;28.2: Regression diagnostic plots, produced by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html">plot()</a></code> on the fitted <code>lm</code> model. <strong>Top-left — Residuals vs Fitted:</strong> the residuals plotted against the model’s predictions. You want a shapeless horizontal band centred on zero with the red trend line roughly flat; a curve or a funnel shape signals a missed nonlinear relationship or a spread that changes across the range. <strong>Top-right — Normal Q-Q:</strong> checks whether the residuals are normally distributed. The points should hug the diagonal; systematic departures, especially at the two ends, mean heavy tails or outliers. <strong>Bottom-left — Scale-Location:</strong> the same residuals as the first panel but showing their <em>size</em>. A flat red line means the errors have roughly constant spread (homoscedasticity); an upward slope means the model is more precise at some ages than others. <strong>Bottom-right — Residuals vs Leverage:</strong> flags individual people with outsized influence on the fit. Points pushed toward the right (high leverage) and beyond the dashed Cook’s-distance contours deserve a look, because a single such point can tilt the entire line.
 </figcaption></figure>
 </div>
 </div>
 </div>
+<p>For our methylation clock, read the four panels together: are the residuals <strong>patternless</strong> (top-left), roughly <strong>normal</strong> (top-right), of <strong>even spread</strong> across the age range (bottom-left), and free of any <strong>single dominating sample</strong> (bottom-right)? Mild wobbles in any of these are normal and rarely cause for alarm. Strong structure, on the other hand — a clear curve, a fanning-out, a lone point far from the pack — would be the data telling you that a straight line is the wrong shape, and that a transformation or a more flexible model (like the tree and forest we try next) might serve better.</p>
 </section><section id="predict" class="level3" data-number="28.4.2"><h3 data-number="28.4.2" class="anchored" data-anchor-id="predict">
 <span class="header-section-number">28.4.2</span> Predict</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
 <span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="assess" class="level3" data-number="28.4.3"><h3 data-number="28.4.3" class="anchored" data-anchor-id="assess">
+</section><section id="assess" class="level3 page-columns page-full" data-number="28.4.3"><h3 data-number="28.4.3" class="anchored" data-anchor-id="assess">
 <span class="header-section-number">28.4.3</span> Assess</h3>
 <p>Printing a regression prediction shows the predicted (<code>response</code>) and true (<code>truth</code>) values side by side.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ── &lt;PredictionRegr&gt; for 209 observations: ──────────────────────────────────────
@@ -951,23 +979,27 @@ Figure&nbsp;28.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitt
 </div>
 </div>
 <p>A scatter plot of truth versus prediction makes the fit visible: a perfect model would put every point on the diagonal.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">pred_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">truth</span>, y <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">pred_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">truth</span>, y <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
 </div>
-<div class="cell-output-display">
-<div>
-<figure class="figure"><p><a href="ml_methylation_age_files/figure-html/unnamed-chunk-10-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="ml_methylation_age_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-meth-lm" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-meth-lm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="ml_methylation_age_files/figure-html/fig-meth-lm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;28.3: Linear-regression predictions on the training set: predicted age (vertical) against true age (horizontal), one point per person, with the blue least-squares line. A perfect model would place every point on the 45° diagonal; the tighter the cloud hugs that line, the better the fit. A straight-line model spreads its predictions continuously across the age range."><img src="ml_methylation_age_files/figure-html/fig-meth-lm-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-meth-lm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.3: Linear-regression predictions on the <strong>training</strong> set: predicted age (vertical) against true age (horizontal), one point per person, with the blue least-squares line. A perfect model would place every point on the 45° diagonal; the tighter the cloud hugs that line, the better the fit. A straight-line model spreads its predictions continuously across the age range.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <p>We summarize the fit with <strong>R²</strong> (the fraction of variation in age the model explains; 1.0 is perfect, 0 is no better than guessing the mean).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
@@ -975,7 +1007,7 @@ Figure&nbsp;28.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitt
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ── &lt;PredictionRegr&gt; for 103 observations: ──────────────────────────────────────
@@ -988,18 +1020,18 @@ Figure&nbsp;28.1: Regression diagnostic plots. Top left: residuals vs.&nbsp;fitt
      307    63 58.68486
      309    68 70.41987</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
 0.9363526 </code></pre>
 </div>
 </div>
 <p>The training R² is high, but the <strong>test R²</strong> is the honest measure of how well the clock would predict the age of a new person. A drop from training to test is, again, the signature of overfitting.</p>
-</section></section><section id="regression-tree" class="level2" data-number="28.5"><h2 data-number="28.5" class="anchored" data-anchor-id="regression-tree">
+</section></section><section id="regression-tree" class="level2 page-columns page-full" data-number="28.5"><h2 data-number="28.5" class="anchored" data-anchor-id="regression-tree">
 <span class="header-section-number">28.5</span> Regression tree</h2>
 <p>We can use a tree for regression too. Instead of voting on a class, each leaf of the tree reports a predicted <em>number</em>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.rpart"</span>, keep_model <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.rpart"</span>, keep_model <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
 <span><span class="va">learner</span><span class="op">$</span><span class="va">model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1027,13 +1059,13 @@ node), split, n, deviance, yval
 <section id="predict-1" class="level3" data-number="28.5.1"><h3 data-number="28.5.1" class="anchored" data-anchor-id="predict-1">
 <span class="header-section-number">28.5.1</span> Predict</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
 <span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="assess-1" class="level3" data-number="28.5.2"><h3 data-number="28.5.2" class="anchored" data-anchor-id="assess-1">
+</section><section id="assess-1" class="level3 page-columns page-full" data-number="28.5.2"><h3 data-number="28.5.2" class="anchored" data-anchor-id="assess-1">
 <span class="header-section-number">28.5.2</span> Assess</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ── &lt;PredictionRegr&gt; for 209 observations: ──────────────────────────────────────
@@ -1048,22 +1080,26 @@ node), split, n, deviance, yval
 </div>
 </div>
 <p>The discreteness is obvious in the scatter plot: predictions stack up into horizontal bands, one per leaf.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">pred_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">truth</span>, y <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">pred_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">truth</span>, y <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
 </div>
-<div class="cell-output-display">
-<div>
-<figure class="figure"><p><a href="ml_methylation_age_files/figure-html/unnamed-chunk-16-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="ml_methylation_age_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-meth-tree" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-meth-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="ml_methylation_age_files/figure-html/fig-meth-tree-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;28.4: Regression-tree predictions on the training set. Because a single tree gives every person who lands in a given leaf the same predicted age, the points stack into horizontal bands — one band per leaf. That blocky, discrete behaviour is a poor match for a smoothly varying quantity like age."><img src="ml_methylation_age_files/figure-html/fig-meth-tree-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-meth-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.4: Regression-tree predictions on the training set. Because a single tree gives every person who lands in a given leaf the <em>same</em> predicted age, the points stack into horizontal bands — one band per leaf. That blocky, discrete behaviour is a poor match for a smoothly varying quantity like age.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
@@ -1071,7 +1107,7 @@ node), split, n, deviance, yval
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ── &lt;PredictionRegr&gt; for 103 observations: ──────────────────────────────────────
@@ -1084,18 +1120,18 @@ node), split, n, deviance, yval
      307    63 61.81250
      309    68 61.81250</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
 0.8545402 </code></pre>
 </div>
 </div>
 <p>The R² differs noticeably from the linear model — the single tree’s blocky predictions are a poor fit for a continuous quantity like age.</p>
-</section></section><section id="random-forest" class="level2" data-number="28.6"><h2 data-number="28.6" class="anchored" data-anchor-id="random-forest">
+</section></section><section id="random-forest" class="level2 page-columns page-full" data-number="28.6"><h2 data-number="28.6" class="anchored" data-anchor-id="random-forest">
 <span class="header-section-number">28.6</span> Random forest</h2>
 <p>A random forest is also tree-based, but averaging over many trees smooths away the blocky, discrete behaviour of a single tree, giving genuinely continuous predictions.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">789</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">789</span><span class="op">)</span></span>
 <span><span class="va">learner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span>, mtry <span class="op">=</span> <span class="fl">2</span>, min.node.size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="va">learner</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
 <span><span class="va">learner</span><span class="op">$</span><span class="va">model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1114,74 +1150,78 @@ Mtry:                             2
 Target node size:                 20 
 Variable importance mode:         none 
 Splitrule:                        variance 
-OOB prediction error (MSE):       17.72152 
-R squared (OOB):                  0.918883 </code></pre>
+OOB prediction error (MSE):       18.46479 
+R squared (OOB):                  0.9154808 </code></pre>
 </div>
 </div>
 <section id="predict-2" class="level3" data-number="28.6.1"><h3 data-number="28.6.1" class="anchored" data-anchor-id="predict-2">
 <span class="header-section-number">28.6.1</span> Predict</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
 <span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="assess-2" class="level3" data-number="28.6.2"><h3 data-number="28.6.2" class="anchored" data-anchor-id="assess-2">
+</section><section id="assess-2" class="level3 page-columns page-full" data-number="28.6.2"><h3 data-number="28.6.2" class="anchored" data-anchor-id="assess-2">
 <span class="header-section-number">28.6.2</span> Assess</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_train</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ── &lt;PredictionRegr&gt; for 209 observations: ──────────────────────────────────────
  row_ids truth response
-     298    29 30.48368
-     103    58 58.25574
-     194    53 48.05929
+     298    29 30.73644
+     103    58 58.11206
+     194    53 48.40537
      ---   ---      ---
-     312    48 51.18667
-     246    66 64.54711
-     238    38 37.65249</code></pre>
+     312    48 51.14171
+     246    66 64.41901
+     238    38 37.83379</code></pre>
 </div>
 </div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">pred_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">truth</span>, y <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">pred_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">truth</span>, y <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
 </div>
-<div class="cell-output-display">
-<div>
-<figure class="figure"><p><a href="ml_methylation_age_files/figure-html/unnamed-chunk-22-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="ml_methylation_age_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-meth-rf" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-meth-rf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="ml_methylation_age_files/figure-html/fig-meth-rf-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;28.5: Random-forest predictions on the training set. Averaging over many trees fills in the gaps between a single tree’s discrete leaves, so the predicted ages now vary smoothly and scatter around the diagonal instead of collapsing into horizontal bands."><img src="ml_methylation_age_files/figure-html/fig-meth-rf-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-meth-rf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.5: Random-forest predictions on the training set. Averaging over many trees fills in the gaps between a single tree’s discrete leaves, so the predicted ages now vary smoothly and scatter around the diagonal instead of collapsing into horizontal bands.
+</figcaption></figure>
 </div>
 </div>
 </div>
 <p>The points now scatter smoothly around the diagonal — no more horizontal bands.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pred_train</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
-0.9623924 </code></pre>
+0.9620203 </code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ── &lt;PredictionRegr&gt; for 103 observations: ──────────────────────────────────────
  row_ids truth response
-       4    37 37.10820
-       5    24 29.29540
-       7    34 33.02805
+       4    37 37.65201
+       5    24 29.29569
+       7    34 32.89875
      ---   ---      ---
-     306    42 40.41656
-     307    63 58.32185
-     309    68 63.00852</code></pre>
+     306    42 40.57969
+     307    63 58.52445
+     309    68 63.00209</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="va">measures</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> regr.rsq 
-0.9226935 </code></pre>
+0.9206675 </code></pre>
 </div>
 </div>
 <p>Compare the test R² across the three regression models. The forest typically predicts age more accurately than either the linear model or the single tree, and without the single tree’s discrete artifacts.</p>
@@ -1213,7 +1253,7 @@ R squared (OOB):                  0.918883 </code></pre>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rf_default</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rf_default</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span><span class="op">)</span></span>
 <span><span class="va">rf_default</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">train_set</span><span class="op">)</span></span>
 <span><span class="va">rf_default</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span>, row_ids <span class="op">=</span> <span class="va">test_set</span><span class="op">)</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1237,7 +1277,7 @@ R squared (OOB):                  0.918883 </code></pre>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span>, <span class="st">'regr.rmse'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pred_test</span><span class="op">$</span><span class="fu">score</span><span class="op">(</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msrs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'regr.rsq'</span>, <span class="st">'regr.rmse'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>R² is unitless and says what <em>fraction</em> of the variation in age the model explains; RMSE is in the target’s own units (years) and says how far off a typical prediction is. For an audience that thinks in years, RMSE is often the more intuitive headline number.</p>
 </div>
