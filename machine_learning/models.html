@@ -822,7 +822,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 10, 2026</p>
+      <p class="date-modified">June 11, 2026</p>
     </div>
   </div>
     
@@ -839,7 +839,7 @@ window.Quarto = {
 <li>Describe any supervised algorithm in terms of its <strong>hypothesis space</strong>, <strong>objective function</strong>, and <strong>learning algorithm</strong>.</li>
 <li>Fit and interpret a <strong>linear regression</strong> with <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>.</li>
 <li>Make predictions with <strong>k-nearest neighbours</strong> using <code><a href="https://rdrr.io/pkg/class/man/knn.html">class::knn()</a></code>, and explain why feature scaling matters.</li>
-<li>Fit <strong>ridge</strong>, <strong>LASSO</strong>, and <strong>elastic-net</strong> models with <code><a href="https://rdrr.io/pkg/glmnet/man/glmnet.html">glmnet()</a></code>, and read off which features each one keeps.</li>
+<li>Fit <strong>ridge</strong>, <strong>LASSO</strong>, and <strong>elastic-net</strong> models with <code><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet()</a></code>, and read off which features each one keeps.</li>
 <li>Grow and read a <strong>decision tree</strong> with <code>rpart</code>, and a <strong>random forest</strong> with <code>ranger</code>.</li>
 </ul></section><section id="a-framework-for-understanding-supervised-algorithms" class="level2" data-number="25.2"><h2 data-number="25.2" class="anchored" data-anchor-id="a-framework-for-understanding-supervised-algorithms">
 <span class="header-section-number">25.2</span> A framework for understanding supervised algorithms</h2>
@@ -993,10 +993,10 @@ $ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 
 <span class="header-section-number">25.6.1</span> Ridge regression</h3>
 <p><strong>Plain-language intuition.</strong> Ridge adds an <strong>L2 penalty</strong>: the sum of the <em>squared</em> coefficients (<a href="#eq-ridge" class="quarto-xref">Equation&nbsp;<span>25.2</span></a>). This shrinks every coefficient toward zero but never quite <em>to</em> zero — so ridge keeps all your features, just turns down their volume. It’s the right choice when you believe many features each contribute a little.</p>
 <p><span id="eq-ridge"><span class="math display">\[L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} \beta_j^2 \tag{25.2}\]</span></span></p>
-<p>In <code>glmnet</code>, ridge is <code>alpha = 0</code>. We use <code><a href="https://rdrr.io/pkg/glmnet/man/cv.glmnet.html">cv.glmnet()</a></code> to let cross-validation pick a good <span class="math inline">\(\lambda\)</span> automatically:</p>
+<p>In <code>glmnet</code>, ridge is <code>alpha = 0</code>. We use <code><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet()</a></code> to let cross-validation pick a good <span class="math inline">\(\lambda\)</span> automatically:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">fit_ridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmnet/man/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">fit_ridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_ridge</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1023,7 +1023,7 @@ bill_depth_mm       -10.47499</code></pre>
 <p>LASSO is <code>alpha = 1</code> in <code>glmnet</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">fit_lasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmnet/man/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">fit_lasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_lasso</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1055,7 +1055,7 @@ bill_depth_mm         .       </code></pre>
 <p>The mixing dial is <code>alpha</code>, between 0 and 1: <code>alpha = 0</code> is pure ridge, <code>alpha = 1</code> is pure LASSO, and anything in between is elastic net. Let’s use a 50/50 blend, <code>alpha = 0.5</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">fit_enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmnet/man/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">fit_enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">x_train</span>, <span class="va">y_train</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">fit_enet</span>, s <span class="op">=</span> <span class="st">"lambda.min"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1167,7 +1167,7 @@ Figure&nbsp;25.2: Graphical representation of a random forest: many decision tre
 <li>
 <strong>k-nearest neighbours</strong> (<code><a href="https://rdrr.io/pkg/class/man/knn.html">class::knn()</a></code>) predicts from the most similar training examples — remember to <strong>scale</strong> your features first.</li>
 <li>
-<strong>Penalized regression</strong> (<code><a href="https://rdrr.io/pkg/glmnet/man/glmnet.html">glmnet()</a></code>) adds a complexity penalty to fight overfitting: <strong>ridge</strong> (<code>alpha = 0</code>) shrinks all coefficients, <strong>LASSO</strong> (<code>alpha = 1</code>) zeroes some out for feature selection, and <strong>elastic net</strong> (<code>0 &lt; alpha &lt; 1</code>) blends the two.</li>
+<strong>Penalized regression</strong> (<code><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet()</a></code>) adds a complexity penalty to fight overfitting: <strong>ridge</strong> (<code>alpha = 0</code>) shrinks all coefficients, <strong>LASSO</strong> (<code>alpha = 1</code>) zeroes some out for feature selection, and <strong>elastic net</strong> (<code>0 &lt; alpha &lt; 1</code>) blends the two.</li>
 <li>
 <strong>Decision trees</strong> (<code>rpart</code>) are readable flow charts but unstable on their own; <strong>random forests</strong> (<code>ranger</code>) average many trees into a stable, accurate, low-fuss predictor.</li>
 </ul>
