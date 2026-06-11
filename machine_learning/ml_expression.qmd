@@ -174,6 +174,11 @@ pred_test <- learner$predict(exp_pred_task, split$test)
 
 ```{r}
 pred_train
+```
+
+```{r}
+#| label: fig-expr-lm-train
+#| fig-cap: "Linear-regression predictions on the **training** genes: predicted expression (vertical) against measured expression (horizontal), one point per gene. The closer the points cluster along the diagonal, the more of the expression signal the histone marks are capturing."
 plot(pred_train)
 ```
 
@@ -191,6 +196,8 @@ pred_test$score(measures)
 ```
 
 ```{r}
+#| label: fig-expr-lm-test
+#| fig-cap: "Linear-regression predictions on the held-out **test** genes. Because the model never saw these genes during training, this scatter is the honest picture of how well promoter histone marks predict a gene's expression."
 plot(pred_test)
 ```
 
@@ -219,6 +226,65 @@ In `mlr3`, the `alpha` setting picks the flavour: `alpha = 0` is ridge,
 `alpha = 1` is lasso, and values in between are elastic net.
 :::
 
+Whichever flavour you pick, a single dial controls *how hard* the penalty pushes:
+the regularization strength **λ** (lambda). At `λ = 0` there is no penalty at all and
+you are back to ordinary least squares — the most flexible, highest-variance fit.
+Turn λ up and the coefficients are squeezed toward zero, giving a simpler,
+higher-bias model. In other words, **λ is a knob that slides the model back and forth
+along the model-complexity axis** from the [introduction](intro.qmd)
+(@fig-lambda-slider). The whole game is to stop at the bottom of the U — and that is
+exactly the job we hand to cross-validation.
+
+```{r}
+#| label: fig-lambda-slider
+#| fig-cap: "Penalized regression turns model complexity into a single continuous dial. The curves are the same bias–variance picture from the [introduction](intro.qmd): as the model grows more complex, **bias²** falls while **variance** rises, and their sum — the **total error** on new data — traces a U. What penalized regression adds is the **λ** knob along the bottom. At **λ = 0** there is no penalty and you fit ordinary least squares: the most complex, highest-variance model (far right). Increasing λ shrinks the coefficients, sliding the model leftward toward simpler, higher-bias fits. Cross-validation's one job is to find the λ that lands at the bottom of the U."
+#| code-fold: true
+library(ggplot2)
+x        <- seq(0, 10, length.out = 400)
+bias2    <- exp(-0.5 * x)
+variance <- 0.01 * exp(0.5 * x)
+total    <- bias2 + variance + 0.12
+opt      <- x[which.min(total)]
+df <- data.frame(
+  x     = rep(x, 3),
+  error = c(total, variance, bias2),
+  curve = factor(rep(c("Total error", "Variance", "Bias²"), each = length(x)),
+                 levels = c("Total error", "Variance", "Bias²")))
+cols <- c("Total error" = "#1a1a1a", "Variance" = "#3a9aa5", "Bias²" = "#a8322a")
+ggplot(df, aes(x, error, colour = curve)) +
+  annotate("segment", x = 0, xend = 0, y = 0, yend = 1.72,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"), linewidth = 0.5) +
+  annotate("segment", x = 0, xend = 10.7, y = 0, yend = 0,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"), linewidth = 0.5) +
+  annotate("segment", x = opt, xend = opt, y = 0, yend = 1.5,
+           linetype = "dotted", colour = "grey25", linewidth = 0.5) +
+  annotate("text", x = opt - 0.18, y = 1.0, label = "λ chosen by cross-validation",
+           angle = 90, fontface = "italic", size = 3.1, colour = "grey20") +
+  geom_line(linewidth = 1.1) +
+  annotate("text", x = 6.1, y = 1.34, label = "Total error", colour = cols[["Total error"]], size = 3.8) +
+  annotate("text", x = 8.9, y = 0.78, label = "Variance",    colour = cols[["Variance"]],    size = 3.8) +
+  annotate("text", x = 8.9, y = 0.14, label = "Bias²",  colour = cols[["Bias²"]],  size = 3.8) +
+  annotate("text", x = 5.3, y = -0.12, label = "Model complexity", size = 3.6) +
+  # the lambda dial beneath the axis
+  annotate("segment", x = 9.3, xend = 1.0, y = -0.34, yend = -0.34,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"),
+           colour = "#3b6ea5", linewidth = 0.7) +
+  annotate("text", x = 9.95, y = -0.34, label = "λ = 0\n(OLS)", hjust = 0,
+           size = 2.9, colour = "grey20", lineheight = 0.85) +
+  annotate("text", x = 0.55, y = -0.34, label = "large λ", hjust = 1,
+           size = 2.9, colour = "grey20") +
+  annotate("text", x = 5.2, y = -0.52,
+           label = "increasing λ  (stronger penalty → simpler model)",
+           colour = "#3b6ea5", size = 3.3) +
+  scale_colour_manual(values = cols) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  coord_cartesian(xlim = c(-0.7, 11.4), ylim = c(-0.62, 1.82), clip = "off") +
+  annotate("text", x = -0.5, y = 0.85, label = "Error", angle = 90, size = 4) +
+  theme_void() +
+  theme(legend.position = "none", plot.margin = margin(6, 14, 10, 18))
+```
+
 We'll use the `regr.cv_glmnet` learner, which automatically uses
 **cross-validation** to choose the penalty strength.
 
@@ -233,6 +299,20 @@ and `cv_glmnet` uses it to pick the best penalty (`lambda`). The `nfolds` settin
 controls *k*; 5 or 10 are common choices.
 :::
 
+Here is how that actually pins down the penalty. `cv_glmnet` lays out a grid of
+candidate λ values, from strong to weak. For *each* candidate it runs the full
+*k*-fold routine just described — fit on *k − 1* folds, measure the error on the
+held-out fold, rotate until every fold has taken a turn as validation set — and
+averages those *k* errors into a *single* score for that λ. Sweeping across the whole
+grid therefore yields one cross-validated error per candidate penalty (the curve we
+plot in a moment). The **best λ** is then simply the one with the lowest
+cross-validated error — glmnet calls it `lambda.min`. Because that minimum can be a
+little noisy, glmnet also offers `lambda.1se`: the strongest penalty (the simplest
+model) whose error is still within one standard error of the best, a slightly more
+conservative default. The essential point is that this entire search happens *inside
+the training data* — the test set is never consulted while we choose λ, so it remains
+a fair, untouched judge at the end.
+
 With `alpha = 0` we fit a **ridge** model with 10-fold cross-validation:
 
 ```{r}
@@ -246,6 +326,16 @@ learner <- lrn("regr.cv_glmnet", nfolds = 10, alpha = 0)
 learner$train(exp_pred_task, split$train)
 ```
 
+Because `cv_glmnet` quietly tried a whole range of λ values and scored each one by
+cross-validation, we can look at that search directly (@fig-cv-lambda) — the
+real-data version of the λ dial from the schematic above.
+
+```{r}
+#| label: fig-cv-lambda
+#| fig-cap: "The cross-validation search that `cv_glmnet` ran. Each red dot is the mean cross-validated error (mean squared error) for one value of the penalty, with vertical bars showing ±1 standard error; the numbers across the top count how many features survive at each λ — all **14** here, because *ridge* shrinks coefficients but never zeros them (only lasso would prune that count). The x-axis is **−log(λ)**, so the penalty grows toward the *left*, the same orientation as the schematic above. The two dotted lines mark **lambda.min** (lowest CV error) and **lambda.1se** (the strongest penalty within one standard error of it). Notice the error keeps falling as the penalty weakens, with no interior bottom: on this small, low-dimensional dataset ridge's shrinkage buys little, and cross-validation settles near the lightly-penalized, OLS-like end. Penalties earn their keep when features are many and correlated — not so much here."
+plot(learner$model)
+```
+
 For a penalized model we can inspect the **coefficients** directly:
 
 ```{r}
@@ -257,6 +347,23 @@ expression up or down. With lasso (`alpha = 1`) many of these would be exactly
 zero — the model would have *selected* a subset of marks for us, which is useful
 not just for prediction but for understanding which marks matter.
 
+::: {.callout-important}
+## Cross-validation tunes the model; the test set still judges it
+
+It is tempting to think that once you have cross-validated, you are done — but the
+two jobs are different, and they deliberately use different data. The
+cross-validation inside `cv_glmnet` ran *entirely on the training split*
+(`split$train`): it carved those training genes into 10 folds to choose λ, and never
+touched `split$test`. That makes it a **tuning** tool, not an honest performance
+estimate — the chosen λ has, in effect, been fitted to the training data, so scoring
+the model on that same data would flatter it.
+
+This is exactly why we set aside a test set with `partition()` at the very start. We
+still report the model's quality on the held-out **test** genes below (`split$test`),
+which played no part in fitting the coefficients *or* in selecting λ.
+Cross-validation picks the dial; the untouched test set delivers the verdict.
+:::
+
 ### Predict and assess
 
 ```{r}
@@ -266,6 +373,11 @@ pred_test <- learner$predict(exp_pred_task, split$test)
 
 ```{r}
 pred_train
+```
+
+```{r}
+#| label: fig-expr-ridge-train
+#| fig-cap: "Ridge-regression predictions on the **training** genes. The L2 penalty shrinks the coefficients to curb overfitting, so the training fit may look slightly looser than plain linear regression — the payoff is steadier predictions on new genes."
 plot(pred_train)
 ```
 
@@ -283,6 +395,8 @@ pred_test$score(measures)
 ```
 
 ```{r}
+#| label: fig-expr-ridge-test
+#| fig-cap: "Ridge-regression predictions on the held-out **test** genes — the honest comparison against the linear model above. With only a handful of histone-mark features here, ridge and plain linear regression land in a similar place; the penalty earns its keep when features are many and correlated."
 plot(pred_test)
 ```
 
