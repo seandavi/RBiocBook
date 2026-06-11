@@ -219,12 +219,14 @@ and how much computation it costs.
 
 ## How the four fit together
 
-Each object owns one part of the workflow, and they snap together in a predictable way:
-a **Learner** trains on a **Task** to produce a fitted model, that model makes
-predictions, a **Measure** scores those predictions, and a **Resampling** strategy
-wraps the whole thing so the score reflects performance on data the model has never
-seen. Because all learners share the same interface, swapping `classif.rpart` for
+Each object owns one part of the workflow, and they snap together in a predictable way
+(@fig-mlr3-blocks): a **Learner** trains on a **Task** to produce a fitted model, that
+model makes predictions, a **Measure** scores those predictions, and a **Resampling**
+strategy wraps the whole thing so the score reflects performance on data the model has
+never seen. Because all learners share the same interface, swapping `classif.rpart` for
 `classif.ranger` changes one string and nothing else.
+
+![How the four mlr3 objects fit together. The **Task** (data + target) feeds the **Learner** (the algorithm), which trains and then makes **predictions** on held-out samples; a **Measure** turns those predictions into a score. The **Resampling** strategy is the outer frame: it repeats the whole train→predict→score flow over different train/validation splits, so the reported score reflects performance on data the model never trained on. Because every Learner shares the same fittings, swapping one algorithm for another changes only the green block.](../images/mlr3_objects.png){#fig-mlr3-blocks fig-align="center"}
 
 ::: {.callout-important}
 ## Why this design pays off
@@ -239,7 +241,7 @@ seen. Because all learners share the same interface, swapping `classif.rpart` fo
 :::
 
 You've now met all four mlr3 building blocks on a problem you already understand. In the
-[next chapter](machine_learning_mlr3.qmd) these pieces come together on real biological
+[next chapter](ml_cancer.qmd) these pieces come together on real biological
 data — classifying cancer types from gene expression, predicting age from DNA
 methylation — where you'll see a Learner actually train on a Task and have its
 predictions scored by a Measure under a Resampling. The concepts are the same; only the
