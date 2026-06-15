@@ -1,0 +1,536 @@
+---
+title: "How single-cell analysis works"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
+---
+
+This chapter is the conceptual map for everything else in the single-cell
+section. It began life as the lecture notes for a talk, and it keeps that
+spirit: no code to run, just the ideas — what each step of a single-cell
+analysis is *for*, what decision it makes on your behalf, and how the steps
+fit together. When you want to see the ideas executed on real data, the
+[companion workflow chapter](setup.qmd) runs the whole Part A pipeline on a
+mouse-brain dataset, and the [multiome](multiome.qmd) and
+[label-transfer](atac_rna_label_transfer.qmd) chapters pick up the
+multimodal thread.
+
+Keep one picture in mind throughout. Every step below either operates on, or
+adds something to, a single accumulating object — the `SingleCellExperiment`
+(@fig-roadmap). Counts go in; QC metrics, normalized values, reduced
+dimensions, and cluster labels all get folded back into the same container.
+That is what lets a modular ecosystem of dozens of small packages hand the
+data back and forth without ever losing track of which metadata belongs to
+which cell.
+
+![**The two questions of single-cell analysis.** Primary analysis funnels raw reads down into a sparse gene-by-cell count matrix; QC and normalization clean and calibrate it. From there the work splits in two. **Part A** asks *what cell types are here?* — a single-sample question answered by finding structure: select informative genes, reduce dimensions, cluster, find markers, annotate. **Part B** asks *what changed?* — a multi-sample question answered by comparison: integrate batches, then test for shifts in expression (pseudobulk) and in composition (differential abundance). Batch correction is the hinge between them. Every box reads from and writes to one `SingleCellExperiment`.](imgs/sc-roadmap.svg){#fig-roadmap}
+
+## From reads to a count matrix
+
+Before any biology, the sequencer's output has to become a table of numbers.
+The defining trick of single-cell chemistry is that every captured molecule
+carries two short barcodes that survive sequencing: a **cell barcode** that
+records *which cell* the molecule came from, and a **unique molecular
+identifier** (UMI) that records *which original molecule* it was
+(@fig-umi). Everything downstream rests on those two labels.
+
+The cell barcode lets you demultiplex one giant pooled library back into tens
+of thousands of per-cell profiles. The UMI solves a subtler problem. PCR
+amplification is wildly uneven — some molecules get copied far more than
+others — so if you simply counted reads, abundance would reflect
+amplification luck rather than biology. Because the UMI is attached *before*
+amplification, reads that share a cell barcode, a UMI, and a gene are copies
+of one original molecule and collapse to a count of one; reads with different
+UMIs are genuinely distinct molecules and are each counted. That collapse,
+called **deduplication**, is what lets us count molecules instead of
+artifacts.
+
+![**Two barcodes turn pooled reads into counts.** Every read carries a cell barcode (*which cell*) and a UMI (*which molecule*), both attached before amplification. **Step 1** — group reads by cell barcode to demultiplex the pooled library back into individual cells. **Step 2** — within a cell, reads that share a UMI (same swatch color) and gene are PCR copies of one original molecule and collapse to a single count, while distinct UMIs are counted separately. Each cell becomes one column of the count matrix: here cell C1's two orange *ACTB* reads collapse to one molecule and its green and purple *ARL1* reads count as two, while cell C2's duplicate *GAPDH* reads collapse to one. Deduplicating on the UMI is what removes PCR amplification bias. Schematic.](imgs/sc-umi.svg){#fig-umi}
+
+Getting reads to the point where they *can* be counted means mapping them to
+genes. Two families of method dominate. **Alignment** (e.g. STAR) places each
+read on the genome base by base; the wrinkle in RNA is splicing, so aligners
+must be splice-aware, stitching a read across an exon–exon junction.
+**Alignment-free** methods (kallisto, @doi:10.1038/nbt.3519; salmon,
+@doi:10.1038/nmeth.4197) skip exact placement and instead ask only which
+transcripts a read is *compatible* with, which is an order of magnitude
+faster and handles multi-mapping reads gracefully. For single-cell data the
+barcode- and UMI-aware versions of these tools (alevin, kallisto|bustools)
+produce the same end product either way: a count matrix.
+
+That matrix — genes down the rows, cells across the columns, UMI counts in
+the cells — is the substrate for everything that follows. Two features of it
+shape every method in this chapter. It is **large** (tens of thousands of
+genes by hundreds of thousands of cells) and it is **sparse**: the
+overwhelming majority of entries are zero, partly because not every gene is
+expressed in every cell and partly because of *dropout*, where a real
+transcript simply isn't captured. Sparsity is why single-cell data lives in
+specialized sparse formats and why the statistics downstream are purpose-built
+rather than borrowed wholesale from bulk RNA-seq.
+
+## Quality control: not every column is a cell
+
+A column of the matrix is a *barcode*, and a barcode is not the same as a
+healthy cell. Some columns are empty droplets that caught only ambient RNA,
+some are doublets where two cells shared a barcode, and some are dying cells
+leaking their contents. Quality control identifies and removes these before
+they masquerade as biology.
+
+Three metrics do most of the work, and the important discipline is to read
+them *together*:
+
+- **Genes detected per cell** — too few suggests an empty droplet or a dead
+  cell; an unusually high count suggests a doublet.
+- **Total UMI count** (library size) — the same logic, on total molecules.
+- **Percent mitochondrial reads** — the most diagnostic. When a membrane
+  ruptures, cytoplasmic mRNA leaks out but the mitochondria stay trapped, so
+  a dying cell's surviving signal is enriched for mitochondrial transcripts.
+
+::: {.callout-warning}
+## Don't reach for universal cutoffs
+
+There is no magic threshold — "20% mito" or "500 genes" are starting points,
+not laws. What counts as low depends on the tissue, the chemistry, and the
+cell type (neurons and cardiomyocytes are legitimately mitochondria-rich).
+Set thresholds from the distribution of *your* data, ideally adaptively
+(e.g. a few median absolute deviations from the median), and always plot the
+metrics against each other before you cut.
+:::
+
+## Normalization: making cells comparable
+
+Even among good cells, raw counts aren't comparable. One cell may show twice
+the counts of another for purely technical reasons — capture efficiency,
+amplification, sequencing depth. Normalization estimates a **size factor**
+per cell and rescales so that what remains reflects biology (cell type,
+state, cycle) rather than how deeply that particular cell happened to be
+sequenced. The standard log-normalization then takes `log(count × sizeFactor
++ 1)` to stabilize variance and pull in the long right tail, which is what
+the distance-based methods downstream assume. Get this right and your
+clusters reflect cell types; get it wrong and they reflect sequencing depth.
+The [workflow chapter](setup.qmd) shows the one-line `logNormCounts()` that
+does this in practice.
+
+## Part A — Finding structure within a sample {#sec-part-a}
+
+The first question is descriptive: *what cell types and states are present?*
+You answer it with unsupervised structure-finding, and the steps form a
+pipeline where each feeds the next.
+
+### Feature selection: keep the genes that vary
+
+Most genes are uninformative for telling cell types apart — housekeeping
+genes are expressed everywhere at similar levels, and the rest are mostly
+noise at this depth. **Highly variable genes** (HVGs) are the ones whose
+variation across cells exceeds what you'd expect from technical noise alone.
+The catch is that in count data, variance rises with mean expression purely
+as an artifact, so you can't just rank by raw variance. The fix is to model
+the mean–variance *trend* and pick the genes that sit furthest *above* it
+(@fig-hvg). Carrying ~1,000–3,000 such genes into the next step sharpens the
+biological signal and slashes the computation.
+
+```{r}
+#| label: fig-hvg
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 6
+#| fig-height: 4
+#| fig-cap: "Feature selection by the mean–variance trend (schematic, simulated). Each point is a gene. Variance rises with mean expression as a technical artifact (blue trend). Highly variable genes (red) are those whose variance exceeds the trend — they carry biological signal and are the ones carried forward into dimensionality reduction. Ranking genes by raw variance instead would just re-discover the trend."
+library(ggplot2)
+set.seed(7)
+n <- 1600
+mean_expr <- runif(n, 0.1, 6)
+trend <- 1.8 * mean_expr * exp(-0.45 * mean_expr) + 0.05
+var_expr <- trend + abs(rnorm(n, 0, 0.06))
+is_hvg <- rep(FALSE, n)
+pick <- sample(n, 180)
+var_expr[pick] <- var_expr[pick] + runif(length(pick), 0.25, 1.1)
+is_hvg[pick] <- TRUE
+df <- data.frame(mean_expr, var_expr, is_hvg)
+trend_df <- data.frame(x = seq(0.1, 6, length.out = 200))
+trend_df$y <- 1.8 * trend_df$x * exp(-0.45 * trend_df$x) + 0.05
+ggplot(df, aes(mean_expr, var_expr)) +
+  geom_point(aes(color = is_hvg), size = 1, alpha = 0.7) +
+  geom_line(data = trend_df, aes(x, y), color = "#2c7fb8", linewidth = 1.1) +
+  scale_color_manual(values = c(`FALSE` = "grey70", `TRUE` = "#d7191c"),
+                     labels = c("other genes", "highly variable"),
+                     name = NULL) +
+  labs(x = "mean of log-expression", y = "variance of log-expression") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top")
+```
+
+### Dimensionality reduction: two jobs, don't confuse them
+
+This is where the most common conceptual error lives, so it's worth being
+explicit. There are *two* dimensionality reductions in a typical workflow and
+they do different jobs.
+
+**PCA** comes first. It is a linear projection that compresses the
+HVG-by-cell matrix down to a few dozen principal components, concentrating
+the coordinated biological variation into the top components and leaving most
+of the per-gene noise behind. PCA is a *denoising and compression* step, and
+its output is what the later steps — clustering, neighbor graphs, even t-SNE
+— actually consume.
+
+**t-SNE and UMAP** come second, and they exist for one purpose: to squeeze
+those dozens of PCs into two dimensions you can *look at* (@fig-embedding).
+They are visualization tools. They deliberately distort global distances to
+make local neighborhoods legible, which is exactly why you should not read
+the gaps between far-apart islands, or the absolute sizes of clusters, as
+quantitative. For the same reason, standard practice clusters on the
+PCA-reduced space rather than the 2-D embedding: crushing dozens of PCs into
+two inevitably distorts distances and densities
+[@doi:10.1371/journal.pcbi.1011288], so the neighbor graph and clustering run
+on the PCs while the embedding is kept purely as a picture — the convention
+OSCA follows [@doi:10.1038/s41592-019-0654-x], shared by tools like Seurat and
+scanpy.
+
+```{r}
+#| label: fig-embedding
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 3.6
+#| fig-cap: "The two dimensionality reductions do different jobs (schematic, simulated). **Left:** PCA concentrates coordinated biological variation into the first few components — the scree plot shows variance dropping off, and you keep the components before the elbow. PCA output is what downstream steps consume. **Right:** t-SNE/UMAP then compress those components into two dimensions purely for viewing; cells of one type land on one island. Treat the embedding as a picture, not a measurement — distances between islands and island sizes are not quantitative."
+library(ggplot2)
+library(patchwork)
+set.seed(11)
+# Scree
+scree <- data.frame(PC = 1:20,
+                    var = 100 * (0.55^(0:19)) / sum(0.55^(0:19)))
+p_scree <- ggplot(scree, aes(PC, var)) +
+  geom_col(fill = "#2c7fb8", width = 0.7) +
+  geom_vline(xintercept = 6.5, linetype = "dashed", color = "grey40") +
+  annotate("text", x = 8.6, y = max(scree$var) * 0.7, label = "elbow",
+           size = 3.4, color = "grey30") +
+  labs(x = "principal component", y = "% variance", title = "PCA: denoise & compress") +
+  theme_minimal(base_size = 11)
+# Embedding
+ k <- 4
+centers <- data.frame(cx = c(-4, 4, -3, 5), cy = c(4, 3, -4, -3))
+emb <- do.call(rbind, lapply(1:k, function(i) {
+  m <- 180
+  data.frame(x = rnorm(m, centers$cx[i], 0.9),
+             y = rnorm(m, centers$cy[i], 0.9),
+             type = paste("type", i))
+}))
+p_emb <- ggplot(emb, aes(x, y, color = type)) +
+  geom_point(size = 0.9, alpha = 0.8) +
+  scale_color_brewer(palette = "Set2", name = NULL) +
+  labs(x = "t-SNE 1", y = "t-SNE 2", title = "t-SNE/UMAP: view only") +
+  theme_minimal(base_size = 11) +
+  theme(axis.text = element_blank(), legend.position = "right")
+p_scree | p_emb
+```
+
+### Clustering: drawing the boundaries
+
+Clustering turns the continuous cloud of cells into discrete groups. The
+dominant approach is **graph-based**: build a nearest-neighbor graph in PC
+space, then let a community-detection algorithm (Louvain, or Leiden,
+@doi:10.1038/s41598-019-41695-z) carve it into densely connected
+communities. It scales to millions of cells and copes with the non-spherical,
+nested structure that single-cell data loves to produce.
+
+The essential thing to internalize is that **a cluster is a hypothesis, not a
+fact**. Every clustering method has a resolution knob, and turning it up
+splits groups while turning it down merges them — both produce valid-looking
+output. There is no true number of clusters handed down by nature; the right
+granularity depends on the question. A cluster earns the name "cell type"
+only once you can attach a marker-gene signature and a biological identity to
+it, which is the next two steps.
+
+### Marker genes: what defines each cluster
+
+To interpret a cluster, you ask which genes are expressed more highly in it
+than elsewhere — its **marker genes**. Mechanically this is a differential
+expression test between one cluster and the others, ranked to surface the
+genes that best distinguish the group. Markers are the bridge from anonymous
+cluster numbers to biology: a cluster lit up by *Cd3d* and *Cd3e* is a T cell;
+one marked by *Gfap* and *Aqp4* is an astrocyte. The [workflow
+chapter](setup.qmd) finds these with `findMarkers()` and draws the
+block-structured heatmap that makes good markers visually obvious.
+
+::: {.callout-important}
+## The double-dipping trap
+
+There is a statistical sin lurking here, and almost every standard pipeline
+commits it. You use the data to *define* clusters, then use the **same data**
+to test which genes differ between those clusters — and report tiny p-values.
+But the clusters were drawn precisely to maximize those differences, so the
+test is circular: it is guaranteed to find "significant" genes even in data
+with no real groups at all (@fig-doubledip). The p-values are not valid in
+the usual sense.
+
+In practice the field largely tolerates this for *marker discovery* —
+markers are a descriptive, hypothesis-generating device, and you confirm them
+against known biology, not against a p-value. But treat those p-values as
+*scores for ranking*, never as evidence that the clusters are real. When you
+genuinely need valid inference after clustering, use methods built for it
+(sample splitting / count splitting, or selective-inference tests for
+post-clustering differences, @doi:10.1080/01621459.2022.2116331). The honest
+way to ask "are these really two cell types?" is a comparison across
+*biological replicates*, which is Part B.
+:::
+
+```{r}
+#| label: fig-doubledip
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 3.6
+#| fig-cap: "Why post-clustering p-values are circular (simulated). The data are a **single** homogeneous Gaussian blob — there are no real groups. **Left:** k-means is asked for two clusters and dutifully splits the blob down the middle. **Right:** testing the splitting axis between the two 'clusters' returns an astronomically small p-value, because the split was *chosen* to maximize that very difference. The significance is manufactured by the procedure, not discovered in the data."
+library(ggplot2)
+library(patchwork)
+set.seed(3)
+N <- 600
+blob <- data.frame(x = rnorm(N), y = rnorm(N))   # one homogeneous Gaussian
+km <- kmeans(blob, centers = 2)
+blob$cluster <- factor(km$cluster)
+p_split <- ggplot(blob, aes(x, y, color = cluster)) +
+  geom_point(size = 1, alpha = 0.7) +
+  scale_color_manual(values = c("#1b9e77", "#d95f02"), name = "k-means\ncluster") +
+  labs(title = "One Gaussian, split into 'two clusters'", x = NULL, y = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(axis.text = element_blank())
+pval <- t.test(x ~ cluster, data = blob)$p.value
+p_box <- ggplot(blob, aes(cluster, x, fill = cluster)) +
+  geom_boxplot(alpha = 0.7, outlier.size = 0.5) +
+  scale_fill_manual(values = c("#1b9e77", "#d95f02"), guide = "none") +
+  annotate("text", x = 1.5, y = max(blob$x) * 0.95,
+           label = sprintf("naive p = %.0e", pval), size = 3.6) +
+  labs(title = "Test the splitting axis → 'highly significant'",
+       x = "data-defined cluster", y = "splitting feature") +
+  theme_minimal(base_size = 11)
+p_split | p_box
+```
+
+### Annotation: attaching biological identity
+
+The final Part A step gives clusters names. Two strategies, often combined
+(@fig-annotation):
+
+- **Reference-based** — score each cell or cluster against an annotated
+  reference atlas and transfer the best-matching label (e.g. SingleR,
+  @doi:10.1038/s41590-018-0276-y; Azimuth). Fast and reproducible when a good
+  reference exists for your tissue.
+- **Marker-based** — match each cluster's marker genes against curated
+  signatures of known cell types. More manual, but it works when no reference
+  fits and it keeps a human in the loop.
+
+When neither suffices — a novel state, an unusual tissue — annotation becomes
+genuine expert work: inspect the markers, consult the literature, and accept
+that some clusters resist a clean label. Annotation is the step where the
+analysis stops being mechanical and starts being biology.
+
+![**Choosing an annotation strategy.** A good reference atlas for the tissue makes label transfer the fast, reproducible default; absent one, fall back to matching each cluster's markers against curated signatures, and absent those, to manual expert interpretation. All three routes converge on the same goal — clusters with biological identities.](imgs/sc-annotation.svg){#fig-annotation}
+
+## Part B — Comparing across samples {#sec-part-b}
+
+Part A describes one sample. The questions that usually motivate an
+experiment are comparative: *does this cell type expand in disease? which
+genes change with treatment?* Answering them needs multiple samples, and a
+different set of tools — because now the dominant nuisance is not sequencing
+depth but the **batch**.
+
+### Integration: removing the batch, keeping the biology
+
+Run the same tissue on two days, two chemistries, or two donors and the
+batch effect can dwarf the biology: cluster naively and you get one cluster
+per batch instead of one per cell type. **Integration** (batch correction)
+aligns shared cell populations across batches so the same cell type from
+different samples lands in the same place (@fig-batch). Mutual-nearest-
+neighbor methods (fastMNN, @doi:10.1038/nbt.4091) and Harmony
+(@doi:10.1038/s41592-019-0619-0) are the common choices.
+
+The danger is over-correction: push too hard and you erase the very
+biological differences you came to study, including a genuinely
+batch-specific cell type. Integration is therefore a balancing act, and a
+sharp distinction matters — you correct batches to put cells in a **shared
+coordinate space for clustering and visualization**, but you do *not* run
+your differential-expression statistics on the batch-corrected values. For
+that, you go back to the raw counts.
+
+```{r}
+#| label: fig-batch
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 3.6
+#| fig-cap: "Integration aligns shared populations across batches (schematic, simulated). Three cell types are measured in two batches. **Before:** an additive batch shift separates the same cell type into batch-specific blobs — cluster now and you'd recover batches, not biology. **After:** correcting the shift superimposes matching cell types, so clustering recovers the three types with both batches mixed inside each. Use corrected coordinates for clustering and visualization, but return to raw counts for differential expression."
+library(ggplot2)
+library(patchwork)
+set.seed(5)
+make_types <- function(shift = c(0, 0)) {
+  centers <- data.frame(cx = c(-3, 3, 0), cy = c(0, 0, 4),
+                        type = c("type 1", "type 2", "type 3"))
+  do.call(rbind, lapply(1:3, function(i) {
+    m <- 120
+    data.frame(x = rnorm(m, centers$cx[i] + shift[1], 0.7),
+               y = rnorm(m, centers$cy[i] + shift[2], 0.7),
+               type = centers$type[i])
+  }))
+}
+b1 <- make_types(c(0, 0));   b1$batch <- "batch 1"
+b2u <- make_types(c(3.2, 2.4)); b2u$batch <- "batch 2"   # uncorrected: shifted
+b2c <- make_types(c(0, 0));   b2c$batch <- "batch 2"      # corrected: aligned
+before <- rbind(b1, b2u); before$panel <- "before"
+after  <- rbind(b1, b2c); after$panel  <- "after"
+plot_one <- function(d, ttl) {
+  ggplot(d, aes(x, y, color = batch, shape = type)) +
+    geom_point(size = 1, alpha = 0.7) +
+    scale_color_manual(values = c("batch 1" = "#7570b3", "batch 2" = "#e7298a")) +
+    labs(title = ttl, x = NULL, y = NULL, color = NULL, shape = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(axis.text = element_blank())
+}
+plot_one(before, "before integration") | plot_one(after, "after integration")
+```
+
+With batches aligned, you can ask what actually changed — and a condition can
+change a cell population in **two distinct ways**, so a complete comparison
+checks both:
+
+1. **Differential expression** — *within* a cell type, which genes change
+   between conditions?
+2. **Differential abundance** — does the *proportion* of a cell type shift
+   between conditions, even if its expression is unchanged?
+
+They answer different biological questions and need different machinery.
+Reporting one without the other tells half the story.
+
+### Differential expression: aggregate to pseudobulk
+
+The intuitive move — test every cell of a type against every cell in the
+other condition — is wrong, and the reason is fundamental. Cells from one
+animal are not independent biological replicates; they are repeated,
+correlated measurements of *that animal*. Treating thousands of cells as
+thousands of replicates produces wildly anti-conservative p-values: with
+enough cells, everything is "significant" (@doi:10.1038/s41467-021-25960-2).
+
+The fix is **pseudobulk**: for each combination of sample and cell type, sum
+the counts across that sample's cells into a single profile, then run a
+mature bulk-RNA-seq test (DESeq2, edgeR) across samples (@fig-pseudobulk).
+Now your replicates are *animals*, which is the level at which the biology
+actually varies, and decades of well-calibrated bulk methodology applies. The
+counter-intuitive lesson of single-cell DE across conditions is that the
+right unit of analysis is the sample, not the cell.
+
+![**Pseudobulk differential expression.** Per-cell counts (top, colored by cell type, grouped by biological sample) are **summed within each sample × cell-type combination** into one pseudobulk profile per group. The result is a genes-by-(sample × cell-type) matrix on which a standard bulk-RNA-seq test (DESeq2 / edgeR) compares conditions *one cell type at a time*. Replicates are now samples, not cells — the level at which biological variation actually lives — so the p-values are calibrated. Schematic; approach after @doi:10.1038/s41467-020-19894-4.](imgs/sc-pseudobulk.svg){#fig-pseudobulk}
+
+### Differential abundance: did the mix change?
+
+The complementary question is compositional: holding expression aside, did
+the *fraction* of cells belonging to a type change with condition
+(@fig-da)? The naive approach — a proportion per cluster, then a test —
+works but is coarse and inherits all the arbitrariness of the cluster
+boundaries. Neighborhood-based methods (Milo,
+@doi:10.1038/s41587-021-01033-z) instead test abundance in many small,
+overlapping neighborhoods of the graph, catching shifts that fall *between*
+named clusters; `propeller` (@doi:10.1093/bioinformatics/btac582) offers a
+robust cluster-level test. Either way, the same warning as in Part B's
+opening applies: test across biological replicates, never across individual
+cells.
+
+```{r}
+#| label: fig-da
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 6.5
+#| fig-height: 4
+#| fig-cap: "Differential abundance asks whether the cellular composition shifts between conditions (schematic, simulated). Each point is a biological replicate; bars show the mean fraction of each cell type. Here cell type 3 expands and type 1 contracts under treatment, while types 2 and 4 hold steady — a change you would miss by looking at expression alone. The replicate-level spread is what a valid test uses; comparing individual cells would manufacture false confidence."
+library(ggplot2)
+set.seed(9)
+types <- paste("type", 1:4)
+base_ctrl <- c(0.40, 0.25, 0.15, 0.20)
+base_trt  <- c(0.25, 0.25, 0.32, 0.18)
+mk <- function(base, cond) {
+  do.call(rbind, lapply(1:5, function(r) {
+    p <- base + rnorm(4, 0, 0.03)
+    p <- pmax(p, 0.01); p <- p / sum(p)
+    data.frame(type = types, frac = p, cond = cond, rep = r)
+  }))
+}
+df <- rbind(mk(base_ctrl, "control"), mk(base_trt, "treatment"))
+summ <- aggregate(frac ~ type + cond, df, mean)
+ggplot(summ, aes(type, frac, fill = cond)) +
+  geom_col(position = position_dodge(0.8), width = 0.7, alpha = 0.85) +
+  geom_point(data = df, aes(type, frac, color = cond),
+             position = position_dodge(0.8), size = 1.3, show.legend = FALSE) +
+  scale_fill_manual(values = c("control" = "#4575b4", "treatment" = "#d73027"),
+                    name = NULL) +
+  scale_color_manual(values = c("control" = "#313f6b", "treatment" = "#7a1a14")) +
+  labs(x = NULL, y = "fraction of cells") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top")
+```
+
+## Beyond the core pipeline
+
+The Part A/Part B arc covers the backbone, but a few further methods come up
+often enough to recognize by name:
+
+- **Trajectory inference / pseudotime** — when cells form a continuum rather
+  than discrete types (differentiation, activation), order them along a
+  learned path instead of binning them into clusters (slingshot, TSCAN).
+- **RNA velocity** — use the ratio of unspliced to spliced reads to infer the
+  *direction* a cell is heading in transcriptional space, adding an arrow of
+  time to a static snapshot.
+- **Gene-set / pathway enrichment** — once you have marker or DE gene lists,
+  summarize them into pathways to interpret what a cell type or a change is
+  *doing*.
+- **Multimodal integration** — pair RNA with chromatin accessibility or
+  surface protein from the same cells; the [multiome](multiome.qmd) and
+  [label-transfer](atac_rna_label_transfer.qmd) chapters develop this thread.
+
+## Two ecosystems, one data structure
+
+You will do all of this in one of two ecosystems. **Seurat** is a single
+integrated R package (CRAN) with opinionated defaults and a large community.
+**Bioconductor** is a modular collection of small, interoperable packages
+organized around the OSCA framework — *Orchestrating Single-Cell Analysis*
+(@doi:10.1038/s41592-019-0654-x) — that share the `SingleCellExperiment`
+data structure (@hao2021integrated covers the Seurat side). This book takes
+the Bioconductor route, but the *concepts* in this chapter are
+ecosystem-agnostic: the steps and their pitfalls are the same whichever
+toolkit you choose.
+
+The payoff of the shared structure is concrete. Because QC metrics, reduced
+dimensions, and cluster labels all live in one synchronized object, you can
+hand it straight to an interactive explorer like iSEE and brush a cluster in
+a t-SNE to watch it light up across linked expression and heatmap panels —
+no plotting code required. A standard container is what turns a pile of
+methods into a workflow.
+
+## Where to go next
+
+- The [single-cell workflow chapter](setup.qmd) runs the Part A pipeline
+  end-to-end on a mouse-brain dataset.
+- **OSCA** — [*Orchestrating Single-Cell Analysis with
+  Bioconductor*](https://bioconductor.org/books/release/OSCA) — is the
+  definitive free, runnable reference for the Bioconductor route.
+- For an honest tour of the open problems, see the "eleven grand challenges"
+  review (@doi:10.1186/s13059-020-1926-6).
+
+::: {.callout-tip}
+## The one-paragraph summary
+
+Two barcodes (cell + UMI) turn sequencing into a sparse gene-by-cell count
+matrix; QC removes non-cells and normalization removes depth. Then the work
+splits: **Part A** finds structure in one sample (select variable genes →
+PCA to denoise → embed only to look → cluster → markers → annotate), and
+**Part B** compares across samples (integrate batches, then test expression
+by *pseudobulk* and composition by *differential abundance*). The recurring
+discipline is knowing your unit of analysis — the cell for describing
+structure, the **sample** for testing differences — and remembering that
+clusters are hypotheses, not facts.
+:::

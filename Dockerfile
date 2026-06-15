@@ -57,6 +57,42 @@ RUN Rscript -e 'install.packages("tinytex", repos = "https://cloud.r-project.org
 ENV PATH="/opt/TinyTeX/bin/x86_64-linux:${PATH}"
 RUN pip3 install --no-cache-dir --break-system-packages quartobot
 
+# Headless Chrome so Quarto can rasterize mermaid (and other diagram) blocks
+# when it renders the pdf and epub. HTML draws mermaid client-side and needs no
+# Chrome, but pdf/epub abort with "Chrome not found" without it.
+#
+# Two parts: (1) the shared libraries a headless Chromium needs, via apt so the
+# names resolve on the base distro — the t64 set is Ubuntu 24.04, with a
+# fallback to the pre-t64 names; (2) the Quarto-managed chrome-headless-shell
+# binary. Quarto keeps installed tools under its data dir ($XDG_DATA_HOME/quarto
+# on Linux), so bake it into a fixed SYSTEM path. We deliberately do NOT export
+# XDG_DATA_HOME as a global ENV: this image also serves multi-user RStudio /
+# Orchestra, where redirecting every user's data dir would surprise. The path is
+# supplied where it's needed — the CI render job (R-CMD-check.yaml) and the
+# devcontainer (.devcontainer/devcontainer.json). Same HOME-override hazard the
+# TinyTeX install above guards against: Actions sets HOME=/github/home in
+# container jobs, so a default per-user install would be invisible at render time.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      libnss3 libnspr4 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+      libxrandr2 libgbm1 libxshmfence1 libcairo2 libpango-1.0-0 \
+      fonts-liberation ca-certificates \
+ && ( apt-get install -y --no-install-recommends \
+        libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libasound2t64 libatspi2.0-0t64 \
+      || apt-get install -y --no-install-recommends \
+        libatk1.0-0 libatk-bridge2.0-0 libcups2 libasound2 libatspi2.0-0 ) \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /opt/quarto-data \
+ && XDG_DATA_HOME=/opt/quarto-data quarto install chrome-headless-shell --no-prompt \
+ && chmod -R a+rX /opt/quarto-data
+# Prove the whole chain works *inside the image* so a broken Chrome/XDG/libs
+# setup fails the build here, not silently at render time months later. Mimic CI
+# exactly — a throwaway HOME plus the pinned XDG_DATA_HOME — rasterizing a
+# mermaid block to docx (the same Chrome path as pdf/epub, minus LaTeX variability).
+RUN printf -- '---\ntitle: smoke\nformat: docx\n---\n\n```{mermaid}\nflowchart TD\n  A[build] --> B[mermaid OK]\n```\n' > /tmp/mermaid-smoke.qmd \
+ && HOME=/nonexistent XDG_DATA_HOME=/opt/quarto-data quarto render /tmp/mermaid-smoke.qmd \
+ && rm -f /tmp/mermaid-smoke.qmd /tmp/mermaid-smoke.docx
+
 # Node.js + npm (apt 18.x) so the devcontainer can install in-container agent
 # tooling (Claude Code) at postCreate time. Appended last as its own layer so it
 # doesn't invalidate the heavy dependency layers above. Not used by CI render or

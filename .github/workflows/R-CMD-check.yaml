@@ -41,6 +41,12 @@ jobs:
       # extension install) and the gh-pages publish uses GITHUB_TOKEN.
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Point Quarto at the chrome-headless-shell the image baked under /opt so
+      # mermaid diagrams rasterize into the pdf/epub. Set here (not as a global
+      # image ENV) because Actions overrides HOME in container jobs, which would
+      # otherwise hide the tool; scoping it to the render keeps the multi-user
+      # RStudio/Orchestra image's per-user data dirs untouched. See Dockerfile.
+      XDG_DATA_HOME: /opt/quarto-data
     steps:
       - uses: actions/checkout@v4
 
