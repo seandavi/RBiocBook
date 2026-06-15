@@ -24,6 +24,8 @@ By the end of this chapter you will be able to:
 - Run PCA and then t-SNE to reduce the data to a 2D map.
 - Cluster cells into groups and inspect how those groups line up with known cell types.
 - Find and visualize the marker genes that define each cluster.
+- Paint marker genes onto a UMAP to see *where* each cell type lives.
+- Recognize cell-type annotation as a form of gene-set scoring.
 
 ## Setup and data loading
 
@@ -283,6 +285,93 @@ plotHeatmap(sce, features=unique(unlist(top_marker_genes_for_all_clusters)),
 
 In @fig-marker-heatmap the columns are cells (grouped and colored by cell type) and the rows are marker genes. The blocky structure is what you're after: each set of marker genes lights up in one band of cells and stays dim elsewhere, which is exactly what makes them useful as markers — they cleanly distinguish one population from the rest.
 
+## From clusters to cell types: annotation
+
+Clustering handed us groups, but a group labeled "cluster 3" tells a biologist nothing. **Annotation** is the step that attaches a *biological identity* to each cluster, and it comes in two broad flavors — the same two the [concepts chapter](concepts.qmd) lays out:
+
+- **Reference-based** — score each cell against an annotated reference atlas and transfer the closest label (e.g. `SingleR`, Azimuth). Fast and reproducible when a good reference exists for your tissue; it's the first thing to reach for in a real project, though we won't run it here.
+- **Marker-based** — match each cluster's marker genes against known cell-type signatures. This is the route we can take *right now*, because we already have marker genes in hand from the previous section.
+
+This dataset is unusual in shipping curated `level1class` labels, so we can *check* our marker-based reasoning against a trusted answer. Treat that as training wheels — in your own data those labels are exactly what you are trying to produce.
+
+### Painting marker genes onto the map
+
+The heatmap showed marker genes as a block matrix. A complementary view is to paint a single marker gene's expression straight onto a 2-D embedding, so you can see *where* it is expressed. Let's add a **UMAP** — a second non-linear embedding that, like t-SNE, exists purely to make high-dimensional structure viewable (the [concepts chapter](concepts.qmd) explains why these embeddings are views, not measurements).
+
+```{r}
+#| label: fig-umap-celltype
+#| fig.cap: "A UMAP of the same cells, colored by curated `level1class` cell type. Like the earlier t-SNE, UMAP is a visualization-only projection of the PCA space — and the same cell-type islands reappear, evidence that the structure is real rather than an artifact of one embedding."
+library(scater)
+library(ggplot2)
+set.seed(1234)
+sce <- runUMAP(sce, dimred = "PCA")
+plotReducedDim(sce, "UMAP", colour_by = "level1class")
+```
+
+Reassuringly, the same cell-type islands we saw in the t-SNE reappear: the embedding algorithm changed, but the biology did not.
+
+Now color the map by individual marker genes — the single top-ranked marker for each of several cell types — and watch each gene light up its own territory.
+
+```{r}
+#| label: fig-umap-markers
+#| fig.cap: "The UMAP colored by the top marker gene of four representative cell types. Each marker concentrates in the island its cell type occupies — the spatial counterpart of the block structure in the marker heatmap."
+# Name the per-cell-type marker lists we built earlier. findMarkers() grouped by
+# level1class in alphabetical order, so the factor levels recover the names.
+celltype_names <- levels(factor(colData(sce)$level1class))
+names(top_marker_genes_for_all_clusters) <- celltype_names
+
+# The single top marker gene for four representative cell types.
+show_types <- head(celltype_names, 4)
+top_one <- vapply(top_marker_genes_for_all_clusters[show_types],
+                  function(g) g[1], character(1))
+
+library(patchwork)
+panels <- lapply(seq_along(top_one), function(i) {
+  plotReducedDim(sce, "UMAP", colour_by = top_one[i]) +
+    ggtitle(sprintf("%s\n(%s)", names(top_one)[i], top_one[i]))
+})
+wrap_plots(panels, ncol = 2)
+```
+
+Each marker concentrates in exactly the island its cell type occupies — visual confirmation that these genes earn the name "marker."
+
+### Marker lists are gene sets
+
+Here is the idea worth carrying away. A cell type's marker genes are nothing more — and nothing less — than a **gene set**: a named list of genes that, together, characterize a biological state. Deciding whether a cluster *is* a given cell type then becomes "is this gene set collectively high in these cells?" — which is exactly the question gene-set and pathway-enrichment analysis asks, only pointed at cell-type signatures instead of GO terms or KEGG pathways.
+
+We can make that concrete with the simplest possible score — the mean log-expression of a marker set in each cell — and paint it onto the map:
+
+```{r}
+#| label: fig-umap-score
+#| fig.cap: "A 'module score' — the mean log-expression of a cell type's marker set — painted onto the UMAP. Scoring cells against a *set* of genes (here the interneuron markers) is the same operation as gene-set / pathway scoring; the high-scoring cells localize to the interneuron island."
+# A cell type's marker genes ARE a gene set; score each cell by the set's mean.
+score_gene_set <- function(sce, genes) {
+  genes <- intersect(genes, rownames(sce))
+  colMeans(logcounts(sce)[genes, , drop = FALSE])
+}
+
+target <- grep("interneuron", celltype_names, value = TRUE)[1]
+if (is.na(target)) target <- celltype_names[1]   # fall back if naming differs
+sce$marker_score <- score_gene_set(sce, top_marker_genes_for_all_clusters[[target]])
+
+plotReducedDim(sce, "UMAP", colour_by = "marker_score") +
+  ggtitle(sprintf("Module score for the %s marker set", target))
+```
+
+The high-scoring cells pile onto a single island — the same one the curated labels call interneurons. A whole *set* of genes, scored together and pointed at a cell type, exactly as a pathway score points at a pathway.
+
+Real annotation tools formalize this same move. Marker-set scorers like `AUCell` and `UCell` swap our crude mean for a rank-based enrichment statistic; reference-based methods like `SingleR` score each cell against *many* signatures at once and assign the best fit. The mental model is identical to gene-set analysis — only the gene sets have changed.
+
+::: {.callout-warning}
+## Mind the double dip
+We derived these marker sets *from these very clusters*, so scoring the same cells with them is somewhat circular — it confirms internal consistency, not external truth (the [concepts chapter](concepts.qmd) unpacks this "double-dipping" trap). Honest annotation scores cells against marker sets defined *independently* — from a reference atlas or the literature — which is why reference-based methods are the gold standard when a reference exists.
+:::
+
+::: {.callout-tip}
+## Annotation ≈ gene-set analysis
+If you remember one thing from this section: **annotating cells by marker lists and testing gene sets for enrichment are the same operation.** A cell-type signature is a gene set; a module score is an enrichment score; choosing the best-scoring label is choosing the most enriched set. Learn one and you have largely learned the other.
+:::
+
 ## Interactive visualization with iSEE
 
 The [Interactive SummarizedExperiment Explorer (iSEE)](https://www.bioconductor.org/packages/release/bioc/html/iSEE.html) is a powerful tool for exploring single-cell data interactively. It allows us to visualize and interact with the data in real-time, making it easier to explore complex datasets and identify patterns. 
@@ -347,6 +436,21 @@ These build directly on the `sce` object you created above. If you've closed you
    Each cluster occupies its own island, and those islands correspond closely to the cell-type islands you saw earlier — evidence that the unsupervised clustering recovered the same structure as the curated annotations.
    :::
 
+4. **Score a different cell type.** Pick another entry of `celltype_names` — say an oligodendrocyte or astrocyte type — recompute the module score for *its* marker set, and redraw the UMAP. Does the high-scoring region land on that cell type's island in @fig-umap-celltype?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   #| label: fig-umap-score-oligo
+   target2 <- grep("oligodendrocyte", celltype_names, value = TRUE)[1]
+   if (is.na(target2)) target2 <- celltype_names[2]   # fall back if naming differs
+   sce$marker_score2 <- score_gene_set(sce, top_marker_genes_for_all_clusters[[target2]])
+   plotReducedDim(sce, "UMAP", colour_by = "marker_score2") +
+       ggtitle(sprintf("Module score for the %s marker set", target2))
+   ```
+   The hot spot moves to a different island — the one the curated labels call oligodendrocytes. Same machinery, different gene set: that is the whole point of treating annotation as gene-set scoring.
+   :::
+
 ## Summary
 
 You took a published mouse-brain dataset all the way from raw counts to a labeled map of cell types, and in doing so walked the standard scRNA-seq workflow:
@@ -357,8 +461,9 @@ You took a published mouse-brain dataset all the way from raw counts to a labele
 - **Reduced dimensions** with `fixedPCA()` and then `runTSNE()`, collapsing thousands of genes into a 2D map.
 - **Clustered** the cells with `clusterCells()` and read the cluster table to see how many groups emerged.
 - **Found and visualized marker genes** with `findMarkers()` and `plotHeatmap()`, confirming that each cluster has its own molecular fingerprint.
+- **Connected markers to identity** by painting them onto a UMAP and scoring marker *sets* as a module score — framing cell-type annotation as the same operation as gene-set enrichment.
 
-The reassuring result was that the unsupervised steps recovered the known cell types: clusters and curated labels landed on the same islands of the t-SNE. From here you could annotate clusters, compare conditions, or hand the object to an interactive explorer like iSEE.
+The reassuring result was that the unsupervised steps recovered the known cell types: clusters and curated labels landed on the same islands of the t-SNE and UMAP. From here you could reach for a reference-based annotator like `SingleR`, compare conditions across samples (the [concepts chapter](concepts.qmd)'s Part B), or hand the object to an interactive explorer like iSEE.
 
 ## Bonus: working with 10x Genomics data
 
