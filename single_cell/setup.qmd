@@ -21,7 +21,7 @@ By the end of this chapter you will be able to:
 - Load a curated scRNA-seq dataset as a `SingleCellExperiment` object.
 - Log-normalize raw counts to correct for differences in sequencing depth.
 - Select the highly variable genes that carry the biological signal.
-- Run PCA and then t-SNE to reduce the data to a 2D map.
+- Run PCA and then UMAP to reduce the data to a 2D map, and see how UMAP compares to t-SNE.
 - Cluster cells into groups and inspect how those groups line up with known cell types.
 - Find and visualize the marker genes that define each cluster.
 - Paint marker genes onto a UMAP to see *where* each cell type lives.
@@ -80,7 +80,7 @@ The mammalian cerebral cortex supports cognitive functions such as sensorimotor 
 sce <- scRNAseq::ZeiselBrainData()
 ```
 
-What is the `sce` object? It is a `SingleCellExperiment` object, a data structure designed specifically for single-cell RNA-seq data. It is built directly on top of the `SummarizedExperiment` class you met in the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd) (see @fig-scRNAseq-sce), so the same mental model applies: an assay matrix of counts, with aligned metadata about the features (genes) down the rows and the cells across the columns. A `SingleCellExperiment` simply adds a few single-cell-specific extras on top, most importantly a slot for dimensionality reductions like PCA and t-SNE.
+What is the `sce` object? It is a `SingleCellExperiment` object, a data structure designed specifically for single-cell RNA-seq data. It is built directly on top of the `SummarizedExperiment` class you met in the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd) (see @fig-scRNAseq-sce), so the same mental model applies: an assay matrix of counts, with aligned metadata about the features (genes) down the rows and the cells across the columns. A `SingleCellExperiment` simply adds a few single-cell-specific extras on top, most importantly a slot for dimensionality reductions like PCA and UMAP.
 
 ![The SingleCellExperiment object. ](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41592-019-0654-x/MediaObjects/41592_2019_654_Fig2_HTML.png){#fig-scRNAseq-sce fig-align="center"}
 
@@ -97,7 +97,7 @@ The `SingleCellExperiment` object contains:
 - **Row metadata**: Information about genes (e.g., gene names, IDs).
 - **Column metadata**: Information about cells (e.g., cell barcodes, tissue type, experimental conditions).
 
-It **can** also contain additional information such as dimensionality reductions (e.g., PCA, t-SNE), clustering results, and quality control metrics.
+It **can** also contain additional information such as dimensionality reductions (e.g., PCA, UMAP), clustering results, and quality control metrics.
 
 In fact, we are going to add some of this additional information in the next steps. First, we add a new assay with the log-normalized counts, which is a common preprocessing step in single-cell RNA-seq analysis.
 
@@ -185,69 +185,89 @@ reducedDimNames(sce)
 
 Note that we assign the output of `fixedPCA()` to the `sce` object. This function performs PCA on the highly variable genes we identified earlier, reducing the dimensionality of the dataset while retaining the most informative features. Because dimensionality reduction is a common step in single-cell RNA-seq analysis, we can store the PCA results in the `reducedDims` slot of the `SingleCellExperiment` object. This allows us to easily access and visualize the PCA coordinates later.
 
-### Non-linear dimensionality reduction with t-SNE
+### Non-linear dimensionality reduction with UMAP
 
-After PCA, we can apply non-linear dimensionality reduction techniques like t-SNE (t-distributed Stochastic Neighbor Embedding) to visualize the data in 2D or 3D. t-SNE is particularly useful for revealing local structure and separating distinct cell populations.
+After PCA, we apply a non-linear method to squeeze the data down to two dimensions we can actually look at. **UMAP** (Uniform Manifold Approximation and Projection) has become the field's default for this step: it is fast, scales to very large datasets, and tends to preserve more of the *global* structure — the relative arrangement of clusters — than its predecessor, t-SNE. We'll use it as our map for the rest of the chapter, and compare the two head-to-head in a moment.
 
 ::: {.callout-tip}
-## Why t-SNE after PCA
+## Why UMAP after PCA — and why not cluster *on* it
 
 This is a two-step approach:
 
-1. **PCA first**: reduces noise and computational burden while preserving global structure.
-2. **t-SNE second**: reveals local neighborhood structure and separates distinct cell populations.
+1. **PCA first** compresses thousands of genes into a few dozen components, stripping noise while keeping the main axes of variation.
+2. **UMAP second** takes those components and lays them out in 2D so neighbouring cells sit together.
+
+One rule worth burning in: UMAP (like t-SNE) is a **visualization** of the data, not the data itself. It deliberately distorts distances to make a readable picture — so you *look* at it, but you do not *compute* on it. In particular, cluster on the PCA coordinates — the richer, denoised space — not on the 2-D embedding (the [concepts chapter](concepts.qmd) explains why clustering on a 2-D view is a mistake).
 :::
 
-t-SNE involves a random initialization, so its output changes from run to run. We call `set.seed()` first so that the figure and the clusters below are reproducible — you'll see exactly the same map we do.
+UMAP uses a random initialization, so its output changes from run to run. We call `set.seed()` first so the figure is reproducible — you'll see exactly the same map we do.
 
 ```{r}
 library(scater)
 set.seed(1234)
-sce <- runTSNE(sce, dimred="PCA")
+sce <- runUMAP(sce, dimred="PCA")
 ```
 
-The `runTSNE()` function applies t-SNE to the PCA results, creating a 2D representation of the data. The `dimred="PCA"` argument specifies that we want to use the PCA coordinates as input for t-SNE.
+The `runUMAP()` function builds the embedding from the PCA results and stores it in the `reducedDims` slot. The `dimred="PCA"` argument tells it to start from the PCA coordinates rather than the raw genes.
 
-Graph-based clustering is also stochastic, so we set a seed before clustering too.
+Now we cluster. Graph-based clustering is stochastic, so we set a seed first — and, following the rule above, we cluster on the **PCA** coordinates, not on the UMAP.
 
 ```{r}
 set.seed(1234)
-nn.clusters <- clusterCells(sce, use.dimred = "TSNE")
+nn.clusters <- clusterCells(sce, use.dimred = "PCA")
 table(nn.clusters)
 ```
 
-The `clusterCells()` function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was [popularized by the Seurat package](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells). It builds a nearest-neighbor graph and then finds communities within this graph. The resulting clusters often correspond to distinct cell types or states. The `use.dimred = "TSNE"` argument specifies that we want to use the t-SNE coordinates for clustering. This is an important choice because t-SNE captures local structure and can reveal distinct cell populations that may not be apparent in the original high-dimensional space. There are other clustering methods available, such as k-means or hierarchical clustering, but graph-based clustering is particularly effective for single-cell data due to its ability to handle complex, non-linear relationships.
+The `clusterCells()` function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was [popularized by the Seurat package](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells): it builds a nearest-neighbor graph and then finds communities within it, and the resulting clusters often correspond to distinct cell types or states. The `use.dimred = "PCA"` argument points it at the denoised PCA space — the full set of principal components carries far more signal than the two UMAP axes, which exist only for viewing. Other methods exist (k-means, hierarchical clustering), but graph-based clustering suits single-cell data because it handles complex, non-linear structure and scales well.
 
 The table above is your first concrete result: each entry is the number of cells assigned to a cluster, so you can read off how many groups the algorithm found and roughly how balanced they are. A handful of large clusters plus several small ones is typical — the large ones are usually abundant cell types, the small ones rare populations.
 
 ### Visualizing cell types and clusters
 
-In this particular dataset, we have pre-defined cell type annotations that we can use to color the t-SNE plot. The `level1class` and `level2class` columns in the metadata contain these annotations. We can use these annotations to color the t-SNE plot and visualize how well the clustering aligns with known cell types.
-
-We can cluster the cells based on their t-SNE coordinates and visualize the results. The `plotReducedDim()` function from the `scater` package allows us to create a scatter plot of the t-SNE coordinates, coloring the points by their cluster assignments or cell type annotations.
+This dataset ships with pre-defined cell type annotations in the `level1class` and `level2class` columns, which we can use to color the UMAP and see how well the structure lines up with known biology. The `plotReducedDim()` function from the `scater` package draws a scatter plot of any stored embedding, coloring the points by cluster assignment or any cell metadata.
 
 ```{r}
 #| label: fig-level1-class
 library(scater)
 colLabels(sce) <- nn.clusters
-plotReducedDim(sce, "TSNE", colour_by="level1class")
+plotReducedDim(sce, "UMAP", colour_by="level1class")
 ```
 
-@fig-level1-class is the payoff of the whole workflow so far. Each point is a cell, placed by t-SNE so that similar cells sit close together, and colored by its known `level1class` cell type. Because cells of the same type fall into the same visual island, you can see at a glance that the unsupervised steps — normalization, HVG selection, PCA, t-SNE — recovered real biology: the broad cell types separate cleanly without ever being told what they were.
+@fig-level1-class is the payoff of the whole workflow so far. Each point is a cell, placed by UMAP so that similar cells sit close together, and colored by its known `level1class` cell type. Because cells of the same type fall into the same visual island, you can see at a glance that the unsupervised steps — normalization, HVG selection, PCA, UMAP — recovered real biology: the broad cell types separate cleanly without ever being told what they were.
 
-We can also visualize the second level of cell type annotations.
+We can also visualize the second, finer level of cell type annotations.
 
 ```{r}
 #| label: fig-level2-class
-plotReducedDim(sce, "TSNE", colour_by="level2class")
+plotReducedDim(sce, "UMAP", colour_by="level2class")
 ```
 
-And add additional metadata such as tissue type to the plot. The `shape_by` argument allows us to differentiate points by another categorical variable, such as tissue type.
+And overlay additional metadata such as tissue type. The `shape_by` argument differentiates points by another categorical variable.
 
 ```{r}
 #| label: fig-level1-tissue
-plotReducedDim(sce, "TSNE", colour_by="level1class", shape_by="tissue")
+plotReducedDim(sce, "UMAP", colour_by="level1class", shape_by="tissue")
 ```
+
+### t-SNE vs UMAP
+
+UMAP didn't appear from nowhere — for years **t-SNE** (t-distributed Stochastic Neighbor Embedding) was the default single-cell map, and you'll still meet it everywhere. It's worth running both once to see how they differ. Both start from the same PCA input; t-SNE optimizes for *local* neighbourhoods, which tends to spread clusters into well-separated blobs, while UMAP keeps more of the global layout and runs faster on large data.
+
+```{r}
+#| label: fig-tsne-umap
+#| fig.cap: "The same cells, the same PCA input, two embeddings — colored by `level1class`. Both recover the same cell-type islands; the choice between them is about readability and speed, not correctness. In neither plot should the distances *between* islands be read quantitatively."
+#| fig-width: 10
+#| fig-height: 4.5
+library(ggplot2)
+library(patchwork)
+set.seed(1234)
+sce <- runTSNE(sce, dimred="PCA")
+p_umap <- plotReducedDim(sce, "UMAP", colour_by="level1class") + ggtitle("UMAP")
+p_tsne <- plotReducedDim(sce, "TSNE", colour_by="level1class") + ggtitle("t-SNE")
+(p_umap | p_tsne) + plot_layout(guides = "collect")
+```
+
+The reassuring result is that both embeddings tell the same story — the same cell types form the same islands. They are two readable pictures of one underlying structure, and modern workflows reach for UMAP first. From here on we'll stick with the UMAP.
 
 ## Finding marker genes
 
@@ -296,21 +316,7 @@ This dataset is unusual in shipping curated `level1class` labels, so we can *che
 
 ### Painting marker genes onto the map
 
-The heatmap showed marker genes as a block matrix. A complementary view is to paint a single marker gene's expression straight onto a 2-D embedding, so you can see *where* it is expressed. Let's add a **UMAP** — a second non-linear embedding that, like t-SNE, exists purely to make high-dimensional structure viewable (the [concepts chapter](concepts.qmd) explains why these embeddings are views, not measurements).
-
-```{r}
-#| label: fig-umap-celltype
-#| fig.cap: "A UMAP of the same cells, colored by curated `level1class` cell type. Like the earlier t-SNE, UMAP is a visualization-only projection of the PCA space — and the same cell-type islands reappear, evidence that the structure is real rather than an artifact of one embedding."
-library(scater)
-library(ggplot2)
-set.seed(1234)
-sce <- runUMAP(sce, dimred = "PCA")
-plotReducedDim(sce, "UMAP", colour_by = "level1class")
-```
-
-Reassuringly, the same cell-type islands we saw in the t-SNE reappear: the embedding algorithm changed, but the biology did not.
-
-Now color the map by individual marker genes — the single top-ranked marker for each of several cell types — and watch each gene light up its own territory.
+The heatmap showed marker genes as a block matrix. A complementary view is to paint a single marker gene's expression straight onto the UMAP we built earlier, so you can see *where* it is expressed. Color the map by individual marker genes — the single top-ranked marker for each of several cell types — and watch each gene light up its own territory.
 
 ```{r}
 #| label: fig-umap-markers
@@ -425,18 +431,18 @@ These build directly on the `sce` object you created above. If you've closed you
    The 500 genes are (almost entirely) a subset of the 2000 — they are simply the *most* variable ones. Picking fewer genes is faster and noisier; picking more keeps weaker signal at the cost of more noise. There is no single right answer, which is why it's a choice you make deliberately.
    :::
 
-3. **Switch the coloring.** Redraw the t-SNE plot, but color the cells by their cluster label (`colour_by="label"`) instead of by the known cell type. How well do the data-driven clusters line up with the annotated cell types in @fig-level1-class?
+3. **Switch the coloring.** Redraw the UMAP, but color the cells by their cluster label (`colour_by="label"`) instead of by the known cell type. How well do the data-driven clusters line up with the annotated cell types in @fig-level1-class?
 
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r}
-   #| label: fig-tsne-by-cluster
-   plotReducedDim(sce, "TSNE", colour_by="label")
+   #| label: fig-umap-by-cluster
+   plotReducedDim(sce, "UMAP", colour_by="label")
    ```
    Each cluster occupies its own island, and those islands correspond closely to the cell-type islands you saw earlier — evidence that the unsupervised clustering recovered the same structure as the curated annotations.
    :::
 
-4. **Score a different cell type.** Pick another entry of `celltype_names` — say an oligodendrocyte or astrocyte type — recompute the module score for *its* marker set, and redraw the UMAP. Does the high-scoring region land on that cell type's island in @fig-umap-celltype?
+4. **Score a different cell type.** Pick another entry of `celltype_names` — say an oligodendrocyte or astrocyte type — recompute the module score for *its* marker set, and redraw the UMAP. Does the high-scoring region land on that cell type's island in @fig-level1-class?
 
    ::: {.callout-note collapse="true"}
    ## Solution
@@ -458,8 +464,8 @@ You took a published mouse-brain dataset all the way from raw counts to a labele
 - **Loaded** the data as a `SingleCellExperiment` — a `SummarizedExperiment` (the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd)) with single-cell extras like a reduced-dimensions slot.
 - **Log-normalized** the counts with `logNormCounts()` to correct for differences in sequencing depth between cells.
 - **Selected highly variable genes** with `getTopHVGs()`, focusing the analysis on the genes that carry biological signal.
-- **Reduced dimensions** with `fixedPCA()` and then `runTSNE()`, collapsing thousands of genes into a 2D map.
-- **Clustered** the cells with `clusterCells()` and read the cluster table to see how many groups emerged.
+- **Reduced dimensions** with `fixedPCA()` and then `runUMAP()` (with a t-SNE comparison), collapsing thousands of genes into a 2D map.
+- **Clustered** the cells with `clusterCells()` on the PCA coordinates — not the 2-D embedding — and read the cluster table to see how many groups emerged.
 - **Found and visualized marker genes** with `findMarkers()` and `plotHeatmap()`, confirming that each cluster has its own molecular fingerprint.
 - **Connected markers to identity** by painting them onto a UMAP and scoring marker *sets* as a module score — framing cell-type annotation as the same operation as gene-set enrichment.
 
