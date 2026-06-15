@@ -808,7 +808,12 @@ window.Quarto = {
   <li><a href="#t-sne-vs-umap" id="toc-t-sne-vs-umap" class="nav-link" data-scroll-target="#t-sne-vs-umap"><span class="header-section-number">39.3.4</span> t-SNE vs UMAP</a></li>
   </ul>
 </li>
-  <li><a href="#finding-marker-genes" id="toc-finding-marker-genes" class="nav-link" data-scroll-target="#finding-marker-genes"><span class="header-section-number">39.4</span> Finding marker genes</a></li>
+  <li>
+<a href="#finding-marker-genes" id="toc-finding-marker-genes" class="nav-link" data-scroll-target="#finding-marker-genes"><span class="header-section-number">39.4</span> Finding marker genes</a>
+  <ul class="collapse">
+<li><a href="#markers-for-the-clusters-you-discovered" id="toc-markers-for-the-clusters-you-discovered" class="nav-link" data-scroll-target="#markers-for-the-clusters-you-discovered"><span class="header-section-number">39.4.1</span> Markers for the clusters you discovered</a></li>
+  </ul>
+</li>
   <li>
 <a href="#from-clusters-to-cell-types-annotation" id="toc-from-clusters-to-cell-types-annotation" class="nav-link" data-scroll-target="#from-clusters-to-cell-types-annotation"><span class="header-section-number">39.5</span> From clusters to cell types: annotation</a>
   <ul class="collapse">
@@ -1332,7 +1337,56 @@ Figure&nbsp;39.7
 </div>
 </div>
 <p>In <a href="#fig-marker-heatmap" class="quarto-xref">Figure&nbsp;<span>39.7</span></a> the columns are cells (grouped and colored by cell type) and the rows are marker genes. The blocky structure is what you’re after: each set of marker genes lights up in one band of cells and stays dim elsewhere, which is exactly what makes them useful as markers — they cleanly distinguish one population from the rest.</p>
-</section><section id="from-clusters-to-cell-types-annotation" class="level2 page-columns page-full" data-number="39.5"><h2 data-number="39.5" class="anchored" data-anchor-id="from-clusters-to-cell-types-annotation">
+<section id="markers-for-the-clusters-you-discovered" class="level3 page-columns page-full" data-number="39.4.1"><h3 data-number="39.4.1" class="anchored" data-anchor-id="markers-for-the-clusters-you-discovered">
+<span class="header-section-number">39.4.1</span> Markers for the clusters you discovered</h3>
+<p>The markers above were found per <em>curated cell type</em> — a shortcut this teaching dataset allows because it ships with <code>level1class</code> labels. A real analysis has no such labels: you find markers for the <strong>clusters you actually discovered</strong>, then use those markers to give each cluster an identity. Let’s do it that way. We ask <code><a href="https://rdrr.io/pkg/scran/man/findMarkers.html">findMarkers()</a></code> to compare the graph-based clusters stored in <code>colLabels(sce)</code> (the <code><a href="https://rdrr.io/pkg/scran/man/clusterCells.html">clusterCells()</a></code> output from earlier), take each cluster’s single top gene, and paint that gene’s expression onto the UMAP.</p>
+<div class="cell page-columns page-full">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Find markers for the data-driven clusters (colLabels holds the clusterCells</span></span>
+<span><span class="co"># assignments), not the curated cell-type labels.</span></span>
+<span><span class="va">cluster_markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/findMarkers.html">findMarkers</a></span><span class="op">(</span><span class="va">sce</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>,</span>
+<span>                               pval.type <span class="op">=</span> <span class="st">"all"</span>, direction <span class="op">=</span> <span class="st">"up"</span>,</span>
+<span>                               test <span class="op">=</span> <span class="st">"t"</span>, subset.row <span class="op">=</span> <span class="va">top_var_genes</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .findMarkers(assay(x, i = assay.type), ...): 'findMarkers' is deprecated.
+Use 'scrapper::scoreMarkers.se' instead.
+See help("Deprecated")</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .local(x, ...): 'pairwiseTTests' is deprecated.
+See help("Deprecated")</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in combineMarkers(fit$statistics, fit$pairs, pval.type = pval.type, : 'combineMarkers' is deprecated.
+Use 'scrapper::summarizeEffects' instead.
+See help("Deprecated")</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The single top marker gene for each cluster.</span></span>
+<span><span class="va">top_per_cluster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">vapply</a></span><span class="op">(</span><span class="va">cluster_markers</span>, <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Paint the four largest clusters, each colored by its top marker's expression.</span></span>
+<span><span class="va">biggest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span><span class="va">panels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">biggest</span>, <span class="kw">function</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">gene</span> <span class="op">&lt;-</span> <span class="va">top_per_cluster</span><span class="op">[[</span><span class="va">cl</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span>, colour_by <span class="op">=</span> <span class="va">gene</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"cluster %s — %s"</span>, <span class="va">cl</span>, <span class="va">gene</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html">wrap_plots</a></span><span class="op">(</span><span class="va">panels</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display page-columns page-full">
+<div id="fig-umap-cluster-markers" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-umap-cluster-markers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="setup_files/figure-html/fig-umap-cluster-markers-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;39.8: The four largest graph-based clusters, each UMAP colored by that cluster’s own top marker gene — found by findMarkers() on colLabels(sce), the data-driven clusters, not the curated labels. Each marker is most strongly expressed in and around its own cluster; some tag a whole island, while others pick out a sub-population within one. Painting a cluster’s marker onto the map this way is the visual basis for turning an anonymous cluster number into a named cell type."><img src="setup_files/figure-html/fig-umap-cluster-markers-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-umap-cluster-markers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;39.8: The four largest graph-based clusters, each UMAP colored by that cluster’s own top marker gene — found by <code><a href="https://rdrr.io/pkg/scran/man/findMarkers.html">findMarkers()</a></code> on <code>colLabels(sce)</code>, the data-driven clusters, <em>not</em> the curated labels. Each marker is most strongly expressed in and around its own cluster; some tag a whole island, while others pick out a sub-population within one. Painting a cluster’s marker onto the map this way is the visual basis for turning an anonymous cluster number into a named cell type.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Each panel lifts out one cluster’s top gene and shows where it is expressed. Some markers tag a whole island cleanly; others light up only part of the large neuronal island, where several graph-based clusters coexist — a reminder that clustering on the PCs resolves finer structure than the 2-D map alone reveals. Either way, the logic is the engine of annotation: an anonymous cluster number plus its localized marker equals a callable cell identity, and we reached it without ever touching the curated labels. (The next section revisits the idea with those labels as an answer key.)</p>
+</section></section><section id="from-clusters-to-cell-types-annotation" class="level2 page-columns page-full" data-number="39.5"><h2 data-number="39.5" class="anchored" data-anchor-id="from-clusters-to-cell-types-annotation">
 <span class="header-section-number">39.5</span> From clusters to cell types: annotation</h2>
 <p>Clustering handed us groups, but a group labeled “cluster 3” tells a biologist nothing. <strong>Annotation</strong> is the step that attaches a <em>biological identity</em> to each cluster, and it comes in two broad flavors — the same two the <a href="../single_cell/concepts.html">concepts chapter</a> lays out:</p>
 <ul>
@@ -1346,7 +1400,7 @@ Figure&nbsp;39.7
 <span class="header-section-number">39.5.1</span> Painting marker genes onto the map</h3>
 <p>The heatmap showed marker genes as a block matrix. A complementary view is to paint a single marker gene’s expression straight onto the UMAP we built earlier, so you can see <em>where</em> it is expressed. Color the map by individual marker genes — the single top-ranked marker for each of several cell types — and watch each gene light up its own territory.</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Name the per-cell-type marker lists we built earlier. findMarkers() grouped by</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Name the per-cell-type marker lists we built earlier. findMarkers() grouped by</span></span>
 <span><span class="co"># level1class in alphabetical order, so the factor levels recover the names.</span></span>
 <span><span class="va">celltype_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">level1class</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">top_marker_genes_for_all_clusters</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">celltype_names</span></span>
@@ -1365,10 +1419,10 @@ Figure&nbsp;39.7
 <div class="cell-output-display page-columns page-full">
 <div id="fig-umap-markers" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-umap-markers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="setup_files/figure-html/fig-umap-markers-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;39.8: The UMAP colored by the top marker gene of four representative cell types. Each marker concentrates in the island its cell type occupies — the spatial counterpart of the block structure in the marker heatmap."><img src="setup_files/figure-html/fig-umap-markers-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="setup_files/figure-html/fig-umap-markers-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;39.9: The UMAP colored by the top marker gene of four representative cell types. Each marker concentrates in the island its cell type occupies — the spatial counterpart of the block structure in the marker heatmap."><img src="setup_files/figure-html/fig-umap-markers-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-umap-markers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;39.8: The UMAP colored by the top marker gene of four representative cell types. Each marker concentrates in the island its cell type occupies — the spatial counterpart of the block structure in the marker heatmap.
+Figure&nbsp;39.9: The UMAP colored by the top marker gene of four representative cell types. Each marker concentrates in the island its cell type occupies — the spatial counterpart of the block structure in the marker heatmap.
 </figcaption></figure>
 </div>
 </div>
@@ -1379,7 +1433,7 @@ Figure&nbsp;39.8: The UMAP colored by the top marker gene of four representative
 <p>Here is the idea worth carrying away. A cell type’s marker genes are nothing more — and nothing less — than a <strong>gene set</strong>: a named list of genes that, together, characterize a biological state. Deciding whether a cluster <em>is</em> a given cell type then becomes “is this gene set collectively high in these cells?” — which is exactly the question gene-set and pathway-enrichment analysis asks, only pointed at cell-type signatures instead of GO terms or KEGG pathways.</p>
 <p>We can make that concrete with the simplest possible score — the mean log-expression of a marker set in each cell — and paint it onto the map:</p>
 <div class="cell page-columns page-full">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># A cell type's marker genes ARE a gene set; score each cell by the set's mean.</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># A cell type's marker genes ARE a gene set; score each cell by the set's mean.</span></span>
 <span><span class="va">score_gene_set</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">sce</span>, <span class="va">genes</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html">intersect</a></span><span class="op">(</span><span class="va">genes</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">logcounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">[</span><span class="va">genes</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
@@ -1394,10 +1448,10 @@ Figure&nbsp;39.8: The UMAP colored by the top marker gene of four representative
 <div class="cell-output-display page-columns page-full">
 <div id="fig-umap-score" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-umap-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="setup_files/figure-html/fig-umap-score-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;39.9: A ‘module score’ — the mean log-expression of a cell type’s marker set — painted onto the UMAP. Scoring cells against a set of genes (here the interneuron markers) is the same operation as gene-set / pathway scoring; the high-scoring cells localize to the interneuron island."><img src="setup_files/figure-html/fig-umap-score-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="setup_files/figure-html/fig-umap-score-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;39.10: A ‘module score’ — the mean log-expression of a cell type’s marker set — painted onto the UMAP. Scoring cells against a set of genes (here the interneuron markers) is the same operation as gene-set / pathway scoring; the high-scoring cells localize to the interneuron island."><img src="setup_files/figure-html/fig-umap-score-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-umap-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;39.9: A ‘module score’ — the mean log-expression of a cell type’s marker set — painted onto the UMAP. Scoring cells against a <em>set</em> of genes (here the interneuron markers) is the same operation as gene-set / pathway scoring; the high-scoring cells localize to the interneuron island.
+Figure&nbsp;39.10: A ‘module score’ — the mean log-expression of a cell type’s marker set — painted onto the UMAP. Scoring cells against a <em>set</em> of genes (here the interneuron markers) is the same operation as gene-set / pathway scoring; the high-scoring cells localize to the interneuron island.
 </figcaption></figure>
 </div>
 </div>
@@ -1436,14 +1490,14 @@ Figure&nbsp;39.9: A ‘module score’ — the mean log-expression of a cell typ
 <p>A key component of iSEE is the <code>SingleCellExperiment</code> object, which serves as the data container for single-cell RNA-seq data. iSEE provides a user-friendly interface for exploring the data.</p>
 <p>To use iSEE, we first need to install the <code>iSEE</code> package and then launch the iSEE app.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Install iSEE package if not already installed</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Install iSEE package if not already installed</span></span>
 <span><span class="fu">iSEE</span><span class="fu">::</span><span class="fu">iSEE</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>iSEE()</code> function launches the iSEE app, which provides an interactive interface for exploring the <code>SingleCellExperiment</code> object.</p>
 <p>You may want to play with a few genes to see how they are expressed across the different clusters. You can also explore the metadata associated with the cells, such as tissue type, cell type annotations, and quality control metrics. The set of “marker genes” we identified earlier can also be visualized in iSEE, allowing us to see how these genes are expressed across different clusters and cell types.</p>
 <p>For cluster 1, the marker genes are:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">top_marker_genes_for_all_clusters</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,<span class="st">'\n'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">top_marker_genes_for_all_clusters</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,<span class="st">'\n'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Aqp4 
  Cldn10 
@@ -1477,17 +1531,17 @@ Figure&nbsp;39.9: A ‘module score’ — the mean log-expression of a cell typ
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>nn.clusters
   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18 
 174 382 165 124 697 716 113 197  59  43  42  78  58  17  35  28  65  12 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span><span class="op">)</span>   <span class="co"># number of clusters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span><span class="op">)</span>   <span class="co"># number of clusters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 18</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span><span class="op">)</span> <span class="co"># the most populous cluster</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">nn.clusters</span><span class="op">)</span><span class="op">)</span> <span class="co"># the most populous cluster</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>6 
 6 </code></pre>
@@ -1513,7 +1567,7 @@ Figure&nbsp;39.9: A ‘module score’ — the mean log-expression of a cell typ
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">top_500</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/getTopHVGs.html">getTopHVGs</a></span><span class="op">(</span><span class="va">sce</span>, n<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">top_500</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/getTopHVGs.html">getTopHVGs</a></span><span class="op">(</span><span class="va">sce</span>, n<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in getTopHVGs(sce, n = 500): 'getTopHVGs' is deprecated.
 Use 'scrapper::chooseHighlyVariableGenes' instead.
@@ -1528,11 +1582,11 @@ See help("Deprecated")</code></pre>
 <pre><code>Warning in combineBlocks(collected, method = method, equiweight = equiweight, : 'combineBlocks' is deprecated.
 See help("Deprecated")</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">top_500</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">top_500</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 500</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html">intersect</a></span><span class="op">(</span><span class="va">top_500</span>, <span class="va">top_var_genes</span><span class="op">)</span><span class="op">)</span>  <span class="co"># overlap with the 2000-gene set</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html">intersect</a></span><span class="op">(</span><span class="va">top_500</span>, <span class="va">top_var_genes</span><span class="op">)</span><span class="op">)</span>  <span class="co"># overlap with the 2000-gene set</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 500</code></pre>
 </div>
@@ -1557,11 +1611,11 @@ See help("Deprecated")</code></pre>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span>, colour_by<span class="op">=</span><span class="st">"label"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span>, colour_by<span class="op">=</span><span class="st">"label"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div id="fig-umap-by-cluster" class="quarto-float quarto-figure quarto-figure-center anchored" width="672">
 <figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-umap-by-cluster-caption"><div aria-describedby="fig-umap-by-cluster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="setup_files/figure-html/fig-umap-by-cluster-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;39.10: "><img src="setup_files/figure-html/fig-umap-by-cluster-1.png" id="fig-umap-by-cluster" class="img-fluid figure-img" width="672"></a>
+<a href="setup_files/figure-html/fig-umap-by-cluster-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;39.11: "><img src="setup_files/figure-html/fig-umap-by-cluster-1.png" id="fig-umap-by-cluster" class="img-fluid figure-img" width="672"></a>
 </div>
 </figure>
 </div>
@@ -1572,7 +1626,7 @@ See help("Deprecated")</code></pre>
 </div>
 </div>
 <div id="fig-umap-by-cluster-caption" class="margin-figure-caption column-margin callout-8-contents callout-collapse collapse callout-margin-content">
-Figure&nbsp;39.10
+Figure&nbsp;39.11
 </div></li>
 <li class="page-columns page-full">
 <p><strong>Score a different cell type.</strong> Pick another entry of <code>celltype_names</code> — say an oligodendrocyte or astrocyte type — recompute the module score for <em>its</em> marker set, and redraw the UMAP. Does the high-scoring region land on that cell type’s island in <a href="#fig-level1-class" class="quarto-xref">Figure&nbsp;<span>39.3</span></a>?</p>
@@ -1589,7 +1643,7 @@ Figure&nbsp;39.10
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">target2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"oligodendrocyte"</span>, <span class="va">celltype_names</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">target2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"oligodendrocyte"</span>, <span class="va">celltype_names</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">target2</span><span class="op">)</span><span class="op">)</span> <span class="va">target2</span> <span class="op">&lt;-</span> <span class="va">celltype_names</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>   <span class="co"># fall back if naming differs</span></span>
 <span><span class="va">sce</span><span class="op">$</span><span class="va">marker_score2</span> <span class="op">&lt;-</span> <span class="fu">score_gene_set</span><span class="op">(</span><span class="va">sce</span>, <span class="va">top_marker_genes_for_all_clusters</span><span class="op">[[</span><span class="va">target2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span>, colour_by <span class="op">=</span> <span class="st">"marker_score2"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1597,7 +1651,7 @@ Figure&nbsp;39.10
 <div class="cell-output-display">
 <div id="fig-umap-score-oligo" class="quarto-float quarto-figure quarto-figure-center anchored" width="672">
 <figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-umap-score-oligo-caption"><div aria-describedby="fig-umap-score-oligo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="setup_files/figure-html/fig-umap-score-oligo-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;39.11: "><img src="setup_files/figure-html/fig-umap-score-oligo-1.png" id="fig-umap-score-oligo" class="img-fluid figure-img" width="672"></a>
+<a href="setup_files/figure-html/fig-umap-score-oligo-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;39.12: "><img src="setup_files/figure-html/fig-umap-score-oligo-1.png" id="fig-umap-score-oligo" class="img-fluid figure-img" width="672"></a>
 </div>
 </figure>
 </div>
@@ -1608,7 +1662,7 @@ Figure&nbsp;39.10
 </div>
 </div>
 <div id="fig-umap-score-oligo-caption" class="margin-figure-caption column-margin callout-9-contents callout-collapse collapse callout-margin-content">
-Figure&nbsp;39.11
+Figure&nbsp;39.12
 </div></li>
 </ol></section><section id="summary" class="level2" data-number="39.8"><h2 data-number="39.8" class="anchored" data-anchor-id="summary">
 <span class="header-section-number">39.8</span> Summary</h2>
@@ -1646,7 +1700,7 @@ Figure&nbsp;39.11
 </ol></section><section id="loading-10x-data-from-matrix-market-files" class="level3" data-number="39.9.2"><h3 data-number="39.9.2" class="anchored" data-anchor-id="loading-10x-data-from-matrix-market-files">
 <span class="header-section-number">39.9.2</span> Loading 10x data from Matrix Market files</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Loading from standard 10x output directory</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Loading from standard 10x output directory</span></span>
 <span><span class="co"># This assumes you have a directory with:</span></span>
 <span><span class="co"># - matrix.mtx.gz (or matrix.mtx)</span></span>
 <span><span class="co"># - features.tsv.gz (or genes.tsv.gz for older versions)</span></span>
@@ -1673,7 +1727,7 @@ Figure&nbsp;39.11
 </ul></section><section id="loading-from-hdf5-files" class="level3" data-number="39.9.3"><h3 data-number="39.9.3" class="anchored" data-anchor-id="loading-from-hdf5-files">
 <span class="header-section-number">39.9.3</span> Loading from HDF5 files</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># For HDF5 format files</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># For HDF5 format files</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://huber-group-embl.github.io/rhdf5/">rhdf5</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Method 1: Using DropletUtils</span></span>
@@ -1698,7 +1752,7 @@ Figure&nbsp;39.11
 </ul></section><section id="essential-quality-control-after-loading-raw-data" class="level3" data-number="39.9.4"><h3 data-number="39.9.4" class="anchored" data-anchor-id="essential-quality-control-after-loading-raw-data">
 <span class="header-section-number">39.9.4</span> Essential quality control after loading raw data</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add mitochondrial gene information</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add mitochondrial gene information</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">scuttle</span><span class="op">)</span></span>
 <span><span class="va">is.mito</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"^MT-"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce_10x</span><span class="op">)</span><span class="op">)</span> <span class="co"># Human mitochondrial genes</span></span>
 <span><span class="co"># For mouse data, use: is.mito &lt;- grepl("^mt-", rownames(sce_10x))</span></span>
@@ -1734,7 +1788,7 @@ Figure&nbsp;39.11
 </ul></section><section id="filtering-low-quality-cells-and-genes" class="level3" data-number="39.9.5"><h3 data-number="39.9.5" class="anchored" data-anchor-id="filtering-low-quality-cells-and-genes">
 <span class="header-section-number">39.9.5</span> Filtering low-quality cells and genes</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize QC metrics</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize QC metrics</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotColData.html">plotColData</a></span><span class="op">(</span><span class="va">sce_10x</span>, x <span class="op">=</span> <span class="st">"sum"</span>, y <span class="op">=</span> <span class="st">"detected"</span>, colour_by <span class="op">=</span> <span class="st">"subsets_Mito_percent"</span><span class="op">)</span></span>
 <span></span>
