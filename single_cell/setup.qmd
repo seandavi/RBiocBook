@@ -305,6 +305,37 @@ plotHeatmap(sce, features=unique(unlist(top_marker_genes_for_all_clusters)),
 
 In @fig-marker-heatmap the columns are cells (grouped and colored by cell type) and the rows are marker genes. The blocky structure is what you're after: each set of marker genes lights up in one band of cells and stays dim elsewhere, which is exactly what makes them useful as markers — they cleanly distinguish one population from the rest.
 
+### Markers for the clusters you discovered
+
+The markers above were found per *curated cell type* — a shortcut this teaching dataset allows because it ships with `level1class` labels. A real analysis has no such labels: you find markers for the **clusters you actually discovered**, then use those markers to give each cluster an identity. Let's do it that way. We ask `findMarkers()` to compare the graph-based clusters stored in `colLabels(sce)` (the `clusterCells()` output from earlier), take each cluster's single top gene, and paint that gene's expression onto the UMAP.
+
+```{r}
+#| label: fig-umap-cluster-markers
+#| fig.cap: "The four largest graph-based clusters, each UMAP colored by that cluster's own top marker gene — found by `findMarkers()` on `colLabels(sce)`, the data-driven clusters, *not* the curated labels. Each marker is most strongly expressed in and around its own cluster; some tag a whole island, while others pick out a sub-population within one. Painting a cluster's marker onto the map this way is the visual basis for turning an anonymous cluster number into a named cell type."
+# Find markers for the data-driven clusters (colLabels holds the clusterCells
+# assignments), not the curated cell-type labels.
+cluster_markers <- findMarkers(sce, groups = colLabels(sce),
+                               pval.type = "all", direction = "up",
+                               test = "t", subset.row = top_var_genes)
+
+# The single top marker gene for each cluster.
+top_per_cluster <- vapply(cluster_markers, function(df) rownames(df)[1], character(1))
+
+# Paint the four largest clusters, each colored by its top marker's expression.
+biggest <- names(sort(table(colLabels(sce)), decreasing = TRUE))[1:4]
+
+library(ggplot2)
+library(patchwork)
+panels <- lapply(biggest, function(cl) {
+  gene <- top_per_cluster[[cl]]
+  plotReducedDim(sce, "UMAP", colour_by = gene) +
+    ggtitle(sprintf("cluster %s — %s", cl, gene))
+})
+wrap_plots(panels, ncol = 2)
+```
+
+Each panel lifts out one cluster's top gene and shows where it is expressed. Some markers tag a whole island cleanly; others light up only part of the large neuronal island, where several graph-based clusters coexist — a reminder that clustering on the PCs resolves finer structure than the 2-D map alone reveals. Either way, the logic is the engine of annotation: an anonymous cluster number plus its localized marker equals a callable cell identity, and we reached it without ever touching the curated labels. (The next section revisits the idea with those labels as an answer key.)
+
 ## From clusters to cell types: annotation
 
 Clustering handed us groups, but a group labeled "cluster 3" tells a biologist nothing. **Annotation** is the step that attaches a *biological identity* to each cluster, and it comes in two broad flavors — the same two the [concepts chapter](concepts.qmd) lays out:
