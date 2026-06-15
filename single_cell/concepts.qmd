@@ -48,7 +48,7 @@ UMIs are genuinely distinct molecules and are each counted. That collapse,
 called **deduplication**, is what lets us count molecules instead of
 artifacts.
 
-![**Two barcodes, two questions.** Each captured transcript is tagged with a cell barcode (*which cell*) and a UMI (*which molecule*) before amplification. After sequencing, reads sharing a cell barcode + UMI + gene are PCR copies of a single original molecule and are **collapsed to one count** (gene *ACTB*, left); reads with the same barcode and gene but **different** UMIs are distinct molecules and are **counted separately** (gene *ARL1*, right). Deduplicating on the UMI is what removes amplification bias from the final counts. Schematic.](imgs/sc-umi.svg){#fig-umi}
+![**Two barcodes turn pooled reads into counts.** Every read carries a cell barcode (*which cell*) and a UMI (*which molecule*), both attached before amplification. **Step 1** — group reads by cell barcode to demultiplex the pooled library back into individual cells. **Step 2** — within a cell, reads that share a UMI (same swatch color) and gene are PCR copies of one original molecule and collapse to a single count, while distinct UMIs are counted separately. Each cell becomes one column of the count matrix: here cell C1's two orange *ACTB* reads collapse to one molecule and its green and purple *ARL1* reads count as two, while cell C2's duplicate *GAPDH* reads collapse to one. Deduplicating on the UMI is what removes PCR amplification bias. Schematic.](imgs/sc-umi.svg){#fig-umi}
 
 Getting reads to the point where they *can* be counted means mapping them to
 genes. Two families of method dominate. **Alignment** (e.g. STAR) places each
@@ -114,13 +114,13 @@ clusters reflect cell types; get it wrong and they reflect sequencing depth.
 The [workflow chapter](setup.qmd) shows the one-line `logNormCounts()` that
 does this in practice.
 
-# Part A — Finding structure within a sample {#sec-part-a}
+## Part A — Finding structure within a sample {#sec-part-a}
 
 The first question is descriptive: *what cell types and states are present?*
 You answer it with unsupervised structure-finding, and the steps form a
 pipeline where each feeds the next.
 
-## Feature selection: keep the genes that vary
+### Feature selection: keep the genes that vary
 
 Most genes are uninformative for telling cell types apart — housekeeping
 genes are expressed everywhere at similar levels, and the rest are mostly
@@ -164,7 +164,7 @@ ggplot(df, aes(mean_expr, var_expr)) +
   theme(legend.position = "top")
 ```
 
-## Dimensionality reduction: two jobs, don't confuse them
+### Dimensionality reduction: two jobs, don't confuse them
 
 This is where the most common conceptual error lives, so it's worth being
 explicit. There are *two* dimensionality reductions in a typical workflow and
@@ -224,7 +224,7 @@ p_emb <- ggplot(emb, aes(x, y, color = type)) +
 p_scree | p_emb
 ```
 
-## Clustering: drawing the boundaries
+### Clustering: drawing the boundaries
 
 Clustering turns the continuous cloud of cells into discrete groups. The
 dominant approach is **graph-based**: build a nearest-neighbor graph in PC
@@ -241,7 +241,7 @@ granularity depends on the question. A cluster earns the name "cell type"
 only once you can attach a marker-gene signature and a biological identity to
 it, which is the next two steps.
 
-## Marker genes: what defines each cluster
+### Marker genes: what defines each cluster
 
 To interpret a cluster, you ask which genes are expressed more highly in it
 than elsewhere — its **marker genes**. Mechanically this is a differential
@@ -307,7 +307,7 @@ p_box <- ggplot(blob, aes(cluster, x, fill = cluster)) +
 p_split | p_box
 ```
 
-## Annotation: attaching biological identity
+### Annotation: attaching biological identity
 
 The final Part A step gives clusters names. Two strategies, often combined
 (@fig-annotation):
@@ -339,7 +339,7 @@ flowchart TD
   F --> G
 ```
 
-# Part B — Comparing across samples {#sec-part-b}
+## Part B — Comparing across samples {#sec-part-b}
 
 Part A describes one sample. The questions that usually motivate an
 experiment are comparative: *does this cell type expand in disease? which
@@ -347,7 +347,7 @@ genes change with treatment?* Answering them needs multiple samples, and a
 different set of tools — because now the dominant nuisance is not sequencing
 depth but the **batch**.
 
-## Integration: removing the batch, keeping the biology
+### Integration: removing the batch, keeping the biology
 
 Run the same tissue on two days, two chemistries, or two donors and the
 batch effect can dwarf the biology: cluster naively and you get one cluster
@@ -402,10 +402,9 @@ plot_one <- function(d, ttl) {
 plot_one(before, "before integration") | plot_one(after, "after integration")
 ```
 
-## Two ways things change: expression and abundance
-
-A condition can change a cell population in two distinct ways, and a complete
-comparison checks both:
+With batches aligned, you can ask what actually changed — and a condition can
+change a cell population in **two distinct ways**, so a complete comparison
+checks both:
 
 1. **Differential expression** — *within* a cell type, which genes change
    between conditions?
@@ -482,7 +481,7 @@ ggplot(summ, aes(type, frac, fill = cond)) +
   theme(legend.position = "top")
 ```
 
-# Beyond the core pipeline
+## Beyond the core pipeline
 
 The Part A/Part B arc covers the backbone, but a few further methods come up
 often enough to recognize by name:
