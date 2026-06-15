@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Sean Davis">
+<meta name="dcterms.date" content="2024-06-01">
+<meta name="description" content="A collection of chapters more than a book, but….">
+<title>38&nbsp; How single-cell analysis works – The RBioc Book</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../single_cell/setup.html" rel="next">
+<link href="../atac-seq/atac-seq.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-709e903f7486fc15c5f7f9cf283d35df.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-709e903f7486fc15c5f7f9cf283d35df.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-709e903f7486fc15c5f7f9cf283d35df.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-89274b6a7b026c87465810c35957e583.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-6dd28c7963e21d618ae16e7ac0413509.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-89274b6a7b026c87465810c35957e583.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-KLLV1GCF4E"></script><script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
+</script><style>html{ scroll-behavior: smooth; }</style>
+</head>
+<body class="nav-sidebar floating nav-fixed slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">The RBioc Book</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <a href="https://github.com/seandavi/RBiocBook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+<li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="../The-RBioc-Book.pdf">
+              <i class="bi bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="../The-RBioc-Book.epub">
+              <i class="bi bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+</div>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-1">
+<li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=%7Curl%7C">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=%7Curl%7C">
+              <i class="bi bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+      </ul>
+</div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../bioc-summarizedexperiment.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../single_cell/concepts.html"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">How single-cell analysis works</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">About R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_rstudio.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">RStudio</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../r_intro_mechanics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R mechanics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../r_basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Up and Running with R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../packages_and_dice.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Packages and more dice</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rproj_and_save_load.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Organizing, saving, and loading your work</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../literate_programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Literate programming with Quarto</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reading_and_writing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Reading and writing data files</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">A Biology Primer</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../biology_primer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">A primer on biological assays</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../data_structures_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">R Data Structures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vectors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Vectors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lists.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Lists: a catch-all container</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dataframes_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Data Frames</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../factors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Factors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../control_statements.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Control statements</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../eda_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda_and_univariate_brfss.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Case Study: Behavioral Risk Factor Surveillance System</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ggplot2/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exploring data with ggplot2</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../comparison_options.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Base R versus the tidyverse</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">A self-guided tour of data visualization in R</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../norm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Working with distribution functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../t-stats-and-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">The t-statistic and t-distribution</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../kmeans.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">K-means clustering</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Machine Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Introduction to machine learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Supervised Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/mlr3verse_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">The mlr3verse framework</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/ml_cancer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Worked example: classifying cancer types from gene expression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/ml_methylation_age.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Worked example: predicting age from DNA methylation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../machine_learning/ml_expression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Worked example: predicting gene expression from histone marks</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Bioconductor</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../bioc-summarizedexperiment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Working with a SummarizedExperiment</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../geoquery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Accessing public omics data with GEOquery</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../bioc-se-building.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Building and sharing a SummarizedExperiment</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../310_microbiome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Analyzing microbiome data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../genomic_ranges.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Genomic ranges and features</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../genomic_ranges_chipseq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Genomic ranges with real ChIP-seq peaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ranges_exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Ranges Exercises</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../atac-seq/atac-seq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-seq</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../single_cell/concepts.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">How single-cell analysis works</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../single_cell/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Single-cell RNA-seq analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../single_cell/multiome.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Integrating single-cell ATAC and RNA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../single_cell/atac_rna_label_transfer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Label transfer: annotating scATAC-seq from an scRNA-seq reference</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contributors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Contributors &amp; acknowledgments</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../git_and_github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git and GitHub</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../additional_resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Further reading, cheat sheets, and datasets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ai_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">AI Tools for Enhanced Learning and Productivity in Bioinformatics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../matrix_exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Matrix Exercises</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#from-reads-to-a-count-matrix" id="toc-from-reads-to-a-count-matrix" class="nav-link active" data-scroll-target="#from-reads-to-a-count-matrix"><span class="header-section-number">38.1</span> From reads to a count matrix</a></li>
+  <li><a href="#quality-control-not-every-column-is-a-cell" id="toc-quality-control-not-every-column-is-a-cell" class="nav-link" data-scroll-target="#quality-control-not-every-column-is-a-cell"><span class="header-section-number">38.2</span> Quality control: not every column is a cell</a></li>
+  <li><a href="#normalization-making-cells-comparable" id="toc-normalization-making-cells-comparable" class="nav-link" data-scroll-target="#normalization-making-cells-comparable"><span class="header-section-number">38.3</span> Normalization: making cells comparable</a></li>
+  <li>
+<a href="#sec-part-a" id="toc-sec-part-a" class="nav-link" data-scroll-target="#sec-part-a"><span class="header-section-number">38.4</span> Part A — Finding structure within a sample</a>
+  <ul class="collapse">
+<li><a href="#feature-selection-keep-the-genes-that-vary" id="toc-feature-selection-keep-the-genes-that-vary" class="nav-link" data-scroll-target="#feature-selection-keep-the-genes-that-vary"><span class="header-section-number">38.4.1</span> Feature selection: keep the genes that vary</a></li>
+  <li><a href="#dimensionality-reduction-two-jobs-dont-confuse-them" id="toc-dimensionality-reduction-two-jobs-dont-confuse-them" class="nav-link" data-scroll-target="#dimensionality-reduction-two-jobs-dont-confuse-them"><span class="header-section-number">38.4.2</span> Dimensionality reduction: two jobs, don’t confuse them</a></li>
+  <li><a href="#clustering-drawing-the-boundaries" id="toc-clustering-drawing-the-boundaries" class="nav-link" data-scroll-target="#clustering-drawing-the-boundaries"><span class="header-section-number">38.4.3</span> Clustering: drawing the boundaries</a></li>
+  <li><a href="#marker-genes-what-defines-each-cluster" id="toc-marker-genes-what-defines-each-cluster" class="nav-link" data-scroll-target="#marker-genes-what-defines-each-cluster"><span class="header-section-number">38.4.4</span> Marker genes: what defines each cluster</a></li>
+  <li><a href="#annotation-attaching-biological-identity" id="toc-annotation-attaching-biological-identity" class="nav-link" data-scroll-target="#annotation-attaching-biological-identity"><span class="header-section-number">38.4.5</span> Annotation: attaching biological identity</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-part-b" id="toc-sec-part-b" class="nav-link" data-scroll-target="#sec-part-b"><span class="header-section-number">38.5</span> Part B — Comparing across samples</a>
+  <ul class="collapse">
+<li><a href="#integration-removing-the-batch-keeping-the-biology" id="toc-integration-removing-the-batch-keeping-the-biology" class="nav-link" data-scroll-target="#integration-removing-the-batch-keeping-the-biology"><span class="header-section-number">38.5.1</span> Integration: removing the batch, keeping the biology</a></li>
+  <li><a href="#differential-expression-aggregate-to-pseudobulk" id="toc-differential-expression-aggregate-to-pseudobulk" class="nav-link" data-scroll-target="#differential-expression-aggregate-to-pseudobulk"><span class="header-section-number">38.5.2</span> Differential expression: aggregate to pseudobulk</a></li>
+  <li><a href="#differential-abundance-did-the-mix-change" id="toc-differential-abundance-did-the-mix-change" class="nav-link" data-scroll-target="#differential-abundance-did-the-mix-change"><span class="header-section-number">38.5.3</span> Differential abundance: did the mix change?</a></li>
+  </ul>
+</li>
+  <li><a href="#beyond-the-core-pipeline" id="toc-beyond-the-core-pipeline" class="nav-link" data-scroll-target="#beyond-the-core-pipeline"><span class="header-section-number">38.6</span> Beyond the core pipeline</a></li>
+  <li><a href="#two-ecosystems-one-data-structure" id="toc-two-ecosystems-one-data-structure" class="nav-link" data-scroll-target="#two-ecosystems-one-data-structure"><span class="header-section-number">38.7</span> Two ecosystems, one data structure</a></li>
+  <li><a href="#where-to-go-next" id="toc-where-to-go-next" class="nav-link" data-scroll-target="#where-to-go-next"><span class="header-section-number">38.8</span> Where to go next</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/single_cell/concepts.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/single_cell/concepts.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../bioc-summarizedexperiment.html">Bioconductor</a></li><li class="breadcrumb-item"><a href="../single_cell/concepts.html"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">How single-cell analysis works</span></a></li></ol></nav><div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">
+<span class="chapter-number">38</span>&nbsp; <span class="chapter-title">How single-cell analysis works</span>
+</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/single_cell/concepts.qmd"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://seandavi.github.io/">Sean Davis</a> <a href="mailto:seandavi@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://medschool.cuanschutz.edu/">
+            University of Colorado<br>Anschutz School of Medicine
+            </a>
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 1, 2024</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">June 15, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header><p>This chapter is the conceptual map for everything else in the single-cell section. It began life as the lecture notes for a talk, and it keeps that spirit: no code to run, just the ideas — what each step of a single-cell analysis is <em>for</em>, what decision it makes on your behalf, and how the steps fit together. When you want to see the ideas executed on real data, the <a href="../single_cell/setup.html">companion workflow chapter</a> runs the whole Part A pipeline on a mouse-brain dataset, and the <a href="../single_cell/multiome.html">multiome</a> and <a href="../single_cell/atac_rna_label_transfer.html">label-transfer</a> chapters pick up the multimodal thread.</p>
+<p>Keep one picture in mind throughout. Every step below either operates on, or adds something to, a single accumulating object — the <code>SingleCellExperiment</code> (<a href="#fig-roadmap" class="quarto-xref">Figure&nbsp;<span>38.1</span></a>). Counts go in; QC metrics, normalized values, reduced dimensions, and cluster labels all get folded back into the same container. That is what lets a modular ecosystem of dozens of small packages hand the data back and forth without ever losing track of which metadata belongs to which cell.</p>
+<div id="fig-roadmap" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-roadmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="imgs/sc-roadmap.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;38.1: The two questions of single-cell analysis. Primary analysis funnels raw reads down into a sparse gene-by-cell count matrix; QC and normalization clean and calibrate it. From there the work splits in two. Part A asks what cell types are here? — a single-sample question answered by finding structure: select informative genes, reduce dimensions, cluster, find markers, annotate. Part B asks what changed? — a multi-sample question answered by comparison: integrate batches, then test for shifts in expression (pseudobulk) and in composition (differential abundance). Batch correction is the hinge between them. Every box reads from and writes to one SingleCellExperiment."><img src="imgs/sc-roadmap.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-roadmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.1: <strong>The two questions of single-cell analysis.</strong> Primary analysis funnels raw reads down into a sparse gene-by-cell count matrix; QC and normalization clean and calibrate it. From there the work splits in two. <strong>Part A</strong> asks <em>what cell types are here?</em> — a single-sample question answered by finding structure: select informative genes, reduce dimensions, cluster, find markers, annotate. <strong>Part B</strong> asks <em>what changed?</em> — a multi-sample question answered by comparison: integrate batches, then test for shifts in expression (pseudobulk) and in composition (differential abundance). Batch correction is the hinge between them. Every box reads from and writes to one <code>SingleCellExperiment</code>.
+</figcaption></figure>
+</div>
+<section id="from-reads-to-a-count-matrix" class="level2 page-columns page-full" data-number="38.1"><h2 data-number="38.1" class="anchored" data-anchor-id="from-reads-to-a-count-matrix">
+<span class="header-section-number">38.1</span> From reads to a count matrix</h2>
+<p>Before any biology, the sequencer’s output has to become a table of numbers. The defining trick of single-cell chemistry is that every captured molecule carries two short barcodes that survive sequencing: a <strong>cell barcode</strong> that records <em>which cell</em> the molecule came from, and a <strong>unique molecular identifier</strong> (UMI) that records <em>which original molecule</em> it was (<a href="#fig-umi" class="quarto-xref">Figure&nbsp;<span>38.2</span></a>). Everything downstream rests on those two labels.</p>
+<p>The cell barcode lets you demultiplex one giant pooled library back into tens of thousands of per-cell profiles. The UMI solves a subtler problem. PCR amplification is wildly uneven — some molecules get copied far more than others — so if you simply counted reads, abundance would reflect amplification luck rather than biology. Because the UMI is attached <em>before</em> amplification, reads that share a cell barcode, a UMI, and a gene are copies of one original molecule and collapse to a count of one; reads with different UMIs are genuinely distinct molecules and are each counted. That collapse, called <strong>deduplication</strong>, is what lets us count molecules instead of artifacts.</p>
+<div id="fig-umi" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-umi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="imgs/sc-umi.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;38.2: Two barcodes turn pooled reads into counts. Every read carries a cell barcode (which cell) and a UMI (which molecule), both attached before amplification. Step 1 — group reads by cell barcode to demultiplex the pooled library back into individual cells. Step 2 — within a cell, reads that share a UMI (same swatch color) and gene are PCR copies of one original molecule and collapse to a single count, while distinct UMIs are counted separately. Each cell becomes one column of the count matrix: here cell C1’s two orange ACTB reads collapse to one molecule and its green and purple ARL1 reads count as two, while cell C2’s duplicate GAPDH reads collapse to one. Deduplicating on the UMI is what removes PCR amplification bias. Schematic."><img src="imgs/sc-umi.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-umi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.2: <strong>Two barcodes turn pooled reads into counts.</strong> Every read carries a cell barcode (<em>which cell</em>) and a UMI (<em>which molecule</em>), both attached before amplification. <strong>Step 1</strong> — group reads by cell barcode to demultiplex the pooled library back into individual cells. <strong>Step 2</strong> — within a cell, reads that share a UMI (same swatch color) and gene are PCR copies of one original molecule and collapse to a single count, while distinct UMIs are counted separately. Each cell becomes one column of the count matrix: here cell C1’s two orange <em>ACTB</em> reads collapse to one molecule and its green and purple <em>ARL1</em> reads count as two, while cell C2’s duplicate <em>GAPDH</em> reads collapse to one. Deduplicating on the UMI is what removes PCR amplification bias. Schematic.
+</figcaption></figure>
+</div>
+<p>Getting reads to the point where they <em>can</em> be counted means mapping them to genes. Two families of method dominate. <strong>Alignment</strong> (e.g.&nbsp;STAR) places each read on the genome base by base; the wrinkle in RNA is splicing, so aligners must be splice-aware, stitching a read across an exon–exon junction. <strong>Alignment-free</strong> methods (kallisto, <span class="citation" data-cites="doi:10.1038/nbt.3519">Bray et al. (<a href="../references.html#ref-doi:10.1038/nbt.3519" role="doc-biblioref">2016</a>)</span>; salmon, <span class="citation" data-cites="doi:10.1038/nmeth.4197">Patro et al. (<a href="../references.html#ref-doi:10.1038/nmeth.4197" role="doc-biblioref">2017</a>)</span>) skip exact placement and instead ask only which transcripts a read is <em>compatible</em> with, which is an order of magnitude faster and handles multi-mapping reads gracefully. For single-cell data the barcode- and UMI-aware versions of these tools (alevin, kallisto|bustools) produce the same end product either way: a count matrix.</p>
+<p>That matrix — genes down the rows, cells across the columns, UMI counts in the cells — is the substrate for everything that follows. Two features of it shape every method in this chapter. It is <strong>large</strong> (tens of thousands of genes by hundreds of thousands of cells) and it is <strong>sparse</strong>: the overwhelming majority of entries are zero, partly because not every gene is expressed in every cell and partly because of <em>dropout</em>, where a real transcript simply isn’t captured. Sparsity is why single-cell data lives in specialized sparse formats and why the statistics downstream are purpose-built rather than borrowed wholesale from bulk RNA-seq.</p>
+</section><section id="quality-control-not-every-column-is-a-cell" class="level2" data-number="38.2"><h2 data-number="38.2" class="anchored" data-anchor-id="quality-control-not-every-column-is-a-cell">
+<span class="header-section-number">38.2</span> Quality control: not every column is a cell</h2>
+<p>A column of the matrix is a <em>barcode</em>, and a barcode is not the same as a healthy cell. Some columns are empty droplets that caught only ambient RNA, some are doublets where two cells shared a barcode, and some are dying cells leaking their contents. Quality control identifies and removes these before they masquerade as biology.</p>
+<p>Three metrics do most of the work, and the important discipline is to read them <em>together</em>:</p>
+<ul>
+<li>
+<strong>Genes detected per cell</strong> — too few suggests an empty droplet or a dead cell; an unusually high count suggests a doublet.</li>
+<li>
+<strong>Total UMI count</strong> (library size) — the same logic, on total molecules.</li>
+<li>
+<strong>Percent mitochondrial reads</strong> — the most diagnostic. When a membrane ruptures, cytoplasmic mRNA leaks out but the mitochondria stay trapped, so a dying cell’s surviving signal is enriched for mitochondrial transcripts.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Don’t reach for universal cutoffs
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There is no magic threshold — “20% mito” or “500 genes” are starting points, not laws. What counts as low depends on the tissue, the chemistry, and the cell type (neurons and cardiomyocytes are legitimately mitochondria-rich). Set thresholds from the distribution of <em>your</em> data, ideally adaptively (e.g.&nbsp;a few median absolute deviations from the median), and always plot the metrics against each other before you cut.</p>
+</div>
+</div>
+</section><section id="normalization-making-cells-comparable" class="level2" data-number="38.3"><h2 data-number="38.3" class="anchored" data-anchor-id="normalization-making-cells-comparable">
+<span class="header-section-number">38.3</span> Normalization: making cells comparable</h2>
+<p>Even among good cells, raw counts aren’t comparable. One cell may show twice the counts of another for purely technical reasons — capture efficiency, amplification, sequencing depth. Normalization estimates a <strong>size factor</strong> per cell and rescales so that what remains reflects biology (cell type, state, cycle) rather than how deeply that particular cell happened to be sequenced. The standard log-normalization then takes <code>log(count × sizeFactor + 1)</code> to stabilize variance and pull in the long right tail, which is what the distance-based methods downstream assume. Get this right and your clusters reflect cell types; get it wrong and they reflect sequencing depth. The <a href="../single_cell/setup.html">workflow chapter</a> shows the one-line <code>logNormCounts()</code> that does this in practice.</p>
+</section><section id="sec-part-a" class="level2 page-columns page-full" data-number="38.4"><h2 data-number="38.4" class="anchored" data-anchor-id="sec-part-a">
+<span class="header-section-number">38.4</span> Part A — Finding structure within a sample</h2>
+<p>The first question is descriptive: <em>what cell types and states are present?</em> You answer it with unsupervised structure-finding, and the steps form a pipeline where each feeds the next.</p>
+<section id="feature-selection-keep-the-genes-that-vary" class="level3 page-columns page-full" data-number="38.4.1"><h3 data-number="38.4.1" class="anchored" data-anchor-id="feature-selection-keep-the-genes-that-vary">
+<span class="header-section-number">38.4.1</span> Feature selection: keep the genes that vary</h3>
+<p>Most genes are uninformative for telling cell types apart — housekeeping genes are expressed everywhere at similar levels, and the rest are mostly noise at this depth. <strong>Highly variable genes</strong> (HVGs) are the ones whose variation across cells exceeds what you’d expect from technical noise alone. The catch is that in count data, variance rises with mean expression purely as an artifact, so you can’t just rank by raw variance. The fix is to model the mean–variance <em>trend</em> and pick the genes that sit furthest <em>above</em> it (<a href="#fig-hvg" class="quarto-xref">Figure&nbsp;<span>38.3</span></a>). Carrying ~1,000–3,000 such genes into the next step sharpens the biological signal and slashes the computation.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-hvg" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-hvg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="concepts_files/figure-html/fig-hvg-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;38.3: Feature selection by the mean–variance trend (schematic, simulated). Each point is a gene. Variance rises with mean expression as a technical artifact (blue trend). Highly variable genes (red) are those whose variance exceeds the trend — they carry biological signal and are the ones carried forward into dimensionality reduction. Ranking genes by raw variance instead would just re-discover the trend."><img src="concepts_files/figure-html/fig-hvg-1.png" class="img-fluid figure-img" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-hvg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.3: Feature selection by the mean–variance trend (schematic, simulated). Each point is a gene. Variance rises with mean expression as a technical artifact (blue trend). Highly variable genes (red) are those whose variance exceeds the trend — they carry biological signal and are the ones carried forward into dimensionality reduction. Ranking genes by raw variance instead would just re-discover the trend.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="dimensionality-reduction-two-jobs-dont-confuse-them" class="level3 page-columns page-full" data-number="38.4.2"><h3 data-number="38.4.2" class="anchored" data-anchor-id="dimensionality-reduction-two-jobs-dont-confuse-them">
+<span class="header-section-number">38.4.2</span> Dimensionality reduction: two jobs, don’t confuse them</h3>
+<p>This is where the most common conceptual error lives, so it’s worth being explicit. There are <em>two</em> dimensionality reductions in a typical workflow and they do different jobs.</p>
+<p><strong>PCA</strong> comes first. It is a linear projection that compresses the HVG-by-cell matrix down to a few dozen principal components, concentrating the coordinated biological variation into the top components and leaving most of the per-gene noise behind. PCA is a <em>denoising and compression</em> step, and its output is what the later steps — clustering, neighbor graphs, even t-SNE — actually consume.</p>
+<p><strong>t-SNE and UMAP</strong> come second, and they exist for one purpose: to squeeze those dozens of PCs into two dimensions you can <em>look at</em> (<a href="#fig-embedding" class="quarto-xref">Figure&nbsp;<span>38.4</span></a>). They are visualization tools. They deliberately distort global distances to make local neighborhoods legible, which is exactly why you should not read the gaps between far-apart islands, or the absolute sizes of clusters, as quantitative. For the same reason, standard practice clusters on the PCA-reduced space rather than the 2-D embedding: crushing dozens of PCs into two inevitably distorts distances and densities <span class="citation" data-cites="doi:10.1371/journal.pcbi.1011288">(<a href="../references.html#ref-doi:10.1371/journal.pcbi.1011288" role="doc-biblioref">Chari and Pachter 2023</a>)</span>, so the neighbor graph and clustering run on the PCs while the embedding is kept purely as a picture — the convention OSCA follows <span class="citation" data-cites="doi:10.1038/s41592-019-0654-x">(<a href="../references.html#ref-doi:10.1038/s41592-019-0654-x" role="doc-biblioref">Amezquita et al. 2019</a>)</span>, shared by tools like Seurat and scanpy.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-embedding" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-embedding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="concepts_files/figure-html/fig-embedding-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;38.4: The two dimensionality reductions do different jobs (schematic, simulated). Left: PCA concentrates coordinated biological variation into the first few components — the scree plot shows variance dropping off, and you keep the components before the elbow. PCA output is what downstream steps consume. Right: t-SNE/UMAP then compress those components into two dimensions purely for viewing; cells of one type land on one island. Treat the embedding as a picture, not a measurement — distances between islands and island sizes are not quantitative."><img src="concepts_files/figure-html/fig-embedding-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-embedding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.4: The two dimensionality reductions do different jobs (schematic, simulated). <strong>Left:</strong> PCA concentrates coordinated biological variation into the first few components — the scree plot shows variance dropping off, and you keep the components before the elbow. PCA output is what downstream steps consume. <strong>Right:</strong> t-SNE/UMAP then compress those components into two dimensions purely for viewing; cells of one type land on one island. Treat the embedding as a picture, not a measurement — distances between islands and island sizes are not quantitative.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="clustering-drawing-the-boundaries" class="level3" data-number="38.4.3"><h3 data-number="38.4.3" class="anchored" data-anchor-id="clustering-drawing-the-boundaries">
+<span class="header-section-number">38.4.3</span> Clustering: drawing the boundaries</h3>
+<p>Clustering turns the continuous cloud of cells into discrete groups. The dominant approach is <strong>graph-based</strong>: build a nearest-neighbor graph in PC space, then let a community-detection algorithm (Louvain, or Leiden, <span class="citation" data-cites="doi:10.1038/s41598-019-41695-z">Traag et al. (<a href="../references.html#ref-doi:10.1038/s41598-019-41695-z" role="doc-biblioref">2019</a>)</span>) carve it into densely connected communities. It scales to millions of cells and copes with the non-spherical, nested structure that single-cell data loves to produce.</p>
+<p>The essential thing to internalize is that <strong>a cluster is a hypothesis, not a fact</strong>. Every clustering method has a resolution knob, and turning it up splits groups while turning it down merges them — both produce valid-looking output. There is no true number of clusters handed down by nature; the right granularity depends on the question. A cluster earns the name “cell type” only once you can attach a marker-gene signature and a biological identity to it, which is the next two steps.</p>
+</section><section id="marker-genes-what-defines-each-cluster" class="level3 page-columns page-full" data-number="38.4.4"><h3 data-number="38.4.4" class="anchored" data-anchor-id="marker-genes-what-defines-each-cluster">
+<span class="header-section-number">38.4.4</span> Marker genes: what defines each cluster</h3>
+<p>To interpret a cluster, you ask which genes are expressed more highly in it than elsewhere — its <strong>marker genes</strong>. Mechanically this is a differential expression test between one cluster and the others, ranked to surface the genes that best distinguish the group. Markers are the bridge from anonymous cluster numbers to biology: a cluster lit up by <em>Cd3d</em> and <em>Cd3e</em> is a T cell; one marked by <em>Gfap</em> and <em>Aqp4</em> is an astrocyte. The <a href="../single_cell/setup.html">workflow chapter</a> finds these with <code>findMarkers()</code> and draws the block-structured heatmap that makes good markers visually obvious.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>The double-dipping trap
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There is a statistical sin lurking here, and almost every standard pipeline commits it. You use the data to <em>define</em> clusters, then use the <strong>same data</strong> to test which genes differ between those clusters — and report tiny p-values. But the clusters were drawn precisely to maximize those differences, so the test is circular: it is guaranteed to find “significant” genes even in data with no real groups at all (<a href="#fig-doubledip" class="quarto-xref">Figure&nbsp;<span>38.5</span></a>). The p-values are not valid in the usual sense.</p>
+<p>In practice the field largely tolerates this for <em>marker discovery</em> — markers are a descriptive, hypothesis-generating device, and you confirm them against known biology, not against a p-value. But treat those p-values as <em>scores for ranking</em>, never as evidence that the clusters are real. When you genuinely need valid inference after clustering, use methods built for it (sample splitting / count splitting, or selective-inference tests for post-clustering differences, <span class="citation" data-cites="doi:10.1080/01621459.2022.2116331">Gao et al. (<a href="../references.html#ref-doi:10.1080/01621459.2022.2116331" role="doc-biblioref">2022</a>)</span>). The honest way to ask “are these really two cell types?” is a comparison across <em>biological replicates</em>, which is Part B.</p>
+</div>
+</div>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-doubledip" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-doubledip-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="concepts_files/figure-html/fig-doubledip-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;38.5: Why post-clustering p-values are circular (simulated). The data are a single homogeneous Gaussian blob — there are no real groups. Left: k-means is asked for two clusters and dutifully splits the blob down the middle. Right: testing the splitting axis between the two ‘clusters’ returns an astronomically small p-value, because the split was chosen to maximize that very difference. The significance is manufactured by the procedure, not discovered in the data."><img src="concepts_files/figure-html/fig-doubledip-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-doubledip-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.5: Why post-clustering p-values are circular (simulated). The data are a <strong>single</strong> homogeneous Gaussian blob — there are no real groups. <strong>Left:</strong> k-means is asked for two clusters and dutifully splits the blob down the middle. <strong>Right:</strong> testing the splitting axis between the two ‘clusters’ returns an astronomically small p-value, because the split was <em>chosen</em> to maximize that very difference. The significance is manufactured by the procedure, not discovered in the data.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="annotation-attaching-biological-identity" class="level3 page-columns page-full" data-number="38.4.5"><h3 data-number="38.4.5" class="anchored" data-anchor-id="annotation-attaching-biological-identity">
+<span class="header-section-number">38.4.5</span> Annotation: attaching biological identity</h3>
+<p>The final Part A step gives clusters names. Two strategies, often combined (<a href="#fig-annotation" class="quarto-xref">Figure&nbsp;<span>38.6</span></a>):</p>
+<ul>
+<li>
+<strong>Reference-based</strong> — score each cell or cluster against an annotated reference atlas and transfer the best-matching label (e.g.&nbsp;SingleR, <span class="citation" data-cites="doi:10.1038/s41590-018-0276-y">Aran et al. (<a href="../references.html#ref-doi:10.1038/s41590-018-0276-y" role="doc-biblioref">2019</a>)</span>; Azimuth). Fast and reproducible when a good reference exists for your tissue.</li>
+<li>
+<strong>Marker-based</strong> — match each cluster’s marker genes against curated signatures of known cell types. More manual, but it works when no reference fits and it keeps a human in the loop.</li>
+</ul>
+<p>When neither suffices — a novel state, an unusual tissue — annotation becomes genuine expert work: inspect the markers, consult the literature, and accept that some clusters resist a clean label. Annotation is the step where the analysis stops being mechanical and starts being biology.</p>
+<div id="fig-annotation" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-annotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="imgs/sc-annotation.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;38.6: Choosing an annotation strategy. A good reference atlas for the tissue makes label transfer the fast, reproducible default; absent one, fall back to matching each cluster’s markers against curated signatures, and absent those, to manual expert interpretation. All three routes converge on the same goal — clusters with biological identities."><img src="imgs/sc-annotation.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-annotation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.6: <strong>Choosing an annotation strategy.</strong> A good reference atlas for the tissue makes label transfer the fast, reproducible default; absent one, fall back to matching each cluster’s markers against curated signatures, and absent those, to manual expert interpretation. All three routes converge on the same goal — clusters with biological identities.
+</figcaption></figure>
+</div>
+</section></section><section id="sec-part-b" class="level2 page-columns page-full" data-number="38.5"><h2 data-number="38.5" class="anchored" data-anchor-id="sec-part-b">
+<span class="header-section-number">38.5</span> Part B — Comparing across samples</h2>
+<p>Part A describes one sample. The questions that usually motivate an experiment are comparative: <em>does this cell type expand in disease? which genes change with treatment?</em> Answering them needs multiple samples, and a different set of tools — because now the dominant nuisance is not sequencing depth but the <strong>batch</strong>.</p>
+<section id="integration-removing-the-batch-keeping-the-biology" class="level3 page-columns page-full" data-number="38.5.1"><h3 data-number="38.5.1" class="anchored" data-anchor-id="integration-removing-the-batch-keeping-the-biology">
+<span class="header-section-number">38.5.1</span> Integration: removing the batch, keeping the biology</h3>
+<p>Run the same tissue on two days, two chemistries, or two donors and the batch effect can dwarf the biology: cluster naively and you get one cluster per batch instead of one per cell type. <strong>Integration</strong> (batch correction) aligns shared cell populations across batches so the same cell type from different samples lands in the same place (<a href="#fig-batch" class="quarto-xref">Figure&nbsp;<span>38.7</span></a>). Mutual-nearest- neighbor methods (fastMNN, <span class="citation" data-cites="doi:10.1038/nbt.4091">Haghverdi et al. (<a href="../references.html#ref-doi:10.1038/nbt.4091" role="doc-biblioref">2018</a>)</span>) and Harmony (<span class="citation" data-cites="doi:10.1038/s41592-019-0619-0">Korsunsky et al. (<a href="../references.html#ref-doi:10.1038/s41592-019-0619-0" role="doc-biblioref">2019</a>)</span>) are the common choices.</p>
+<p>The danger is over-correction: push too hard and you erase the very biological differences you came to study, including a genuinely batch-specific cell type. Integration is therefore a balancing act, and a sharp distinction matters — you correct batches to put cells in a <strong>shared coordinate space for clustering and visualization</strong>, but you do <em>not</em> run your differential-expression statistics on the batch-corrected values. For that, you go back to the raw counts.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-batch" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="concepts_files/figure-html/fig-batch-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;38.7: Integration aligns shared populations across batches (schematic, simulated). Three cell types are measured in two batches. Before: an additive batch shift separates the same cell type into batch-specific blobs — cluster now and you’d recover batches, not biology. After: correcting the shift superimposes matching cell types, so clustering recovers the three types with both batches mixed inside each. Use corrected coordinates for clustering and visualization, but return to raw counts for differential expression."><img src="concepts_files/figure-html/fig-batch-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.7: Integration aligns shared populations across batches (schematic, simulated). Three cell types are measured in two batches. <strong>Before:</strong> an additive batch shift separates the same cell type into batch-specific blobs — cluster now and you’d recover batches, not biology. <strong>After:</strong> correcting the shift superimposes matching cell types, so clustering recovers the three types with both batches mixed inside each. Use corrected coordinates for clustering and visualization, but return to raw counts for differential expression.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>With batches aligned, you can ask what actually changed — and a condition can change a cell population in <strong>two distinct ways</strong>, so a complete comparison checks both:</p>
+<ol type="1">
+<li>
+<strong>Differential expression</strong> — <em>within</em> a cell type, which genes change between conditions?</li>
+<li>
+<strong>Differential abundance</strong> — does the <em>proportion</em> of a cell type shift between conditions, even if its expression is unchanged?</li>
+</ol>
+<p>They answer different biological questions and need different machinery. Reporting one without the other tells half the story.</p>
+</section><section id="differential-expression-aggregate-to-pseudobulk" class="level3 page-columns page-full" data-number="38.5.2"><h3 data-number="38.5.2" class="anchored" data-anchor-id="differential-expression-aggregate-to-pseudobulk">
+<span class="header-section-number">38.5.2</span> Differential expression: aggregate to pseudobulk</h3>
+<p>The intuitive move — test every cell of a type against every cell in the other condition — is wrong, and the reason is fundamental. Cells from one animal are not independent biological replicates; they are repeated, correlated measurements of <em>that animal</em>. Treating thousands of cells as thousands of replicates produces wildly anti-conservative p-values: with enough cells, everything is “significant” (<span class="citation" data-cites="doi:10.1038/s41467-021-25960-2">Squair et al. (<a href="../references.html#ref-doi:10.1038/s41467-021-25960-2" role="doc-biblioref">2021</a>)</span>).</p>
+<p>The fix is <strong>pseudobulk</strong>: for each combination of sample and cell type, sum the counts across that sample’s cells into a single profile, then run a mature bulk-RNA-seq test (DESeq2, edgeR) across samples (<a href="#fig-pseudobulk" class="quarto-xref">Figure&nbsp;<span>38.8</span></a>). Now your replicates are <em>animals</em>, which is the level at which the biology actually varies, and decades of well-calibrated bulk methodology applies. The counter-intuitive lesson of single-cell DE across conditions is that the right unit of analysis is the sample, not the cell.</p>
+<div id="fig-pseudobulk" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-pseudobulk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="imgs/sc-pseudobulk.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;38.8: Pseudobulk differential expression. Per-cell counts (top, colored by cell type, grouped by biological sample) are summed within each sample × cell-type combination into one pseudobulk profile per group. The result is a genes-by-(sample × cell-type) matrix on which a standard bulk-RNA-seq test (DESeq2 / edgeR) compares conditions one cell type at a time. Replicates are now samples, not cells — the level at which biological variation actually lives — so the p-values are calibrated. Schematic; approach after @doi:10.1038/s41467-020-19894-4."><img src="imgs/sc-pseudobulk.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-pseudobulk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.8: <strong>Pseudobulk differential expression.</strong> Per-cell counts (top, colored by cell type, grouped by biological sample) are <strong>summed within each sample × cell-type combination</strong> into one pseudobulk profile per group. The result is a genes-by-(sample × cell-type) matrix on which a standard bulk-RNA-seq test (DESeq2 / edgeR) compares conditions <em>one cell type at a time</em>. Replicates are now samples, not cells — the level at which biological variation actually lives — so the p-values are calibrated. Schematic; approach after <span class="citation" data-cites="doi:10.1038/s41467-020-19894-4">Crowell et al. (<a href="../references.html#ref-doi:10.1038/s41467-020-19894-4" role="doc-biblioref">2020</a>)</span>.
+</figcaption></figure>
+</div>
+</section><section id="differential-abundance-did-the-mix-change" class="level3 page-columns page-full" data-number="38.5.3"><h3 data-number="38.5.3" class="anchored" data-anchor-id="differential-abundance-did-the-mix-change">
+<span class="header-section-number">38.5.3</span> Differential abundance: did the mix change?</h3>
+<p>The complementary question is compositional: holding expression aside, did the <em>fraction</em> of cells belonging to a type change with condition (<a href="#fig-da" class="quarto-xref">Figure&nbsp;<span>38.9</span></a>)? The naive approach — a proportion per cluster, then a test — works but is coarse and inherits all the arbitrariness of the cluster boundaries. Neighborhood-based methods (Milo, <span class="citation" data-cites="doi:10.1038/s41587-021-01033-z">Dann et al. (<a href="../references.html#ref-doi:10.1038/s41587-021-01033-z" role="doc-biblioref">2021</a>)</span>) instead test abundance in many small, overlapping neighborhoods of the graph, catching shifts that fall <em>between</em> named clusters; <code>propeller</code> (<span class="citation" data-cites="doi:10.1093/bioinformatics/btac582">Phipson et al. (<a href="../references.html#ref-doi:10.1093/bioinformatics/btac582" role="doc-biblioref">2022</a>)</span>) offers a robust cluster-level test. Either way, the same warning as in Part B’s opening applies: test across biological replicates, never across individual cells.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-da" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-da-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="concepts_files/figure-html/fig-da-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;38.9: Differential abundance asks whether the cellular composition shifts between conditions (schematic, simulated). Each point is a biological replicate; bars show the mean fraction of each cell type. Here cell type 3 expands and type 1 contracts under treatment, while types 2 and 4 hold steady — a change you would miss by looking at expression alone. The replicate-level spread is what a valid test uses; comparing individual cells would manufacture false confidence."><img src="concepts_files/figure-html/fig-da-1.png" class="img-fluid figure-img" width="624"></a>
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-da-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.9: Differential abundance asks whether the cellular composition shifts between conditions (schematic, simulated). Each point is a biological replicate; bars show the mean fraction of each cell type. Here cell type 3 expands and type 1 contracts under treatment, while types 2 and 4 hold steady — a change you would miss by looking at expression alone. The replicate-level spread is what a valid test uses; comparing individual cells would manufacture false confidence.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="beyond-the-core-pipeline" class="level2" data-number="38.6"><h2 data-number="38.6" class="anchored" data-anchor-id="beyond-the-core-pipeline">
+<span class="header-section-number">38.6</span> Beyond the core pipeline</h2>
+<p>The Part A/Part B arc covers the backbone, but a few further methods come up often enough to recognize by name:</p>
+<ul>
+<li>
+<strong>Trajectory inference / pseudotime</strong> — when cells form a continuum rather than discrete types (differentiation, activation), order them along a learned path instead of binning them into clusters (slingshot, TSCAN).</li>
+<li>
+<strong>RNA velocity</strong> — use the ratio of unspliced to spliced reads to infer the <em>direction</em> a cell is heading in transcriptional space, adding an arrow of time to a static snapshot.</li>
+<li>
+<strong>Gene-set / pathway enrichment</strong> — once you have marker or DE gene lists, summarize them into pathways to interpret what a cell type or a change is <em>doing</em>.</li>
+<li>
+<strong>Multimodal integration</strong> — pair RNA with chromatin accessibility or surface protein from the same cells; the <a href="../single_cell/multiome.html">multiome</a> and <a href="../single_cell/atac_rna_label_transfer.html">label-transfer</a> chapters develop this thread.</li>
+</ul></section><section id="two-ecosystems-one-data-structure" class="level2" data-number="38.7"><h2 data-number="38.7" class="anchored" data-anchor-id="two-ecosystems-one-data-structure">
+<span class="header-section-number">38.7</span> Two ecosystems, one data structure</h2>
+<p>You will do all of this in one of two ecosystems. <strong>Seurat</strong> is a single integrated R package (CRAN) with opinionated defaults and a large community. <strong>Bioconductor</strong> is a modular collection of small, interoperable packages organized around the OSCA framework — <em>Orchestrating Single-Cell Analysis</em> (<span class="citation" data-cites="doi:10.1038/s41592-019-0654-x">Amezquita et al. (<a href="../references.html#ref-doi:10.1038/s41592-019-0654-x" role="doc-biblioref">2019</a>)</span>) — that share the <code>SingleCellExperiment</code> data structure (<span class="citation" data-cites="hao2021integrated"><span class="nocase">Hao et al.</span> (<a href="../references.html#ref-hao2021integrated" role="doc-biblioref">2021</a>)</span> covers the Seurat side). This book takes the Bioconductor route, but the <em>concepts</em> in this chapter are ecosystem-agnostic: the steps and their pitfalls are the same whichever toolkit you choose.</p>
+<p>The payoff of the shared structure is concrete. Because QC metrics, reduced dimensions, and cluster labels all live in one synchronized object, you can hand it straight to an interactive explorer like iSEE and brush a cluster in a t-SNE to watch it light up across linked expression and heatmap panels — no plotting code required. A standard container is what turns a pile of methods into a workflow.</p>
+</section><section id="where-to-go-next" class="level2" data-number="38.8"><h2 data-number="38.8" class="anchored" data-anchor-id="where-to-go-next">
+<span class="header-section-number">38.8</span> Where to go next</h2>
+<ul>
+<li>The <a href="../single_cell/setup.html">single-cell workflow chapter</a> runs the Part A pipeline end-to-end on a mouse-brain dataset.</li>
+<li>
+<strong>OSCA</strong> — <a href="https://bioconductor.org/books/release/OSCA"><em>Orchestrating Single-Cell Analysis with Bioconductor</em></a> — is the definitive free, runnable reference for the Bioconductor route.</li>
+<li>For an honest tour of the open problems, see the “eleven grand challenges” review (<span class="citation" data-cites="doi:10.1186/s13059-020-1926-6">Lähnemann et al. (<a href="../references.html#ref-doi:10.1186/s13059-020-1926-6" role="doc-biblioref">2020</a>)</span>).</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>The one-paragraph summary
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Two barcodes (cell + UMI) turn sequencing into a sparse gene-by-cell count matrix; QC removes non-cells and normalization removes depth. Then the work splits: <strong>Part A</strong> finds structure in one sample (select variable genes → PCA to denoise → embed only to look → cluster → markers → annotate), and <strong>Part B</strong> compares across samples (integrate batches, then test expression by <em>pseudobulk</em> and composition by <em>differential abundance</em>). The recurring discipline is knowing your unit of analysis — the cell for describing structure, the <strong>sample</strong> for testing differences — and remembering that clusters are hypotheses, not facts.</p>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-doi:10.1038/s41592-019-0654-x" class="csl-entry" role="listitem">
+Amezquita, Robert A., Aaron T. L. Lun, Etienne Becht, et al. 2019. <span>“Orchestrating Single-Cell Analysis with <span>Bioconductor</span>.”</span> <em>Nature Methods</em> 17 (2): 137–45. <a href="https://doi.org/10.1038/s41592-019-0654-x">https://doi.org/10.1038/s41592-019-0654-x</a>.
+</div>
+<div id="ref-doi:10.1038/s41590-018-0276-y" class="csl-entry" role="listitem">
+Aran, Dvir, Agnieszka P. Looney, Leqian Liu, et al. 2019. <span>“Reference-Based Analysis of Lung Single-Cell Sequencing Reveals a Transitional Profibrotic Macrophage.”</span> <em>Nature Immunology</em> 20 (2): 163–72. <a href="https://doi.org/10.1038/s41590-018-0276-y">https://doi.org/10.1038/s41590-018-0276-y</a>.
+</div>
+<div id="ref-doi:10.1038/nbt.3519" class="csl-entry" role="listitem">
+Bray, Nicolas L, Harold Pimentel, Páll Melsted, and Lior Pachter. 2016. <span>“Near-Optimal Probabilistic <span class="nocase">RNA-seq</span> Quantification.”</span> <em>Nature Biotechnology</em> 34 (5): 525–27. <a href="https://doi.org/10.1038/nbt.3519">https://doi.org/10.1038/nbt.3519</a>.
+</div>
+<div id="ref-doi:10.1371/journal.pcbi.1011288" class="csl-entry" role="listitem">
+Chari, Tara, and Lior Pachter. 2023. <span>“The Specious Art of Single-Cell Genomics.”</span> <em>PLOS Computational Biology</em> 19 (8): e1011288. <a href="https://doi.org/10.1371/journal.pcbi.1011288">https://doi.org/10.1371/journal.pcbi.1011288</a>.
+</div>
+<div id="ref-doi:10.1038/s41467-020-19894-4" class="csl-entry" role="listitem">
+Crowell, Helena L., Charlotte Soneson, Pierre-Luc Germain, et al. 2020. <span>“Muscat Detects Subpopulation-Specific State Transitions from Multi-Sample Multi-Condition Single-Cell Transcriptomics Data.”</span> <em>Nature Communications</em> 11 (1). <a href="https://doi.org/10.1038/s41467-020-19894-4">https://doi.org/10.1038/s41467-020-19894-4</a>.
+</div>
+<div id="ref-doi:10.1038/s41587-021-01033-z" class="csl-entry" role="listitem">
+Dann, Emma, Neil C. Henderson, Sarah A. Teichmann, Michael D. Morgan, and John C. Marioni. 2021. <span>“Differential Abundance Testing on Single-Cell Data Using k-Nearest Neighbor Graphs.”</span> <em>Nature Biotechnology</em> 40 (2): 245–53. <a href="https://doi.org/10.1038/s41587-021-01033-z">https://doi.org/10.1038/s41587-021-01033-z</a>.
+</div>
+<div id="ref-doi:10.1080/01621459.2022.2116331" class="csl-entry" role="listitem">
+Gao, Lucy L., Jacob Bien, and Daniela Witten. 2022. <span>“Selective <span>Inference</span> for <span>Hierarchical</span> <span>Clustering</span>.”</span> <em>Journal of the American Statistical Association</em> 119 (545): 332–42. <a href="https://doi.org/10.1080/01621459.2022.2116331">https://doi.org/10.1080/01621459.2022.2116331</a>.
+</div>
+<div id="ref-doi:10.1038/nbt.4091" class="csl-entry" role="listitem">
+Haghverdi, Laleh, Aaron T L Lun, Michael D Morgan, and John C Marioni. 2018. <span>“Batch Effects in Single-Cell <span class="nocase">RNA-sequencing</span> Data Are Corrected by Matching Mutual Nearest Neighbors.”</span> <em>Nature Biotechnology</em> 36 (5): 421–27. <a href="https://doi.org/10.1038/nbt.4091">https://doi.org/10.1038/nbt.4091</a>.
+</div>
+<div id="ref-hao2021integrated" class="csl-entry" role="listitem">
+<span class="nocase">Hao, Yuhan, Stephanie Hao, Erica Andersen-Nissen, et al.</span> 2021. <span>“Integrated Analysis of Multimodal Single-Cell Data.”</span> <em>Cell</em> 184 (13): 3573–3587.e29. <a href="https://doi.org/10.1016/j.cell.2021.04.048">https://doi.org/10.1016/j.cell.2021.04.048</a>.
+</div>
+<div id="ref-doi:10.1038/s41592-019-0619-0" class="csl-entry" role="listitem">
+Korsunsky, Ilya, Nghia Millard, Jean Fan, et al. 2019. <span>“Fast, Sensitive and Accurate Integration of Single-Cell Data with <span>Harmony</span>.”</span> <em>Nature Methods</em> 16 (12): 1289–96. <a href="https://doi.org/10.1038/s41592-019-0619-0">https://doi.org/10.1038/s41592-019-0619-0</a>.
+</div>
+<div id="ref-doi:10.1186/s13059-020-1926-6" class="csl-entry" role="listitem">
+Lähnemann, David, Johannes Köster, Ewa Szczurek, et al. 2020. <span>“Eleven Grand Challenges in Single-Cell Data Science.”</span> <em>Genome Biology</em> 21 (1). <a href="https://doi.org/10.1186/s13059-020-1926-6">https://doi.org/10.1186/s13059-020-1926-6</a>.
+</div>
+<div id="ref-doi:10.1038/nmeth.4197" class="csl-entry" role="listitem">
+Patro, Rob, Geet Duggal, Michael I Love, Rafael A Irizarry, and Carl Kingsford. 2017. <span>“Salmon Provides Fast and Bias-Aware Quantification of Transcript Expression.”</span> <em>Nature Methods</em> 14 (4): 417–19. <a href="https://doi.org/10.1038/nmeth.4197">https://doi.org/10.1038/nmeth.4197</a>.
+</div>
+<div id="ref-doi:10.1093/bioinformatics/btac582" class="csl-entry" role="listitem">
+Phipson, Belinda, Choon Boon Sim, Enzo R Porrello, Alex W Hewitt, Joseph Powell, and Alicia Oshlack. 2022. <span>“<em>Propeller:</em> Testing for Differences in Cell Type Proportions in Single Cell Data.”</span> <em>Bioinformatics</em> 38 (20): 4720–26. <a href="https://doi.org/10.1093/bioinformatics/btac582">https://doi.org/10.1093/bioinformatics/btac582</a>.
+</div>
+<div id="ref-doi:10.1038/s41467-021-25960-2" class="csl-entry" role="listitem">
+Squair, Jordan W., Matthieu Gautier, Claudia Kathe, et al. 2021. <span>“Confronting False Discoveries in Single-Cell Differential Expression.”</span> <em>Nature Communications</em> 12 (1). <a href="https://doi.org/10.1038/s41467-021-25960-2">https://doi.org/10.1038/s41467-021-25960-2</a>.
+</div>
+<div id="ref-doi:10.1038/s41598-019-41695-z" class="csl-entry" role="listitem">
+Traag, V. A., L. Waltman, and N. J. van Eck. 2019. <span>“From <span>Louvain</span> to <span>Leiden:</span> Guaranteeing Well-Connected Communities.”</span> <em>Scientific Reports</em> 9 (1). <a href="https://doi.org/10.1038/s41598-019-41695-z">https://doi.org/10.1038/s41598-019-41695-z</a>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../atac-seq/atac-seq.html" class="pagination-link" aria-label="Genomic ranges and ATAC-seq">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Genomic ranges and ATAC-seq</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../single_cell/setup.html" class="pagination-link" aria-label="Single-cell RNA-seq analysis">
+        <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Single-cell RNA-seq analysis</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+<li class="nav-item">
+    <a class="nav-link" href="../about.html">
+<p>About</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../contributors.html">
+<p>Contributors</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../license.html">
+<p>License</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="https://doi.org/10.5281/zenodo.20574829">
+<p>DOI: 10.5281/zenodo.20574829</p>
+</a>
+  </li>  
+</ul>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/single_cell/concepts.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/single_cell/concepts.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
