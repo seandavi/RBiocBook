@@ -197,7 +197,7 @@ This is a two-step approach:
 1. **PCA first** compresses thousands of genes into a few dozen components, stripping noise while keeping the main axes of variation.
 2. **UMAP second** takes those components and lays them out in 2D so neighbouring cells sit together.
 
-One rule worth burning in: UMAP (like t-SNE) is a **visualization** of the data, not the data itself. It deliberately distorts distances to make a readable picture — so you *look* at it, but you do not *compute* on it. In particular, cluster on the PCA coordinates — the richer, denoised space — not on the 2-D embedding (the [concepts chapter](concepts.qmd) explains why clustering on a 2-D view is a mistake).
+One rule worth burning in: UMAP (like t-SNE) is a **visualization** of the data, not the data itself. It deliberately distorts distances to make a readable picture — so you *look* at it, but you do not *compute* on it. In particular, cluster on the PCA coordinates — the richer, denoised space — not on the 2-D embedding. Squeezing dozens of principal components down to two inevitably distorts distances and densities [@doi:10.1371/journal.pcbi.1011288], so clustering runs on the PCs while the embedding stays a picture — the convention OSCA, Seurat, and scanpy all follow [@doi:10.1038/s41592-019-0654-x]. The [concepts chapter](concepts.qmd) unpacks the reasoning.
 :::
 
 UMAP uses a random initialization, so its output changes from run to run. We call `set.seed()` first so the figure is reproducible — you'll see exactly the same map we do.
