@@ -51,6 +51,12 @@ jobs:
       # otherwise hide the tool; scoping it to the render keeps the multi-user
       # RStudio/Orchestra image's per-user data dirs untouched. See Dockerfile.
       XDG_DATA_HOME: /opt/quarto-data
+      # The scrapper render hangs deterministically on the multi-core CI runner
+      # (never locally / under emulation) — the signature of a native threading
+      # or multithreaded-BLAS deadlock in scrapper's C++ (PCA/SVD, neighbor
+      # search). Force single-threaded numerics to rule it out / fix it.
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -79,7 +85,7 @@ jobs:
         run: |
           export R_DEFAULT_INTERNET_TIMEOUT=120
           set -o pipefail
-          timeout --signal=INT --kill-after=60 1800 quarto render 2>&1 | tee /tmp/render.log
+          timeout --signal=INT --kill-after=60 1800 quarto render --debug 2>&1 | tee /tmp/render.log
           rc=$?
           if [ "$rc" -ne 0 ]; then
             echo "::group::render.log tail (exit $rc; 124 = step timeout)"
