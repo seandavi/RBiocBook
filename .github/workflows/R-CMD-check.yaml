@@ -67,21 +67,19 @@ jobs:
         run: quarto install extension --no-prompt nmfs-opensci/quarto_titlepages
 
       - name: Render
-        # Self-bounded, instrumented render. `timeout` aborts a stalled render
-        # (SIGINT, then SIGKILL after 60s) so a hung remote fetch fails fast
-        # instead of sitting for the full job. `--debug` surfaces the exact
-        # sub-process (pandoc image fetch, lualatex, knitr chunk) it stalls on,
-        # and we dump the log tail on any non-zero exit. R download timeout is
-        # capped so a base-R fetch errors rather than hangs.
-        # TODO: once the devel render hang is diagnosed and fixed, drop --debug
-        # and relax these to a plain `quarto render`.
+        # Self-bounded render. `timeout` aborts a stalled render (SIGINT, then
+        # SIGKILL after 60s) so a hung remote fetch fails fast instead of sitting
+        # until the job timeout; the log tail is dumped on any non-zero exit, and
+        # the R download timeout is capped so a base-R fetch errors rather than
+        # hangs. (Add `--debug` to the quarto render below when a stall needs to
+        # be traced to a specific sub-process.)
         # shell: bash is required — container `run:` defaults to sh (dash), which
         # rejects `set -o pipefail`.
         shell: bash
         run: |
           export R_DEFAULT_INTERNET_TIMEOUT=120
           set -o pipefail
-          timeout --signal=INT --kill-after=60 1800 quarto render --debug 2>&1 | tee /tmp/render.log
+          timeout --signal=INT --kill-after=60 1800 quarto render 2>&1 | tee /tmp/render.log
           rc=$?
           if [ "$rc" -ne 0 ]; then
             echo "::group::render.log tail (exit $rc; 124 = step timeout)"
