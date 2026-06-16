@@ -5,10 +5,13 @@
 #   2. devcontainer  — render/run ANY chapter locally (incl. the single-cell stack)
 #   3. Orchestra     — browser-based RStudio workshop (RStudio Server ships in the base)
 #
-# Pinned to the Bioconductor RELEASE the book is validated against. The base is
-# derived from rocker/rstudio, so it provides RStudio Server + R 4.6 + every
-# Bioconductor system library + BINARY package installs (no source compiles).
-ARG BIOC_VERSION=RELEASE_3_23
+# Tracks Bioconductor *devel* so the book is validated against the current edge of
+# the single-cell stack (scrapper et al.) and deprecations surface in CI early.
+# The base is derived from rocker/rstudio, so it provides RStudio Server + R +
+# every Bioconductor system library + package installs (binaries where devel has
+# them built; some may compile from source). Pin BIOC_VERSION back to a release
+# tag (e.g. RELEASE_3_23) if devel goes red and needs to be ridden out.
+ARG BIOC_VERSION=devel
 FROM bioconductor/bioconductor_docker:${BIOC_VERSION}
 
 # System tools Quarto needs that the base doesn't carry:
