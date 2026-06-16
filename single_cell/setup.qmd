@@ -39,6 +39,7 @@ By the end of this chapter you will be able to:
 library(scRNAseq)
 library(scrapper)
 library(scater)
+cat("CIPROBE 1: libraries loaded\n", file = stderr())  # CI diagnostic — remove
 ```
 
 We start by loading three essential R packages for single-cell analysis:
@@ -55,6 +56,7 @@ We are going to use the `scRNAseq` package to access a curated collection of sin
 
 ```{r}
 datasets <- scRNAseq::surveyDatasets()
+cat("CIPROBE 2: surveyDatasets done\n", file = stderr())  # CI diagnostic — remove
 ```
 
 The `surveyDatasets()` function queries the scRNAseq package database to show all available datasets. This creates a simple table of publicly available single-cell datasets that have been processed and made easily accessible.
@@ -78,6 +80,7 @@ The mammalian cerebral cortex supports cognitive functions such as sensorimotor 
 ```{r}
 #| label: fig-scRNAseq-datasets
 sce <- scRNAseq::ZeiselBrainData()
+cat("CIPROBE 3: ZeiselBrainData done\n", file = stderr())  # CI diagnostic — remove
 ```
 
 What is the `sce` object? It is a `SingleCellExperiment` object, a data structure designed specifically for single-cell RNA-seq data. It is built directly on top of the `SummarizedExperiment` class you met in the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd) (see @fig-scRNAseq-sce), so the same mental model applies: an assay matrix of counts, with aligned metadata about the features (genes) down the rows and the cells across the columns. A `SingleCellExperiment` simply adds a few single-cell-specific extras on top, most importantly a slot for dimensionality reductions like PCA and UMAP.
@@ -103,6 +106,7 @@ In fact, we are going to add some of this additional information in the next ste
 
 ```{r}
 sce <- normalizeRnaCounts.se(sce)
+cat("CIPROBE 4: normalize done\n", file = stderr())  # CI diagnostic — remove
 ```
 
 The `normalizeRnaCounts.se()` function performs log-normalization of the count data. It reads the `counts` assay, computes a size factor for each cell, and writes a new `logcounts` assay (and a `sizeFactor` column) back into the `sce` object — so afterwards `logcounts(sce)` holds the normalized values. Raw count data from scRNA-seq experiments contains technical variation due to differences in sequencing depth between cells. Some cells might have been sequenced more deeply than others, leading to higher total counts that don't reflect true biological differences. Log-normalization addresses this by:
@@ -179,6 +183,7 @@ PCA is a widely _linear_ dimensionality reduction technique that:
 # Perform PCA on the highly variable genes
 set.seed(100) # See below.
 sce <- runPca.se(sce, features=rowData(sce)$hvg)
+cat("CIPROBE 5: runPca done\n", file = stderr())  # CI diagnostic — remove
 
 reducedDimNames(sce)
 ```
@@ -205,6 +210,7 @@ UMAP uses a random initialization, so its output changes from run to run. We cal
 ```{r}
 set.seed(1234)
 sce <- runUmap.se(sce, reddim.type="PCA")
+cat("CIPROBE 6: runUmap done\n", file = stderr())  # CI diagnostic — remove
 ```
 
 The `runUmap.se()` function builds the embedding from the PCA results and stores it in the `reducedDims` slot (under `"UMAP"`). The `reddim.type="PCA"` argument tells it to start from the PCA coordinates rather than the raw genes.
@@ -214,6 +220,7 @@ Now we cluster. Graph-based clustering is stochastic, so we set a seed first —
 ```{r}
 set.seed(1234)
 sce <- clusterGraph.se(sce, reddim.type="PCA")
+cat("CIPROBE 7: clusterGraph done\n", file = stderr())  # CI diagnostic — remove
 nn.clusters <- factor(sce$clusters)
 table(nn.clusters)
 ```
@@ -262,6 +269,7 @@ library(ggplot2)
 library(patchwork)
 set.seed(1234)
 sce <- runTsne.se(sce, reddim.type="PCA")
+cat("CIPROBE 8: runTsne done\n", file = stderr())  # CI diagnostic — remove
 p_umap <- plotReducedDim(sce, "UMAP", colour_by="level1class") + ggtitle("UMAP")
 p_tsne <- plotReducedDim(sce, "TSNE", colour_by="level1class") + ggtitle("t-SNE")
 (p_umap | p_tsne) + plot_layout(guides = "collect")
@@ -279,6 +287,7 @@ To find marker genes, we use the `scoreMarkers()` function from the `scrapper` p
 #| label: fig-marker-genes
 markers <- scoreMarkers(logcounts(sce)[top_var_genes, ],
                         groups=colData(sce)$level1class)
+cat("CIPROBE 9: scoreMarkers(celltype) done\n", file = stderr())  # CI diagnostic — remove
 ```
 
 We pass `logcounts(sce)[top_var_genes, ]` — the log-normalized matrix restricted to the highly variable genes we identified earlier, which are more likely to be informative for distinguishing cell types — and `groups=...` tells the function which cell type each cell belongs to.
