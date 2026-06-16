@@ -330,7 +330,19 @@ genuine expert work: inspect the markers, consult the literature, and accept
 that some clusters resist a clean label. Annotation is the step where the
 analysis stops being mechanical and starts being biology.
 
-![**Choosing an annotation strategy.** A good reference atlas for the tissue makes label transfer the fast, reproducible default; absent one, fall back to matching each cluster's markers against curated signatures, and absent those, to manual expert interpretation. All three routes converge on the same goal — clusters with biological identities.](imgs/sc-annotation.svg){#fig-annotation}
+```{mermaid}
+%%| label: fig-annotation
+%%| fig-cap: "Choosing an annotation strategy. A good reference atlas for the tissue makes label transfer the fast, reproducible default; absent one, fall back to matching each cluster's markers against curated signatures, and absent those, to manual expert interpretation. All three routes converge on the same goal — clusters with biological identities."
+flowchart TD
+  A[Clusters in hand] --> B{Good reference<br/>atlas for this tissue?}
+  B -- yes --> C[Reference-based transfer<br/>SingleR / Azimuth]
+  B -- no --> D{Known marker<br/>genes available?}
+  D -- yes --> E[Marker-based<br/>signature scoring]
+  D -- no --> F[Manual: inspect DE<br/>+ literature]
+  C --> G([Annotated cell types])
+  E --> G
+  F --> G
+```
 
 ## Part B — Comparing across samples {#sec-part-b}
 
