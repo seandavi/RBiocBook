@@ -104,15 +104,32 @@ metrics against each other before you cut.
 
 Even among good cells, raw counts aren't comparable. One cell may show twice
 the counts of another for purely technical reasons — capture efficiency,
-amplification, sequencing depth. Normalization estimates a **size factor**
-per cell and rescales so that what remains reflects biology (cell type,
-state, cycle) rather than how deeply that particular cell happened to be
-sequenced. The standard log-normalization then takes `log(count × sizeFactor
-+ 1)` to stabilize variance and pull in the long right tail, which is what
-the distance-based methods downstream assume. Get this right and your
-clusters reflect cell types; get it wrong and they reflect sequencing depth.
-The [workflow chapter](setup.qmd) shows the one-line `logNormCounts()` that
-does this in practice.
+amplification, sequencing depth. Normalization removes that nuisance so that
+what is left reflects biology (cell type, state, cycle) rather than how
+deeply a cell happened to be sequenced (@fig-sizefactor).
+
+The instrument for the job is a per-cell **size factor**: one number per
+cell, roughly proportional to how much that cell was sequenced, that you
+divide its counts by. The simplest estimate is just the cell's total UMI
+count — its *library size* — relative to the average: a cell sequenced twice
+as deeply gets a size factor near two, and dividing brings it back into line.
+In single-cell data that crude estimate is often not enough. Counts are
+dominated by zeros, and a few very highly expressed genes can inflate one
+cell's total without saying anything about its depth, so per-cell totals are
+noisy and can be biased when cells differ in composition. The robust fix —
+the `scran`/`scrapper` default — is **deconvolution**: pool many cells so
+their summed counts are large and nearly zero-free, estimate a stable size
+factor for the pool, then solve back for each individual cell's factor.
+
+Once each cell has its size factor *s*, log-normalization computes
+`log(count / s + 1)`: dividing by *s* puts every cell on a common depth, the
+`+ 1` keeps zeros finite, and the log stabilizes variance and reins in the
+long right tail — exactly what the distance-based methods downstream assume.
+Get this right and your clusters reflect cell types; get it wrong and they
+reflect sequencing depth. The [workflow chapter](setup.qmd) shows the
+one-line `logNormCounts()` that does all of this in practice.
+
+![**A size factor makes cells comparable.** Three cells of the *same* type sequenced at different depths have raw count profiles of different heights (top) — a purely technical artifact. Each cell gets a **size factor** roughly proportional to its sequencing depth (≈ its library size); dividing every gene's count by it puts the cells on a common scale, so the shared profile lines up (bottom). The naive size factor is just the cell's total count, but because single-cell counts are mostly zeros, the robust estimate pools similar cells and deconvolves a per-cell factor (`scran`/`scrapper`). Schematic.](imgs/sc-sizefactor.svg){#fig-sizefactor}
 
 ## Part A — Finding structure within a sample {#sec-part-a}
 
