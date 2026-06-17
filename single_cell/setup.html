@@ -1052,12 +1052,12 @@ altExpNames(2): repeat ERCC</code></pre>
 <p>The <code><a href="https://rdrr.io/pkg/scrapper/man/normalizeRnaCounts.se.html">normalizeRnaCounts.se()</a></code> function performs log-normalization of the count data. It reads the <code>counts</code> assay, computes a size factor for each cell, and writes a new <code>logcounts</code> assay (and a <code>sizeFactor</code> column) back into the <code>sce</code> object — so afterwards <code>logcounts(sce)</code> holds the normalized values. Raw count data from scRNA-seq experiments contains technical variation due to differences in sequencing depth between cells. Some cells might have been sequenced more deeply than others, leading to higher total counts that don’t reflect true biological differences. Log-normalization addresses this by:</p>
 <ol type="1">
 <li>
-<strong>Size factor normalization</strong>: Scaling each cell’s counts by a size factor that accounts for differences in sequencing depth. There are several methods to calculate size factors, but the most common is the median of ratios method, which divides each cell’s counts by the median count for each gene across all cells. This helps to adjust for differences in library size.</li>
+<strong>Size factor normalization</strong>: Scaling each cell’s counts by a per-cell <em>size factor</em> that captures how deeply it was sequenced. <code><a href="https://rdrr.io/pkg/scrapper/man/normalizeRnaCounts.se.html">normalizeRnaCounts.se()</a></code> uses the simplest such factor — the cell’s total count (its <em>library size</em>), centered so the average factor across cells is 1 — and divides every gene’s count by it. More robust estimators exist; the <a href="../single_cell/concepts.html#sec-normalization">concepts chapter</a> explains the deconvolution refinement used when cells differ in composition.</li>
 <li>
 <strong>Log transformation</strong>: Taking log(count + 1) to stabilize variance and make the data more normally distributed</li>
 </ol>
 <p>For each gene g in cell i, the log-normalized expression becomes:</p>
-<p><span class="math display">\[log_2(count_{g_i} × {size factor}_{i} + 1)\]</span></p>
+<p><span class="math display">\[log_2\left(\frac{count_{g_i}}{{size factor}_{i}} + 1\right)\]</span></p>
 <p>This log transformation is useful because the next steps in the downstream analyses (like clustering and dimensionality reduction) assume that the data is approximately normally distributed (or at least bell-shaped). Log-normalization helps achieve this by reducing the impact of outliers and making the data more suitable for PCA and visualization.</p>
 </section></section><section id="dimensionality-reduction" class="level2 page-columns page-full" data-number="39.3"><h2 data-number="39.3" class="anchored" data-anchor-id="dimensionality-reduction">
 <span class="header-section-number">39.3</span> Dimensionality reduction</h2>
