@@ -58,7 +58,7 @@ jobs:
       OMP_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mark workspace safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -85,7 +85,7 @@ jobs:
         run: |
           export R_DEFAULT_INTERNET_TIMEOUT=120
           set -o pipefail
-          timeout --signal=INT --kill-after=60 1800 quarto render --debug 2>&1 | tee /tmp/render.log
+          timeout --signal=INT --kill-after=60 1800 quarto render 2>&1 | tee /tmp/render.log
           rc=$?
           if [ "$rc" -ne 0 ]; then
             echo "::group::render.log tail (exit $rc; 124 = step timeout)"
@@ -149,7 +149,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mark workspace safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -170,7 +170,7 @@ jobs:
         run: |
           printf '/*\n  X-Robots-Tag: noindex\n' > _book/_headers
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: book-html
           path: _book
@@ -185,13 +185,13 @@ jobs:
       contents: read
       pull-requests: write # post the preview URL as a PR comment
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: book-html
           path: _book
 
       - name: Deploy preview to Netlify
-        uses: nwtgck/actions-netlify@v3
+        uses: nwtgck/actions-netlify@v4
         with:
           publish-dir: _book
           production-deploy: false
