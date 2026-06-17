@@ -37,15 +37,15 @@ By the end of this chapter you will be able to:
 #| warning: false
 # Load essential libraries for single-cell RNA-seq analysis
 library(scRNAseq)
-library(scran)
+library(scrapper)
 library(scater)
 ```
 
 We start by loading three essential R packages for single-cell analysis:
 
 - **scRNAseq**: Provides access to curated single-cell RNA-seq datasets, making it easy to practice analysis techniques on real data. At the time of writing, it includes more than 50 datasets covering various tissues, organisms, and experimental conditions. See @risso2024scRNAseq
-- **scran**: Contains methods for normalization, feature selection, and clustering specifically designed for single-cell data. See @lun2016.
-- **scater**: Offers tools for quality control, visualization, and exploratory data analysis. See @McCarthy2017scater.
+- **scrapper**: Provides fast, modern implementations of the core single-cell numerics — normalization, feature selection, PCA, clustering, and marker detection. It is the successor to the older `scran`/`scuttle` stack: the same algorithms, re-implemented in C++ for speed, with a consistent functional interface. For most steps we use its `.se` helpers, which read from and write to a `SingleCellExperiment` so the familiar object stays at the centre of the workflow; for marker detection we call the matrix-level `scoreMarkers()` directly. See @lun2016.
+- **scater**: Offers tools for visualization and exploratory data analysis. We use it here purely for plotting (`plotReducedDim`, `plotHeatmap`); scrapper does the numerical heavy lifting. See @McCarthy2017scater.
 
 Single-cell data has unique characteristics (sparsity, high dimensionality, technical noise) that require specialized tools. These packages form the backbone of the Bioconductor single-cell analysis ecosystem and provide methods that account for the specific challenges of single-cell data.
 
@@ -102,10 +102,10 @@ It **can** also contain additional information such as dimensionality reductions
 In fact, we are going to add some of this additional information in the next steps. First, we add a new assay with the log-normalized counts, which is a common preprocessing step in single-cell RNA-seq analysis.
 
 ```{r}
-sce <- logNormCounts(sce)
+sce <- normalizeRnaCounts.se(sce)
 ```
 
-The `logNormCounts()` function performs log-normalization of the count data. Raw count data from scRNA-seq experiments contains technical variation due to differences in sequencing depth between cells. Some cells might have been sequenced more deeply than others, leading to higher total counts that don't reflect true biological differences. Log-normalization addresses this by:
+The `normalizeRnaCounts.se()` function performs log-normalization of the count data. It reads the `counts` assay, computes a size factor for each cell, and writes a new `logcounts` assay (and a `sizeFactor` column) back into the `sce` object — so afterwards `logcounts(sce)` holds the normalized values. Raw count data from scRNA-seq experiments contains technical variation due to differences in sequencing depth between cells. Some cells might have been sequenced more deeply than others, leading to higher total counts that don't reflect true biological differences. Log-normalization addresses this by:
 
 1. **Size factor normalization**: Scaling each cell's counts by a size factor that accounts for differences in sequencing depth. There are several methods to calculate size factors, but the most common is the median of ratios method, which divides each cell's counts by the median count for each gene across all cells. This helps to adjust for differences in library size.
 2. **Log transformation**: Taking log(count + 1) to stabilize variance and make the data more normally distributed
@@ -133,28 +133,28 @@ Not all genes are equally informative for distinguishing cell types. Genes that 
 
 
 ```{r}
-library(scran)
-top_var_genes <- getTopHVGs(sce, n=2000)
+sce <- chooseRnaHvgs.se(sce, top=2000)
+top_var_genes <- rownames(sce)[rowData(sce)$hvg]
 ```
 
-The `getTopHVGs()` function identifies the top 2000 highly variable genes based on their variance across cells. Choosing a subset of highly variable genes reduces the dimensionality of the dataset while retaining the most informative features for downstream analyses.
+The `chooseRnaHvgs.se()` function identifies the top 2000 highly variable genes based on their variance across cells. It models the mean–variance relationship internally, marks the chosen genes with a logical `hvg` column in `rowData(sce)`, and also stores the per-gene `means`, `variances`, and `fitted` trend values there. We pull the names of the selected genes into `top_var_genes` for the steps that need an explicit gene list. Choosing a subset of highly variable genes reduces the dimensionality of the dataset while retaining the most informative features for downstream analyses.
 
 The algorithm models the relationship between gene expression mean and variance, then identifies genes that show more variation than expected based on their expression level. This accounts for the fact that highly expressed genes naturally show more variance.
 
 ```{r}
 #| label: fig-scRNAseq-hvg
 #| fig.cap: "A plot of the mean vs variance of log-expression for all the genes in the dataset, with the highly variable genes highlighted in red. Here, the x-axis represents the mean log-expression of each gene, and the y-axis represents the variance of log-expression. The blue curve represents the trend of variance as a function of mean expression, while the red points represent the highly variable genes."
-# Visualizing the highly variable genes
-library(scran)
-dec <- modelGeneVar(sce)
-
-# Visualizing the fit:
-fit.mv <- metadata(dec)
-plot(fit.mv$mean, fit.mv$var, xlab="Mean of log-expression",
+# Visualizing the highly variable genes. chooseRnaHvgs.se() already stored the
+# per-gene mean, variance, fitted trend, and hvg flag in rowData(sce).
+rd <- rowData(sce)
+plot(rd$means, rd$variances, xlab="Mean of log-expression",
     ylab="Variance of log-expression", ylim=c(0, 4))
-curve(fit.mv$trend(x), col="dodgerblue", add=TRUE, lwd=2)
+# The fitted trend, drawn as a curve by ordering genes along the mean axis:
+o <- order(rd$means)
+lines(rd$means[o], rd$fitted[o], col="dodgerblue", lwd=2)
+# Highlight the genes flagged as highly variable:
 points(
-    fit.mv$mean[top_var_genes], fit.mv$var[top_var_genes], 
+    rd$means[rd$hvg], rd$variances[rd$hvg],
     col="red", pch=16, cex=0.5
 )
 ```
@@ -178,12 +178,12 @@ PCA is a widely _linear_ dimensionality reduction technique that:
 ```{r}
 # Perform PCA on the highly variable genes
 set.seed(100) # See below.
-sce <- fixedPCA(sce, subset.row=top_var_genes)
+sce <- runPca.se(sce, features=rowData(sce)$hvg)
 
 reducedDimNames(sce)
 ```
 
-Note that we assign the output of `fixedPCA()` to the `sce` object. This function performs PCA on the highly variable genes we identified earlier, reducing the dimensionality of the dataset while retaining the most informative features. Because dimensionality reduction is a common step in single-cell RNA-seq analysis, we can store the PCA results in the `reducedDims` slot of the `SingleCellExperiment` object. This allows us to easily access and visualize the PCA coordinates later.
+Note that we assign the output of `runPca.se()` back to the `sce` object. The `features=rowData(sce)$hvg` argument restricts the PCA to the highly variable genes we flagged earlier, reducing the dimensionality of the dataset while retaining the most informative features. Because dimensionality reduction is a common step in single-cell RNA-seq analysis, the function stores the PCA results in the `reducedDims` slot of the `SingleCellExperiment` object (under the name `"PCA"`). This allows us to easily access and visualize the PCA coordinates later.
 
 ### Non-linear dimensionality reduction with UMAP
 
@@ -203,22 +203,22 @@ One rule worth burning in: UMAP (like t-SNE) is a **visualization** of the data,
 UMAP uses a random initialization, so its output changes from run to run. We call `set.seed()` first so the figure is reproducible — you'll see exactly the same map we do.
 
 ```{r}
-library(scater)
 set.seed(1234)
-sce <- runUMAP(sce, dimred="PCA")
+sce <- runUmap.se(sce, reddim.type="PCA")
 ```
 
-The `runUMAP()` function builds the embedding from the PCA results and stores it in the `reducedDims` slot. The `dimred="PCA"` argument tells it to start from the PCA coordinates rather than the raw genes.
+The `runUmap.se()` function builds the embedding from the PCA results and stores it in the `reducedDims` slot (under `"UMAP"`). The `reddim.type="PCA"` argument tells it to start from the PCA coordinates rather than the raw genes.
 
 Now we cluster. Graph-based clustering is stochastic, so we set a seed first — and, following the rule above, we cluster on the **PCA** coordinates, not on the UMAP.
 
 ```{r}
 set.seed(1234)
-nn.clusters <- clusterCells(sce, use.dimred = "PCA")
+sce <- clusterGraph.se(sce, reddim.type="PCA")
+nn.clusters <- factor(sce$clusters)
 table(nn.clusters)
 ```
 
-The `clusterCells()` function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was [popularized by the Seurat package](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells): it builds a nearest-neighbor graph and then finds communities within it, and the resulting clusters often correspond to distinct cell types or states. The `use.dimred = "PCA"` argument points it at the denoised PCA space — the full set of principal components carries far more signal than the two UMAP axes, which exist only for viewing. Other methods exist (k-means, hierarchical clustering), but graph-based clustering suits single-cell data because it handles complex, non-linear structure and scales well.
+The `clusterGraph.se()` function uses graph-based clustering to identify groups of similar cells. Graph-based clustering was [popularized by the Seurat package](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells): it builds a nearest-neighbor graph and then finds communities within it, and the resulting clusters often correspond to distinct cell types or states. It writes the assignments to a `clusters` column in `colData(sce)`; we wrap them in a factor and keep a copy in `nn.clusters`. The `reddim.type="PCA"` argument points it at the denoised PCA space — the full set of principal components carries far more signal than the two UMAP axes, which exist only for viewing. Other methods exist (k-means, hierarchical clustering), but graph-based clustering suits single-cell data because it handles complex, non-linear structure and scales well.
 
 The table above is your first concrete result: each entry is the number of cells assigned to a cluster, so you can read off how many groups the algorithm found and roughly how balanced they are. A handful of large clusters plus several small ones is typical — the large ones are usually abundant cell types, the small ones rare populations.
 
@@ -261,7 +261,7 @@ UMAP didn't appear from nowhere — for years **t-SNE** (t-distributed Stochasti
 library(ggplot2)
 library(patchwork)
 set.seed(1234)
-sce <- runTSNE(sce, dimred="PCA")
+sce <- runTsne.se(sce, reddim.type="PCA")
 p_umap <- plotReducedDim(sce, "UMAP", colour_by="level1class") + ggtitle("UMAP")
 p_tsne <- plotReducedDim(sce, "TSNE", colour_by="level1class") + ggtitle("t-SNE")
 (p_umap | p_tsne) + plot_layout(guides = "collect")
@@ -273,29 +273,30 @@ The reassuring result is that both embeddings tell the same story — the same c
 
 Marker genes are genes that are differentially expressed in a specific cell type or cluster compared to others. Identifying marker genes helps us understand the molecular characteristics of each cell type and can provide insights into their functions.
 
-To find marker genes, we can use the `findMarkers()` function from the `scran` package. This function performs pairwise differential expression analysis between clusters or cell types. We can specify the clusters we want to compare and the method for calculating differential expression.
+To find marker genes, we use the `scoreMarkers()` function from the `scrapper` package. For every group, it compares each gene's expression against every *other* group and summarizes the result as an **effect size** — here we use Cohen's *d*, a standardized difference in mean expression. A gene that is strongly and consistently higher in one group than in all the others gets a large effect size for that group, marking it as a good marker.
 
 ```{r}
 #| label: fig-marker-genes
-markers <- findMarkers(sce, 
-    groups=as.numeric(as.factor(colData(sce)$level1class)), pval.type="all",
-    direction="up", subset.row=top_var_genes, test="t")
+markers <- scoreMarkers(logcounts(sce)[top_var_genes, ],
+                        groups=colData(sce)$level1class)
 ```
 
-The `findMarkers()` function identifies genes that are significantly upregulated in each cluster compared to all other clusters. The `pval.type="all"` argument specifies that we want to calculate p-values for all comparisons, and the `direction="up"` argument indicates that we are interested in genes that are upregulated in the specified clusters.
+We pass `logcounts(sce)[top_var_genes, ]` — the log-normalized matrix restricted to the highly variable genes we identified earlier, which are more likely to be informative for distinguishing cell types — and `groups=...` tells the function which cell type each cell belongs to.
 
-The `subset.row=top_var_genes` argument restricts the analysis to the highly variable genes we identified earlier, which are more likely to be informative for distinguishing cell types.
+The resulting `markers` object is a list. The piece we want is `markers$cohens.d`: a per-group list of tables, one row per gene, whose `mean` column is that gene's average Cohen's *d* across all pairwise comparisons. Ranking a group's genes by that column, from largest to smallest, puts its best markers on top. The small helper below does exactly that, and we reuse it whenever we need ranked markers.
 
-The resulting `markers` object is a list where each element corresponds to a cluster and contains the differential expression results for that cluster. A compact way to see them all at once is a heatmap: take the top genes from every cluster, then plot their expression across all the cells.
+```{r}
+# Rank a group's genes by mean Cohen's d (largest effect size first).
+rank_markers <- function(effects) rownames(effects)[order(effects$mean, decreasing=TRUE)]
+```
 
-The code below pulls the top 10 marker genes for each cluster, collapses them into one unique set, and draws a single heatmap of every cluster side by side. This lets us see which genes are most strongly associated with each cluster and how the clusters differ from one another.
+A compact way to see all the groups at once is a heatmap: take the top genes from every group, then plot their expression across all the cells. The code below pulls the top 10 marker genes for each cell type, collapses them into one unique set, and draws a single heatmap. This lets us see which genes are most strongly associated with each cell type and how they differ from one another.
 
 ```{r}
 #| label: fig-marker-heatmap
-# Heatmap of the top marker genes across all clusters
-library(scater)
-top_marker_genes_for_all_clusters <- lapply(markers, function(x) {
-    return(head(rownames(x), 10))
+# Heatmap of the top marker genes across all cell types
+top_marker_genes_for_all_clusters <- lapply(markers$cohens.d, function(eff) {
+    return(head(rank_markers(eff), 10))
 })
 plotHeatmap(sce, features=unique(unlist(top_marker_genes_for_all_clusters)),
     cluster_rows=TRUE, cluster_cols=TRUE, show_colnames=FALSE,
@@ -307,19 +308,19 @@ In @fig-marker-heatmap the columns are cells (grouped and colored by cell type) 
 
 ### Markers for the clusters you discovered
 
-The markers above were found per *curated cell type* — a shortcut this teaching dataset allows because it ships with `level1class` labels. A real analysis has no such labels: you find markers for the **clusters you actually discovered**, then use those markers to give each cluster an identity. Let's do it that way. We ask `findMarkers()` to compare the graph-based clusters stored in `colLabels(sce)` (the `clusterCells()` output from earlier), take each cluster's single top gene, and paint that gene's expression onto the UMAP.
+The markers above were found per *curated cell type* — a shortcut this teaching dataset allows because it ships with `level1class` labels. A real analysis has no such labels: you find markers for the **clusters you actually discovered**, then use those markers to give each cluster an identity. Let's do it that way. We ask `scoreMarkers()` to compare the graph-based clusters stored in `colLabels(sce)` (the `clusterGraph.se()` output from earlier), take each cluster's single top gene, and paint that gene's expression onto the UMAP.
 
 ```{r}
 #| label: fig-umap-cluster-markers
-#| fig.cap: "The four largest graph-based clusters, each UMAP colored by that cluster's own top marker gene — found by `findMarkers()` on `colLabels(sce)`, the data-driven clusters, *not* the curated labels. Each marker is most strongly expressed in and around its own cluster; some tag a whole island, while others pick out a sub-population within one. Painting a cluster's marker onto the map this way is the visual basis for turning an anonymous cluster number into a named cell type."
-# Find markers for the data-driven clusters (colLabels holds the clusterCells
+#| fig.cap: "The four largest graph-based clusters, each UMAP colored by that cluster's own top marker gene — found by `scoreMarkers()` on `colLabels(sce)`, the data-driven clusters, *not* the curated labels. Each marker is most strongly expressed in and around its own cluster; some tag a whole island, while others pick out a sub-population within one. Painting a cluster's marker onto the map this way is the visual basis for turning an anonymous cluster number into a named cell type."
+# Find markers for the data-driven clusters (colLabels holds the clusterGraph.se
 # assignments), not the curated cell-type labels.
-cluster_markers <- findMarkers(sce, groups = colLabels(sce),
-                               pval.type = "all", direction = "up",
-                               test = "t", subset.row = top_var_genes)
+cluster_markers <- scoreMarkers(logcounts(sce)[top_var_genes, ],
+                                groups = colLabels(sce))
 
-# The single top marker gene for each cluster.
-top_per_cluster <- vapply(cluster_markers, function(df) rownames(df)[1], character(1))
+# The single top marker gene for each cluster (highest mean Cohen's d).
+top_per_cluster <- vapply(cluster_markers$cohens.d,
+                          function(eff) rank_markers(eff)[1], character(1))
 
 # Paint the four largest clusters, each colored by its top marker's expression.
 biggest <- names(sort(table(colLabels(sce)), decreasing = TRUE))[1:4]
@@ -352,10 +353,9 @@ The heatmap showed marker genes as a block matrix. A complementary view is to pa
 ```{r}
 #| label: fig-umap-markers
 #| fig.cap: "The UMAP colored by the top marker gene of four representative cell types. Each marker concentrates in the island its cell type occupies — the spatial counterpart of the block structure in the marker heatmap."
-# Name the per-cell-type marker lists we built earlier. findMarkers() grouped by
-# level1class in alphabetical order, so the factor levels recover the names.
-celltype_names <- levels(factor(colData(sce)$level1class))
-names(top_marker_genes_for_all_clusters) <- celltype_names
+# The per-cell-type marker lists we built earlier are already named by cell type,
+# because scoreMarkers() was grouped by level1class.
+celltype_names <- names(top_marker_genes_for_all_clusters)
 
 # The single top marker gene for four representative cell types.
 show_types <- head(celltype_names, 4)
@@ -426,7 +426,7 @@ The `iSEE()` function launches the iSEE app, which provides an interactive inter
 
 You may want to play with a few genes to see how they are expressed across the different clusters. You can also explore the metadata associated with the cells, such as tissue type, cell type annotations, and quality control metrics. The set of "marker genes" we identified earlier can also be visualized in iSEE, allowing us to see how these genes are expressed across different clusters and cell types.
 
-For cluster 1, the marker genes are:
+For the first cell type (`r names(top_marker_genes_for_all_clusters)[1]`), the marker genes are:
 
 ```{r}
 cat(paste(top_marker_genes_for_all_clusters[[1]],'\n'))
@@ -438,7 +438,7 @@ Try entering a couple of those gene names into the iSEE feature-expression panel
 
 These build directly on the `sce` object you created above. If you've closed your session, re-run the chapter up to the marker-gene step first.
 
-1. **Read the cluster table.** How many clusters did `clusterCells()` find, and which is the largest? Which function's output answers this?
+1. **Read the cluster table.** How many clusters did `clusterGraph.se()` find, and which is the largest? Which function's output answers this?
 
    ::: {.callout-note collapse="true"}
    ## Solution
@@ -450,12 +450,13 @@ These build directly on the `sce` object you created above. If you've closed you
    `table()` counts cells per cluster; `length(unique(...))` turns that into the number of groups. The largest cluster is usually an abundant cell type rather than a rare one.
    :::
 
-2. **Tune the number of variable genes.** Re-run `getTopHVGs()` asking for only 500 genes instead of 2000. Does the size of the gene set change which features you'd carry into PCA?
+2. **Tune the number of variable genes.** Re-select the top variable genes asking for only 500 instead of 2000. (`chooseRnaHvgs.se()` already stored each gene's variability as the `residuals` column of `rowData(sce)`, so you can re-rank without re-modelling.) Does the size of the gene set change which features you'd carry into PCA?
 
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r}
-   top_500 <- getTopHVGs(sce, n=500)
+   top_500_idx <- chooseHighlyVariableGenes(rowData(sce)$residuals, top=500)
+   top_500 <- rownames(sce)[top_500_idx]
    length(top_500)
    length(intersect(top_500, top_var_genes))  # overlap with the 2000-gene set
    ```
@@ -493,11 +494,11 @@ These build directly on the `sce` object you created above. If you've closed you
 You took a published mouse-brain dataset all the way from raw counts to a labeled map of cell types, and in doing so walked the standard scRNA-seq workflow:
 
 - **Loaded** the data as a `SingleCellExperiment` — a `SummarizedExperiment` (the [SummarizedExperiment chapter](../bioc-summarizedexperiment.qmd)) with single-cell extras like a reduced-dimensions slot.
-- **Log-normalized** the counts with `logNormCounts()` to correct for differences in sequencing depth between cells.
-- **Selected highly variable genes** with `getTopHVGs()`, focusing the analysis on the genes that carry biological signal.
-- **Reduced dimensions** with `fixedPCA()` and then `runUMAP()` (with a t-SNE comparison), collapsing thousands of genes into a 2D map.
-- **Clustered** the cells with `clusterCells()` on the PCA coordinates — not the 2-D embedding — and read the cluster table to see how many groups emerged.
-- **Found and visualized marker genes** with `findMarkers()` and `plotHeatmap()`, confirming that each cluster has its own molecular fingerprint.
+- **Log-normalized** the counts with `normalizeRnaCounts.se()` to correct for differences in sequencing depth between cells.
+- **Selected highly variable genes** with `chooseRnaHvgs.se()`, focusing the analysis on the genes that carry biological signal.
+- **Reduced dimensions** with `runPca.se()` and then `runUmap.se()` (with a t-SNE comparison), collapsing thousands of genes into a 2D map.
+- **Clustered** the cells with `clusterGraph.se()` on the PCA coordinates — not the 2-D embedding — and read the cluster table to see how many groups emerged.
+- **Found and visualized marker genes** with `scoreMarkers()` and `plotHeatmap()`, confirming that each cluster has its own molecular fingerprint.
 - **Connected markers to identity** by painting them onto a UMAP and scoring marker *sets* as a module score — framing cell-type annotation as the same operation as gene-set enrichment.
 
 The reassuring result was that the unsupervised steps recovered the known cell types: clusters and curated labels landed on the same islands of the t-SNE and UMAP. From here you could reach for a reference-based annotator like `SingleR`, compare conditions across samples (the [concepts chapter](concepts.qmd)'s Part B), or hand the object to an interactive explorer like iSEE.

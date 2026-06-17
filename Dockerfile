@@ -8,6 +8,11 @@
 # Pinned to the Bioconductor RELEASE the book is validated against. The base is
 # derived from rocker/rstudio, so it provides RStudio Server + R 4.6 + every
 # Bioconductor system library + BINARY package installs (no source compiles).
+#
+# NOTE: a devel base (#50) was attempted but reverted — on the devel image the
+# scRNAseq/gypsum data fetch in single_cell/setup.qmd deterministically hangs
+# from the GitHub Actions runner (works locally and on release). Revisit under
+# #50 with a fix (e.g. pre-cached data) before switching again.
 ARG BIOC_VERSION=RELEASE_3_23
 FROM bioconductor/bioconductor_docker:${BIOC_VERSION}
 
