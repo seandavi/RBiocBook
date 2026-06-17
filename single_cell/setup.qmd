@@ -107,7 +107,7 @@ sce <- normalizeRnaCounts.se(sce)
 
 The `normalizeRnaCounts.se()` function performs log-normalization of the count data. It reads the `counts` assay, computes a size factor for each cell, and writes a new `logcounts` assay (and a `sizeFactor` column) back into the `sce` object — so afterwards `logcounts(sce)` holds the normalized values. Raw count data from scRNA-seq experiments contains technical variation due to differences in sequencing depth between cells. Some cells might have been sequenced more deeply than others, leading to higher total counts that don't reflect true biological differences. Log-normalization addresses this by:
 
-1. **Size factor normalization**: Scaling each cell's counts by a size factor that accounts for differences in sequencing depth. There are several methods to calculate size factors, but the most common is the median of ratios method, which divides each cell's counts by the median count for each gene across all cells. This helps to adjust for differences in library size.
+1. **Size factor normalization**: Scaling each cell's counts by a per-cell *size factor* that captures how deeply it was sequenced. `normalizeRnaCounts.se()` uses the simplest such factor — the cell's total count (its *library size*), centered so the average factor across cells is 1 — and divides every gene's count by it. More robust estimators exist; the [concepts chapter](concepts.qmd#sec-normalization) explains the deconvolution refinement used when cells differ in composition.
 2. **Log transformation**: Taking log(count + 1) to stabilize variance and make the data more normally distributed
 
 For each gene g in cell i, the log-normalized expression becomes:

@@ -100,7 +100,7 @@ Set thresholds from the distribution of *your* data, ideally adaptively
 metrics against each other before you cut.
 :::
 
-## Normalization: making cells comparable
+## Normalization: making cells comparable {#sec-normalization}
 
 Even among good cells, raw counts aren't comparable. One cell may show twice
 the counts of another for purely technical reasons — capture efficiency,
@@ -130,6 +130,36 @@ reflect sequencing depth. The [workflow chapter](setup.qmd) shows the
 one-line `logNormCounts()` that does all of this in practice.
 
 ![**A size factor makes cells comparable.** Three cells of the *same* type sequenced at different depths have raw count profiles of different heights (top) — a purely technical artifact. Each cell gets a **size factor** roughly proportional to its sequencing depth (≈ its library size); dividing every gene's count by it puts the cells on a common scale, so the shared profile lines up (bottom). The naive size factor is just the cell's total count, but because single-cell counts are mostly zeros, the robust estimate pools similar cells and deconvolves a per-cell factor (`scran`/`scrapper`). Schematic.](imgs/sc-sizefactor.svg){#fig-sizefactor}
+
+To see the arithmetic concretely, take four genes measured in three cells of
+the *same* type, sequenced at increasing depth. Cell 3 was sequenced three
+times as deeply as cell 1, so its raw counts are uniformly larger — but the
+*profile* (the ratios between genes) is identical:
+
+```{r}
+#| label: sizefactor-toy
+counts <- matrix(c( 3,  6,  9,    # gene 1
+                    5, 10, 15,    # gene 2
+                    2,  4,  6,    # gene 3
+                    4,  8, 12),   # gene 4
+                 nrow = 4, byrow = TRUE,
+                 dimnames = list(paste0("gene", 1:4), paste0("cell", 1:3)))
+counts
+
+# Library-size factor: each cell's total count, rescaled to average 1.
+totals <- colSums(counts)
+size_factors <- totals / mean(totals)
+size_factors
+
+# Divide each cell's column by its own size factor.
+round(sweep(counts, 2, size_factors, "/"), 1)
+```
+
+The three columns collapse onto an identical profile: the depth differences
+vanish and only the shared cell-type signal remains — exactly what
+@fig-sizefactor shows. This library-size factor is what `normalizeRnaCounts()`
+uses by default; the deconvolution refinement above changes *how* the size
+factor is estimated, not this final division.
 
 ## Part A — Finding structure within a sample {#sec-part-a}
 
