@@ -25,6 +25,10 @@ concurrency:
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
+    # Backstop: a render that hangs (e.g. a stalled remote fetch with no timeout)
+    # would otherwise sit until GitHub's 6h default. Cap the whole job; the Render
+    # step below also self-bounds with `timeout` so it fails fast with logs.
+    timeout-minutes: 45
     container:
       image: ghcr.io/seandavi/rbiocbook:latest
       # GITHUB_TOKEN can pull the repo's own (private) package; make the package
@@ -47,6 +51,12 @@ jobs:
       # otherwise hide the tool; scoping it to the render keeps the multi-user
       # RStudio/Orchestra image's per-user data dirs untouched. See Dockerfile.
       XDG_DATA_HOME: /opt/quarto-data
+      # The scrapper render hangs deterministically on the multi-core CI runner
+      # (never locally / under emulation) — the signature of a native threading
+      # or multithreaded-BLAS deadlock in scrapper's C++ (PCA/SVD, neighbor
+      # search). Force single-threaded numerics to rule it out / fix it.
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -63,7 +73,27 @@ jobs:
         run: quarto install extension --no-prompt nmfs-opensci/quarto_titlepages
 
       - name: Render
-        run: quarto render
+        # Self-bounded render. `timeout` aborts a stalled render (SIGINT, then
+        # SIGKILL after 60s) so a hung remote fetch fails fast instead of sitting
+        # until the job timeout; the log tail is dumped on any non-zero exit, and
+        # the R download timeout is capped so a base-R fetch errors rather than
+        # hangs. (Add `--debug` to the quarto render below when a stall needs to
+        # be traced to a specific sub-process.)
+        # shell: bash is required — container `run:` defaults to sh (dash), which
+        # rejects `set -o pipefail`.
+        shell: bash
+        run: |
+          export R_DEFAULT_INTERNET_TIMEOUT=120
+          set -o pipefail
+          timeout --signal=INT --kill-after=60 1800 quarto render --debug 2>&1 | tee /tmp/render.log
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::group::render.log tail (exit $rc; 124 = step timeout)"
+            tail -120 /tmp/render.log
+            echo "::endgroup::"
+            echo "::error::quarto render failed (exit $rc)"
+            exit "$rc"
+          fi
 
       - uses: quarto-dev/quarto-actions/publish@v2
         # Only publish to gh-pages on a push to main, never on a PR.
