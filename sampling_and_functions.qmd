@@ -1,0 +1,347 @@
+---
+title: "Random sampling and writing functions"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
+---
+
+```{r setup, include=FALSE}
+# Seed the random-number generator so every example below renders identically.
+# Remove this line (or change the number) and you'll get a different—but equally
+# valid—set of random sequences each time.
+set.seed(42)
+```
+
+By now you can talk to R at the console, store values in objects, and call
+functions that other people wrote (see the [R mechanics chapter](r_intro_mechanics.qmd)).
+In this chapter we put those pieces together to build something small but real: a
+little machine that **generates random DNA sequences**.
+
+That goal is a good excuse to learn two ideas you'll use constantly. The first is
+**random sampling** — asking R to draw values at random, which is the engine behind
+every simulation in this book. The second is **writing your own functions** — packaging
+a few lines of code under a name so you can reuse them with a single call. Every
+later chapter assumes you can do this, so this is the place to get it under your fingers.
+
+There's a bigger idea hiding in here, too. By the end you'll have written a tiny
+**generative model** of DNA: a set of rules that can produce sequence data that never
+existed before. It is a crude model — deliberately so — but it is a genuine cousin,
+in spirit, of the DNA language models now used in genomics research. Those models
+learn fantastically complex rules about how bases depend on one another; ours will
+use one almost laughably simple rule. Seeing the simple version first makes the
+fancy version far less mysterious.
+
+## What you'll learn
+
+- Draw values at random with `sample()`, and read its arguments.
+- Explain **sampling with and without replacement**, and why DNA needs *with*.
+- Recognize the **modeling assumptions** baked into a simulation — and where they
+  break down in real biology.
+- Write your own **function**: give it a name, a body, arguments, and defaults.
+- See how a few simple rules add up to a (very basic) **generative model**.
+
+## The four letters of DNA
+
+DNA is written in an alphabet of four letters — the nucleotide bases adenine,
+cytosine, guanine, and thymine. We can hold that alphabet in a **character vector**:
+
+```{r}
+nucleotides <- c("A", "C", "G", "T")
+nucleotides
+```
+
+That's it — a four-element vector, each element a one-letter string. If `c()`,
+quoting, and the idea of a vector feel shaky, the [Vectors chapter](vectors.qmd)
+covers them in depth; here we only need this one small vector to get going.
+
+## Drawing a base at random
+
+To "read" a base off this alphabet at random, we use the `sample()` function.
+Like every function, we call it by writing its name followed by parentheses, with
+the data it should work on inside. Give `sample()` a vector and it returns one of
+the elements, chosen at random:
+
+```{r}
+sample(nucleotides, size = 1)
+```
+
+Run that again and you'll (usually) get a different letter — that's the point. The
+`size` argument says how many elements to draw. Ask for a few:
+
+```{r}
+sample(nucleotides, size = 3)
+```
+
+::: {.callout-tip}
+## Arguments have names
+`size` is the *name* of an argument, and writing `size = 3` makes the call easy to
+read. You can look up the arguments a function accepts with `help(sample)` or, more
+briefly, `?sample`. Getting in the habit of reading help pages is one of the highest-
+return skills in R.
+:::
+
+## With or without replacement
+
+Now try to draw a whole sequence — say, ten bases:
+
+```{r error=TRUE}
+sample(nucleotides, size = 10)
+```
+
+R refuses, and the error message tells you why: by default `sample()` draws
+**without replacement**. Picture the four letters as tiles in a bag. Drawing without
+replacement means each tile, once pulled, is set aside and can't be drawn again — so
+from a bag of four tiles you can pull at most four, and you'd just get the same four
+letters in a shuffled order. That is nothing like DNA, where the same base appears
+over and over.
+
+What we want is sampling **with replacement**: pull a tile, write down its letter,
+then *drop it back in the bag* before the next draw. Every draw faces the full bag of
+four, so letters can — and do — repeat. We switch this on with `replace = TRUE`:
+
+```{r}
+sample(nucleotides, size = 10, replace = TRUE)
+```
+
+Now we can draw sequences of any length we like.
+
+::: {.callout-important}
+## The assumption hiding in `replace = TRUE`
+Sampling with replacement, the way we're doing it, makes every position **independent**
+of every other: knowing that position 5 is a `G` tells you nothing about position 6.
+That is a *modeling assumption*, and in real DNA it is plainly false. Bases in a
+coding sequence come in three-letter codons; promoters and binding sites have
+recurring motifs; whole regions are GC-rich or AT-rich. Real genomes are full of
+local structure that our independent-draws model ignores entirely.
+
+That doesn't make the model useless — simple models are often the right starting
+point, and a deliberately wrong baseline is the thing more realistic models get
+measured against. But always keep the assumption in view, because the conclusions
+you draw from a simulation are only as good as the assumptions you fed into it.
+:::
+
+## From letters to a sequence
+
+A draw like the one above is a *vector* of single letters. A biologist usually wants
+the sequence as one string, `"ACGT…"`. We glue the letters together with `paste()`,
+using `collapse = ""` to join them with nothing in between:
+
+```{r}
+bases <- sample(nucleotides, size = 10, replace = TRUE)
+bases
+paste(bases, collapse = "")
+```
+
+`paste()` is one of the workhorse string functions; it and its relatives get a fuller
+treatment in the [Vectors chapter](vectors.qmd). For now it's just the last step in
+turning random draws into something that looks like DNA.
+
+## Writing your own function
+
+We now have a recipe — sample with replacement, then paste — that we'll want to run
+again and again. Retyping it every time is tedious and error-prone. The fix is to
+wrap the recipe in a **function** of our own.
+
+You already *call* functions all the time (`sample()`, `paste()`, `mean()`). Writing
+one just means bottling up some code under a new name. Every R function has three
+parts:
+
+- a **name** (so you can call it later),
+- a **body** (the code that runs), and
+- a set of **arguments** (the inputs you can vary each time).
+
+You build one with the `function` keyword, put the body between braces `{ }`, and
+save the result to a name with `<-`:
+
+```{r}
+random_sequence <- function(n) {
+  bases <- sample(nucleotides, size = n, replace = TRUE)
+  paste(bases, collapse = "")
+}
+```
+
+Read that as: "`random_sequence` is a function of one argument, `n`; it draws `n`
+bases with replacement and pastes them into a single string." A function returns the
+value of its **last line**, so `random_sequence()` hands back the pasted string.
+
+Call it the same way you call any function — name, then parentheses, with a value for
+`n`:
+
+```{r}
+random_sequence(n = 10)
+random_sequence(n = 30)
+```
+
+Each call re-runs the body, so each call gives a fresh sequence. We've turned three
+lines of fiddly code into one reusable verb.
+
+::: {.callout-tip}
+## A function is just another object
+`random_sequence` is an object, exactly like `nucleotides` is. Type its name *without*
+parentheses and R shows you the code it contains; type it *with* parentheses and R
+runs that code. The parentheses are the trigger.
+:::
+
+### Default arguments
+
+Right now you must supply `n` every time, or you get an error. Often it's convenient
+to give an argument a **default** — a value R uses when you don't specify one. Set the
+default in the function definition with `=`:
+
+```{r}
+random_sequence <- function(n = 20) {
+  bases <- sample(nucleotides, size = n, replace = TRUE)
+  paste(bases, collapse = "")
+}
+```
+
+Now a bare call produces a 20-base sequence, but you can still override the default
+when you want a different length:
+
+```{r}
+random_sequence()
+random_sequence(n = 50)
+```
+
+### A second argument: base composition
+
+So far every base is equally likely — each of A, C, G, T turns up about a quarter of
+the time. Real genomes are lopsided: some organisms are strikingly GC-poor (the
+malaria parasite *Plasmodium falciparum*) and others GC-rich (many *Streptomyces*).
+The `sample()` function can model that through its `prob` argument, which takes a
+vector of relative probabilities, one per element of the alphabet. Let's expose that
+as an argument of our own function:
+
+```{r}
+random_sequence <- function(n = 20, prob = NULL) {
+  bases <- sample(nucleotides, size = n, replace = TRUE, prob = prob)
+  paste(bases, collapse = "")
+}
+```
+
+The default `prob = NULL` tells `sample()` to fall back on equal probabilities, so the
+old behavior is unchanged. But now we can ask for, say, a GC-rich sequence by making
+G and C more likely than A and T (remember the order is A, C, G, T):
+
+```{r}
+# A, C, G, T weighted 1 : 4 : 4 : 1  ->  mostly G and C
+random_sequence(n = 50, prob = c(1, 4, 4, 1))
+```
+
+Count the letters and you should see far more `G`s and `C`s than `A`s and `T`s.
+
+## A (very simple) generative model
+
+Step back and look at what we built. `random_sequence()` is a small **generative
+model** of DNA: a set of rules that can manufacture new sequence data. Its rules are
+just two:
+
+1. each base is drawn from the four-letter alphabet, and
+2. the draws are independent, each following a fixed probability distribution
+   (uniform by default, or whatever `prob` you supply).
+
+That is about the simplest generative model of DNA imaginable. The large DNA
+**language models** used in modern genomics are generative models too, and in spirit
+they do the same job — produce, or assign probabilities to, sequence. The difference
+is in rule 2. Where our model treats every position as independent, a language model
+makes each base depend on the entire context around it, capturing codons, motifs,
+regulatory grammar, and long-range structure that ours throws away. They have
+millions or billions of learned parameters; ours has at most four. Same idea, wildly
+different complexity — and you now understand the simple end of that spectrum from the
+inside.
+
+In the [next chapter](packages_and_simulation.qmd) we'll put this model to work:
+generate *many* sequences, summarize each with a single number, and watch a beautiful
+piece of statistics — the law of large numbers — emerge.
+
+## Exercises
+
+Each solution names the key idea and a one-line *why*, because the reasoning transfers
+further than the answer.
+
+1.  Use `sample()` directly (no custom function) to draw a single random codon — three
+    bases — as a character vector.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    sample(nucleotides, size = 3, replace = TRUE)
+    ```
+    `size = 3` asks for three draws, and `replace = TRUE` lets a base repeat — a codon
+    like `"TTT"` is perfectly legal, so we *must* sample with replacement.
+    :::
+
+2.  Explain in one sentence why `sample(nucleotides, size = 6)` (no `replace`) throws
+    an error, but `sample(nucleotides, size = 6, replace = TRUE)` does not.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    Without replacement there are only four tiles to draw from, so you can't pull six;
+    with replacement each tile goes back in the bag after every draw, so the supply
+    never runs out.
+    :::
+
+3.  Write a function `random_codon()` that returns a single three-base string (e.g.
+    `"GAT"`). Reuse the pattern from `random_sequence()`.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    random_codon <- function() {
+      bases <- sample(nucleotides, size = 3, replace = TRUE)
+      paste(bases, collapse = "")
+    }
+    random_codon()
+    ```
+    Same three parts as before — name, body, (here empty) arguments — just with `size`
+    fixed at 3 and no inputs to vary.
+    :::
+
+4.  Our model assumes every base position is independent. Name one real biological
+    feature of DNA that violates that assumption, and say in a sentence why it matters.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    Many answers work: codons (bases come in functional triplets), sequence motifs in
+    promoters and binding sites, CpG islands, or GC-rich/AT-rich regions. Any of these
+    means the base at one position carries information about its neighbors — exactly
+    the dependence our independent-draws model ignores, which is why sequences it
+    generates won't contain genuine genes or regulatory signals.
+    :::
+
+5.  Modify a copy of `random_sequence()` so that it returns the *vector* of bases
+    instead of a single pasted string. Which line do you remove?
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    random_bases <- function(n = 20, prob = NULL) {
+      sample(nucleotides, size = n, replace = TRUE, prob = prob)
+    }
+    random_bases(n = 8)
+    ```
+    Drop the `paste()` line; a function returns its last expression, so making the
+    `sample()` call the last line returns the raw vector.
+    :::
+
+## Summary
+
+You can now generate random data and package code for reuse — two skills the rest of
+the book leans on constantly:
+
+- **`sample()`** draws values at random from a vector; `size` sets how many and
+  `replace = TRUE` allows repeats. Building DNA requires sampling *with* replacement,
+  which models every position as **independent** — a convenient fiction that real
+  genomic structure violates.
+- **You write a function** with `function(args) { body }`, save it with `<-`, and it
+  returns the value of its last line. Arguments can have **defaults**, and extra
+  arguments (like `prob`) let one function cover many cases.
+- Strung together, a couple of simple rules make a **generative model** — here, a
+  bare-bones one that is, in spirit, the simplest relative of the DNA language models
+  used in research.
+
+Next we'll generate sequences by the thousands, reduce each to a single summary
+number — a **statistic** — and meet the **law of large numbers**.
