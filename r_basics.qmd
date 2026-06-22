@@ -1,594 +1,347 @@
 ---
-author: "Sean Davis & Garrett Grolemund"
+title: "Random sampling and writing functions"
+author:
+  - name: Sean Davis
+    url: https://seandavi.github.io/
+    affiliation: University of Colorado<br/>Anschutz School of Medicine
+    affiliation-url: https://medschool.cuanschutz.edu/
+    email: seandavi@gmail.com
 ---
 
-# Up and Running with R
-
-In this chapter, we're going to get an introduction to the R language, so we can dive right into programming. We're going to create a pair of virtual dice that can generate random numbers. No need to worry if you're new to programming. We'll return to many of the concepts here in more detail later.  
-
-To simulate a pair of dice, we need to break down each die into its essential features. A die can only show one of six numbers: 1, 2, 3, 4, 5, and 6. We can capture the die's essential characteristics by saving these numbers as a group of values in the computer. Let's save these numbers first and then figure out a way to "roll" our virtual die.
-
-## The R User Interface
-
-The RStudio interface is simple. You type R code into the bottom line of the RStudio console pane and then click Enter to run it. The code you type is called a _command_, because it will command your computer to do something for you. The line you type it into is called the _command line_.
-
-![Your computer does your bidding when you type R commands at the prompt in the bottom line of the console pane. Don't forget to hit the Enter key. When you first open RStudio, the console appears in the pane on your left, but you can change this with **File > Tools > Global Options** in the menu bar.](images/rstudio_image.png){#fig-rstudio-start}
-
-When you type a command at the prompt and hit Enter, your computer executes the command and shows you the results. Then RStudio displays a fresh prompt for your next command. For example, if you type `1 + 1` and hit Enter, RStudio will display:
-
-```
-> 1 + 1
-[1] 2
->
+```{r setup, include=FALSE}
+# Seed the random-number generator so every example below renders identically.
+# Remove this line (or change the number) and you'll get a different—but equally
+# valid—set of random sequences each time.
+set.seed(42)
 ```
 
-You'll notice that a `[1]` appears next to your result. R is just letting you know that this line begins with the first value in your result. Some commands return more than one value, and their results may fill up multiple lines. For example, the command `100:130` returns 31 values; it creates a sequence of integers from 100 to 130. Notice that new bracketed numbers appear at the start of the second and third lines of output. These numbers just mean that the second line begins with the 14th value in the result, and the third line begins with the 25th value. You can mostly ignore the numbers that appear in brackets:
+By now you can talk to R at the console, store values in objects, and call
+functions that other people wrote (see the [R mechanics chapter](r_intro_mechanics.qmd)).
+In this chapter we put those pieces together to build something small but real: a
+little machine that **generates random DNA sequences**.
 
-```
-> 100:130
- [1] 100 101 102 103 104 105 106 107 108 109 110 111 112
-[14] 113 114 115 116 117 118 119 120 121 122 123 124 125
-[25] 126 127 128 129 130
-```
+That goal is a good excuse to learn two ideas you'll use constantly. The first is
+**random sampling** — asking R to draw values at random, which is the engine behind
+every simulation in this book. The second is **writing your own functions** — packaging
+a few lines of code under a name so you can reuse them with a single call. Every
+later chapter assumes you can do this, so this is the place to get it under your fingers.
 
-::: {.callout-tip}
-The colon operator (`:`) returns every integer between two integers. It is an easy way to create a sequence of numbers.
-:::
+There's a bigger idea hiding in here, too. By the end you'll have written a tiny
+**generative model** of DNA: a set of rules that can produce sequence data that never
+existed before. It is a crude model — deliberately so — but it is a genuine cousin,
+in spirit, of the DNA language models now used in genomics research. Those models
+learn fantastically complex rules about how bases depend on one another; ours will
+use one almost laughably simple rule. Seeing the simple version first makes the
+fancy version far less mysterious.
 
-::: {.callout-note}
-## When do we compile?
+## What you'll learn
 
-In some languages, like C, Java, and FORTRAN, you have to compile your human-readable code into machine-readable code (often 1s and 0s) before you can run it. If you've programmed in such a language before, you may wonder whether you have to compile your R code before you can use it. The answer is no. R is a dynamic programming language, which means R automatically interprets your code as you run it. 
-:::
+- Draw values at random with `sample()`, and read its arguments.
+- Explain **sampling with and without replacement**, and why DNA needs *with*.
+- Recognize the **modeling assumptions** baked into a simulation — and where they
+  break down in real biology.
+- Write your own **function**: give it a name, a body, arguments, and defaults.
+- See how a few simple rules add up to a (very basic) **generative model**.
 
-If you type an incomplete command and press Enter, R will display a `+` prompt, which means R is waiting for you to type the rest of your command. Either finish the command or hit Escape to start over:
+## The four letters of DNA
 
-```r
-> 5 -
-+
-+ 1
-[1] 4
-```
-
-If you type a command that R doesn't recognize, R will return an error message. If you ever see an error message, don't panic. R is just telling you that your computer couldn't understand or do what you asked it to do. You can then try a different command at the next prompt:
-
-```r
-> 3 % 5
-Error: unexpected input in "3 % 5"
->
-```
-
-::: {.callout-tip}
-Whenever you get an error message in R, consider googling the error message. You'll often find that someone else has had the same problem and has posted a solution online. Simply cutting-and-pasting the error message into a search engine will often work
-:::
-
-
-Once you get the hang of the command line, you can easily do anything in R that you would do with a calculator. For example, you could do some basic arithmetic:
+DNA is written in an alphabet of four letters — the nucleotide bases adenine,
+cytosine, guanine, and thymine. We can hold that alphabet in a **character vector**:
 
 ```{r}
-2 * 3   
+nucleotides <- c("A", "C", "G", "T")
+nucleotides
+```
 
-4 - 1   
+That's it — a four-element vector, each element a one-letter string. If `c()`,
+quoting, and the idea of a vector feel shaky, the [Vectors chapter](vectors.qmd)
+covers them in depth; here we only need this one small vector to get going.
 
-# this obeys order-of-operations
-6 / (4 - 1)   
+## Drawing a base at random
+
+To "read" a base off this alphabet at random, we use the `sample()` function.
+Like every function, we call it by writing its name followed by parentheses, with
+the data it should work on inside. Give `sample()` a vector and it returns one of
+the elements, chosen at random:
+
+```{r}
+sample(nucleotides, size = 1)
+```
+
+Run that again and you'll (usually) get a different letter — that's the point. The
+`size` argument says how many elements to draw. Ask for a few:
+
+```{r}
+sample(nucleotides, size = 3)
 ```
 
 ::: {.callout-tip}
-R treats the hashtag character, `#`, in a special way; R will not run anything that follows a hashtag on a line. This makes hashtags very useful for adding comments and annotations to your code. Humans will be able to read the comments, but your computer will pass over them. The hashtag is known as the _commenting symbol_ in R.
+## Arguments have names
+`size` is the *name* of an argument, and writing `size = 3` makes the call easy to
+read. You can look up the arguments a function accepts with `help(sample)` or, more
+briefly, `?sample`. Getting in the habit of reading help pages is one of the highest-
+return skills in R.
 :::
+
+## With or without replacement
+
+Now try to draw a whole sequence — say, ten bases:
+
+```{r error=TRUE}
+sample(nucleotides, size = 10)
+```
+
+R refuses, and the error message tells you why: by default `sample()` draws
+**without replacement**. Picture the four letters as tiles in a bag. Drawing without
+replacement means each tile, once pulled, is set aside and can't be drawn again — so
+from a bag of four tiles you can pull at most four, and you'd just get the same four
+letters in a shuffled order. That is nothing like DNA, where the same base appears
+over and over.
+
+What we want is sampling **with replacement**: pull a tile, write down its letter,
+then *drop it back in the bag* before the next draw. Every draw faces the full bag of
+four, so letters can — and do — repeat. We switch this on with `replace = TRUE`:
+
+```{r}
+sample(nucleotides, size = 10, replace = TRUE)
+```
+
+Now we can draw sequences of any length we like.
 
 ::: {.callout-important}
-## Cancelling commands
+## The assumption hiding in `replace = TRUE`
+Sampling with replacement, the way we're doing it, makes every position **independent**
+of every other: knowing that position 5 is a `G` tells you nothing about position 6.
+That is a *modeling assumption*, and in real DNA it is plainly false. Bases in a
+coding sequence come in three-letter codons; promoters and binding sites have
+recurring motifs; whole regions are GC-rich or AT-rich. Real genomes are full of
+local structure that our independent-draws model ignores entirely.
 
-Some R commands may take a long time to run. You can cancel a command once it has begun by pressing ctrl + c or by clicking the "stop sign" if it is available in Rstudio. Note that it may also take R a long time to cancel the command. 
+That doesn't make the model useless — simple models are often the right starting
+point, and a deliberately wrong baseline is the thing more realistic models get
+measured against. But always keep the assumption in view, because the conclusions
+you draw from a simulation are only as good as the assumptions you fed into it.
 :::
 
+## From letters to a sequence
 
-### An exercise
-
-That's the basic interface for executing R code in RStudio. Think you have it? If so, try doing these simple tasks. If you execute everything correctly, you should end up with the same number that you started with: 
-
-1. Choose any number and add 2 to it.
-2. Multiply the result by 3.
-3. Subtract 6 from the answer.
-4. Divide what you get by 3.
-
+A draw like the one above is a *vector* of single letters. A biologist usually wants
+the sequence as one string, `"ACGT…"`. We glue the letters together with `paste()`,
+using `collapse = ""` to join them with nothing in between:
 
 ```{r}
-10 + 2
-
-12 * 3
-
-36 - 6
-
-30 / 3
+bases <- sample(nucleotides, size = 10, replace = TRUE)
+bases
+paste(bases, collapse = "")
 ```
 
-## Objects
+`paste()` is one of the workhorse string functions; it and its relatives get a fuller
+treatment in the [Vectors chapter](vectors.qmd). For now it's just the last step in
+turning random draws into something that looks like DNA.
 
-Now that you know how to use R, let's use it to make a virtual die. The `:` operator from a couple of pages ago gives you a nice way to create a group of numbers from one to six. The `:` operator returns its results as a __vector__ (we are going to work with vectors in more detail), a one-dimensional set of numbers:
+## Writing your own function
 
-```r
-1:6
-## 1 2 3 4 5 6
-```
+We now have a recipe — sample with replacement, then paste — that we'll want to run
+again and again. Retyping it every time is tedious and error-prone. The fix is to
+wrap the recipe in a **function** of our own.
 
-That's all there is to how a virtual die looks! But you are not done yet. Running `1:6` generated a vector of numbers for you to see, but it didn't save that vector anywhere for later use. If we want to use those numbers again, we'll have to ask your computer to save them somewhere. You can do that by creating an R _object_.
+You already *call* functions all the time (`sample()`, `paste()`, `mean()`). Writing
+one just means bottling up some code under a new name. Every R function has three
+parts:
 
-R lets you save data by storing it inside an R object. What is an object? Just a name that you can use to call up stored data. For example, you can save data into an object like _`a`_ or _`b`_. Wherever R encounters the object, it will replace it with the data saved inside, like so:
+- a **name** (so you can call it later),
+- a **body** (the code that runs), and
+- a set of **arguments** (the inputs you can vary each time).
+
+You build one with the `function` keyword, put the body between braces `{ }`, and
+save the result to a name with `<-`:
 
 ```{r}
-a <- 1
-a
-```
-
-```{r}
-a + 2
-```
-
-::: {.callout-note}
-## What just happened?
-  
-1. To create an R object, choose a name and then use the less-than symbol, `<`, followed by a minus sign, `-`, to save data into it. This combination looks like an arrow, `<-`. R will make an object, give it your name, and store in it whatever follows the arrow. So `a <- 1` stores `1` in an object named `a`.
-2. When you ask R what's in `a`, R tells you on the next line.
-3. You can use your object in new R commands, too. Since `a` previously stored the value of `1`, you're now adding `1` to `2`.
-:::
-
-::: {.callout-important}
-## Assignment vs expressions
-
-Everything that you type into the R console can be assigned to one of two categories:
-
-- Assignments
-- Expressions
-
-An expression is a command that tells R to do something. For example, `1 + 2` is an expression that tells R to add `1` and `2`. When you type an expression into the R console, R will evaluate the expression and return the result. For example, if you type `1 + 2` into the R console, R will return `3`. Expressions can have "side effects" but they don't explicitly result
-in anything being added to R memory.
-
-```{r}
-5 + 2
-28 %% 3
-3^2
-5 + 4 * 4 + 4 ^ 4 / 10
-```
-
-While using R as a calculator is interesting, to do useful and interesting things, we need to assign values to objects. To create objects, we need to give it a name followed by the assignment operator `<-` (or, entirely equivalently, `=`) and the value we want to give it:
-
-```{r}
-weight_kg <- 55
-```
-:::
-
-
-So, for another example, the following code would create an object named `die` that contains the numbers one through six. To see what is stored in an object, just type the object's name by itself:
-
-```{r}
-die <- 1:6
-die
-```
-
-When you create an object, the object will appear in the environment pane of RStudio, as shown in @fig-add-to-environment. This pane will show you all of the objects you've created since opening RStudio.
-
-![Assignment creates an object in the environment pane.](images/rstudio_add_to_environment.png){#fig-add-to-environment}
-
-
-```{r, environment, echo = FALSE, fig.cap = "The RStudio environment pane keeps track of the R objects you create."}
-#knitr::include_graphics("images/hopr_0102.png")
-```
-
-You can name an object in R almost anything you want, but there are a few rules. First, a name cannot start with a number. Second, a name cannot use some special symbols, like `^`, `!`, `$`, `@`, `+`, `-`, `/`, or `*`:
-
-|Good names|Names that cause errors
-|----------|----------
-|a         | 1trial
-|b         | $
-|FOO       | ^mean
-|my_var    | 2nd
-|.day      | !bad
-
-
-::: {.callout-warning}
-## Capitalization matters
-  
-R is case-sensitive, so `name` and `Name` will refer to different objects:
-
-```r
-> Name = 0
-> Name + 1
-[1] 1
-> name + 1
-Error: object 'name' not found
-```
-The error above is a common one!
-
-:::
-
-Finally, R will overwrite any previous information stored in an object without asking you for permission. So, it is a good idea to _not_ use names that are already taken:
-
-```{r}
-my_number <- 1
-my_number 
-```
-
-```{r}
-my_number <- 999
-my_number
-```
-
-You can see which object names you have already used with the function `ls`:
-
-```r
-ls()
-```
-
-Your environment will contain different names than mine, because you have probably created different objects.
-
-You can also see which names you have used by examining RStudio's environment pane.
-
-We now have a virtual die that is stored in the computer's memory and which has a name that we can use to refer to it. You can access it whenever you like by typing the word *`die`*. 
-
-So what can you do with this die? Quite a lot. R will replace an object with its contents whenever the object's name appears in a command. So, for example, you can do all sorts of math with the die. Math isn't so helpful for rolling dice, but manipulating sets of numbers will be your stock and trade as a data scientist. So let's take a look at how to do that:
-
-```{r}
-die - 1
-die / 2
-die * die
-```
-
-R uses _element-wise execution_ when working with a _vector_ like `die`. When you manipulate a set of numbers, R will apply the same operation to each element in the set. So for example, when you run *`die - 1`*, R subtracts one from each element of `die`. 
-
-When you use two or more vectors in an operation, R will line up the vectors and perform a sequence of individual operations. For example, when you run *`die * die`*, R lines up the two `die` vectors and then multiplies the first element of vector 1 by the first element of vector 2. R then multiplies the second element of vector 1 by the second element of vector 2, and so on, until every element has been multiplied. The result will be a new vector the same length as the first two {@fig-elementwise}.
-
-!["When R performs element-wise execution, it matches up vectors and then manipulates each pair of elements independently."](images/hopr_0103.png){#fig-elementwise}
-
-If you give R two vectors of unequal lengths, R will repeat the shorter vector until it is as long as the longer vector, and then do the math, as shown in @fig-recycle. This isn't a permanent change--the shorter vector will be its original size after R does the math. If the length of the short vector does not divide evenly into the length of the long vector, R will return a warning message. This behavior is known as _vector recycling_, and it helps R do element-wise operations:
-
-```{r}
-1:2
-1:4
-die
-die + 1:2
-die + 1:4
-```
-
-!["R will repeat a short vector to do element-wise operations with two vectors of uneven lengths."](images/hopr_0104.png){#fig-recycle}
-
-Element-wise operations are a very useful feature in R because they manipulate groups of values in an orderly way. When you start working with data sets, element-wise operations will ensure that values from one observation or case are only paired with values from the same observation or case. Element-wise operations also make it easier to write your own programs and functions in R. 
-
-::: {.callout-important}
-## Element-wise operations are not matrix operations
-
-It is important to know that operations with vectors are not the same that you might expect if you are expecting R to perform "matrix" operations. R can do inner multiplication with the `%*%` operator and outer multiplication with the `%o%` operator:
-
-```r
-# Inner product (1*1 + 2*2 + 3*3 + 4*4 + 5*5 + 6*6)
-die %*% die
-# Outer product
-die %o% die
-```
-:::
-
-Now that you can do math with your `die` object, let's look at how you could "roll" it. Rolling your die will require something more sophisticated than basic arithmetic; you'll need to randomly select one of the die's values. And for that, you will need a _function_.
-
-## Functions
-
-R has many functions and puts them all at our disposal. We can use functions to do simple and sophisticated tasks. For example, we can round a number with the `round` function, or calculate its factorial with the `factorial` function. Using a function is pretty simple. Just write the name of the function and then the data you want the function to operate on in parentheses: 
-
-```{r}
-round(3.1415)
-factorial(3)
-```
-
-The data that you pass into the function is called the function's _argument_. The argument can be raw data, an R object, or even the results of another R function. In this last case, R will work from the innermost function to the outermost @fig-pemdas.
-
-```{r}
-mean(1:6)
-mean(die)
-round(mean(die))
-```
-
-!["When you link functions together, R will resolve them from the innermost operation to the outermost. Here R first looks up die, then calculates the mean of one through six, then rounds the mean."](images/hopr_0105.png){#fig-pemdas}
-
-Returning to our die, we can use the `sample` function to randomly select one of the die's values; in other words, the `sample` function can simulate rolling the `die`.
-
-The `sample` function takes _two_ arguments: a vector named `x` and a number named `size`. `sample` will return `size` elements from the vector:
-
-```{r}
-sample(x = 1:4, size = 2)
-```
-
-To roll your die and get a number back, set `x` to `die` and sample one element from it. You'll get a new (maybe different) number each time you roll it:
-
-```{r}
-sample(x = die, size = 1)
-sample(x = die, size = 1)
-sample(x = die, size = 1)
-```
-
-Many R functions take multiple arguments that help them do their job. You can give a function as many arguments as you like as long as you separate each argument with a comma. 
-
-You may have noticed that I set `die` and `1` equal to the names of the arguments in `sample`, `x` and `size`. Every argument in every R function has a name. You can specify which data should be assigned to which argument by setting a name equal to data, as in the preceding code. This becomes important as you begin to pass multiple arguments to the same function; names help you avoid passing the wrong data to the wrong argument. However, using names is optional. You will notice that R users do not often use the name of the first argument in a function. So you might see the previous code written as:
-
-```{r}
-sample(die, size = 1)
-```
-
-Often, the name of the first argument is not very descriptive, and it is usually obvious what the first piece of data refers to anyways.
-
-But how do you know which argument names to use? If you try to use a name that a function does not expect, you will likely get an error:
-
-```r
-round(3.1415, corners = 2)
-## Error in round(3.1415, corners = 2) : unused argument(s) (corners = 2)
-```
-
-If you're not sure which names to use with a function, you can look up the function's arguments with `args`. To do this, place the name of the function in the parentheses behind `args`. For example, you can see that the `round` function takes two arguments, one named `x` and one named `digits`:
-
-```{r}
-args(round)
-```
-
-Did you notice that `args` shows that the `digits` argument of `round` is already set to 0? Frequently, an R function will take optional arguments like `digits`. These arguments are considered optional because they come with a default value. You can pass a new value to an optional argument if you want, and R will use the default value if you do not. For example, `round` will round your number to 0 digits past the decimal point by default. To override the default, supply your own value for `digits`:
-
-```{r}
-round(3.1415)
-round(3.1415, digits = 2)
-# pi happens to be a built-in value in R
-pi
-round(pi)
-```
-
-You should write out the names of each argument after the first one or two when you call a function with multiple arguments. Why? First, this will help you and others understand your code. It is usually obvious which argument your first input refers to (and sometimes the second input as well). However, you'd need a large memory to remember the third and fourth arguments of every R function. Second, and more importantly, writing out argument names prevents errors.
-
-If you do not write out the names of your arguments, R will match your values to the arguments in your function by order. For example, in the following code, the first value, `die`, will be matched to the first argument of `sample`, which is named `x`. The next value, `1`, will be matched to the next argument, `size`:
-
-```{r}
-sample(die, 1)
-```
-
-As you provide more arguments, it becomes more likely that your order and R's order may not align. As a result, values may get passed to the wrong argument. Argument names prevent this. R will always match a value to its argument name, no matter where it appears in the order of arguments:
-
-```{r}
-sample(size = 1, x = die)
-```
-
-### Sample with Replacement
-
-If you set `size = 2`, you can _almost_ simulate a pair of dice. Before we run that code, think for a minute why that might be the case. `sample` will return two numbers, one for each die:
-
-```{r}
-sample(die, size = 2)
-```
-
-I said this "almost" works because this method does something funny. If you use it many times, you'll notice that the second die never has the same value as the first die, which means you'll never roll something like a pair of threes or snake eyes. What is going on?
-
-By default, `sample` builds a sample _without replacement_. To see what this means, imagine that `sample` places all of the values of `die` in a jar or urn. Then imagine that `sample` reaches into the jar and pulls out values one by one to build its sample. Once a value has been drawn from the jar, `sample` sets it aside. The value doesn't go back into the jar, so it cannot be drawn again. So if `sample` selects a six on its first draw, it will not be able to select a six on the second draw; six is no longer in the jar to be selected. Although `sample` creates its sample electronically, it follows this seemingly physical behavior.
-
-One side effect of this behavior is that each draw depends on the draws that come before it. In the real world, however, when you roll a pair of dice, each die is independent of the other. If the first die comes up six, it does not prevent the second die from coming up six. In fact, it doesn't influence the second die in any way whatsoever. You can recreate this behavior in `sample` by adding the argument `replace = TRUE`:
-
-```{r}
-sample(die, size = 2, replace = TRUE)
-```
-
-The argument `replace = TRUE` causes `sample` to sample _with replacement_. Our jar example provides a good way to understand the difference between sampling with replacement and without. When `sample` uses replacement, it draws a value from the jar and records the value. Then it puts the value back into the jar. In other words, `sample` _replaces_ each value after each draw. As a result, `sample` may select the same value on the second draw. Each value has a chance of being selected each time. It is as if every draw were the first draw.
-
-Sampling with replacement is an easy way to create _independent random samples_. Each value in your sample will be a sample of size one that is independent of the other values. This is the correct way to simulate a pair of dice:
-
-```{r}
-sample(die, size = 2, replace = TRUE)
-```
-
-Congratulate yourself; you've just run your first simulation in R! You now have a method for simulating the result of rolling a pair of dice. If you want to add up the dice, you can feed your result straight into the `sum` function:
-
-```{r}
-dice <- sample(die, size = 2, replace = TRUE)
-dice
-sum(dice)
-```
-
-What would happen if you call `dice` multiple times? Would R generate a new pair of dice values each time? Let's give it a try:
-
-```{r}
-dice
-dice
-dice
-```
-
-The name `dice` refers to a _vector_ of two numbers. Calling more than once does not change the value. Each time you call `dice`, R will show you the result of that one time you called `sample` and saved the output to `dice`. R won't rerun `sample(die, 2, replace = TRUE)` to create a new roll of the dice. Once you save a set of results to an R object, those results do not change.
-
-However, it _would_ be convenient to have an object that can re-roll the dice whenever you call it. You can make such an object by writing your own R function.
-
-## Writing Your Own Functions {#write-functions}
-
-To recap, you already have working R code that simulates rolling a pair of dice:
-
-```{r}
-die <- 1:6
-dice <- sample(die, size = 2, replace = TRUE)
-sum(dice)
-```
-
-You can retype this code into the console anytime you want to re-roll your dice. However, this is an awkward way to work with the code. It would be easier to use your code if you wrapped it into its own function, which is exactly what we'll do now. We're going to write a function named `roll` that you can use to roll your virtual dice. When you're finished, the function will work like this: each time you call `roll()`, R will return the sum of rolling two dice:
-
-```r
-roll()
-## 8 
-
-roll()
-## 3
-
-roll()
-## 7
-```
-
-Functions may seem mysterious or fancy, but they are _just another type of R object_. Instead of containing data, they contain code. This code is stored in a special format that makes it easy to reuse the code in new situations. You can write your own functions by recreating this format.
-
-### The Function Constructor
-
-Every function in R has three basic parts: a name, a body of code, and a set of arguments. To make your own function, you need to replicate these parts and store them in an R object, which you can do with the `function` function. To do this, call `function()` and follow it with a pair of braces, `{}`:
-
-```{r}
-my_function <- function() {}
-```
-
-This function, as written, doesn't do anything (yet). However, it is a valid function. You can call it by typing its name followed by an open and closed parenthesis:
-
-```{r}
-my_function()
-```
-
-`function` will build a function out of whatever R code you place between the braces. For example, you can turn your dice code into a function by calling:
-
-```{r}
-roll <- function() {
-  die <- 1:6
-  dice <- sample(die, size = 2, replace = TRUE)
-  sum(dice)
+random_sequence <- function(n) {
+  bases <- sample(nucleotides, size = n, replace = TRUE)
+  paste(bases, collapse = "")
 }
 ```
 
-::: {.callout-note}
-## Indentation and readability
+Read that as: "`random_sequence` is a function of one argument, `n`; it draws `n`
+bases with replacement and pastes them into a single string." A function returns the
+value of its **last line**, so `random_sequence()` hands back the pasted string.
 
-Notice each line of code between the braces is indented. This makes the code easier to read but has no impact on how the code runs. R ignores spaces and line breaks and executes one complete expression at a time. Note that in other languages like python, spacing is extremely important and part of the language.
-:::
-
-
-Just hit the Enter key between each line after the first brace, `{`. R will wait for you to type the last brace, `}`, before it responds.
-
-Don't forget to save the output of `function` to an R object. This object will become your new function. To use it, write the object's name followed by an open and closed parenthesis:
+Call it the same way you call any function — name, then parentheses, with a value for
+`n`:
 
 ```{r}
-roll()
+random_sequence(n = 10)
+random_sequence(n = 30)
 ```
 
-You can think of the parentheses as the "trigger" that causes R to run the function. If you type in a function's name _without_ the parentheses, R will show you the code that is stored inside the function. If you type in the name _with_ the parentheses, R will run that code:
-
-```{r}
-roll
-roll()
-```
-
-The code that you place inside your function is known as the _body_ of the function. When you run a function in R, R will execute all of the code in the body and then return the result of the last line of code. If the last line of code doesn't return a value, neither will your function, so you want to ensure that your final line of code returns a value. One way to check this is to think about what would happen if you ran the body of code line by line in the command line. Would R display a result after the last line, or would it not?
-
-Here's some code that would display a result:
-
-```r
-dice
-1 + 1
-sqrt(2)
-```
-
-And here's some code that would not:
-
-```r
-dice <- sample(die, size = 2, replace = TRUE)
-two <- 1 + 1
-a <- sqrt(2)
-```
-
-Again, this is just showing the distinction between expressions and assignments. 
-
-## Arguments
-
-What if we removed one line of code from our function and changed the name `die` to `bones` (just a name--don't think of it as important), like this?
-
-```{r}
-roll2 <- function() {
-  dice <- sample(bones, size = 2, replace = TRUE)
-  sum(dice)
-}
-```
-
-Now I'll get an error when I run the function. The function **needs** the object `bones` to do its job, but there is no object named `bones` to be found (you can check by typing `ls()` which will show you the names in the environment, or memory).
-
-```r
-roll2()
-## Error in sample(bones, size = 2, replace = TRUE) : 
-##   object 'bones' not found
-```
-
-You can supply `bones` when you call `roll2` if you make `bones` an argument of the function. To do this, put the name `bones` in the parentheses that follow `function` when you define `roll2`:
-
-```{r}
-roll2 <- function(bones) {
-  dice <- sample(bones, size = 2, replace = TRUE)
-  sum(dice)
-}
-```
-
-Now `roll2` will work as long as you supply `bones` when you call the function. You can take advantage of this to roll different types of dice each time you call `roll2`. 
-
-Remember, we're rolling pairs of dice:
-
-```{r}
-roll2(bones = 1:4)
-roll2(bones = 1:6)
-roll2(1:20)
-```
-
-Notice that `roll2` will still give an error if you do not supply a value for the `bones` argument when you call `roll2`:
-
-```r
-roll2()
-## Error in sample(bones, size = 2, replace = TRUE) : 
-##   argument "bones" is missing, with no default
-```
-
-You can prevent this error by giving the `bones` argument a default value. To do this, set `bones` equal to a value when you define `roll2`:
-
-```{r}
-roll2 <- function(bones = 1:6) {
-  dice <- sample(bones, size = 2, replace = TRUE)
-  sum(dice)
-}
-```
-
-Now you can supply a new value for `bones` if you like, and `roll2` will use the default if you do not:
-
-```{r}
-roll2()
-```
-
-You can give your functions as many arguments as you like. Just list their names, separated by commas, in the parentheses that follow `function`. When the function is run, R will replace each argument name in the function body with the value that the user supplies for the argument. If the user does not supply a value, R will replace the argument name with the argument's default value (if you defined one).
-
-To summarize, `function` helps you construct your own R functions. You create a body of code for your function to run by writing code between the braces that follow `function`. You create arguments for your function to use by supplying their names in the parentheses that follow `function`. Finally, you give your function a name by saving its output to an R object, as shown in @fig-functions.
-
-Once you've created your function, R will treat it like every other function in R. Think about how useful this is. Have you ever tried to create a new Excel option and add it to Microsoft's menu bar? Or a new slide animation and add it to Powerpoint's options? When you work with a programming language, you can do these types of things. As you learn to program in R, you will be able to create new, customized, reproducible tools for yourself whenever you like.
-
-!["Every function in R has the same parts, and you can use `function` to create these parts. Assign the result to a name, so you can call the function later."](images/hopr_0106.png){#fig-functions}
-
-## Scripts
-
-Scripts are code that are saved for later reuse or editing. An R script is just a plain text file that you save R code in. You can open an R script in RStudio by going to **File > New File > R script** in the menu bar. RStudio will then open a fresh script above your console pane, as shown in @fig-blank-script.
-
-I strongly encourage you to write and edit all of your R code in a script before you run it in the console. Why? This habit creates a reproducible record of your work. When you're finished for the day, you can save your script and then use it to rerun your entire analysis the next day. Scripts are also very handy for editing and proofreading your code, and they make a nice copy of your work to share with others. To save a script, click the scripts pane, and then go to **File > Save As** in the menu bar.
-
-!["When you open an R Script (File > New File > R Script in the menu bar), RStudio creates a fourth pane (or puts a new tab in the existing pane) above the console where you can write and edit your code."](images/hopr_0107.png){#fig-blank-script}
-
-RStudio comes with many built-in features that make it easy to work with scripts. First, you can automatically execute a line of code in a script by clicking the Run button at the top of the editor panel.
-
-R will run whichever line of code your cursor is on. If you have a whole section highlighted, R will run the highlighted code. Alternatively, you can run the entire script by clicking the Source button. Don't like clicking buttons? You can use Control + Return as a shortcut for the Run button. On Macs, that would be Command + Return.
-
-```{r run, echo = FALSE, fig.cap = "You can run a highlighted portion of code in your script if you click the Run button at the top of the scripts pane. You can run the entire script by clicking the Source button."}
-#knitr::include_graphics("images/hopr_0108.png")
-```
-
-If you're not convinced about scripts, you soon will be. It becomes a pain to write multi-line code in the console's single-line command line. Let's avoid that headache and open your first script now before we move to the next chapter. 
+Each call re-runs the body, so each call gives a fresh sequence. We've turned three
+lines of fiddly code into one reusable verb.
 
 ::: {.callout-tip}
-**Extract function**
-
-RStudio comes with a tool that can help you build functions. To use it, highlight the lines of code in your R script that you want to turn into a function. Then click `Code > Extract Function` in the menu bar. RStudio will ask you for a function name to use and then wrap your code in a `function` call. It will scan the code for undefined variables and use these as arguments.
-
-You may want to double-check RStudio's work. It assumes that your code is correct, so if it does something surprising, you may have a problem in your code.
+## A function is just another object
+`random_sequence` is an object, exactly like `nucleotides` is. Type its name *without*
+parentheses and R shows you the code it contains; type it *with* parentheses and R
+runs that code. The parentheses are the trigger.
 :::
+
+### Default arguments
+
+Right now you must supply `n` every time, or you get an error. Often it's convenient
+to give an argument a **default** — a value R uses when you don't specify one. Set the
+default in the function definition with `=`:
+
+```{r}
+random_sequence <- function(n = 20) {
+  bases <- sample(nucleotides, size = n, replace = TRUE)
+  paste(bases, collapse = "")
+}
+```
+
+Now a bare call produces a 20-base sequence, but you can still override the default
+when you want a different length:
+
+```{r}
+random_sequence()
+random_sequence(n = 50)
+```
+
+### A second argument: base composition
+
+So far every base is equally likely — each of A, C, G, T turns up about a quarter of
+the time. Real genomes are lopsided: some organisms are strikingly GC-poor (the
+malaria parasite *Plasmodium falciparum*) and others GC-rich (many *Streptomyces*).
+The `sample()` function can model that through its `prob` argument, which takes a
+vector of relative probabilities, one per element of the alphabet. Let's expose that
+as an argument of our own function:
+
+```{r}
+random_sequence <- function(n = 20, prob = NULL) {
+  bases <- sample(nucleotides, size = n, replace = TRUE, prob = prob)
+  paste(bases, collapse = "")
+}
+```
+
+The default `prob = NULL` tells `sample()` to fall back on equal probabilities, so the
+old behavior is unchanged. But now we can ask for, say, a GC-rich sequence by making
+G and C more likely than A and T (remember the order is A, C, G, T):
+
+```{r}
+# A, C, G, T weighted 1 : 4 : 4 : 1  ->  mostly G and C
+random_sequence(n = 50, prob = c(1, 4, 4, 1))
+```
+
+Count the letters and you should see far more `G`s and `C`s than `A`s and `T`s.
+
+## A (very simple) generative model
+
+Step back and look at what we built. `random_sequence()` is a small **generative
+model** of DNA: a set of rules that can manufacture new sequence data. Its rules are
+just two:
+
+1. each base is drawn from the four-letter alphabet, and
+2. the draws are independent, each following a fixed probability distribution
+   (uniform by default, or whatever `prob` you supply).
+
+That is about the simplest generative model of DNA imaginable. The large DNA
+**language models** used in modern genomics are generative models too, and in spirit
+they do the same job — produce, or assign probabilities to, sequence. The difference
+is in rule 2. Where our model treats every position as independent, a language model
+makes each base depend on the entire context around it, capturing codons, motifs,
+regulatory grammar, and long-range structure that ours throws away. They have
+millions or billions of learned parameters; ours has at most four. Same idea, wildly
+different complexity — and you now understand the simple end of that spectrum from the
+inside.
+
+In the [next chapter](packages_and_simulation.qmd) we'll put this model to work:
+generate *many* sequences, summarize each with a single number, and watch a beautiful
+piece of statistics — the law of large numbers — emerge.
+
+## Exercises
+
+Each solution names the key idea and a one-line *why*, because the reasoning transfers
+further than the answer.
+
+1.  Use `sample()` directly (no custom function) to draw a single random codon — three
+    bases — as a character vector.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    sample(nucleotides, size = 3, replace = TRUE)
+    ```
+    `size = 3` asks for three draws, and `replace = TRUE` lets a base repeat — a codon
+    like `"TTT"` is perfectly legal, so we *must* sample with replacement.
+    :::
+
+2.  Explain in one sentence why `sample(nucleotides, size = 6)` (no `replace`) throws
+    an error, but `sample(nucleotides, size = 6, replace = TRUE)` does not.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    Without replacement there are only four tiles to draw from, so you can't pull six;
+    with replacement each tile goes back in the bag after every draw, so the supply
+    never runs out.
+    :::
+
+3.  Write a function `random_codon()` that returns a single three-base string (e.g.
+    `"GAT"`). Reuse the pattern from `random_sequence()`.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    random_codon <- function() {
+      bases <- sample(nucleotides, size = 3, replace = TRUE)
+      paste(bases, collapse = "")
+    }
+    random_codon()
+    ```
+    Same three parts as before — name, body, (here empty) arguments — just with `size`
+    fixed at 3 and no inputs to vary.
+    :::
+
+4.  Our model assumes every base position is independent. Name one real biological
+    feature of DNA that violates that assumption, and say in a sentence why it matters.
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    Many answers work: codons (bases come in functional triplets), sequence motifs in
+    promoters and binding sites, CpG islands, or GC-rich/AT-rich regions. Any of these
+    means the base at one position carries information about its neighbors — exactly
+    the dependence our independent-draws model ignores, which is why sequences it
+    generates won't contain genuine genes or regulatory signals.
+    :::
+
+5.  Modify a copy of `random_sequence()` so that it returns the *vector* of bases
+    instead of a single pasted string. Which line do you remove?
+
+    ::: {.callout-note collapse="true"}
+    ## Solution
+    ```{r}
+    random_bases <- function(n = 20, prob = NULL) {
+      sample(nucleotides, size = n, replace = TRUE, prob = prob)
+    }
+    random_bases(n = 8)
+    ```
+    Drop the `paste()` line; a function returns its last expression, so making the
+    `sample()` call the last line returns the raw vector.
+    :::
 
 ## Summary
 
-We've covered a lot of ground already. You now have a virtual die stored in your computer's memory, as well as your own R function that rolls a pair of dice. You've also begun speaking the R language.
+You can now generate random data and package code for reuse — two skills the rest of
+the book leans on constantly:
 
-The two most important components of the R language are objects, which store data, and functions, which manipulate data. R also uses a host of operators like `+`, `-`, `*`, `/`, and `<-` to do basic tasks. As a data scientist, you will use R objects to store data in your computer's memory, and you will use functions to automate tasks and do complicated calculations.
+- **`sample()`** draws values at random from a vector; `size` sets how many and
+  `replace = TRUE` allows repeats. Building DNA requires sampling *with* replacement,
+  which models every position as **independent** — a convenient fiction that real
+  genomic structure violates.
+- **You write a function** with `function(args) { body }`, save it with `<-`, and it
+  returns the value of its last line. Arguments can have **defaults**, and extra
+  arguments (like `prob`) let one function cover many cases.
+- Strung together, a couple of simple rules make a **generative model** — here, a
+  bare-bones one that is, in spirit, the simplest relative of the DNA language models
+  used in research.
 
-
+Next we'll generate sequences by the thousands, reduce each to a single summary
+number — a **statistic** — and meet the **law of large numbers**.
