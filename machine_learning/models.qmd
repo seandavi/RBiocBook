@@ -218,19 +218,19 @@ works beautifully.
 
 ## Penalized regression
 
-*Some material in this section is adapted from the* [STHDA penalized-regression
-tutorial](http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/).
-
 Plain linear regression has a weakness: when you have many features — especially
 more features than observations, the common situation in genomics — it can chase
 noise and overfit. **Penalized regression** fixes this by tweaking the *objective
-function* (pillar two). It keeps the squared-error term but adds a **penalty** that
-grows as the coefficients get large, gently pressuring the model to stay simple.
+function* (pillar two). It keeps the usual squared-error term but bolts on a
+**penalty** that grows as the coefficients get large, so the fitting procedure now
+has to balance two goals at once: fit the data well *and* keep the coefficients
+small. The net effect is a model that is pressured to stay simple.
 
-A single dial, **lambda** ($\lambda$), controls how hard that pressure pushes. When
-$\lambda = 0$ there's no penalty and you're back to ordinary linear regression. As
-$\lambda$ grows, coefficients are squeezed toward zero. The three methods below —
-ridge, LASSO, and elastic net — differ only in the *shape* of the penalty.
+A single dial, **lambda** ($\lambda$), sets how hard that pressure pushes. When
+$\lambda = 0$ the penalty vanishes and you are back to ordinary linear regression;
+as $\lambda$ grows, the coefficients are squeezed ever harder toward zero. The
+three methods below — ridge, LASSO, and elastic net — share this idea and differ
+only in the *shape* of the penalty they add.
 
 We'll fit all three with the `glmnet` package. `glmnet` does not take a formula; it
 wants a numeric **matrix** of features `x` and a response vector `y`. The
@@ -251,10 +251,12 @@ y_test <- test$body_mass_g
 
 ### Ridge regression
 
-**Plain-language intuition.** Ridge adds an **L2 penalty**: the sum of the *squared*
-coefficients (@eq-ridge). This shrinks every coefficient toward zero but never
-quite *to* zero — so ridge keeps all your features, just turns down their volume.
-It's the right choice when you believe many features each contribute a little.
+**Plain-language intuition.** Ridge uses an **L2 penalty**: the sum of the *squared*
+coefficients (@eq-ridge). Because squaring punishes large coefficients much more than
+small ones, ridge pulls every coefficient toward zero but never lets any of them land
+exactly *on* zero. Every feature therefore survives — ridge simply turns down their
+volume rather than dropping any. That makes it a good fit when you suspect many
+features each carry a little of the signal.
 
 $$L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} \beta_j^2$$ {#eq-ridge}
 
@@ -279,11 +281,12 @@ rmse(y_test, pred_ridge)
 ### LASSO regression
 
 **Plain-language intuition.** LASSO (Least Absolute Shrinkage and Selection
-Operator) adds an **L1 penalty**: the sum of the *absolute* coefficients
-(@eq-lasso). The difference from ridge sounds small but matters a lot: the L1
-penalty can push a coefficient *exactly* to zero, effectively deleting that feature
-from the model. So LASSO does **automatic feature selection** — it hands you a
-simpler model that uses only the features that earn their keep.
+Operator) swaps in an **L1 penalty**: the sum of the *absolute* coefficients
+(@eq-lasso). Switching from squares to absolute values sounds like a minor change,
+but it has a dramatic consequence — the L1 penalty can drive a coefficient *all the
+way* to zero, which is the same as striking that feature out of the model entirely.
+LASSO therefore performs **automatic feature selection**, leaving you with a leaner
+model built only from the features that pull their weight.
 
 $$L = \sum_{i=1}^{n}{(\hat{y}_i - y_i)}^2 + \lambda\sum_{j=1}^{k} |\beta_j|$$ {#eq-lasso}
 

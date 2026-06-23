@@ -109,69 +109,73 @@ Note that R follows order-of-operations and groupings based on parentheses.
 
 ### Assignment
 
-While using R as a calculator is interesting, to do useful and interesting things, we need to assign _values_ to _objects_. To create objects, we need to give it a name followed by the assignment operator `<-` (or, entirely equivalently, `=`) and the value we want to give it:
+While using R as a calculator is interesting, to do useful and interesting things, we need to assign _values_ to _objects_. To create an object, we give it a name, followed by the assignment operator `<-` (or, entirely equivalently, `=`), and the value we want to store. Here we record the length of a gene, in base pairs:
 
 ```{r assignment}
-weight_kg <- 55 
+gene_length_bp <- 2400
 ```
 
-`<-` is the assignment operator. Assigns values on the right to objects on the left, it is like an arrow that points from the value to the object. Using an `=` is equivalent (in nearly all cases). Learn to use `<-` as it is good programming practice. 
+`<-` is the assignment operator: it stores the value on the right in the object named on the left, like an arrow pointing from the value into the name. An `=` is equivalent (in nearly all cases), but learning to use `<-` is good programming practice.
 
 ::: {.callout-note}
 ## What about `<-` and `=` for assignment?
 
 The `<-` and `=` both work fine for assignment.
 You'll see both used and it is up to you to choose a standard for yourself.
-However, some programming communities, such as Bioconductor, will strongly suggest using the `<-` as it is clearer that it represents an _assignment_ operation. 
-::: 
+However, some programming communities, such as Bioconductor, will strongly suggest using the `<-` as it is clearer that it represents an _assignment_ operation.
+:::
 
-Objects can be given any name such as `x`, `current_temperature`, or `subject_id` (see below). You want your object names to be explicit and not too long. They cannot start with a number (`2x` is not valid but `x2` is). R is case sensitive (e.g., `weight_kg` is different from `Weight_kg`). There are some names that cannot be used because they represent the names of fundamental functions in R (e.g., `if`, `else`, `for`, see [here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html) for a complete list). In general, even if it's allowed, it's best to not use other function names, which we'll get into shortly (e.g., `c`, `T`, `mean`, `data`, `df`, `weights`). When in doubt, check the help to see if the name is already in use. It's also best to avoid dots (`.`) within a variable name as in `my.dataset`. It is also recommended to use nouns for variable names, and verbs for function names.
+Objects can be given almost any name, such as `x`, `gene_length_bp`, or `subject_id`. Aim for names that are explicit but not too long. They cannot start with a number (`2x` is not valid, but `x2` is), and R is case sensitive (so `gene_length_bp` is different from `Gene_Length_bp`). A few names are reserved because they are fundamental parts of the language (`if`, `else`, `for`, and others — see the [list of reserved words](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html)). Even when it is allowed, avoid reusing the names of common functions (`c`, `T`, `mean`, `data`, `df`), and avoid dots inside names (`my.dataset`), since dots carry special meaning in some contexts. A useful convention is to use nouns for variable names and verbs for function names.
 
-When assigning a value to an object, R does not print anything. You can force to print the value by typing the name:
+When you assign a value to an object, R prints nothing. To see what is stored, type the object's name:
 
 ```{r printAssignment}
-weight_kg
+gene_length_bp
 ```
 
-Now that R has `weight_kg` in memory, which R refers to as the "global environment", we can do arithmetic with it. For instance, we may want to convert this weight in pounds (weight in pounds is 2.2 times the weight in kg).
+Now that R holds `gene_length_bp` in memory (its "global environment"), we can do arithmetic with it. Gene lengths are often quoted in kilobases, so let's convert by dividing by 1000:
 
-```{r modAssignment}
-2.2 * weight_kg
+```{r geneArithmetic}
+gene_length_bp / 1000
 ```
 
-We can also change a variable's value by assigning it a new one:
+We can also change an object's value by assigning a new one:
 
-```{r newAssignment}
-weight_kg <- 57.5
-2.2 * weight_kg
+```{r reassign}
+gene_length_bp <- 1800
+gene_length_bp / 1000
 ```
 
-This means that assigning a value to one variable does not change the values of other variables. For example, let's store the animal's weight in pounds in a variable.
+Here is a subtle but important point: assigning a value to one object does **not** update other objects that were computed from it earlier. Suppose we store the length in kilobases in its own object:
 
-```{r calculationWithVar}
-weight_lb <- 2.2 * weight_kg
+```{r derivedVar}
+gene_length_kb <- gene_length_bp / 1000
 ```
 
-and then change `weight_kg` to 100.
+and then change `gene_length_bp` to a new value:
 
-```{r modAssignment2}
-weight_kg <- 100
+```{r reassign2}
+gene_length_bp <- 3000
 ```
 
-What do you think is the current content of the object `weight_lb`, 126.5 or 220?
+What do you think `gene_length_kb` holds now — `1.8` or `3.0`? R computed `gene_length_kb` once, from the value `gene_length_bp` had *at that moment* (1800), and stored the result (1.8). Re-assigning `gene_length_bp` afterward does not reach back and recompute `gene_length_kb`:
 
-You can see what objects (variables) are stored by viewing the Environment tab in Rstudio. You can also use the `ls()` function. You can remove objects (variables) with the `rm()` function. You can do this one at a time or remove several objects at once. You can also use the little broom button in your environment pane to remove everything from your environment.
+```{r checkDerived}
+gene_length_kb
+```
+
+You can see what objects are stored by viewing the Environment tab in RStudio, or with the `ls()` function. You can remove objects with `rm()`, one at a time or several at once (the little broom button in the Environment pane clears everything):
 
 ```{r rm, eval=FALSE}
 ls()
-rm(weight_lb, weight_kg)
+rm(gene_length_kb, gene_length_bp)
 ls()
 ```
 
 What happens when you type the following, now?
 
 ```{r errorAfterrm, eval=FALSE}
-weight_lb # oops! you should get an error because weight_lb no longer exists!
+gene_length_kb # error: object no longer exists, because we just removed it!
 ```
 
 ## Rules for Names in R

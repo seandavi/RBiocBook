@@ -31,6 +31,15 @@ exactly what each operation does, then finish with real gene models pulled from 
 genome annotation.
 
 ::: {.callout-note}
+## Acknowledgement
+
+This chapter's explanations are adapted, in part, from the Bioconductor
+*GenomicRanges* vignette by P. Aboyoun, H. Pagès, and M. Lawrence
+(Artistic-2.0 license), rewritten here for a beginning audience. The package
+itself is described in @lawrence_software_2013.
+:::
+
+::: {.callout-note}
 ## A note on coordinate systems
 
 Different tools count positions differently. The UCSC Genome Browser uses
@@ -82,12 +91,13 @@ in context first.
 
 To get going, we can construct a `GRanges` object by hand as an example.
 
-The `GRanges` class represents a collection of genomic ranges that each have a single start
-and end location on the genome. It can be used to store the location of genomic features
-such as contiguous binding sites, transcripts, and exons. These objects can be created by
-using the GRanges constructor function. The following code creates one from scratch. (The `Rle()` calls in it simply
-repeat each value a given number of times — a compact "run-length" shorthand we
-return to under *coverage* later.)
+A `GRanges` holds a set of intervals, each pinned to a chromosome by a single
+start and a single end. That is exactly the shape of most genomic features —
+a binding site, a transcript, an exon all amount to "this stretch, on this
+chromosome" — so a `GRanges` is where you put them. You build one with the
+`GRanges()` constructor; the code below does so from scratch. (The `Rle()` calls
+in it simply repeat each value a given number of times — a compact "run-length"
+shorthand we return to under *coverage* later.)
 
 ```{r mkexample}
 gr <- GRanges(
@@ -99,12 +109,12 @@ gr <- GRanges(
 gr
 ```
 
-This creates a `GRanges` object with 10 genomic ranges. The output of the `GRanges` `show()` method
-separates the information into a left and right hand region that are separated by `|` symbols (see @fig-granges-structure).
-The genomic coordinates (seqnames, ranges, and strand) are located on the left-hand side
-and the metadata columns are located on the right. For this example, the
-metadata is comprised of score and GC information, but almost anything can be stored in
-the metadata portion of a GRanges object.
+We now have a `GRanges` with 10 ranges. When you print one, the display splits
+into two regions divided by `|` symbols (see @fig-granges-structure). To the left
+sit the genomic coordinates — `seqnames`, `ranges`, and `strand`; to the right sit
+the metadata columns. Here the metadata is just the `score` and `GC` columns we
+supplied, but the right-hand side will happily carry anything else you care to
+attach to a range.
 
 ::: {.callout-note}
 ## Reading a `GRanges`: the `|` is the dividing line
@@ -217,9 +227,9 @@ tail(gr,n=2)
 
 #### Intra-range methods
 
-The methods described in this section work *one-region-at-a-time* and are, therefore, called
-"intra-range" methods. Methods that work across all regions are described below 
-in the [Inter-range methods] section.
+The operations in this section reshape each range *on its own*, never looking at
+its neighbours — which is why they are called "intra-range" methods. The ones that
+do look across the whole set come next, in the [Inter-range methods] section.
 
 To make the operations in this section easy to *see*, we'll work with a small set
 of ranges on a single chromosome and draw a picture of each operation as we go.
@@ -382,9 +392,10 @@ The `r Biocpkg("GenomicRanges")` help page `?"intra-range-methods"` summarizes t
 
 #### Inter-range methods
 
-Inter-range methods involve comparisons between ranges in a single GRanges object. For
-instance, the reduce method will align the ranges and merge overlapping ranges to produce
-a simplified set.
+Inter-range methods, by contrast, look at the ranges in a single `GRanges`
+*together*. The first one to meet is `reduce()`, which scans the set and merges
+any ranges that overlap or touch into a single range, leaving you with a tidied-up,
+non-redundant set.
 
 ```{r grreduce}
 reduce(g)
@@ -426,8 +437,8 @@ work you set the chromosome lengths with `seqlengths()` so that `gaps()`,
 that detail for these toy examples.
 :::
 
-The disjoin method represents a GRanges object as a collection of non-overlapping
-ranges. This is the step before *counting*: once a region is split into pieces that
+The `disjoin()` method rewrites a `GRanges` as a set of pieces that no longer
+overlap one another. This is the step before *counting*: once a region is split into pieces that
 each belong to a fixed set of features, a read landing in a piece can be attributed
 to those features unambiguously.
 
@@ -513,13 +524,13 @@ methods(class="GRanges")
 
 ## GRangesList
 
-Some important genomic features, such as spliced transcripts that are comprised of exons,
-are inherently compound structures. Such a feature makes much more sense when expressed
-as a compound object such as a GRangesList. If we think of each transcript as a set of exons,
-each transcript would be summarized as a `GRanges` object. However, if we have multiple transcripts,
-we want to keep them separate, with each transcript holding its own exons. A `GRangesList`
-is a list of `GRanges` objects. Continuing with the transcripts idea, a `GRangesList`
-can contain all the transcripts and their exons; each transcript is one element in the list.
+Not every feature is a single interval. A spliced transcript, for example, is
+made of several exons, so it is naturally a *group* of ranges rather than one
+range. The right container for that is a `GRangesList` — simply a list whose
+elements are themselves `GRanges` objects. Picture one transcript as a `GRanges`
+holding its exons; a `GRangesList` then holds many such transcripts at once,
+each kept separate as its own element, so the grouping (which exons belong to
+which transcript) is never lost.
 
 ![The structure of a GRangesList, which is a `list` of GRanges objects. While the analogy is not perfect, a `GRangesList` behaves a bit like a list. Each element in the `GRangesList` *is* a `GRanges` object. A common use case for a `GRangesList` is to store a list of transcripts, each of which have exons as the regions in the `GRanges`. ](images/granges_list_structure.png){#fig-granges-list-structure}
 
@@ -703,15 +714,31 @@ g
 g2
 ```
 
-- nearest: Performs conventional nearest neighbor finding. Returns an integer vector containing the index of the nearest neighbor range in subject for each range in x. If there is no nearest neighbor NA is returned. For details of the algorithm see the man page in the IRanges package (?nearest).
+There are three closely related functions here, each taking a query `x` and a
+`subject` and returning, for every range in `x`, an integer index into `subject`
+(or `NA` when nothing qualifies):
 
-- precede: For each range in x, precede returns the index of the range in subject that is directly preceded by the range in x. Overlapping ranges are excluded. NA is returned when there are no qualifying ranges in subject.
+- `nearest()` finds the closest range in `subject`, whether it lies before, after,
+  or overlapping. It is the everyday tool; for the exact tie-breaking rules see
+  `?nearest` in the IRanges package.
 
-- follow: The opposite of precede, follow returns the index of the range in subject that is directly followed by the range in x. Overlapping ranges are excluded. NA is returned when there are no qualifying ranges in subject.
+- `precede()` looks only *ahead*: for each range in `x` it returns the first
+  `subject` range that `x` comes before. Anything overlapping is skipped.
 
-Orientation and strand for precede and follow: Orientation is 5' to 3', consistent with the direction of translation. Because positional numbering along a chromosome is from left to right and transcription takes place from 5' to 3', precede and follow can appear to have ‘opposite’ behavior on the + and - strand. Using positions 5 and 6 as an example, 5 precedes 6 on the + strand but follows 6 on the - strand.
+- `follow()` is the mirror image, looking only *behind*: it returns the `subject`
+  range that `x` comes after, again ignoring overlaps.
 
-The table below outlines the orientation when ranges on different strands are compared. In general, a feature on * is considered to belong to both strands. The single exception is when both x and subject are * in which case both are treated as +.
+The catch with `precede()` and `follow()` is that "ahead" and "behind" are read in
+the biological 5'-to-3' direction, the direction transcription runs — not simply
+left-to-right along the chromosome. On the `+` strand those two directions agree,
+but on the `-` strand they are reversed, so the same pair of positions can flip its
+answer. Take positions 5 and 6: on the `+` strand, 5 *precedes* 6, but on the `-`
+strand 5 *follows* 6, because 5'-to-3' now runs the other way.
+
+The table below spells out the resulting orientation for every combination of query
+and subject strand. A `*` (unstranded) range is treated as belonging to both
+strands; the one special case is when *both* `x` and `subject` are `*`, where they
+are both taken to be `+`.
 
 
 ```
