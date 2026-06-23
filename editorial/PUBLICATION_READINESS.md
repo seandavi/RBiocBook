@@ -190,11 +190,22 @@ These cannot be made open by attribution; they are the load-bearing work.
 5. Phase 1.2 (ggplot2/Kabacoff) + 1.3 (STHDA) + 1.6 (Turner) — the larger rewrites.
 6. Phase 3 verify-and-annotate; then Phase 4 sweep + Phase 5 release.
 
-## Open license-research questions (resolve during Phase 0/early)
+## License-research verdicts (resolved 2026-06-23)
 
-- [ ] Bioconnector / Stephen Turner tutorials — exact license? (decides 1.6 vs Phase 2)
-- [ ] Kasper Hansen Bioconductor course — license? (decides 2.4)
-- [ ] OMA / `mia` documentation — license? (decides 2.5)
-- [ ] *Stats from Stardust* blog — any stated reuse terms? (informs 2.3)
-- [ ] Lantz *insurance* dataset redistribution terms (decides 1.2 dataset swap)
-- [ ] Confirm VS Code docs (CC-BY) and Posit screenshot terms (3.1)
+- [x] **Bioconnector / Stephen Turner** — **CC-BY-NC 4.0** (bdsr) / CC-BY-NC-SA-4.0
+  (workshops). NonCommercial → **must rewrite** `dataframes_intro.qmd` + `dplyr_intro_msleep.qmd` (1.6 = rewrite, not attribute).
+- [x] **Kasper Hansen course** — CC-BY-NC-ND/-SA (conflicting), NonCommercial → **must
+  redesign** `ranges_exercises.qmd` (2.4 = redesign, not attribute).
+- [x] **OMA book prose/figures** — **CC-BY-NC** → **must replace** the TSE figure +
+  reword caption (2.5). The `mia` (Artistic-2.0) / `TreeSummarizedExperiment` (GPL)
+  *code* is fine to use with attribution.
+- [x] ***Stats from Stardust* blog** — no license → **all-rights-reserved** → re-author
+  `norm.qmd` figures independently (2.3).
+- [x] **Lantz *insurance* dataset** — reusable only via Kaggle **ODbL-1.0/DbCL-1.0**;
+  cite the Kaggle mirror, not the unlicensed GitHub copies (1.2).
+- [x] **VS Code docs** — **CC-BY-3.0-US** (+ MS screenshot policy: OK for education, no
+  splash/beta/partial screens). **Posit/RStudio** — no blanket grant; plain UI screenshots
+  are defensible nominative fair use, **but keep logos/wordmarks out** (3.1).
+- [x] **scikit-learn ml_map** — **BSD-3-Clause**, reusable with the BSD notice (3.3).
+- [x] **GenomicRanges vignette** — **Artistic-2.0**: reproducing/adapting vignette prose
+  **with attribution** is permitted → reword + credit (2.1, no replacement needed).
