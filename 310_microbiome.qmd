@@ -113,12 +113,14 @@ Once the data is loaded, you can start exploring its structure and contents. The
 In microbiome data science, containers like this one link a taxonomic abundance table to rich side information about both the features (the microbes) and the samples. That abundance data can come from 16S rRNA amplicon sequencing, metagenomic sequencing, phylogenetic microarrays, or other methods. A single experiment often holds several versions of the data at once — raw counts plus transformed or agglomerated versions derived from them — and the container keeps them all together.
 
 
-![Anatomy of a TreeSummarizedExperiment object. Compared to the SingleCellExperiment objects, TreeSummarizedExperiment has five additional slots. **rowTree**: the hierarchical structure on the rows of the assays. 
-**rowLinks**: the link information between rows of the assays and the rowTree.
-**colTree**: the hierarchical structure on the columns of the assays.
-**colLinks**: the link information between columns of the assays and the colTree.
-**referenceSeq** (optional): the reference sequence data per feature (row).
-](images/treesummarizedexperiment.png){#fig-tse-anatomy}
+![Anatomy of a TreeSummarizedExperiment. On top of the assay matrix, `rowData`, and
+`colData` it shares with a SummarizedExperiment, it adds slots that record *hierarchy*:
+a **`rowTree`** holding a tree over the features (here, the taxonomic/phylogenetic
+relationships among microbes) with **`rowLinks`** tying each assay row to a node on
+that tree; an optional **`colTree`**/**`colLinks`** doing the same for the samples; and
+an optional **`referenceSeq`** storing a reference sequence for each feature. The tree
+slots are what make this container a natural fit for microbiome data, where features
+are related by a phylogeny.](images/treesummarizedexperiment.png){#fig-tse-anatomy}
 
 
 To get an overview of the data, we can simply type the name of the object in the R console:
