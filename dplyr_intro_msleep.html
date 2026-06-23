@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.9.37">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Stephen Turner (with modifications by Sean Davis)">
+<meta name="author" content="Sean Davis">
 <meta name="dcterms.date" content="2024-06-01">
 <meta name="description" content="A collection of chapters more than a book, but….">
-<title>16&nbsp; Introduction to dplyr: mammal sleep dataset – The RBioc Book</title>
+<title>16&nbsp; Reshaping tables with dplyr – The RBioc Book</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -351,7 +351,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./dplyr_intro_msleep.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./dplyr_intro_msleep.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -500,7 +500,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -744,39 +744,45 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
    
   <ul>
 <li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">16.1</span> What you’ll learn</a></li>
-  <li><a href="#what-is-dplyr" id="toc-what-is-dplyr" class="nav-link" data-scroll-target="#what-is-dplyr"><span class="header-section-number">16.2</span> What is dplyr?</a></li>
-  <li><a href="#why-is-dplyr-useful" id="toc-why-is-dplyr-useful" class="nav-link" data-scroll-target="#why-is-dplyr-useful"><span class="header-section-number">16.3</span> Why is dplyr useful?</a></li>
-  <li><a href="#data-mammals-sleep" id="toc-data-mammals-sleep" class="nav-link" data-scroll-target="#data-mammals-sleep"><span class="header-section-number">16.4</span> Data: mammals sleep</a></li>
-  <li><a href="#the-dplyr-verbs" id="toc-the-dplyr-verbs" class="nav-link" data-scroll-target="#the-dplyr-verbs"><span class="header-section-number">16.5</span> The dplyr verbs</a></li>
-  <li><a href="#selecting-columns-with-select" id="toc-selecting-columns-with-select" class="nav-link" data-scroll-target="#selecting-columns-with-select"><span class="header-section-number">16.6</span> Selecting columns with <code>select()</code></a></li>
-  <li><a href="#selecting-rows-with-filter" id="toc-selecting-rows-with-filter" class="nav-link" data-scroll-target="#selecting-rows-with-filter"><span class="header-section-number">16.7</span> Selecting rows with <code>filter()</code></a></li>
-  <li><a href="#chaining-verbs-with-the-pipe" id="toc-chaining-verbs-with-the-pipe" class="nav-link" data-scroll-target="#chaining-verbs-with-the-pipe"><span class="header-section-number">16.8</span> Chaining verbs with the pipe, <code>|&gt;</code></a></li>
-  <li><a href="#re-ordering-rows-with-arrange" id="toc-re-ordering-rows-with-arrange" class="nav-link" data-scroll-target="#re-ordering-rows-with-arrange"><span class="header-section-number">16.9</span> Re-ordering rows with <code>arrange()</code></a></li>
-  <li><a href="#creating-new-columns-with-mutate" id="toc-creating-new-columns-with-mutate" class="nav-link" data-scroll-target="#creating-new-columns-with-mutate"><span class="header-section-number">16.10</span> Creating new columns with <code>mutate()</code></a></li>
-  <li><a href="#summarizing-with-summarise" id="toc-summarizing-with-summarise" class="nav-link" data-scroll-target="#summarizing-with-summarise"><span class="header-section-number">16.11</span> Summarizing with <code>summarise()</code></a></li>
-  <li><a href="#grouping-with-group_by" id="toc-grouping-with-group_by" class="nav-link" data-scroll-target="#grouping-with-group_by"><span class="header-section-number">16.12</span> Grouping with <code>group_by()</code></a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">16.13</span> Exercises</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">16.14</span> Summary</a></li>
+  <li><a href="#a-small-table-to-practice-on" id="toc-a-small-table-to-practice-on" class="nav-link" data-scroll-target="#a-small-table-to-practice-on"><span class="header-section-number">16.2</span> A small table to practice on</a></li>
+  <li><a href="#select-choose-columns" id="toc-select-choose-columns" class="nav-link" data-scroll-target="#select-choose-columns"><span class="header-section-number">16.3</span> <code>select()</code>: choose columns</a></li>
+  <li><a href="#filter-choose-rows" id="toc-filter-choose-rows" class="nav-link" data-scroll-target="#filter-choose-rows"><span class="header-section-number">16.4</span> <code>filter()</code>: choose rows</a></li>
+  <li><a href="#the-pipe-reading-an-analysis-top-to-bottom" id="toc-the-pipe-reading-an-analysis-top-to-bottom" class="nav-link" data-scroll-target="#the-pipe-reading-an-analysis-top-to-bottom"><span class="header-section-number">16.5</span> The pipe: reading an analysis top to bottom</a></li>
+  <li><a href="#arrange-sort-rows" id="toc-arrange-sort-rows" class="nav-link" data-scroll-target="#arrange-sort-rows"><span class="header-section-number">16.6</span> <code>arrange()</code>: sort rows</a></li>
+  <li><a href="#mutate-build-new-columns" id="toc-mutate-build-new-columns" class="nav-link" data-scroll-target="#mutate-build-new-columns"><span class="header-section-number">16.7</span> <code>mutate()</code>: build new columns</a></li>
+  <li><a href="#summarise-reduce-a-column-to-one-number" id="toc-summarise-reduce-a-column-to-one-number" class="nav-link" data-scroll-target="#summarise-reduce-a-column-to-one-number"><span class="header-section-number">16.8</span> <code>summarise()</code>: reduce a column to one number</a></li>
+  <li><a href="#group_by-one-summary-per-group" id="toc-group_by-one-summary-per-group" class="nav-link" data-scroll-target="#group_by-one-summary-per-group"><span class="header-section-number">16.9</span> <code>group_by()</code>: one summary per group</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">16.10</span> Exercises</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">16.11</span> Summary</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/dplyr_intro_msleep.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/dplyr_intro_msleep.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./dplyr_intro_msleep.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></a></li></ol></nav><div class="quarto-title">
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./eda_overview.html">Exploratory data analysis</a></li><li class="breadcrumb-item"><a href="./dplyr_intro_msleep.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span></a></li></ol></nav><div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span>
+<span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/seandavi/RBiocBook/blob/main/dplyr_intro_msleep.qmd"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author"><a href="https://seandavi.github.io/">Sean Davis</a> <a href="mailto:seandavi@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://medschool.cuanschutz.edu/">
+            University of Colorado<br>Anschutz School of Medicine
+            </a>
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Stephen Turner (with modifications by Sean Davis) </p>
-          </div>
-  </div>
-    
+      
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
@@ -787,7 +793,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 22, 2026</p>
+      <p class="date-modified">June 23, 2026</p>
     </div>
   </div>
     
@@ -795,17 +801,18 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   
 
 
-</header><p>Almost every analysis you’ll do in biology starts with a table: a sample sheet with one row per sample, a count matrix with one row per gene, a results table with one row per differentially expressed transcript. Over and over you’ll want to do the same handful of things to those tables — keep only the rows that pass a filter, pull out a few columns, sort by a statistic, add a derived column, or collapse many rows into a per-group summary.</p>
-<p>That recurring pattern has a name: <strong>split-apply-combine</strong>. You <em>split</em> a table into groups (say, by treatment condition), <em>apply</em> a calculation to each group (say, the mean expression), and <em>combine</em> the answers back into one tidy table. The <strong>dplyr</strong> package gives you a small, consistent vocabulary of verbs for exactly these moves, and they read almost like English.</p>
-<p>We’ll learn those verbs on a gentle, friendly dataset — the sleep habits of mammals — before you turn them loose on genomics tables. The dataset is small enough to see the whole thing, so you can watch each verb do its job. Every move you make here (filtering rows, selecting columns, summarizing by group) is the same move you’ll later make on a count matrix or a sample sheet.</p>
+</header><p>Open almost any biological analysis and a table is sitting at the center of it. A sample sheet has one row per sample. A count matrix has one row per gene. A differential-expression result has one row per transcript, with columns for the fold change, the p-value, and the adjusted p-value. The data changes from study to study, but the <em>moves</em> you make on those tables hardly change at all: keep the rows that matter, throw away the columns that don’t, sort by some number, compute a derived quantity, and boil many rows down to a handful of summary numbers.</p>
+<p>The <strong>dplyr</strong> package gives each of those moves a name and a function. The functions are small, they each do one job, and they snap together. Once you can do these moves on a table of mammal sleep times, you can do them — unchanged — on a table of gene counts. That is the whole bet of this chapter: learn the moves on something easy to picture, then carry them straight over to data you actually care about.</p>
 <section id="what-youll-learn" class="level2" data-number="16.1"><h2 data-number="16.1" class="anchored" data-anchor-id="what-youll-learn">
 <span class="header-section-number">16.1</span> What you’ll learn</h2>
 <ul>
-<li>Filter rows of a table with <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> and select columns with <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>.</li>
-<li>Re-order rows with <code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code> and add derived columns with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code>.</li>
-<li>Collapse a table to summary statistics with <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code>.</li>
-<li>Use <code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> to compute those summaries <em>per group</em> — the split-apply-combine pattern.</li>
-<li>Chain verbs together with the pipe operator, <code>|&gt;</code>, to read an analysis left to right.</li>
+<li>Keep and drop columns with <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>.</li>
+<li>Keep rows that pass a test with <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code>.</li>
+<li>Sort rows with <code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code>, including largest-first with <code><a href="https://dplyr.tidyverse.org/reference/desc.html">desc()</a></code>.</li>
+<li>Build new columns from old ones with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code>.</li>
+<li>Reduce a column to one number with <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code>.</li>
+<li>Compute those summaries one-per-group with <code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> — the <em>split-apply-combine</em> idea.</li>
+<li>Chain all of these together with the pipe, <code>|&gt;</code>, so an analysis reads top to bottom.</li>
 </ul>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -813,132 +820,49 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Why a sleep dataset for a genomics book?
+<span class="screen-reader-only">Tip</span>Why mammal sleep in a genomics book?
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>msleep</code> is a warm-up, chosen because it is small and the columns are easy to reason about. Keep the <em>biological</em> payoff in view as you go: filtering mammals that sleep more than 16 hours is the same operation as filtering genes with an adjusted p-value below 0.05; selecting the <code>name</code> and <code>sleep_total</code> columns is the same as pulling <code>sample_id</code> and <code>condition</code> out of a sample sheet; and summarizing sleep by taxonomic order is the same as summarizing mean expression by treatment group. Learn the verbs here; reuse them on your own data.</p>
+<p>We’ll practice on <code>msleep</code>, a small table of how long different mammals sleep. It’s a stand-in, picked because it’s tiny enough to see all at once and the columns need no explaining. But hold the genomics version in your head the whole time: filtering to mammals that sleep more than 16 hours is the <em>same operation</em> as filtering to genes with an adjusted p-value below 0.05; pulling out two columns is the same as pulling <code>sample_id</code> and <code>condition</code> from a sample sheet; and averaging sleep within each taxonomic order is the same as averaging expression within each treatment group. Same verbs, bigger stakes.</p>
 </div>
 </div>
-</section><section id="what-is-dplyr" class="level2" data-number="16.2"><h2 data-number="16.2" class="anchored" data-anchor-id="what-is-dplyr">
-<span class="header-section-number">16.2</span> What is dplyr?</h2>
-<p>The <em>dplyr</em> package is a specialized package for working with <code>data.frame</code>s (and the closely related <code>tibble</code>) to transform and summarize tabular data with rows and columns. For another explanation, see the package vignette, <a href="http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html">Introduction to dplyr</a>.</p>
-</section><section id="why-is-dplyr-useful" class="level2" data-number="16.3"><h2 data-number="16.3" class="anchored" data-anchor-id="why-is-dplyr-useful">
-<span class="header-section-number">16.3</span> Why is dplyr useful?</h2>
-<p>dplyr provides a set of functions — commonly called the dplyr “verbs” — that perform the common data manipulations: filtering rows, selecting columns, re-ordering rows, adding new columns, and summarizing data. It also makes the split-apply-combine pattern straightforward through grouping.</p>
-<p>Compared with base R functions, the dplyr verbs are often easier to work with. They are more consistent in their syntax and are designed around data frames rather than individual vectors, which is exactly the shape biological data usually arrives in.</p>
-</section><section id="data-mammals-sleep" class="level2 page-columns page-full" data-number="16.4"><h2 data-number="16.4" class="anchored" data-anchor-id="data-mammals-sleep">
-<span class="header-section-number">16.4</span> Data: mammals sleep</h2>
-<p>The <code>msleep</code> (mammals sleep) dataset is an updated and expanded version of the mammals sleep dataset, with sleep times and weights taken from Savage and West<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. It contains the sleep times and weights for a set of mammals, with 83 rows and 11 variables. It ships as a dataset inside the <em>ggplot2</em> package, so there is nothing to download — you just install ggplot2 once if you don’t already have it.</p>
+</section><section id="a-small-table-to-practice-on" class="level2 page-columns page-full" data-number="16.2"><h2 data-number="16.2" class="anchored" data-anchor-id="a-small-table-to-practice-on">
+<span class="header-section-number">16.2</span> A small table to practice on</h2>
+<p>The <code>msleep</code> dataset records sleep times, brain weights, and body weights for 83 mammals, drawn from a study by Savage and West<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. It ships inside <strong>ggplot2</strong>, so there is nothing to download — install ggplot2 once if you don’t already have it, then load it to make the data available.</p>
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;A quantitative, theoretical framework for understanding mammalian sleep. Van M. Savage, Geoffrey B. West. Proceedings of the National Academy of Sciences Jan 2007, 104 (3) 1051-1056; DOI: <a href="https://doi.org/10.1073/pnas.0610080104">10.1073/pnas.0610080104</a></p></div></div><div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"ggplot2"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Then load the library, which makes <code>msleep</code> available.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">msleep</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>As with many datasets in R, a help page describes the dataset itself.</p>
+<p>A few of the columns will do most of the work for us: <code>name</code> (the common name), <code>order</code> and <code>vore</code> (taxonomic order and feeding type — carnivore, herbivore, omnivore, or insectivore), <code>sleep_total</code> and <code>sleep_rem</code> (hours of total and REM sleep), and <code>bodywt</code> and <code>brainwt</code> (weights in kilograms). The full set of 11 columns is described on the help page:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="op">?</span><span class="va">msleep</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The columns are described on that help page, and are listed here for convenience.</p>
-<table class="table">
-<thead><tr class="header">
-<th>column name</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>name</td>
-<td>common name</td>
-</tr>
-<tr class="even">
-<td>genus</td>
-<td>taxonomic rank</td>
-</tr>
-<tr class="odd">
-<td>vore</td>
-<td>carnivore, omnivore or herbivore?</td>
-</tr>
-<tr class="even">
-<td>order</td>
-<td>taxonomic rank</td>
-</tr>
-<tr class="odd">
-<td>conservation</td>
-<td>the conservation status of the mammal</td>
-</tr>
-<tr class="even">
-<td>sleep_total</td>
-<td>total amount of sleep, in hours</td>
-</tr>
-<tr class="odd">
-<td>sleep_rem</td>
-<td>rem sleep, in hours</td>
-</tr>
-<tr class="even">
-<td>sleep_cycle</td>
-<td>length of sleep cycle, in hours</td>
-</tr>
-<tr class="odd">
-<td>awake</td>
-<td>amount of time spent awake, in hours</td>
-</tr>
-<tr class="even">
-<td>brainwt</td>
-<td>brain weight in kilograms</td>
-</tr>
-<tr class="odd">
-<td>bodywt</td>
-<td>body weight in kilograms</td>
-</tr>
-</tbody>
-</table></section><section id="the-dplyr-verbs" class="level2" data-number="16.5"><h2 data-number="16.5" class="anchored" data-anchor-id="the-dplyr-verbs">
-<span class="header-section-number">16.5</span> The dplyr verbs</h2>
-<p>dplyr has many functions, but the six verbs below do the bulk of everyday work. The rest of this chapter takes them one at a time.</p>
-<table class="table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead><tr class="header">
-<th>dplyr verbs</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code></td>
-<td>select columns</td>
-</tr>
-<tr class="even">
-<td><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code></td>
-<td>filter rows</td>
-</tr>
-<tr class="odd">
-<td><code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code></td>
-<td>re-order or arrange rows</td>
-</tr>
-<tr class="even">
-<td><code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code></td>
-<td>create new columns</td>
-</tr>
-<tr class="odd">
-<td><code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code></td>
-<td>summarise values</td>
-</tr>
-<tr class="even">
-<td><code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code></td>
-<td>allows for group operations in the “split-apply-combine” concept</td>
-</tr>
-</tbody>
-</table>
-<p>Before going further, install dplyr (once) and load it.</p>
+<p>Glancing at the first few rows is a good habit before you touch any table:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"dplyr"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">msleep</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 11
+  name    genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
+  &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;
+1 Cheetah Acin… carni Carn… lc                  12.1      NA        NA      11.9
+2 Owl mo… Aotus omni  Prim… &lt;NA&gt;                17         1.8      NA       7  
+3 Mounta… Aplo… herbi Rode… nt                  14.4       2.4      NA       9.6
+4 Greate… Blar… omni  Sori… lc                  14.9       2.3       0.133   9.1
+5 Cow     Bos   herbi Arti… domesticated         4         0.7       0.667  20  
+6 Three-… Brad… herbi Pilo… &lt;NA&gt;                14.4       2.2       0.767   9.6
+# ℹ 2 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>The verbs we’re about to meet live in dplyr. Install it once, then load it:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"dplyr"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
 Attaching package: 'dplyr'</code></pre>
@@ -954,28 +878,31 @@ Attaching package: 'dplyr'</code></pre>
     intersect, setdiff, setequal, union</code></pre>
 </div>
 </div>
-</section><section id="selecting-columns-with-select" class="level2" data-number="16.6"><h2 data-number="16.6" class="anchored" data-anchor-id="selecting-columns-with-select">
-<span class="header-section-number">16.6</span> Selecting columns with <code>select()</code>
-</h2>
-<p><code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> keeps only the columns you name. Here we keep the <code>name</code> and <code>sleep_total</code> columns — think of pulling just the sample identifier and one measurement out of a wider table.</p>
+</section><section id="select-choose-columns" class="level2" data-number="16.3"><h2 data-number="16.3" class="anchored" data-anchor-id="select-choose-columns">
+<span class="header-section-number">16.3</span> <code>select()</code>: choose columns</h2>
+<p><code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> returns a table with only the columns you ask for, in the order you ask for them. Notice that you write the column names bare — no quotes — as if they were already variables in scope:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sleepData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">name</span>, <span class="va">sleep_total</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">sleepData</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">name</span>, <span class="va">sleep_total</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 2
-  name                       sleep_total
-  &lt;chr&gt;                            &lt;dbl&gt;
-1 Cheetah                           12.1
-2 Owl monkey                        17  
-3 Mountain beaver                   14.4
-4 Greater short-tailed shrew        14.9
-5 Cow                                4  
-6 Three-toed sloth                  14.4</code></pre>
+<pre><code># A tibble: 83 × 2
+   name                       sleep_total
+   &lt;chr&gt;                            &lt;dbl&gt;
+ 1 Cheetah                           12.1
+ 2 Owl monkey                        17  
+ 3 Mountain beaver                   14.4
+ 4 Greater short-tailed shrew        14.9
+ 5 Cow                                4  
+ 6 Three-toed sloth                  14.4
+ 7 Northern fur seal                  8.7
+ 8 Vesper mouse                       7  
+ 9 Dog                               10.1
+10 Roe deer                           3  
+# ℹ 73 more rows</code></pre>
 </div>
 </div>
-<p>To keep all columns <em>except</em> one, put a minus sign in front of it (negative indexing). For example, every column except <code>name</code>:</p>
+<p>A leading minus sign means “everything <em>except</em> this.” To drop the <code>name</code> column and keep the rest:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="op">-</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="op">-</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 10
   genus      vore  order    conservation sleep_total sleep_rem sleep_cycle awake
@@ -989,9 +916,9 @@ Attaching package: 'dplyr'</code></pre>
 # ℹ 2 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>To select a range of columns by name, use the <code>:</code> operator. Notice that dplyr lets you write the column names without quotes, almost as if they were variables:</p>
+<p>A colon picks a contiguous run of columns by name, the same way <code>1:5</code> picks a run of numbers:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">name</span><span class="op">:</span><span class="va">order</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">name</span><span class="op">:</span><span class="va">order</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 4
   name                       genus      vore  order       
@@ -1004,9 +931,9 @@ Attaching package: 'dplyr'</code></pre>
 6 Three-toed sloth           Bradypus   herbi Pilosa      </code></pre>
 </div>
 </div>
-<p>To select every column whose name <em>starts with</em> “sl”, use the helper <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with()</a></code>:</p>
+<p>When column names follow a pattern, dplyr’s selection helpers save typing. To grab every column whose name begins with <code>"sleep"</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"sl"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"sleep"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 3
   sleep_total sleep_rem sleep_cycle
@@ -1019,22 +946,12 @@ Attaching package: 'dplyr'</code></pre>
 6        14.4       2.2       0.767</code></pre>
 </div>
 </div>
-<p>Other helpers let you select columns by other criteria:</p>
-<ol type="1">
-<li>
-<code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with()</a></code> — columns that end with a character string</li>
-<li>
-<code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">contains()</a></code> — columns that contain a character string</li>
-<li>
-<code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">matches()</a></code> — columns that match a regular expression</li>
-<li>
-<code><a href="https://tidyselect.r-lib.org/reference/one_of.html">one_of()</a></code> — columns whose names are in a given group of names</li>
-</ol></section><section id="selecting-rows-with-filter" class="level2" data-number="16.7"><h2 data-number="16.7" class="anchored" data-anchor-id="selecting-rows-with-filter">
-<span class="header-section-number">16.7</span> Selecting rows with <code>filter()</code>
-</h2>
-<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> keeps only the rows that <em>match</em> a condition. For example, keep the mammals that sleep a total of 16 or more hours:</p>
+<p>There are companions to <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with()</a></code> — <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">contains()</a></code> (a literal substring), and <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">matches()</a></code> (a regular expression) — that all select columns by their names. They matter more than they look: a real count matrix might have hundreds of columns, and naming them one at a time is not an option.</p>
+</section><section id="filter-choose-rows" class="level2" data-number="16.4"><h2 data-number="16.4" class="anchored" data-anchor-id="filter-choose-rows">
+<span class="header-section-number">16.4</span> <code>filter()</code>: choose rows</h2>
+<p>Where <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> works on columns, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> works on rows. You give it a logical test, and it keeps the rows where the test is <code>TRUE</code>. Here are the mammals that sleep at least 16 hours a day:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">sleep_total</span> <span class="op">&gt;=</span> <span class="fl">16</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">sleep_total</span> <span class="op">&gt;=</span> <span class="fl">16</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 8 × 11
   name    genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
@@ -1050,9 +967,10 @@ Attaching package: 'dplyr'</code></pre>
 # ℹ 2 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>You can give <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> more than one condition, separated by commas; a row must satisfy <em>all</em> of them. Here we want mammals that sleep at least 16 hours <em>and</em> weigh more than one kilogram:</p>
+<p>The test is an ordinary comparison of the kind you met in the Vectors chapter — <code>sleep_total &gt;= 16</code> is <code>TRUE</code> or <code>FALSE</code> for each row, and <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> keeps the <code>TRUE</code> ones. Any comparison works: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code>, <code>!=</code>.</p>
+<p>List several conditions, separated by commas, and a row must satisfy <em>all</em> of them — the comma acts as “and.” Mammals that both sleep a lot <em>and</em> are not tiny:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">sleep_total</span> <span class="op">&gt;=</span> <span class="fl">16</span>, <span class="va">bodywt</span> <span class="op">&gt;=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">sleep_total</span> <span class="op">&gt;=</span> <span class="fl">16</span>, <span class="va">bodywt</span> <span class="op">&gt;=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 11
   name    genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
@@ -1063,9 +981,9 @@ Attaching package: 'dplyr'</code></pre>
 # ℹ 2 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>You can also match against a set of values with the <code>%in%</code> operator, which returns <code>TRUE</code> for each element of the first vector that appears <em>in</em> the second. Here we keep mammals in either the Perissodactyla or Primates taxonomic order:</p>
+<p>To test membership in a set of allowed values, reach for <code>%in%</code>. It asks, for each row, “is this value one of these?” Here we keep two taxonomic orders at once:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">order</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Perissodactyla"</span>, <span class="st">"Primates"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">order</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Perissodactyla"</span>, <span class="st">"Primates"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 15 × 11
    name   genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
@@ -1088,27 +1006,26 @@ Attaching package: 'dplyr'</code></pre>
 # ℹ 2 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>Any of the comparison operators (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>!=</code>, <code>%in%</code>) can form the logical test. This is exactly how you would later keep only the genes passing a significance cutoff.</p>
-</section><section id="chaining-verbs-with-the-pipe" class="level2" data-number="16.8"><h2 data-number="16.8" class="anchored" data-anchor-id="chaining-verbs-with-the-pipe">
-<span class="header-section-number">16.8</span> Chaining verbs with the pipe, <code>|&gt;</code>
-</h2>
-<p>Real analyses string several of these operations together. The pipe operator, <code>|&gt;</code>, lets you “pipe” the output of one function straight into the first argument of the next. There is nothing magical about it — but it lets you read a chain of operations from left to right, in the order they happen.</p>
+<p>This is exactly the operation behind “keep only the genes that passed significance” or “keep only the samples from these three batches.”</p>
+</section><section id="the-pipe-reading-an-analysis-top-to-bottom" class="level2" data-number="16.5"><h2 data-number="16.5" class="anchored" data-anchor-id="the-pipe-reading-an-analysis-top-to-bottom">
+<span class="header-section-number">16.5</span> The pipe: reading an analysis top to bottom</h2>
+<p>So far each call has stood alone. Real work strings these verbs together, and nesting the calls — <code>head(select(filter(msleep, ...), ...))</code> — gets unreadable fast, because you have to read it inside-out. The <strong>pipe</strong> fixes this. Written <code>|&gt;</code>, it takes whatever is on its left and feeds it as the <em>first argument</em> to the function on its right.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Read the pipe as “and then”
+<span class="screen-reader-only">Tip</span>Read <code>|&gt;</code> as “and then”
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>x |&gt; f() |&gt; g()</code> means: take <code>x</code>, <strong>and then</strong> apply <code>f</code>, <strong>and then</strong> apply <code>g</code>. Without the pipe you’d either save each step in a temporary variable and pass it along, or <em>nest</em> the calls inside out — <code>g(f(x))</code> — which is hard to read once the chain grows. The pipe keeps the steps in the order you think about them.</p>
+<p><code>x |&gt; f() |&gt; g()</code> means: start with <code>x</code>, <strong>and then</strong> apply <code>f</code>, <strong>and then</strong> apply <code>g</code>. The steps appear in the order they actually happen, top to bottom, instead of turned inside-out by nesting. Older code uses <code>%&gt;%</code> from the magrittr package for the same idea; <code>|&gt;</code> is built into R itself, and the two behave the same for everything we do here.</p>
 </div>
 </div>
-<p>Here is an example we have already written the nested way:</p>
+<p>Compare the nested form with the piped form. Nested, read inside-out:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">name</span>, <span class="va">sleep_total</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">msleep</span>, <span class="va">name</span>, <span class="va">sleep_total</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
   name                       sleep_total
@@ -1121,9 +1038,9 @@ Attaching package: 'dplyr'</code></pre>
 6 Three-toed sloth                  14.4</code></pre>
 </div>
 </div>
-<p>With the pipe, you read the same thing top to bottom: take <code>msleep</code>, <strong>and then</strong> select two columns (<code>name</code> and <code>sleep_total</code>), <strong>and then</strong> show the head of the result.</p>
+<p>Piped, read top to bottom — take <code>msleep</code>, <strong>and then</strong> select two columns, <strong>and then</strong> show the head:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1138,13 +1055,12 @@ Attaching package: 'dplyr'</code></pre>
 6 Three-toed sloth                  14.4</code></pre>
 </div>
 </div>
-<p>You’ll see how much this helps once we start combining many verbs. From here on, we’ll use the pipe throughout.</p>
-</section><section id="re-ordering-rows-with-arrange" class="level2" data-number="16.9"><h2 data-number="16.9" class="anchored" data-anchor-id="re-ordering-rows-with-arrange">
-<span class="header-section-number">16.9</span> Re-ordering rows with <code>arrange()</code>
-</h2>
-<p><code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code> sorts the rows by one or more columns. To sort by the taxonomic order, name the column:</p>
+<p>Both produce the same answer. The piped version wins the moment a chain grows past two steps, so we’ll use it from here on.</p>
+</section><section id="arrange-sort-rows" class="level2" data-number="16.6"><h2 data-number="16.6" class="anchored" data-anchor-id="arrange-sort-rows">
+<span class="header-section-number">16.6</span> <code>arrange()</code>: sort rows</h2>
+<p><code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code> reorders the rows by one or more columns, smallest first by default. Sort by taxonomic order:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">order</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">order</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 11
   name    genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
@@ -1158,9 +1074,9 @@ Attaching package: 'dplyr'</code></pre>
 # ℹ 2 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>Now let’s combine verbs: select three columns, sort the rows first by taxonomic order and then by <code>sleep_total</code>, and finally show the head of the result.</p>
+<p>Name more than one column and <code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code> sorts by the first, breaking ties with the second. Here we select three columns, then sort by order and, within each order, by total sleep:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">order</span>, <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">order</span>, <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1176,92 +1092,68 @@ Attaching package: 'dplyr'</code></pre>
 6 Goat     Artiodactyla         5.3</code></pre>
 </div>
 </div>
-<p>The same chain, but instead of showing the head we filter to the mammals that sleep 16 or more hours:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">order</span>, <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">order</span>, <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">sleep_total</span> <span class="op">&gt;=</span> <span class="fl">16</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 8 × 3
-  name                   order           sleep_total
-  &lt;chr&gt;                  &lt;chr&gt;                 &lt;dbl&gt;
-1 Big brown bat          Chiroptera             19.7
-2 Little brown bat       Chiroptera             19.9
-3 Long-nosed armadillo   Cingulata              17.4
-4 Giant armadillo        Cingulata              18.1
-5 North American Opossum Didelphimorphia        18  
-6 Thick-tailed opposum   Didelphimorphia        19.4
-7 Owl monkey             Primates               17  
-8 Arctic ground squirrel Rodentia               16.6</code></pre>
-</div>
-</div>
-<p>To sort a column in <em>descending</em> order, wrap it in <code><a href="https://dplyr.tidyverse.org/reference/desc.html">desc()</a></code>. Here we sort by order ascending, then by <code>sleep_total</code> descending:</p>
+<p>Wrap a column in <code><a href="https://dplyr.tidyverse.org/reference/desc.html">desc()</a></code> to sort it from largest to smallest. The sleepiest mammals within each order, heaviest sleepers first:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">order</span>, <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">order</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">sleep_total</span> <span class="op">&gt;=</span> <span class="fl">16</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 8 × 3
-  name                   order           sleep_total
-  &lt;chr&gt;                  &lt;chr&gt;                 &lt;dbl&gt;
-1 Little brown bat       Chiroptera             19.9
-2 Big brown bat          Chiroptera             19.7
-3 Giant armadillo        Cingulata              18.1
-4 Long-nosed armadillo   Cingulata              17.4
-5 Thick-tailed opposum   Didelphimorphia        19.4
-6 North American Opossum Didelphimorphia        18  
-7 Owl monkey             Primates               17  
-8 Arctic ground squirrel Rodentia               16.6</code></pre>
+<pre><code># A tibble: 6 × 3
+  name     order        sleep_total
+  &lt;chr&gt;    &lt;chr&gt;              &lt;dbl&gt;
+1 Tenrec   Afrosoricida        15.6
+2 Pig      Artiodactyla         9.1
+3 Goat     Artiodactyla         5.3
+4 Cow      Artiodactyla         4  
+5 Sheep    Artiodactyla         3.8
+6 Roe deer Artiodactyla         3  </code></pre>
 </div>
 </div>
-</section><section id="creating-new-columns-with-mutate" class="level2" data-number="16.10"><h2 data-number="16.10" class="anchored" data-anchor-id="creating-new-columns-with-mutate">
-<span class="header-section-number">16.10</span> Creating new columns with <code>mutate()</code>
-</h2>
-<p><code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> adds new columns computed from existing ones. Here we add a column <code>rem_proportion</code>, the ratio of REM sleep to total sleep:</p>
+<p>Sorting a results table by p-value, or a count table by total expression, is this same verb.</p>
+</section><section id="mutate-build-new-columns" class="level2" data-number="16.7"><h2 data-number="16.7" class="anchored" data-anchor-id="mutate-build-new-columns">
+<span class="header-section-number">16.7</span> <code>mutate()</code>: build new columns</h2>
+<p><code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> adds columns computed from the ones already there, leaving the original columns in place. REM sleep as a fraction of total sleep is a natural quantity to derive:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>rem_proportion <span class="op">=</span> <span class="va">sleep_rem</span> <span class="op">/</span> <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>rem_fraction <span class="op">=</span> <span class="va">sleep_rem</span> <span class="op">/</span> <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">sleep_total</span>, <span class="va">sleep_rem</span>, <span class="va">rem_fraction</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 12
-  name    genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
-  &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;
-1 Cheetah Acin… carni Carn… lc                  12.1      NA        NA      11.9
-2 Owl mo… Aotus omni  Prim… &lt;NA&gt;                17         1.8      NA       7  
-3 Mounta… Aplo… herbi Rode… nt                  14.4       2.4      NA       9.6
-4 Greate… Blar… omni  Sori… lc                  14.9       2.3       0.133   9.1
-5 Cow     Bos   herbi Arti… domesticated         4         0.7       0.667  20  
-6 Three-… Brad… herbi Pilo… &lt;NA&gt;                14.4       2.2       0.767   9.6
-# ℹ 3 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;, rem_proportion &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 6 × 4
+  name                       sleep_total sleep_rem rem_fraction
+  &lt;chr&gt;                            &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+1 Cheetah                           12.1      NA         NA    
+2 Owl monkey                        17         1.8        0.106
+3 Mountain beaver                   14.4       2.4        0.167
+4 Greater short-tailed shrew        14.9       2.3        0.154
+5 Cow                                4         0.7        0.175
+6 Three-toed sloth                  14.4       2.2        0.153</code></pre>
 </div>
 </div>
-<p>You can add several columns at once, separated by commas. Here we add <code>rem_proportion</code> and also <code>bodywt_grams</code>, the body weight expressed in grams:</p>
+<p>You can compute several new columns in one call, separated by commas, and a later one may even use a column the same <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> just created. Here we convert body weight to grams and flag the heavyweights:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>rem_proportion <span class="op">=</span> <span class="va">sleep_rem</span> <span class="op">/</span> <span class="va">sleep_total</span>,</span>
-<span>           bodywt_grams <span class="op">=</span> <span class="va">bodywt</span> <span class="op">*</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>bodywt_g <span class="op">=</span> <span class="va">bodywt</span> <span class="op">*</span> <span class="fl">1000</span>,</span>
+<span>           is_large <span class="op">=</span> <span class="va">bodywt_g</span> <span class="op">&gt;</span> <span class="fl">10000</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">bodywt</span>, <span class="va">bodywt_g</span>, <span class="va">is_large</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 13
-  name    genus vore  order conservation sleep_total sleep_rem sleep_cycle awake
-  &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;
-1 Cheetah Acin… carni Carn… lc                  12.1      NA        NA      11.9
-2 Owl mo… Aotus omni  Prim… &lt;NA&gt;                17         1.8      NA       7  
-3 Mounta… Aplo… herbi Rode… nt                  14.4       2.4      NA       9.6
-4 Greate… Blar… omni  Sori… lc                  14.9       2.3       0.133   9.1
-5 Cow     Bos   herbi Arti… domesticated         4         0.7       0.667  20  
-6 Three-… Brad… herbi Pilo… &lt;NA&gt;                14.4       2.2       0.767   9.6
-# ℹ 4 more variables: brainwt &lt;dbl&gt;, bodywt &lt;dbl&gt;, rem_proportion &lt;dbl&gt;,
-#   bodywt_grams &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 6 × 4
+  name                        bodywt bodywt_g is_large
+  &lt;chr&gt;                        &lt;dbl&gt;    &lt;dbl&gt; &lt;lgl&gt;   
+1 Cheetah                     50        50000 TRUE    
+2 Owl monkey                   0.48       480 FALSE   
+3 Mountain beaver              1.35      1350 FALSE   
+4 Greater short-tailed shrew   0.019       19 FALSE   
+5 Cow                        600       600000 TRUE    
+6 Three-toed sloth             3.85      3850 FALSE   </code></pre>
 </div>
 </div>
-<p>Computing a derived column like this is the same move as turning raw counts into counts-per-million, or a fold change into a log fold change.</p>
-</section><section id="summarizing-with-summarise" class="level2" data-number="16.11"><h2 data-number="16.11" class="anchored" data-anchor-id="summarizing-with-summarise">
-<span class="header-section-number">16.11</span> Summarizing with <code>summarise()</code>
-</h2>
-<p><code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> collapses a column down to a single summary statistic. To get the average amount of sleep, apply <code><a href="https://rdrr.io/r/base/mean.html">mean()</a></code> to <code>sleep_total</code> and name the result <code>avg_sleep</code>:</p>
+<p>Turning raw counts into counts-per-million, or a fold change into a log fold change, is <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> doing exactly this job on a bigger table.</p>
+</section><section id="summarise-reduce-a-column-to-one-number" class="level2" data-number="16.8"><h2 data-number="16.8" class="anchored" data-anchor-id="summarise-reduce-a-column-to-one-number">
+<span class="header-section-number">16.8</span> <code>summarise()</code>: reduce a column to one number</h2>
+<p><code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> collapses a whole column down to a single summary value. The mean amount of sleep across all 83 mammals:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>avg_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1272,78 +1164,77 @@ Attaching package: 'dplyr'</code></pre>
 1      10.4</code></pre>
 </div>
 </div>
-<p>Mammals in this dataset sleep about ten and a half hours a day, on average. You can compute several summaries at once. Besides <code><a href="https://rdrr.io/r/base/mean.html">mean()</a></code>, useful summary functions include <code><a href="https://rdrr.io/r/stats/sd.html">sd()</a></code>, <code><a href="https://rdrr.io/r/base/Extremes.html">min()</a></code>, <code><a href="https://rdrr.io/r/base/Extremes.html">max()</a></code>, <code><a href="https://rdrr.io/r/stats/median.html">median()</a></code>, <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/context.html">n()</a></code> (the number of rows), <code><a href="https://dplyr.tidyverse.org/reference/nth.html">first()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/nth.html">last()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/n_distinct.html">n_distinct()</a></code> (the number of distinct values):</p>
+<p>Ask for several summaries at once and you get a one-row table with one column per answer. Alongside <code><a href="https://rdrr.io/r/base/mean.html">mean()</a></code>, the usual reducers — <code><a href="https://rdrr.io/r/base/Extremes.html">min()</a></code>, <code><a href="https://rdrr.io/r/base/Extremes.html">max()</a></code>, <code><a href="https://rdrr.io/r/stats/median.html">median()</a></code>, <code><a href="https://rdrr.io/r/stats/sd.html">sd()</a></code>, <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/context.html">n()</a></code> (which simply counts the rows) — are all fair game:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>avg_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span>,</span>
 <span>              min_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span>,</span>
 <span>              max_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span>,</span>
-<span>              total <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>              n_mammals <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 4
-  avg_sleep min_sleep max_sleep total
-      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;int&gt;
-1      10.4       1.9      19.9    83</code></pre>
+  avg_sleep min_sleep max_sleep n_mammals
+      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;int&gt;
+1      10.4       1.9      19.9        83</code></pre>
 </div>
 </div>
-<p>That single row tells you the average, the extremes, and the sample size all at once.</p>
-</section><section id="grouping-with-group_by" class="level2" data-number="16.12"><h2 data-number="16.12" class="anchored" data-anchor-id="grouping-with-group_by">
-<span class="header-section-number">16.12</span> Grouping with <code>group_by()</code>
-</h2>
-<p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> is what makes <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> powerful. On its own, <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> collapses the whole table to one row. Combined with <code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code>, it gives you one summary row <em>per group</em> — this is split-apply-combine in action.</p>
+<p>That single row reports the average, the extremes, and the sample size together.</p>
+</section><section id="group_by-one-summary-per-group" class="level2" data-number="16.9"><h2 data-number="16.9" class="anchored" data-anchor-id="group_by-one-summary-per-group">
+<span class="header-section-number">16.9</span> <code>group_by()</code>: one summary per group</h2>
+<p><code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> on its own gives one number for the whole table. Pair it with <code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> and you get one number <em>per group</em> instead — and almost every interesting summary is a per-group summary.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Split-apply-combine
+<span class="screen-reader-only">Note</span>Split, apply, combine
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Picture the table sorted into piles, one pile per group (here, one per taxonomic order). dplyr <strong>splits</strong> the data into those piles, <strong>applies</strong> your summary to each pile independently, and <strong>combines</strong> the per-pile answers into one tidy result table. It’s the same idea as base R’s <code><a href="https://rdrr.io/r/stats/aggregate.html">aggregate()</a></code>, but it fits naturally into a dplyr pipe.</p>
+<p><code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> doesn’t change the data; it tags the rows with which group each belongs to. Picture the table sorted into piles, one pile per taxonomic order. The next <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> runs <em>separately</em> on each pile (<strong>apply</strong>) and stacks the per-pile answers back into one tidy table (<strong>combine</strong>). Splitting the data, applying a calculation to each part, and combining the results is such a common shape that it has a name: <strong>split-apply-combine</strong>. Base R does it with <code><a href="https://rdrr.io/r/stats/aggregate.html">aggregate()</a></code> and <code><a href="https://rdrr.io/r/base/tapply.html">tapply()</a></code>; dplyr just makes it read like a sentence.</p>
 </div>
 </div>
-<p>Let’s split <code>msleep</code> by taxonomic order, then ask for the same summary statistics as before. We expect one row of statistics per order:</p>
+<p>Group by taxonomic order, then ask for the same summaries as before. The result has one row per order:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">order</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>avg_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span>,</span>
 <span>              min_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span>,</span>
 <span>              max_sleep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">sleep_total</span><span class="op">)</span>,</span>
-<span>              total <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>              n_mammals <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 19 × 5
-   order           avg_sleep min_sleep max_sleep total
-   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;int&gt;
- 1 Afrosoricida        15.6       15.6      15.6     1
- 2 Artiodactyla         4.52       1.9       9.1     6
- 3 Carnivora           10.1        3.5      15.8    12
- 4 Cetacea              4.5        2.7       5.6     3
- 5 Chiroptera          19.8       19.7      19.9     2
- 6 Cingulata           17.8       17.4      18.1     2
- 7 Didelphimorphia     18.7       18        19.4     2
- 8 Diprotodontia       12.4       11.1      13.7     2
- 9 Erinaceomorpha      10.2       10.1      10.3     2
-10 Hyracoidea           5.67       5.3       6.3     3
-11 Lagomorpha           8.4        8.4       8.4     1
-12 Monotremata          8.6        8.6       8.6     1
-13 Perissodactyla       3.47       2.9       4.4     3
-14 Pilosa              14.4       14.4      14.4     1
-15 Primates            10.5        8        17      12
-16 Proboscidea          3.6        3.3       3.9     2
-17 Rodentia            12.5        7        16.6    22
-18 Scandentia           8.9        8.9       8.9     1
-19 Soricomorpha        11.1        8.4      14.9     5</code></pre>
+   order           avg_sleep min_sleep max_sleep n_mammals
+   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;int&gt;
+ 1 Afrosoricida        15.6       15.6      15.6         1
+ 2 Artiodactyla         4.52       1.9       9.1         6
+ 3 Carnivora           10.1        3.5      15.8        12
+ 4 Cetacea              4.5        2.7       5.6         3
+ 5 Chiroptera          19.8       19.7      19.9         2
+ 6 Cingulata           17.8       17.4      18.1         2
+ 7 Didelphimorphia     18.7       18        19.4         2
+ 8 Diprotodontia       12.4       11.1      13.7         2
+ 9 Erinaceomorpha      10.2       10.1      10.3         2
+10 Hyracoidea           5.67       5.3       6.3         3
+11 Lagomorpha           8.4        8.4       8.4         1
+12 Monotremata          8.6        8.6       8.6         1
+13 Perissodactyla       3.47       2.9       4.4         3
+14 Pilosa              14.4       14.4      14.4         1
+15 Primates            10.5        8        17          12
+16 Proboscidea          3.6        3.3       3.9         2
+17 Rodentia            12.5        7        16.6        22
+18 Scandentia           8.9        8.9       8.9         1
+19 Soricomorpha        11.1        8.4      14.9         5</code></pre>
 </div>
 </div>
-<p>Each row is one taxonomic order, with its average, minimum, and maximum sleep and the number of species. Swap “order” for “treatment condition” and “sleep” for “expression” and you have a standard genomics summary.</p>
-</section><section id="exercises" class="level2" data-number="16.13"><h2 data-number="16.13" class="anchored" data-anchor-id="exercises">
-<span class="header-section-number">16.13</span> Exercises</h2>
-<p>Use the <code>msleep</code> dataset (with ggplot2 and dplyr loaded) for each of these. Try to write the pipe before opening the solution.</p>
+<p>Swap “order” for “treatment condition” and “sleep” for “expression” and you have a standard table from a genomics paper, produced with the same three lines.</p>
+</section><section id="exercises" class="level2" data-number="16.10"><h2 data-number="16.10" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">16.10</span> Exercises</h2>
+<p>For each exercise, with ggplot2 and dplyr loaded, try writing the pipe yourself before opening the solution.</p>
 <ol type="1">
 <li>
-<p><strong>Pick a verb.</strong> You want only the mammals that sleep <em>fewer than</em> 5 hours, showing just their <code>name</code> and <code>sleep_total</code>. Which two verbs do you need, and in what order? Write the pipe.</p>
+<p><strong>The right two verbs.</strong> You want only the mammals that sleep <em>fewer than</em> 5 hours, showing just <code>name</code> and <code>sleep_total</code>. Which two verbs, and in what order?</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1377,13 +1268,13 @@ Attaching package: 'dplyr'</code></pre>
 11 Brazilian tapir          4.4</code></pre>
 </div>
 </div>
-<p>You need <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> to choose the rows and <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> to choose the columns. Either order works here, but filtering first means <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> operates on fewer rows — the habit that scales to large tables.</p>
+<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> chooses the rows; <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> chooses the columns. Either order returns the same answer, but filtering first means <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> has fewer rows to carry — the habit that pays off on large tables.</p>
 </div>
 </div>
 </div>
 </li>
 <li>
-<p><strong>Sleepiest carnivores.</strong> Keep only the carnivores (<code>vore == "carni"</code>), then sort them from most to least total sleep. Show <code>name</code>, <code>vore</code>, and <code>sleep_total</code>.</p>
+<p><strong>Sleepiest carnivores.</strong> Keep only the carnivores (<code>vore == "carni"</code>), then sort them from most to least total sleep, showing <code>name</code>, <code>vore</code>, and <code>sleep_total</code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1426,13 +1317,13 @@ Attaching package: 'dplyr'</code></pre>
 19 Pilot whale                carni         2.7</code></pre>
 </div>
 </div>
-<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> chooses the rows, <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> trims the columns, and <code>arrange(desc(...))</code> sorts largest-first. Reading the pipe top to bottom tells the whole story.</p>
+<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> selects the rows, <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> trims the columns, and <code>arrange(desc(...))</code> sorts largest-first. Reading the pipe top to bottom tells the whole story.</p>
 </div>
 </div>
 </div>
 </li>
 <li>
-<p><strong>A derived column.</strong> Is there a relationship between <code>rem_proportion</code> (REM sleep divided by total sleep) and body weight? Add a <code>rem_proportion</code> column, then sort the table so the mammals with the <em>highest</em> REM proportion come first, and look at their <code>bodywt</code>.</p>
+<p><strong>A derived column.</strong> Add a <code>rem_fraction</code> column (REM sleep divided by total sleep), then sort so the mammals with the <em>highest</em> REM fraction come first, and look at their <code>bodywt</code>. Do the heaviest animals sit at the top?</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1447,29 +1338,29 @@ Attaching package: 'dplyr'</code></pre>
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">msleep</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>rem_proportion <span class="op">=</span> <span class="va">sleep_rem</span> <span class="op">/</span> <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">bodywt</span>, <span class="va">rem_proportion</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">rem_proportion</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>rem_fraction <span class="op">=</span> <span class="va">sleep_rem</span> <span class="op">/</span> <span class="va">sleep_total</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">bodywt</span>, <span class="va">rem_fraction</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">rem_fraction</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 3
-  name                   bodywt rem_proportion
-  &lt;chr&gt;                   &lt;dbl&gt;          &lt;dbl&gt;
-1 European hedgehog       0.77           0.347
-2 Thick-tailed opposum    0.37           0.340
-3 Giant armadillo        60              0.337
-4 Tree shrew              0.104          0.292
-5 Dog                    14              0.287
-6 North American Opossum  1.7            0.272</code></pre>
+  name                   bodywt rem_fraction
+  &lt;chr&gt;                   &lt;dbl&gt;        &lt;dbl&gt;
+1 European hedgehog       0.77         0.347
+2 Thick-tailed opposum    0.37         0.340
+3 Giant armadillo        60            0.337
+4 Tree shrew              0.104        0.292
+5 Dog                    14            0.287
+6 North American Opossum  1.7          0.272</code></pre>
 </div>
 </div>
-<p><code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> builds the new column, then <code>arrange(desc(...))</code> ranks by it. The heaviest mammals are not at the top, hinting that large-bodied animals tend to spend a <em>smaller</em> fraction of their sleep in REM — a pattern worth a proper plot to confirm.</p>
+<p><code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> builds the new column and <code>arrange(desc(...))</code> ranks by it. The heaviest mammals are <em>not</em> at the top, hinting that large-bodied animals spend a smaller fraction of their sleep in REM — a pattern worth a proper plot to confirm.</p>
 </div>
 </div>
 </div>
 </li>
 <li>
-<p><strong>Summarize by group.</strong> For each feeding type (<code>vore</code>), compute the average total sleep and the number of species. Which group sleeps the most on average?</p>
+<p><strong>Summarize by group.</strong> For each feeding type (<code>vore</code>), compute the average total sleep and the number of species. Which feeding type sleeps the most on average?</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1498,30 +1389,30 @@ Attaching package: 'dplyr'</code></pre>
 5 &lt;NA&gt;        10.2      7</code></pre>
 </div>
 </div>
-<p>This is the split-apply-combine pattern: split by <code>vore</code>, apply <code><a href="https://rdrr.io/r/base/mean.html">mean()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/context.html">n()</a></code>, combine into one row per group. The <code>NA</code> row collects mammals whose feeding type is unknown — a reminder to check for missing values in real data.</p>
+<p>Split-apply-combine: split by <code>vore</code>, apply <code><a href="https://rdrr.io/r/base/mean.html">mean()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/context.html">n()</a></code> to each group, combine into one row per group. The <code>NA</code> row gathers mammals whose feeding type is unrecorded — a standing reminder to check for missing values in real data.</p>
 </div>
 </div>
 </div>
 </li>
-</ol></section><section id="summary" class="level2" data-number="16.14"><h2 data-number="16.14" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">16.14</span> Summary</h2>
-<p>You now have the core dplyr toolkit, and every verb maps onto something you’ll do with biological tables:</p>
+</ol></section><section id="summary" class="level2" data-number="16.11"><h2 data-number="16.11" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">16.11</span> Summary</h2>
+<p>You now have the core of dplyr, and every verb maps onto something you’ll do to a biological table:</p>
 <ul>
 <li>
-<code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> keeps the columns you want (e.g.&nbsp;pulling <code>sample_id</code> and <code>condition</code> from a sample sheet).</li>
+<code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> keeps the columns you want (e.g.&nbsp;<code>sample_id</code> and <code>condition</code> from a sample sheet).</li>
 <li>
-<code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> keeps the rows that pass a condition (e.g.&nbsp;genes below a p-value cutoff).</li>
+<code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> keeps the rows that pass a test (e.g.&nbsp;genes below a p-value cutoff).</li>
 <li>
 <code><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange()</a></code> sorts rows, with <code><a href="https://dplyr.tidyverse.org/reference/desc.html">desc()</a></code> for largest-first.</li>
 <li>
 <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> adds derived columns (e.g.&nbsp;log fold changes).</li>
 <li>
-<code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> collapses a column to a summary statistic.</li>
+<code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> reduces a column to a summary statistic.</li>
 <li>
-<code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> turns <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> into per-group summaries — the split-apply-combine pattern at the heart of so many analyses.</li>
-<li>The pipe, <code>|&gt;</code>, chains these verbs so you can read an analysis left to right, as a sequence of “and then” steps.</li>
+<code><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by()</a></code> turns <code><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise()</a></code> into one-summary-per-group — the split-apply-combine pattern at the heart of countless analyses.</li>
+<li>The pipe, <code>|&gt;</code>, threads these verbs so an analysis reads top to bottom as a sequence of “and then” steps.</li>
 </ul>
-<p>Master these six verbs on <code>msleep</code> and you can carry them straight over to count matrices, sample sheets, and results tables.</p>
+<p>Master these six verbs on <code>msleep</code> and they carry over, unchanged, to count matrices, sample sheets, and results tables.</p>
 
 
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">

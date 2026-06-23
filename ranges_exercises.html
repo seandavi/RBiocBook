@@ -500,7 +500,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -744,11 +744,12 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
    
   <ul>
 <li><a href="#what-youll-learn" id="toc-what-youll-learn" class="nav-link active" data-scroll-target="#what-youll-learn"><span class="header-section-number">36.1</span> What you’ll learn</a></li>
-  <li><a href="#exercise-1-explore-a-dnase-peak-set" id="toc-exercise-1-explore-a-dnase-peak-set" class="nav-link" data-scroll-target="#exercise-1-explore-a-dnase-peak-set"><span class="header-section-number">36.2</span> Exercise 1: explore a DNase peak set</a></li>
-  <li><a href="#exercise-2-compare-two-replicates" id="toc-exercise-2-compare-two-replicates" class="nav-link" data-scroll-target="#exercise-2-compare-two-replicates"><span class="header-section-number">36.3</span> Exercise 2: compare two replicates</a></li>
-  <li><a href="#exercise-3-dnase-sites-relative-to-gene-promoters" id="toc-exercise-3-dnase-sites-relative-to-gene-promoters" class="nav-link" data-scroll-target="#exercise-3-dnase-sites-relative-to-gene-promoters"><span class="header-section-number">36.4</span> Exercise 3: DNase sites relative to gene promoters</a></li>
-  <li><a href="#exercise-4-enrichment-of-histone-marks-at-cpg-islands" id="toc-exercise-4-enrichment-of-histone-marks-at-cpg-islands" class="nav-link" data-scroll-target="#exercise-4-enrichment-of-histone-marks-at-cpg-islands"><span class="header-section-number">36.5</span> Exercise 4: enrichment of histone marks at CpG islands</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">36.6</span> Summary</a></li>
+  <li><a href="#exercise-1-build-a-granges-and-take-it-apart" id="toc-exercise-1-build-a-granges-and-take-it-apart" class="nav-link" data-scroll-target="#exercise-1-build-a-granges-and-take-it-apart"><span class="header-section-number">36.2</span> Exercise 1: build a GRanges and take it apart</a></li>
+  <li><a href="#exercise-2-reshape-and-summarize-one-range-set" id="toc-exercise-2-reshape-and-summarize-one-range-set" class="nav-link" data-scroll-target="#exercise-2-reshape-and-summarize-one-range-set"><span class="header-section-number">36.3</span> Exercise 2: reshape and summarize one range set</a></li>
+  <li><a href="#exercise-3-the-chr1-vs-1-overlap-trap" id="toc-exercise-3-the-chr1-vs-1-overlap-trap" class="nav-link" data-scroll-target="#exercise-3-the-chr1-vs-1-overlap-trap"><span class="header-section-number">36.4</span> Exercise 3: the <code>chr1</code>-vs-<code>1</code> overlap trap</a></li>
+  <li><a href="#exercise-4-real-ctcf-peaks-meet-a-gene-model" id="toc-exercise-4-real-ctcf-peaks-meet-a-gene-model" class="nav-link" data-scroll-target="#exercise-4-real-ctcf-peaks-meet-a-gene-model"><span class="header-section-number">36.5</span> Exercise 4: real CTCF peaks meet a gene model</a></li>
+  <li><a href="#exercise-5-which-gene-is-each-peak-closest-to" id="toc-exercise-5-which-gene-is-each-peak-closest-to" class="nav-link" data-scroll-target="#exercise-5-which-gene-is-each-peak-closest-to"><span class="header-section-number">36.6</span> Exercise 5: which gene is each peak closest to?</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">36.7</span> Summary</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/seandavi/RBiocBook/edit/main/ranges_exercises.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/seandavi/RBiocBook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/seandavi/RBiocBook/blob/main/ranges_exercises.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -788,7 +789,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 22, 2026</p>
+      <p class="date-modified">June 23, 2026</p>
     </div>
   </div>
     
@@ -796,22 +797,71 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
   
 
 
-</header><p>The two ranges chapters — <em>Genomic ranges and features</em> and <em>Genomic ranges with real ChIP-seq peaks</em> — walked you through the <code>GenomicRanges</code> toolkit on small hand-built objects and a single real peak set. This chapter is their hands-on companion. Here you’ll point those same tools at <em>real</em> ENCODE data and answer the kinds of questions a genomicist actually asks: How many peaks did this experiment call? How wide are they? Do two replicates agree? Are open-chromatin regions enriched near gene promoters? Is one set of histone marks enriched at CpG islands?</p>
-<p>The data comes from the <a href="https://www.encodeproject.org/">ENCODE project</a> via the <code>AnnotationHub</code> package. ENCODE published these datasets as BED-style files; AnnotationHub has packaged them into ready-to-use <code>GRanges</code> objects, so you can load one with a single line instead of downloading and parsing a file. (If you ever have a peak file of your own — peak calls, enhancer regions, and so on — you can read it into a <code>GRanges</code> the same way the ChIP-seq chapter does, with <code>rtracklayer::import()</code>.)</p>
-<p>Each exercise below is a short prompt. Try it yourself first; then expand the <strong>Solution</strong> box to reveal the code, its output, and a sentence or two on what to notice.</p>
+</header><p>The two ranges chapters — <em>Genomic ranges and features</em> and <em>Genomic ranges with real ChIP-seq peaks</em> — walked you through the <code>GenomicRanges</code> toolkit, first on small hand-built objects and then on a real CTCF peak set. This chapter is their hands-on companion: a set of short problems that ask you to <em>use</em> those tools rather than read about them.</p>
+<p>The exercises come in two halves. The first half (Exercises 1–3) stays entirely on small <code>GRanges</code> you build by hand, so you can run them anywhere with nothing but <code>GenomicRanges</code> loaded — no downloads, no annotation packages. These drill the core mechanics: construction and accessors, the intra- and inter-range operations, and the <code>chr1</code>-vs-<code>1</code> naming trap that quietly breaks overlaps. The second half (Exercises 4–5) turns you loose on the <strong>real</strong> ENCODE CTCF peaks from the ChIP-seq chapter and a human gene model, to answer the kind of question a genomicist actually asks: which peaks sit in a promoter, and which gene is each peak closest to?</p>
+<p>Each exercise is a short prompt. Try it yourself first; then expand the <strong>Solution</strong> box to reveal the code, its output, and a sentence or two on what to notice.</p>
 <section id="what-youll-learn" class="level2" data-number="36.1"><h2 data-number="36.1" class="anchored" data-anchor-id="what-youll-learn">
 <span class="header-section-number">36.1</span> What you’ll learn</h2>
 <ul>
-<li>Query <code>AnnotationHub</code> to find and load a published dataset as a <code>GRanges</code>.</li>
-<li>Inspect a <code>GRanges</code> — its class, its metadata columns, and its per-chromosome peak counts.</li>
-<li>Measure and summarize peak widths, and compute how much of the genome a peak set covers.</li>
-<li>Read and switch the <code>seqlevelsStyle</code> of an object (the <code>chr1</code> vs <code>1</code> naming convention) and recognize the silent bug a mismatch causes.</li>
-<li>Compute overlaps between two range sets with <code>%over%</code>, and reshape ranges with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>.</li>
-<li>Quantify how enriched one set of ranges is inside another with intersect/union.</li>
-</ul></section><section id="exercise-1-explore-a-dnase-peak-set" class="level2" data-number="36.2"><h2 data-number="36.2" class="anchored" data-anchor-id="exercise-1-explore-a-dnase-peak-set">
-<span class="header-section-number">36.2</span> Exercise 1: explore a DNase peak set</h2>
-<p>DNase-seq finds <strong>open chromatin</strong> — stretches of DNA that are accessible to the DNase enzyme, which is where regulatory machinery tends to sit. In this exercise you’ll load one DNase hypersensitivity peak set from the K562 cell line and get to know it as a <code>GRanges</code> object.</p>
-<p><strong>Find and load the peak set.</strong> Use <code>AnnotationHub</code> to find the record <code>goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz</code> and load it into a variable named <code>dnase</code>.</p>
+<li>Build a <code>GRanges</code> from scratch and pull it apart with the coordinate accessors (<code><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames()</a></code>, <code><a href="https://rdrr.io/r/stats/start.html">start()</a></code>, <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code>, <code><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html">strand()</a></code>) and <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>.</li>
+<li>Reshape ranges with the intra-range operations (<code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">shift()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>) and summarize a set with the inter-range operations (<code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">disjoin()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">gaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code>).</li>
+<li>Relate two range sets with <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">findOverlaps()</a></code>, <code>%over%</code>, <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code>.</li>
+<li>Recognize the silent zero-overlap bug a <code>chr1</code>-vs-<code>1</code> <code>seqlevelsStyle</code> mismatch causes, and fix it.</li>
+<li>Apply the whole toolkit to a real ENCODE peak set and a <code>TxDb</code> gene model.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="exercise-1-build-a-granges-and-take-it-apart" class="level2" data-number="36.2"><h2 data-number="36.2" class="anchored" data-anchor-id="exercise-1-build-a-granges-and-take-it-apart">
+<span class="header-section-number">36.2</span> Exercise 1: build a GRanges and take it apart</h2>
+<p>Before analysing anyone else’s data, it pays to be fluent in <em>constructing</em> a <code>GRanges</code> and reading every piece back out. In this exercise you’ll build a small catalogue of imaginary gene features by hand and practice the accessors.</p>
+<p><strong>Build the object.</strong> Construct a <code>GRanges</code> named <code>feat</code> with five ranges on <code>chr1</code>, with these starts and ends, strands, and a <code>gene</code> metadata column:</p>
+<table class="table">
+<thead><tr class="header">
+<th>name</th>
+<th>start</th>
+<th>end</th>
+<th>strand</th>
+<th>gene</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>f1</td>
+<td>100</td>
+<td>250</td>
+<td>+</td>
+<td>AAA</td>
+</tr>
+<tr class="even">
+<td>f2</td>
+<td>300</td>
+<td>470</td>
+<td>+</td>
+<td>BBB</td>
+</tr>
+<tr class="odd">
+<td>f3</td>
+<td>600</td>
+<td>760</td>
+<td>-</td>
+<td>CCC</td>
+</tr>
+<tr class="even">
+<td>f4</td>
+<td>720</td>
+<td>900</td>
+<td>-</td>
+<td>DDD</td>
+</tr>
+<tr class="odd">
+<td>f5</td>
+<td>1000</td>
+<td>1180</td>
+<td>+</td>
+<td>EEE</td>
+</tr>
+</tbody>
+</table>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -825,39 +875,32 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">AnnotationHub</span><span class="op">)</span></span>
-<span><span class="co"># GenomicRanges gives us the GRanges accessors and overlap/resize operators;</span></span>
-<span><span class="co"># GenomeInfoDb provides the seqlevels()/seqlevelsStyle() machinery used below.</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomicRanges">GenomicRanges</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomeInfoDb">GenomeInfoDb</a></span><span class="op">)</span></span>
-<span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">AnnotationHub</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query</a></span><span class="op">(</span><span class="va">ah</span>, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">feat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span></span>
+<span>  seqnames <span class="op">=</span> <span class="st">"chr1"</span>,</span>
+<span>  ranges   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">300</span>, <span class="fl">600</span>, <span class="fl">720</span>, <span class="fl">1000</span><span class="op">)</span>,</span>
+<span>                     end   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">470</span>, <span class="fl">760</span>, <span class="fl">900</span>, <span class="fl">1180</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  strand   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"+"</span>, <span class="st">"+"</span>, <span class="st">"-"</span>, <span class="st">"-"</span>, <span class="st">"+"</span><span class="op">)</span>,</span>
+<span>  gene     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"AAA"</span>, <span class="st">"BBB"</span>, <span class="st">"CCC"</span>, <span class="st">"DDD"</span>, <span class="st">"EEE"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"f1"</span>, <span class="st">"f2"</span>, <span class="st">"f3"</span>, <span class="st">"f4"</span>, <span class="st">"f5"</span><span class="op">)</span></span>
+<span><span class="va">feat</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>AnnotationHub with 1 record
-# snapshotDate(): 2026-04-23
-# names(): AH26801
-# $dataprovider: UCSC
-# $species: Homo sapiens
-# $rdataclass: GRanges
-# $rdatadateadded: 2015-03-11
-# $title: wgEncodeUwDnaseK562PkRep1.narrowPeak.gz
-# $description: narrowPeak file from ENCODE
-# $taxonomyid: 9606
-# $genome: hg19
-# $sourcetype: BED
-# $sourceurl: http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEnc...
-# $sourcesize: 1734368
-# $tags: c("wgEncode", "DnaseSeq", "bam", "K562 cell", "Stam grant") 
-# retrieve record with 'object[["AH26801"]]' </code></pre>
+<pre><code>GRanges object with 5 ranges and 1 metadata column:
+     seqnames    ranges strand |        gene
+        &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+  f1     chr1   100-250      + |         AAA
+  f2     chr1   300-470      + |         BBB
+  f3     chr1   600-760      - |         CCC
+  f4     chr1   720-900      - |         DDD
+  f5     chr1 1000-1180      + |         EEE
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The query above matches exactly one record, so we grab it with [[1]].</span></span>
-<span><span class="va">dnase</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query</a></span><span class="op">(</span><span class="va">ah</span>, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep1.narrowPeak.gz"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The <code><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query()</a></code> call returns a one-row hub listing, and <code>[[1]]</code> downloads that one record and hands you the object itself. AnnotationHub caches the download, so a second <code>[[1]]</code> is instant.</p>
+<p>The <code><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges()</a></code> constructor takes the coordinate pieces by name; any extra named argument (<code>gene</code> here) becomes a metadata column on the right of the <code>|</code>. A single <code>seqnames = "chr1"</code> is recycled to all five ranges.</p>
 </div>
 </div>
 </div>
-<p><strong>What kind of object did you get?</strong> Print it and ask for its class.</p>
+<p><strong>What’s on the left of the <code>|</code>, and what’s on the right?</strong> Pull out the <code>seqnames</code>, the <code>strand</code>, the <code>width</code> of each range, and then the metadata.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -871,50 +914,45 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dnase</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GRanges object with 142986 ranges and 6 metadata columns:
-           seqnames              ranges strand |        name     score
-              &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt; &lt;numeric&gt;
-       [1]     chr1       115601-115750      * |        &lt;NA&gt;         0
-       [2]     chr1       136281-136430      * |        &lt;NA&gt;         0
-       [3]     chr1       138961-139110      * |        &lt;NA&gt;         0
-       [4]     chr1       235041-235190      * |        &lt;NA&gt;         0
-       [5]     chr1       235601-235750      * |        &lt;NA&gt;         0
-       ...      ...                 ...    ... .         ...       ...
-  [142982]     chrX 154739261-154739410      * |        &lt;NA&gt;         0
-  [142983]     chrX 154842581-154842730      * |        &lt;NA&gt;         0
-  [142984]     chrX 154871201-154871350      * |        &lt;NA&gt;         0
-  [142985]     chrX 154892021-154892170      * |        &lt;NA&gt;         0
-  [142986]     chrX 154896481-154896630      * |        &lt;NA&gt;         0
-           signalValue    pValue    qValue      peak
-             &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
-       [1]         121  175.9120        -1        -1
-       [2]          15   15.9719        -1        -1
-       [3]          10    5.5961        -1        -1
-       [4]           7    5.3138        -1        -1
-       [5]          52   60.7856        -1        -1
-       ...         ...       ...       ...       ...
-  [142982]           9   5.59481        -1        -1
-  [142983]          30  25.91170        -1        -1
-  [142984]          13   8.92979        -1        -1
-  [142985]          14   7.12722        -1        -1
-  [142986]          23  16.29100        -1        -1
-  -------
-  seqinfo: 298 sequences (2 circular) from hg19 genome</code></pre>
+<pre><code>factor-Rle of length 5 with 1 run
+  Lengths:    5
+  Values : chr1
+Levels(1): chr1</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html">strand</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "GRanges"
-attr(,"package")
-[1] "GenomicRanges"</code></pre>
+<pre><code>factor-Rle of length 5 with 3 runs
+  Lengths: 2 2 1
+  Values : + - +
+Levels(3): + - *</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span>        <span class="co"># end - start + 1, because GRanges are 1-based and inclusive</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 151 171 161 181 181</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span>        <span class="co"># everything on the right of the |</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 5 rows and 1 column
+          gene
+   &lt;character&gt;
+f1         AAA
+f2         BBB
+f3         CCC
+f4         DDD
+f5         EEE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span><span class="op">$</span><span class="va">gene</span>   <span class="co"># one metadata column</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AAA" "BBB" "CCC" "DDD" "EEE"</code></pre>
 </div>
 </div>
-<p>It’s a <code>GRanges</code> — the same class you built by hand in the ranges chapter, only this one was pulled from a public archive. Printing it shows the seqnames, ranges, strand, and a block of metadata columns.</p>
+<p>The coordinate parts each have their own accessor; everything you attached lives in <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>. Note <code>width(feat)[1]</code> is 151, not 150 — both endpoints count.</p>
 </div>
 </div>
 </div>
-<p><strong>What metadata is attached?</strong> The per-range metadata lives in the <code>mcols</code>.</p>
+<p><strong>Subset two ways.</strong> Keep only the genes on the <code>+</code> strand, and — separately — keep only the ranges wider than 160 bp.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -928,24 +966,38 @@ attr(,"package")
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">feat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html">strand</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span> <span class="op">==</span> <span class="st">"+"</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>DataFrame with 6 rows and 6 columns
-         name     score signalValue    pValue    qValue      peak
-  &lt;character&gt; &lt;numeric&gt;   &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
-1          NA         0         121  175.9120        -1        -1
-2          NA         0          15   15.9719        -1        -1
-3          NA         0          10    5.5961        -1        -1
-4          NA         0           7    5.3138        -1        -1
-5          NA         0          52   60.7856        -1        -1
-6          NA         0          21   18.9209        -1        -1</code></pre>
+<pre><code>GRanges object with 3 ranges and 1 metadata column:
+     seqnames    ranges strand |        gene
+        &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+  f1     chr1   100-250      + |         AAA
+  f2     chr1   300-470      + |         BBB
+  f5     chr1 1000-1180      + |         EEE
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">feat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">160</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 4 ranges and 1 metadata column:
+     seqnames    ranges strand |        gene
+        &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+  f2     chr1   300-470      + |         BBB
+  f3     chr1   600-760      - |         CCC
+  f4     chr1   720-900      - |         DDD
+  f5     chr1 1000-1180      + |         EEE
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>These columns are the extra fields from the original narrowPeak file — things like the signal value and score for each peak. They ride along with every range so you never lose the link between a location and its data.</p>
+<p>A <code>GRanges</code> subsets like a vector: any logical vector the same length as the object selects ranges. Here <code>strand(feat) == "+"</code> and <code>width(feat) &gt; 160</code> are each such a vector.</p>
 </div>
 </div>
 </div>
-<p><strong>How many peaks are on each chromosome?</strong> <code><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames()</a></code> returns the chromosome of every peak; <code><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html">table()</a></code> tallies them.</p>
+</section><section id="exercise-2-reshape-and-summarize-one-range-set" class="level2" data-number="36.3"><h2 data-number="36.3" class="anchored" data-anchor-id="exercise-2-reshape-and-summarize-one-range-set">
+<span class="header-section-number">36.3</span> Exercise 2: reshape and summarize one range set</h2>
+<p>This exercise stays with <code>feat</code> and works through the single-set operations: the <em>intra-range</em> ones that reshape each range on its own, and the <em>inter-range</em> ones that look at the whole set together.</p>
+<p><strong>Promoters with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>.</strong> Grab the 100 bp immediately <em>upstream</em> of each feature. Then look carefully at <code>f3</code>/<code>f4</code> (the <code>-</code>-strand genes) and explain where their flanks landed.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -959,21 +1011,26 @@ attr(,"package")
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Show the busiest 25 chromosomes; the full list includes many empty contigs.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqnames</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">25</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">proms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank</a></span><span class="op">(</span><span class="va">feat</span>, <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">proms</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>
- chr1  chr2  chr6  chr3  chr7 chr11 chr12  chr5 chr17 chr10 chr19  chr4  chr8 
-16557 10734 10440  8586  8329  7730  7344  7006  6731  6517  6186  6046  5757 
- chr9 chr16 chr15 chr14 chr20  chrX chr22 chr18 chr13 chr21  chrY  chrM 
- 5431  4981  4501  3607  3534  3405  2915  2531  2297  1821     0     0 </code></pre>
+<pre><code>GRanges object with 5 ranges and 1 metadata column:
+     seqnames    ranges strand |        gene
+        &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+  f1     chr1      0-99      + |         AAA
+  f2     chr1   200-299      + |         BBB
+  f3     chr1   761-860      - |         CCC
+  f4     chr1  901-1000      - |         DDD
+  f5     chr1   900-999      + |         EEE
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>Each count is the number of DNase peaks called on that chromosome. Bigger chromosomes generally carry more peaks, but accessibility varies by chromosome too.</p>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> is strand-aware. For the <code>+</code> genes the upstream flank sits at <em>lower</em> coordinates (just before the start); for the <code>-</code> genes <code>f3</code> and <code>f4</code>, “upstream” runs the other way, so their flanks sit at <em>higher</em> coordinates, just past their ends. Every flank is 100 bp wide — only the side changes.</p>
 </div>
 </div>
 </div>
-<p><strong>How wide are the peaks?</strong> Summarize the <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code> of every range.</p>
+<p><strong>Standardize the widths with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>.</strong> Make every feature a 200 bp window centered on its midpoint, and confirm the widths.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -987,17 +1044,21 @@ attr(,"package")
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">win</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize</a></span><span class="op">(</span><span class="va">feat</span>, width <span class="op">=</span> <span class="fl">200</span>, fix <span class="op">=</span> <span class="st">"center"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">win</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  150.0   150.0   150.0   150.2   150.0   430.0 </code></pre>
+<pre><code>[1] 200 200 200 200 200</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">win</span><span class="op">)</span> <span class="op">==</span> <span class="fl">200</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
-<p>The summary gives you the min, median, mean, and max peak width in base pairs. A tight distribution around a couple hundred bp is typical for a DNase peak caller.</p>
+<p><code>fix = "center"</code> holds each range’s midpoint still and grows or shrinks it to the requested width — the standard way to build comparable fixed-width windows.</p>
 </div>
 </div>
 </div>
-<p><strong>What sequence names were used — <code>chr1</code> or just <code>1</code>?</strong> Look at the <code>seqlevels</code> and the <code>seqlevelsStyle</code>, then switch the style to Ensembl and look again.</p>
+<p><strong>Collapse overlaps with <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>.</strong> Features <code>f3</code> (600–760) and <code>f4</code> (720–900) overlap. Merge any overlapping or touching ranges into a non-redundant set, then report how many ranges survive. (Try it once with the strands as-is, and once with <code>ignore.strand = TRUE</code>, and explain the difference.)</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1011,49 +1072,75 @@ attr(,"package")
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlevels</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span>, <span class="fl">25</span><span class="op">)</span>   <span class="co"># first 25 of many contigs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] "chr1"  "chr2"  "chr3"  "chr4"  "chr5"  "chr6"  "chr7"  "chr8"  "chr9" 
-[10] "chr10" "chr11" "chr12" "chr13" "chr14" "chr15" "chr16" "chr17" "chr18"
-[19] "chr19" "chr20" "chr21" "chr22" "chrX"  "chrY"  "chrM" </code></pre>
+<pre><code>GRanges object with 4 ranges and 0 metadata columns:
+      seqnames    ranges strand
+         &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+  [1]     chr1   100-250      +
+  [2]     chr1   300-470      +
+  [3]     chr1 1000-1180      +
+  [4]     chr1   600-900      -
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlevels</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span>     <span class="co"># how many sequence names in all</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 298</code></pre>
+<pre><code>[1] 4</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">feat</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "UCSC"</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"ensembl"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "UCSC"</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlevels</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span>, <span class="fl">25</span><span class="op">)</span>   <span class="co"># same chromosomes, now in Ensembl style</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10" "11" "12" "13" "14" "15"
-[16] "16" "17" "18" "19" "20" "21" "22" "X"  "Y"  "MT"</code></pre>
+<pre><code>GRanges object with 4 ranges and 0 metadata columns:
+      seqnames    ranges strand
+         &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+  [1]     chr1   100-250      *
+  [2]     chr1   300-470      *
+  [3]     chr1   600-900      *
+  [4]     chr1 1000-1180      *
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>The object started in <strong>UCSC</strong> style (<code>chr1</code>, <code>chr2</code>, …). Assigning a new <code>seqlevelsStyle</code> rewrites every sequence name in place — after the switch the same chromosomes are now named <code>1</code>, <code>2</code>, … in <strong>Ensembl</strong> style. Nothing about the ranges changed, only the labels.</p>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code> merges by chromosome <em>and strand</em> by default, so <code>f3</code> and <code>f4</code> — both on <code>-</code> — collapse into one range, leaving four. Because none of the ranges sit on opposite strands in the same place, <code>ignore.strand = TRUE</code> gives the same merge here, but in general it would also fuse ranges that overlap across strands.</p>
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
+<p><strong>Per-base coverage.</strong> Compute the <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> of <code>feat</code> and find the single highest depth anywhere on <code>chr1</code>. Where does it occur, and why?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>The <code>chr</code> gotcha that silently returns zero overlaps
+<span class="screen-reader-only">Note</span>Solution
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p><code>seqlevelsStyle</code> matters the moment you compare two objects. Overlap operations match on the <em>exact</em> sequence name, so a peak on <code>chr1</code> will <strong>never</strong> overlap a region on <code>1</code> — R reports zero overlaps and raises no error. If an overlap count comes back suspiciously at zero, the first thing to check is whether both objects share the same <code>seqlevelsStyle</code>. We switched to Ensembl here to practice; in Exercise 3 we’ll switch back before comparing against UCSC-style gene models.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage</a></span><span class="op">(</span><span class="va">feat</span><span class="op">)</span></span>
+<span><span class="va">cov</span>                       <span class="co"># an RleList, one element per chromosome</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RleList of length 1
+$chr1
+integer-Rle of length 1180 with 10 runs
+  Lengths:  99 151  49 171 129 120  41 140  99 181
+  Values :   0   1   0   1   0   1   2   1   0   1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">cov</span><span class="op">$</span><span class="va">chr1</span><span class="op">)</span>             <span class="co"># the tallest pile-up</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2</code></pre>
 </div>
 </div>
-<p><strong>How much of the genome do the peaks cover?</strong> Assuming the peaks don’t overlap, sum their widths and divide by the total genome length.</p>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> counts, base by base, how many ranges cover each position. The maximum is 2, in the 720–760 stretch where <code>f3</code> and <code>f4</code> overlap; everywhere else at most one feature is present, so the depth is 1 (or 0 in the gaps).</p>
+</div>
+</div>
+</div>
+</section><section id="exercise-3-the-chr1-vs-1-overlap-trap" class="level2" data-number="36.4"><h2 data-number="36.4" class="anchored" data-anchor-id="exercise-3-the-chr1-vs-1-overlap-trap">
+<span class="header-section-number">36.4</span> Exercise 3: the <code>chr1</code>-vs-<code>1</code> overlap trap</h2>
+<p>Overlap operations match on the <em>exact</em> sequence name, so a range on <code>chr1</code> will never overlap a range on <code>1</code> — and R reports zero overlaps with no error or warning. This exercise reproduces that silent bug deliberately on two tiny hand-built objects, then fixes it, so you recognize it when it bites you for real.</p>
+<p><strong>Build two overlapping sets in different naming styles.</strong> Build <code>ucsc</code> with two ranges on <code>"chr1"</code>, and <code>ens</code> with two ranges on <code>"1"</code> that clearly overlap them by coordinate.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1067,27 +1154,43 @@ attr(,"package")
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/GenomeInfoDb">GenomeInfoDb</a></span><span class="op">)</span></span>
+<span><span class="va">ucsc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">500</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">700</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ens</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span><span class="st">"1"</span>,    <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">650</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">400</span>, <span class="fl">800</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ucsc</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 21472260</code></pre>
+<pre><code>GRanges object with 2 ranges and 0 metadata columns:
+      seqnames    ranges strand
+         &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+  [1]     chr1   100-300      *
+  [2]     chr1   500-700      *
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ens</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3234851260</code></pre>
+<pre><code>GRanges object with 2 ranges and 0 metadata columns:
+      seqnames    ranges strand
+         &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+  [1]        1   250-400      *
+  [2]        1   650-800      *
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">ucsc</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.006637789</code></pre>
+<pre><code>[1] "UCSC"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">ens</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "NCBI"    "Ensembl" "MSU6"    "AGPvF"  </code></pre>
 </div>
 </div>
-<p>The first number is the total base pairs of open chromatin called; the second is the size of the genome. Their ratio — a small fraction of a percent — tells you that accessible chromatin is a tiny slice of the whole genome, which is exactly why these regions are interesting.</p>
+<p>By coordinate, <code>ucsc</code> range 1 (100–300) overlaps <code>ens</code> range 1 (250–400), and <code>ucsc</code> range 2 (500–700) overlaps <code>ens</code> range 2 (650–800). But the two objects use different naming conventions: <code>ucsc</code> is <strong>UCSC</strong> style (<code>chr1</code>) and <code>ens</code> is <strong>Ensembl</strong> style (<code>1</code>).</p>
 </div>
 </div>
 </div>
-</section><section id="exercise-2-compare-two-replicates" class="level2" data-number="36.3"><h2 data-number="36.3" class="anchored" data-anchor-id="exercise-2-compare-two-replicates">
-<span class="header-section-number">36.3</span> Exercise 2: compare two replicates</h2>
-<p>A good experiment is reproducible. ENCODE ran the DNase assay twice on K562, so we have a second replicate. In this exercise you’ll load it and ask how well the two replicates agree.</p>
-<p><strong>Load the second replicate</strong> (<code>...wgEncodeUwDnaseK562PkRep2.narrowPeak.gz</code>) as <code>dnase2</code>.</p>
+<p><strong>Count the overlaps. What do you get, and is it right?</strong></p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1101,32 +1204,28 @@ attr(,"package")
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query</a></span><span class="op">(</span><span class="va">ah</span>, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">ucsc</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">ens</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .merge_two_Seqinfo_objects(x, y): The 2 combined objects have no sequence levels in common. (Use
+  suppressWarnings() to suppress this warning.)</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>AnnotationHub with 1 record
-# snapshotDate(): 2026-04-23
-# names(): AH26802
-# $dataprovider: UCSC
-# $species: Homo sapiens
-# $rdataclass: GRanges
-# $rdatadateadded: 2015-03-11
-# $title: wgEncodeUwDnaseK562PkRep2.narrowPeak.gz
-# $description: narrowPeak file from ENCODE
-# $taxonomyid: 9606
-# $genome: hg19
-# $sourcetype: BED
-# $sourceurl: http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEnc...
-# $sourcesize: 1715821
-# $tags: c("wgEncode", "DnaseSeq", "bai", "K562 cell", "Stam grant") 
-# retrieve record with 'object[["AH26802"]]' </code></pre>
+<pre><code>[1] 0</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Again, a single matching record — grab it with [[1]].</span></span>
-<span><span class="va">dnase2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query</a></span><span class="op">(</span><span class="va">ah</span>, <span class="st">"goldenpath/hg19/encodeDCC/wgEncodeUwDnase/wgEncodeUwDnaseK562PkRep2.narrowPeak.gz"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps</a></span><span class="op">(</span><span class="va">ucsc</span>, <span class="va">ens</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .merge_two_Seqinfo_objects(x, y): The 2 combined objects have no sequence levels in common. (Use
+  suppressWarnings() to suppress this warning.)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0 0</code></pre>
+</div>
+</div>
+<p>Zero — even though we built the ranges to overlap. Nothing errors; the names <code>chr1</code> and <code>1</code> simply never match, so every overlap test fails silently. This is the trap: an overlap count of 0 that <em>should</em> be positive almost always means a <code>seqlevelsStyle</code> mismatch, not a biological result.</p>
 </div>
 </div>
 </div>
-</div>
-<p><strong>How many peaks are in each replicate?</strong> Compare the lengths.</p>
+<p><strong>Fix it and re-count.</strong> Put both objects in the same naming style, then count again.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1140,44 +1239,57 @@ attr(,"package")
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">ens</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span>   <span class="co"># rewrite "1" -&gt; "chr1" in place</span></span>
+<span><span class="va">ens</span>                             <span class="co"># same ranges, new sequence names</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 142986</code></pre>
+<pre><code>GRanges object with 2 ranges and 0 metadata columns:
+      seqnames    ranges strand
+         &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt;
+  [1]     chr1   250-400      *
+  [2]     chr1   650-800      *
+  -------
+  seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">dnase2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">ucsc</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">ens</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 142811</code></pre>
+<pre><code>[1] 2</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps</a></span><span class="op">(</span><span class="va">ucsc</span>, <span class="va">ens</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1 1</code></pre>
 </div>
 </div>
-<p>The two replicates call a broadly similar number of peaks. A wildly different count between replicates would be a red flag that something went wrong in one of the experiments.</p>
+<p>Assigning a new <code>seqlevelsStyle</code> rewrites every sequence name without touching the coordinates. Once both objects are UCSC style the names match, and the overlap count is the 2 we expected all along.</p>
 </div>
 </div>
 </div>
-<p><strong>How wide are the <code>dnase2</code> peaks?</strong></p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
+<span class="screen-reader-only">Warning</span>Check <code>seqlevelsStyle</code> before every cross-object operation
 </div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
+<p>Whenever two <code>GRanges</code> come from different sources — one from UCSC, one from Ensembl, one from a peak caller, one from an annotation package — confirm they share a <code>seqlevelsStyle</code> before you compare them. The mismatch produces no error, just wrong (usually zero) answers. <code>seqlevelsStyle(x) &lt;- "UCSC"</code> (or <code>"Ensembl"</code>) harmonizes them.</p>
+</div>
+</div>
+</section><section id="exercise-4-real-ctcf-peaks-meet-a-gene-model" class="level2" data-number="36.5"><h2 data-number="36.5" class="anchored" data-anchor-id="exercise-4-real-ctcf-peaks-meet-a-gene-model">
+<span class="header-section-number">36.5</span> Exercise 4: real CTCF peaks meet a gene model</h2>
+<p>Now we leave the hand-built toys behind. In the ChIP-seq chapter you imported a real set of ENCODE CTCF peaks; here you’ll load the same file and ask how those peaks relate to human genes. CTCF often binds near gene boundaries, so promoters are a natural place to look.</p>
+<p>The peak file is the one the book keeps in its repository (ENCODE accession <code>ENCFF960ZGP</code>), read straight from its URL. The gene model is the hg38 UCSC knownGene <code>TxDb</code>, which is already declared as a dependency of the book.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  150.0   150.0   150.0   150.2   150.0   410.0 </code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">bed_url</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/seandavi/RBiocBook/main/data/ctcf_peaks_ENCFF960ZGP.bed.gz"</span></span>
+<span><span class="va">ctcf</span> <span class="op">&lt;-</span> <span class="fu">import</span><span class="op">(</span><span class="va">bed_url</span>, format <span class="op">=</span> <span class="st">"narrowPeak"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="va">TxDb.Hsapiens.UCSC.hg38.knownGene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<p>The width distribution looks much like the first replicate’s — another reassuring sign of reproducibility.</p>
-</div>
-</div>
-</div>
-<p><strong>What proportion of the genome does <code>dnase2</code> cover?</strong> Same calculation as before.</p>
+<p><strong>Sanity-check the naming styles before you compare anything.</strong> This is the lesson of Exercise 3, applied for real: confirm the peaks and the <code>TxDb</code> use the same <code>seqlevelsStyle</code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1191,16 +1303,20 @@ attr(,"package")
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase2</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths</a></span><span class="op">(</span><span class="va">dnase2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">ctcf</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.006631294</code></pre>
+<pre><code>[1] "UCSC"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "UCSC"</code></pre>
 </div>
 </div>
-<p>A comparable coverage fraction to replicate 1, as you’d hope for two runs of the same assay.</p>
+<p>Both are <strong>UCSC</strong> style (<code>chr1</code>, <code>chr2</code>, …) — the peak file came from ENCODE in UCSC naming and the <code>TxDb</code> was built on the UCSC genome — so overlaps between them are safe. If either had come back <code>"Ensembl"</code>, you would harmonize first.</p>
 </div>
 </div>
 </div>
-<p><strong>How many <code>dnase</code> peaks overlap a <code>dnase2</code> peak?</strong> The <code>%over%</code> operator returns a logical vector — <code>TRUE</code> for each <code>dnase</code> peak that hits at least one <code>dnase2</code> peak — so summing it counts the overlapping peaks.</p>
+<p><strong>Build a clean set of promoter regions.</strong> Pull the transcripts from the <code>TxDb</code>, take a 2 kb promoter window around each transcription start site with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code>, then collapse the overlapping windows into a non-redundant set with <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>. How many promoter regions remain?</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1214,16 +1330,64 @@ attr(,"package")
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">dnase</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">dnase2</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tx</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">transcripts</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span>
+<span><span class="va">proms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters</a></span><span class="op">(</span><span class="va">tx</span>, upstream <span class="op">=</span> <span class="fl">2000</span>, downstream <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in valid.GenomicRanges.seqinfo(x, suggest.trim = TRUE): GRanges object contains 330 out-of-bound ranges located on sequences
+  chr1_GL383518v1_alt, chr1_KI270762v1_alt, chr2_GL383522v1_alt,
+  chr2_KI270774v1_alt, chr3_KI270777v1_alt, chr3_KI270781v1_alt,
+  chr4_GL000257v2_alt, chr4_KI270788v1_alt, chr5_GL339449v2_alt,
+  chr5_KI270795v1_alt, chr5_KI270898v1_alt, chr6_GL000250v2_alt,
+  chr6_GL000254v2_alt, chr6_KI270797v1_alt, chr6_KI270798v1_alt,
+  chr6_KI270801v1_alt, chr7_GL383534v2_alt, chr7_KI270803v1_alt,
+  chr7_KI270806v1_alt, chr7_KI270809v1_alt, chr8_KI270815v1_alt,
+  chr9_GL383540v1_alt, chr9_GL383541v1_alt, chr9_GL383542v1_alt,
+  chr9_KI270823v1_alt, chr10_GL383546v1_alt, chr11_KI270831v1_alt,
+  chr11_KI270902v1_alt, chr12_GL383551v1_alt, chr12_GL383553v2_alt,
+  chr12_KI270834v1_alt, chr13_KI270838v1_alt, chr14_KI270847v1_alt,
+  chr15_KI270848v1_alt, chr15_KI270850v1_alt, chr15_KI270851v1_alt,
+  chr15_KI270906v1_alt, chr16_GL383556v1_alt, chr16_GL383557v1_alt,
+  chr16_KI270854v1_alt, chr17_JH159146v1_alt, chr17_JH159147v1_alt,
+  chr17_KI270857v1_alt, chr17_KI270860v1_alt, chr17_KI270910v1_alt,
+  chr19_GL383575v2_alt, chr19_GL383576v1_alt, chr19_KI270866v1_alt,
+  chr19_KI270868v1_alt, chr19_KI270884v1_alt, chr19_KI270885v1_alt,
+  chr19_KI270889v1_alt, chr19_KI270890v1_alt, chr19_KI270891v1_alt,
+  chr19_KI270915v1_alt, chr19_KI270916v1_alt, chr19_KI270919v1_alt,
+  chr19_KI270922v1_alt, chr19_KI270923v1_alt, chr19_KI270929v1_alt,
+  chr19_KI270930v1_alt, chr19_KI270931v1_alt, chr19_KI270932v1_alt,
+  chr19_KI270933v1_alt, chr20_KI270869v1_alt, chr21_GL383581v2_alt,
+  chr21_KI270872v1_alt, chr22_KB663609v1_alt, chr22_KI270876v1_alt,
+  chr22_KI270879v1_alt, chrX_KI270880v1_alt, chr1_KI270706v1_random,
+  chr3_GL000221v1_random, chr4_GL000008v2_random, chr14_KI270726v1_random,
+  chr16_KI270728v1_random, chr22_KI270731v1_random, chrUn_KI270748v1,
+  chrUn_KI270750v1, chr4_ML143349v1_fix, chr5_KV575244v1_fix,
+  chr7_KZ208912v1_fix, chr10_MU273367v1_fix, chr11_KZ559108v1_fix,
+  chr11_MU273371v1_fix, chr15_ML143370v1_fix, chr16_ML143373v1_fix,
+  chr17_KV575245v1_fix, chr17_KV766196v1_fix, chr17_MU273381v1_fix,
+  chr17_MU273383v1_fix, chr19_MU273384v1_fix, chr20_MU273389v1_fix,
+  chrY_MU273398v1_fix, chr1_KQ458384v1_alt, chr2_KQ983256v1_alt,
+  chr4_KV766193v1_alt, chr17_KV766198v1_alt, chr19_KV575259v1_alt, and
+  chr19_MU273387v1_alt. Note that ranges located on a sequence whose length is
+  unknown (NA) or on a circular sequence are not considered out-of-bound (use
+  seqlengths() and isCircular() to get the lengths and circularity flags of the
+  underlying sequences). You can use trim() to trim these ranges. See
+  ?`trim,GenomicRanges-method` for more information.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">prom_regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">proms</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">proms</span><span class="op">)</span>          <span class="co"># one window per transcript (many overlap)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0</code></pre>
+<pre><code>[1] 412044</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">prom_regions</span><span class="op">)</span>   <span class="co"># non-redundant promoter regions after reduce()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 130668</code></pre>
 </div>
 </div>
-<p>A high overlap count is the quantitative version of “the replicates agree”: the same regions of open chromatin show up both times. This is the kind of number you would report when arguing that a peak set is trustworthy.</p>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code> builds a strand-aware window around each transcript’s start. Because many transcripts share a start neighbourhood, those windows overlap heavily; <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code> merges each overlapping cluster into one region so nothing is double-counted downstream.</p>
 </div>
 </div>
 </div>
-<p><strong>Expand every peak by 50 bp on each end.</strong> Suppose your peak caller was too strict and you want peaks 100 bp wider. Use <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code> with <code>fix="center"</code> so the expansion is symmetric, and call the result <code>dnase_wide</code>.</p>
+<p><strong>How many CTCF peaks fall in a promoter region?</strong> Use <code>%over%</code> for the count, and <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code> to pull out the peaks themselves.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1237,28 +1401,21 @@ attr(,"package")
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span></span>
-<span><span class="va">dnase_wide</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize</a></span><span class="op">(</span><span class="va">dnase</span>, width <span class="op">=</span> <span class="va">w</span> <span class="op">+</span> <span class="fl">100</span>, fix <span class="op">=</span> <span class="st">"center"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase_wide</span><span class="op">)</span><span class="op">)</span>             <span class="co"># first few widened peaks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">ctcf</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">prom_regions</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 250 250 250 250 250 250</code></pre>
+<pre><code>[1] 12421</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">dnase_wide</span><span class="op">)</span> <span class="op">==</span> <span class="va">w</span> <span class="op">+</span> <span class="fl">100</span><span class="op">)</span>   <span class="co"># every peak is exactly 100 bp wider</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">prom_peaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps</a></span><span class="op">(</span><span class="va">ctcf</span>, <span class="va">prom_regions</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">prom_peaks</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] TRUE</code></pre>
+<pre><code>[1] 12421</code></pre>
 </div>
 </div>
-<p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code> sets each range to a new width; <code>fix="center"</code> keeps the midpoint fixed so the peak grows 50 bp in each direction. The <code>all(...)</code> check confirms every peak ended up exactly 100 bp larger.</p>
+<p><code>%over%</code> returns a logical vector — <code>TRUE</code> for each peak that hits at least one promoter region — so <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code> counts them. <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code> returns those same peaks as a <code>GRanges</code>, ready for further work.</p>
 </div>
 </div>
 </div>
-</section><section id="exercise-3-dnase-sites-relative-to-gene-promoters" class="level2" data-number="36.4"><h2 data-number="36.4" class="anchored" data-anchor-id="exercise-3-dnase-sites-relative-to-gene-promoters">
-<span class="header-section-number">36.4</span> Exercise 3: DNase sites relative to gene promoters</h2>
-<p>Open chromatin should cluster near where genes are regulated — especially at <strong>promoters</strong>, the regions just upstream of a gene’s start. In this exercise you’ll build promoter regions from a gene model and ask whether the DNase sites land there more than chance would predict.</p>
-<p>You’ll need the <code>TxDb.Hsapiens.UCSC.hg19.knownGene</code> transcript database. If it isn’t already installed, install it once (this is a one-time setup step, not part of the analysis):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># one-time setup, not part of the analysis</span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html">install</a></span><span class="op">(</span><span class="st">"TxDb.Hsapiens.UCSC.hg19.knownGene"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Load the genes from the TxDb.</strong> Attach the package, grab the <code>TxDb</code> object, and pull out the genes. What class is the result, and how many genes are there?</p>
+<p><strong>Is that overlap more than chance?</strong> If CTCF peaks were scattered over the genome <em>independently</em> of promoters, how many would you expect to land in a promoter by chance? Compare that expectation to what you observed.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1272,25 +1429,27 @@ attr(,"package")
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st">"TxDb.Hsapiens.UCSC.hg19.knownGene"</span><span class="op">)</span></span>
-<span><span class="va">kg</span> <span class="op">&lt;-</span> <span class="va">TxDb.Hsapiens.UCSC.hg19.knownGene</span></span>
-<span><span class="va">gx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes</a></span><span class="op">(</span><span class="va">kg</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">gx</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fraction of the genome covered by promoter regions. Some contigs have unknown</span></span>
+<span><span class="co"># (NA) lengths, so drop those when summing the genome size.</span></span>
+<span><span class="va">genome_bp</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">prom_frac</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">prom_regions</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">genome_bp</span></span>
+<span></span>
+<span><span class="va">expected</span> <span class="op">&lt;-</span> <span class="va">prom_frac</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ctcf</span><span class="op">)</span>   <span class="co"># peaks expected in promoters by chance</span></span>
+<span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">ctcf</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">prom_regions</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>expected <span class="op">=</span> <span class="va">expected</span>, observed <span class="op">=</span> <span class="va">observed</span>, ratio <span class="op">=</span> <span class="va">observed</span> <span class="op">/</span> <span class="va">expected</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "GRanges"
-attr(,"package")
-[1] "GenomicRanges"</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">gx</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 28622</code></pre>
+<pre><code>   expected    observed       ratio 
+ 4424.94630 12421.00000     2.80704 </code></pre>
 </div>
 </div>
-<p><code><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes()</a></code> returns a <code>GRanges</code> — one range per gene, in UCSC (<code>chr1</code>) style to match the genome it was built on. The length tells you how many genes the annotation contains.</p>
+<p>Promoter regions are a small fraction of the genome, so the chance expectation is modest — yet the observed count is several-fold larger. That gap is the biology: CTCF binding is <strong>not</strong> randomly placed with respect to promoters. The overlap is meaningful precisely because it dwarfs the null expectation.</p>
 </div>
 </div>
 </div>
-<p><strong>Get promoter regions with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>.</strong> Read <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">?flank</a></code>. The promoter sits <em>upstream</em> of a gene, so flanking each gene by 2 kb on its upstream side gives a first approximation.</p>
+</section><section id="exercise-5-which-gene-is-each-peak-closest-to" class="level2" data-number="36.6"><h2 data-number="36.6" class="anchored" data-anchor-id="exercise-5-which-gene-is-each-peak-closest-to">
+<span class="header-section-number">36.6</span> Exercise 5: which gene is each peak closest to?</h2>
+<p>Counting overlaps answers “is this peak <em>in</em> a feature?” But many peaks fall <em>between</em> genes, and there the useful question is “which gene is this peak nearest, and how far away?” That’s a job for <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code> and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code>.</p>
+<p><strong>Annotate each peak with its nearest gene.</strong> Get the per-gene ranges from the <code>TxDb</code>, then for every CTCF peak find the index of the nearest gene with <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code>. Attach the matched gene id to the peaks as a new metadata column.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1304,26 +1463,22 @@ attr(,"package")
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank</a></span><span class="op">(</span><span class="va">gx</span>, <span class="fl">2000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html">genes</a></span><span class="op">(</span><span class="va">txdb</span><span class="op">)</span></span>
+<span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest</a></span><span class="op">(</span><span class="va">ctcf</span>, <span class="va">gn</span><span class="op">)</span>            <span class="co"># index into gn for each peak (NA if none)</span></span>
+<span><span class="co"># Keep only peaks that found a nearest gene (e.g. drop peaks on contigs gn lacks).</span></span>
+<span><span class="va">ok</span>  <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">idx</span><span class="op">)</span></span>
+<span><span class="va">ctcf_ann</span> <span class="op">&lt;-</span> <span class="va">ctcf</span><span class="op">[</span><span class="va">ok</span><span class="op">]</span></span>
+<span><span class="va">ctcf_ann</span><span class="op">$</span><span class="va">nearest_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">gn</span><span class="op">)</span><span class="op">[</span><span class="va">idx</span><span class="op">[</span><span class="va">ok</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ctcf_ann</span><span class="op">$</span><span class="va">nearest_gene</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>GRanges object with 6 ranges and 1 metadata column:
-            seqnames              ranges strand |     gene_id
-               &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
-          1    chr19   58874118-58876117      - |           1
-         10     chr8   18246792-18248791      + |          10
-        100    chr20   43280894-43282893      - |         100
-       1000    chr18   25757911-25759910      - |        1000
-      10000     chr1 244014382-244016381      - |       10000
-  100008586     chrX   49313881-49315880      + |   100008586
-  -------
-  seqinfo: 298 sequences (2 circular) from hg19 genome</code></pre>
+<pre><code>[1] "8864"      "6615"      "100505534" "79648"     "105376325" "401335"   </code></pre>
 </div>
 </div>
-<p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> returns a new range immediately upstream of each gene — strand-aware, so “upstream” means the correct direction for genes on either strand. These are 2 kb-wide candidate promoter regions.</p>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code> returns, for each peak, the index of the single closest gene — overlapping, upstream, or downstream, whichever is nearest. Indexing <code>names(gn)</code> with that vector turns the indices into gene ids, which we store on the peaks.</p>
 </div>
 </div>
 </div>
-<p><strong>Do the same thing with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code>.</strong> The TxDb knows where transcripts start, so <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code> builds promoter regions directly (see <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">?promoters</a></code> for the default window).</p>
+<p><strong>How far is each peak from its nearest gene?</strong> Use <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code> and summarize the distances. How many peaks sit <em>inside</em> a gene (distance 0)?</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -1337,272 +1492,40 @@ attr(,"package")
 <div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">proms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters</a></span><span class="op">(</span><span class="va">kg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code> is the purpose-built tool: it returns a promoter window around each transcript’s start site without you having to reason about strand and flanking yourself.</p>
-</div>
-</div>
-</div>
-<p><strong>Do these promoters overlap each other?</strong> Genes are dense, and nearby transcripts share promoter neighborhoods, so many of these windows will overlap. <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps()</a></code> of the set against itself counts how many promoters each one touches.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps</a></span><span class="op">(</span><span class="va">proms</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d2n</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest</a></span><span class="op">(</span><span class="va">ctcf</span>, <span class="va">gn</span><span class="op">)</span></span>
+<span><span class="va">dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols</a></span><span class="op">(</span><span class="va">d2n</span><span class="op">)</span><span class="op">$</span><span class="va">distance</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">dist</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-   1.00    2.00    6.00   17.59   16.00  516.00 </code></pre>
+      0       0       0   12588    2838 2433030 </code></pre>
 </div>
-</div>
-<p>Every promoter overlaps at least itself (count ≥ 1), and the larger counts show that promoters pile up on top of one another — overlapping transcripts and alternative start sites. That redundancy is a problem if we want clean, non-double-counted regions.</p>
-</div>
-</div>
-</div>
-<p><strong>Collapse overlapping promoters with <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>.</strong> <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code> merges every group of overlapping ranges into a single contiguous region, giving us a tidy set of promoter regions to test against.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-19" class="callout-19-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># reduce() takes all overlapping ranges and collapses each cluster</span></span>
-<span><span class="co"># into one region spanning the whole cluster.</span></span>
-<span><span class="va">prom_regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">proms</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># After reducing, each region overlaps only itself.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">countOverlaps</a></span><span class="op">(</span><span class="va">prom_regions</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span>            <span class="co"># peaks overlapping a gene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-      1       1       1       1       1       2 </code></pre>
+<pre><code>[1] 29931</code></pre>
 </div>
-</div>
-<p>After <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>, the self-overlap count is 1 everywhere — confirming the regions no longer overlap each other and can be treated as a clean, non-redundant set.</p>
-</div>
-</div>
-</div>
-<p><strong>Count DNase sites that overlap a promoter region.</strong> Here is where the <code>seqlevelsStyle</code> warning above comes due: we switched <code>dnase</code> to Ensembl (<code>1</code>) in Exercise 1, but the gene models are UCSC (<code>chr1</code>). Watch what happens.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-20" class="callout-20-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># dnase is still in Ensembl style from Exercise 1, while</span></span>
-<span><span class="co"># prom_regions is UCSC style — so this first count is misleadingly zero.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">dnase</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">prom_regions</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html">mean</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span>           <span class="co"># ...as a fraction of all matched peaks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Switch dnase back to UCSC so the sequence names match, then recount.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqlevelsStyle.html">seqlevelsStyle</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"UCSC"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">dnase</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">prom_regions</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">dnase2</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">prom_regions</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 46357</code></pre>
+<pre><code>[1] 0.6824213</code></pre>
 </div>
 </div>
-<p>The first count is <strong>zero</strong> — not because the data disagree, but because <code>chr1</code> and <code>1</code> never match. After switching <code>dnase</code> back to UCSC style, the same overlap query returns a large, sensible count. This is the silent bug from the warning, caught and fixed. (<code>dnase2</code> was never reassigned, so it was UCSC-style all along.)</p>
+<p><code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code> returns a <code>Hits</code> object with a <code>distance</code> column: 0 means the peak overlaps its nearest gene, and any positive number is the base-pair gap to the closest gene edge. The summary shows the spread; the count and fraction of zeros tell you how much CTCF binding falls within genes versus in the intergenic space between them.</p>
 </div>
 </div>
 </div>
-<p><strong>Is that overlap surprising?</strong> If DNase sites and promoters were placed <em>independently</em> on the genome, how many overlaps would you expect by chance? Compare that expectation to what you observed.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-21" class="callout-21-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Use one consistent genome size. Some contigs have unknown (NA) lengths,</span></span>
-<span><span class="co"># so drop those when summing.</span></span>
-<span><span class="va">genome_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths</a></span><span class="op">(</span><span class="va">gx</span><span class="op">)</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">prop_proms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="va">prom_regions</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">genome_bp</span></span>
-<span><span class="co"># Under independence, the expected number of DNase peaks landing in a promoter</span></span>
-<span><span class="co"># is (fraction of the genome that is promoter) times the number of peaks.</span></span>
-<span><span class="va">prop_proms</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">dnase</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 13745.27</code></pre>
-</div>
-</div>
-<p>The expected-by-chance number is far smaller than the count you actually observed. That gap is the biology: DNase hypersensitive sites are <strong>not</strong> scattered at random — they concentrate at promoters, exactly where regulatory machinery opens up the chromatin. The overlap count is meaningful precisely because it dwarfs the null expectation.</p>
-</div>
-</div>
-</div>
-</section><section id="exercise-4-enrichment-of-histone-marks-at-cpg-islands" class="level2" data-number="36.5"><h2 data-number="36.5" class="anchored" data-anchor-id="exercise-4-enrichment-of-histone-marks-at-cpg-islands">
-<span class="header-section-number">36.5</span> Exercise 4: enrichment of histone marks at CpG islands</h2>
-<p>Histone modifications mark functional regions of the genome: <code>H3K4me3</code> flags active promoters, <code>H3K4me1</code> flags enhancers, <code>H3K27me3</code> flags repressed regions, and so on. In this exercise you’ll ask how much each mark <strong>overlaps CpG islands</strong> — and build a small reusable enrichment score along the way.</p>
-<p>The data again comes from <code>AnnotationHub</code>. ENCODE published these histone ChIP-seq peak calls as BED files; the hub serves them as <code>GRanges</code>. Each mark’s query matches several records, so to keep things moving we’ve already picked the right hub IDs and you can load each mark directly.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">AnnotationHub</span><span class="op">)</span></span>
-<span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">AnnotationHub</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Here are the <code>GRanges</code> for four histone marks plus one extra <code>H3K4me3</code> replicate:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">h3k4me1</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH25832"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">h3k4me3</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH25833"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">h3k9ac</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH25834"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">h3k27me3</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH25835"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">h3k4me3_2</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH27284"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Each variable holds the peak calls from one ChIP-seq experiment pulling down that histone mark. Now grab the hg19 CpG islands the same way:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cpg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationHub/man/AnnotationHub-class.html">query</a></span><span class="op">(</span><span class="va">ah</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"cpg"</span>, <span class="st">"UCSC"</span>, <span class="st">"hg19"</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>How many <code>H3K4me1</code> peaks overlap a CpG island?</strong> Start with the simple <code>%over%</code> count, as in Exercise 2.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-22" class="callout-22-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">h3k4me1</span> <span class="op"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">%over%</a></span> <span class="va">cpg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 21123</code></pre>
-</div>
-</div>
-<p>That’s the number of <code>H3K4me1</code> peaks touching at least one CpG island — a quick first look at the association.</p>
-</div>
-</div>
-</div>
-<p><strong>How many <em>bases</em> overlap?</strong> A peak count ignores how much of each peak overlaps. <code><a href="https://generics.r-lib.org/reference/setops.html">intersect()</a></code> returns the overlapping regions themselves, so summing their widths gives the total overlapping base pairs.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-23" class="callout-23-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># intersect() returns only the overlapping stretches as a new range set;</span></span>
-<span><span class="co"># summing their widths gives the total bases of overlap.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 10541975</code></pre>
-</div>
-</div>
-<p>This is a finer measure than the peak count: it tells you how many base pairs the two sets actually share, not just how many peaks touch.</p>
-</div>
-</div>
-</div>
-<p><strong>Turn that into an enrichment score.</strong> Broad marks cover more bases and so overlap CpG islands more just by being big. To correct for that, normalize the shared bases by the <em>total</em> bases covered by either set (their <code>union</code>). The result is a Jaccard-style ratio between 0 and 1: the fraction of the combined footprint that both sets share.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-24" class="callout-24-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 79640291</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Normalize the overlap by the combined coverage of both sets.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1323699</code></pre>
-</div>
-</div>
-<p>A score near 0 means the two sets barely co-occur; a score near 1 means they cover almost exactly the same ground. Because the denominator grows with peak breadth, this score lets you compare a broad mark and a narrow mark on equal footing.</p>
-</div>
-</div>
-</div>
-<p><strong>Wrap it in a function</strong> so you can score any pair of range sets, then try it on <code>H3K4me1</code> and the CpG islands.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-25" class="callout-25-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">range_enrichment_score</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">union</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">i</span> <span class="op">/</span> <span class="va">u</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>The function is just the intersect-over-union calculation with names: <code>i</code> for the shared bases, <code>u</code> for the combined footprint. Give it a try:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">range_enrichment_score</span><span class="op">(</span><span class="va">h3k4me1</span>, <span class="va">cpg</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1323699</code></pre>
-</div>
-</div>
-<p>You get back the same normalized score as before. Now you can call <code>range_enrichment_score()</code> on any two <code>GRanges</code> — try the other histone marks against <code>cpg</code> and see which one is most enriched at CpG islands.</p>
-</div>
-</div>
-</div>
-</section><section id="summary" class="level2" data-number="36.6"><h2 data-number="36.6" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">36.6</span> Summary</h2>
-<p>You’ve now run the core range-analysis workflow end to end on real ENCODE data. You can:</p>
+</section><section id="summary" class="level2" data-number="36.7"><h2 data-number="36.7" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">36.7</span> Summary</h2>
+<p>You’ve now exercised the whole range-analysis toolkit, from hand-built objects to real ENCODE data. You can:</p>
 <ul>
 <li>
-<strong>Find and load</strong> a published dataset from <code>AnnotationHub</code> as a <code>GRanges</code>, and inspect its class, metadata, and per-chromosome peak counts.</li>
+<strong>Build a <code>GRanges</code></strong> from scratch and pull it apart with the coordinate accessors and <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>, and subset it like a vector.</li>
 <li>
-<strong>Measure</strong> peak widths and compute the fraction of the genome a peak set covers.</li>
+<strong>Reshape</strong> a set with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>, and <strong>summarize</strong> it with <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code> — reading strand-awareness and overlap depth correctly.</li>
 <li>
-<strong>Read and switch <code>seqlevelsStyle</code></strong>, and — just as important — recognize the silent zero-overlap bug a <code>chr1</code>-vs-<code>1</code> mismatch causes.</li>
+<strong>Recognize and fix</strong> the silent zero-overlap bug a <code>chr1</code>-vs-<code>1</code> <code>seqlevelsStyle</code> mismatch causes.</li>
 <li>
-<strong>Compare range sets</strong> with <code>%over%</code>, and <strong>reshape</strong> ranges with <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">resize()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">promoters()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>.</li>
-<li>
-<strong>Quantify enrichment</strong> of one set inside another with an intersect-over-union score.</li>
+<strong>Relate two real range sets</strong> with <code>%over%</code>, <code><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html">subsetByOverlaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code>, and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest()</a></code>, and judge an overlap against a chance expectation.</li>
 </ul>
-<p>For the underlying concepts — how <code>GRanges</code> objects are built, the full catalog of set operations and overlap methods, and the coordinate-system details — return to the <em>Genomic ranges and features</em> chapter. For the real-data import workflow with <code>rtracklayer</code>, see <em>Genomic ranges with real ChIP-seq peaks</em>. This chapter was the place to put those tools to work.</p>
+<p>For the underlying concepts — how <code>GRanges</code> objects are built, the full catalog of set operations and overlap methods, and the coordinate-system details — return to the <em>Genomic ranges and features</em> chapter. For the real-data import workflow with <code>rtracklayer</code>, see <em>Genomic ranges with real ChIP-seq peaks</em>. This chapter was the place to put those tools to work.  </p>
 
 
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">

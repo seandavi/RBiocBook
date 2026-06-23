@@ -522,7 +522,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -830,7 +830,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 22, 2026</p>
+      <p class="date-modified">June 23, 2026</p>
     </div>
   </div>
     
@@ -840,6 +840,19 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 
 </header><p>Almost everything you study in genomics lives at a <em>place</em> on the genome. A gene sits between two coordinates on a chromosome. An exon is a stretch within that gene. A ChIP-seq peak marks where a protein bound. A SNP is a single position. As soon as you have two such sets of places, the most interesting biological questions become questions about <em>location</em>: Which peaks fall inside a promoter? What is the nearest gene to this variant? Where do these two experiments agree?</p>
 <p>In this chapter you’ll learn to represent those places as <strong>genomic ranges</strong> and to ask how they relate to one another. The workhorse is Bioconductor’s <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> package <span class="citation" data-cites="lawrence_software_2013">(<a href="references.html#ref-lawrence_software_2013" role="doc-biblioref">Lawrence et al. 2013</a>)</span>, which gives you a compact object to hold ranges plus any data attached to them, and a vocabulary of fast operations — overlap, nearest-neighbor, flank, reduce — that scale to millions of regions. We’ll build small example objects by hand so you can see exactly what each operation does, then finish with real gene models pulled from a genome annotation.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Acknowledgement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This chapter’s explanations are adapted, in part, from the Bioconductor <em>GenomicRanges</em> vignette by P. Aboyoun, H. Pagès, and M. Lawrence (Artistic-2.0 license), rewritten here for a beginning audience. The package itself is described in <span class="citation" data-cites="lawrence_software_2013">Lawrence et al. (<a href="references.html#ref-lawrence_software_2013" role="doc-biblioref">2013</a>)</span>.</p>
+</div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -908,7 +921,7 @@ Table&nbsp;34.1: The containers used in this chapter.
 </div>
 <p>A compact cheat-sheet of the accessor and operation methods is collected under <a href="#sec-granges-methods">Quick reference</a> at the end of the chapter; we meet each one in context first.</p>
 <p>To get going, we can construct a <code>GRanges</code> object by hand as an example.</p>
-<p>The <code>GRanges</code> class represents a collection of genomic ranges that each have a single start and end location on the genome. It can be used to store the location of genomic features such as contiguous binding sites, transcripts, and exons. These objects can be created by using the GRanges constructor function. The following code creates one from scratch. (The <code><a href="https://rdrr.io/pkg/S4Vectors/man/Rle-class.html">Rle()</a></code> calls in it simply repeat each value a given number of times — a compact “run-length” shorthand we return to under <em>coverage</em> later.)</p>
+<p>A <code>GRanges</code> holds a set of intervals, each pinned to a chromosome by a single start and a single end. That is exactly the shape of most genomic features — a binding site, a transcript, an exon all amount to “this stretch, on this chromosome” — so a <code>GRanges</code> is where you put them. You build one with the <code><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges()</a></code> constructor; the code below does so from scratch. (The <code><a href="https://rdrr.io/pkg/S4Vectors/man/Rle-class.html">Rle()</a></code> calls in it simply repeat each value a given number of times — a compact “run-length” shorthand we return to under <em>coverage</em> later.)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span></span>
 <span>    seqnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Rle-class.html">Rle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"chr1"</span>, <span class="st">"chr3"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -935,7 +948,7 @@ Table&nbsp;34.1: The containers used in this chapter.
   seqinfo: 3 sequences from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
-<p>This creates a <code>GRanges</code> object with 10 genomic ranges. The output of the <code>GRanges</code> <code><a href="https://rdrr.io/r/methods/show.html">show()</a></code> method separates the information into a left and right hand region that are separated by <code>|</code> symbols (see <a href="#fig-granges-structure" class="quarto-xref">Figure&nbsp;<span>34.1</span></a>). The genomic coordinates (seqnames, ranges, and strand) are located on the left-hand side and the metadata columns are located on the right. For this example, the metadata is comprised of score and GC information, but almost anything can be stored in the metadata portion of a GRanges object.</p>
+<p>We now have a <code>GRanges</code> with 10 ranges. When you print one, the display splits into two regions divided by <code>|</code> symbols (see <a href="#fig-granges-structure" class="quarto-xref">Figure&nbsp;<span>34.1</span></a>). To the left sit the genomic coordinates — <code>seqnames</code>, <code>ranges</code>, and <code>strand</code>; to the right sit the metadata columns. Here the metadata is just the <code>score</code> and <code>GC</code> columns we supplied, but the right-hand side will happily carry anything else you care to attach to a range.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1156,7 +1169,7 @@ j        10  0.000000</code></pre>
 <span class="header-section-number">34.2.2</span> Interval operations on one GRanges object</h3>
 <section id="intra-range-methods" class="level4 page-columns page-full" data-number="34.2.2.1"><h4 data-number="34.2.2.1" class="anchored" data-anchor-id="intra-range-methods">
 <span class="header-section-number">34.2.2.1</span> Intra-range methods</h4>
-<p>The methods described in this section work <em>one-region-at-a-time</em> and are, therefore, called “intra-range” methods. Methods that work across all regions are described below in the <a href="#inter-range-methods">Inter-range methods</a> section.</p>
+<p>The operations in this section reshape each range <em>on its own</em>, never looking at its neighbours — which is why they are called “intra-range” methods. The ones that do look across the whole set come next, in the <a href="#inter-range-methods">Inter-range methods</a> section.</p>
 <p>To make the operations in this section easy to <em>see</em>, we’ll work with a small set of ranges on a single chromosome and draw a picture of each operation as we go. Here is the toy <code>GRanges</code>, <code>g</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>,</span>
@@ -1384,7 +1397,7 @@ Figure&nbsp;34.5: <code>resize(g, width = 12, fix = "center")</code> forces ever
 <p>The <a href="http://bioconductor.org/packages/GenomicRanges.html"><code>GenomicRanges</code></a> help page <code><a href="https://rdrr.io/pkg/GenomicRanges/man/intra-range-methods.html">?"intra-range-methods"</a></code> summarizes these methods.</p>
 </section><section id="inter-range-methods" class="level4 page-columns page-full" data-number="34.2.2.2"><h4 data-number="34.2.2.2" class="anchored" data-anchor-id="inter-range-methods">
 <span class="header-section-number">34.2.2.2</span> Inter-range methods</h4>
-<p>Inter-range methods involve comparisons between ranges in a single GRanges object. For instance, the reduce method will align the ranges and merge overlapping ranges to produce a simplified set.</p>
+<p>Inter-range methods, by contrast, look at the ranges in a single <code>GRanges</code> <em>together</em>. The first one to meet is <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code>, which scans the set and merges any ranges that overlap or touch into a single range, leaving you with a tidied-up, non-redundant set.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1450,7 +1463,7 @@ Figure&nbsp;34.7: <code>gaps(g)</code> returns the complement of <code>g</code> 
 <p>We never told this object how long the chromosomes are, so Bioconductor assumes each chromosome ends at the largest coordinate it has seen. That means the final gap (from the last range to the true end of the chromosome) is missing. In real work you set the chromosome lengths with <code><a href="https://rdrr.io/pkg/Seqinfo/man/seqinfo.html">seqlengths()</a></code> so that <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">gaps()</a></code>, <code><a href="https://rdrr.io/pkg/IRanges/man/coverage-methods.html">coverage()</a></code>, and friends know the full extent of each sequence. We can ignore that detail for these toy examples.</p>
 </div>
 </div>
-<p>The disjoin method represents a GRanges object as a collection of non-overlapping ranges. This is the step before <em>counting</em>: once a region is split into pieces that each belong to a fixed set of features, a read landing in a piece can be attributed to those features unambiguously.</p>
+<p>The <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">disjoin()</a></code> method rewrites a <code>GRanges</code> as a set of pieces that no longer overlap one another. This is the step before <em>counting</em>: once a region is split into pieces that each belong to a fixed set of features, a read landing in a piece can be attributed to those features unambiguously.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">disjoin</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1568,7 +1581,7 @@ Figure&nbsp;34.10: The three set operations on <code>g</code> and <code>g2</code
 </div>
 </section></section><section id="grangeslist" class="level2 page-columns page-full" data-number="34.3"><h2 data-number="34.3" class="anchored" data-anchor-id="grangeslist">
 <span class="header-section-number">34.3</span> GRangesList</h2>
-<p>Some important genomic features, such as spliced transcripts that are comprised of exons, are inherently compound structures. Such a feature makes much more sense when expressed as a compound object such as a GRangesList. If we think of each transcript as a set of exons, each transcript would be summarized as a <code>GRanges</code> object. However, if we have multiple transcripts, we want to keep them separate, with each transcript holding its own exons. A <code>GRangesList</code> is a list of <code>GRanges</code> objects. Continuing with the transcripts idea, a <code>GRangesList</code> can contain all the transcripts and their exons; each transcript is one element in the list.</p>
+<p>Not every feature is a single interval. A spliced transcript, for example, is made of several exons, so it is naturally a <em>group</em> of ranges rather than one range. The right container for that is a <code>GRangesList</code> — simply a list whose elements are themselves <code>GRanges</code> objects. Picture one transcript as a <code>GRanges</code> holding its exons; a <code>GRangesList</code> then holds many such transcripts at once, each kept separate as its own element, so the grouping (which exons belong to which transcript) is never lost.</p>
 <div id="fig-granges-list-structure" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-granges-list-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="images/granges_list_structure.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;34.11: The structure of a GRangesList, which is a list of GRanges objects. While the analogy is not perfect, a GRangesList behaves a bit like a list. Each element in the GRangesList is a GRanges object. A common use case for a GRangesList is to store a list of transcripts, each of which have exons as the regions in the GRanges."><img src="images/granges_list_structure.png" class="img-fluid figure-img"></a>
@@ -1839,13 +1852,14 @@ Figure&nbsp;34.12: <code>findOverlaps(g, g2)</code> / <code>g %over% g2</code>. 
   seqinfo: 1 sequence from an unspecified genome; no seqlengths</code></pre>
 </div>
 </div>
+<p>There are three closely related functions here, each taking a query <code>x</code> and a <code>subject</code> and returning, for every range in <code>x</code>, an integer index into <code>subject</code> (or <code>NA</code> when nothing qualifies):</p>
 <ul>
-<li><p>nearest: Performs conventional nearest neighbor finding. Returns an integer vector containing the index of the nearest neighbor range in subject for each range in x. If there is no nearest neighbor NA is returned. For details of the algorithm see the man page in the IRanges package (?nearest).</p></li>
-<li><p>precede: For each range in x, precede returns the index of the range in subject that is directly preceded by the range in x. Overlapping ranges are excluded. NA is returned when there are no qualifying ranges in subject.</p></li>
-<li><p>follow: The opposite of precede, follow returns the index of the range in subject that is directly followed by the range in x. Overlapping ranges are excluded. NA is returned when there are no qualifying ranges in subject.</p></li>
+<li><p><code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">nearest()</a></code> finds the closest range in <code>subject</code>, whether it lies before, after, or overlapping. It is the everyday tool; for the exact tie-breaking rules see <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">?nearest</a></code> in the IRanges package.</p></li>
+<li><p><code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">precede()</a></code> looks only <em>ahead</em>: for each range in <code>x</code> it returns the first <code>subject</code> range that <code>x</code> comes before. Anything overlapping is skipped.</p></li>
+<li><p><code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">follow()</a></code> is the mirror image, looking only <em>behind</em>: it returns the <code>subject</code> range that <code>x</code> comes after, again ignoring overlaps.</p></li>
 </ul>
-<p>Orientation and strand for precede and follow: Orientation is 5’ to 3’, consistent with the direction of translation. Because positional numbering along a chromosome is from left to right and transcription takes place from 5’ to 3’, precede and follow can appear to have ‘opposite’ behavior on the + and - strand. Using positions 5 and 6 as an example, 5 precedes 6 on the + strand but follows 6 on the - strand.</p>
-<p>The table below outlines the orientation when ranges on different strands are compared. In general, a feature on * is considered to belong to both strands. The single exception is when both x and subject are * in which case both are treated as +.</p>
+<p>The catch with <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">precede()</a></code> and <code><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">follow()</a></code> is that “ahead” and “behind” are read in the biological 5’-to-3’ direction, the direction transcription runs — not simply left-to-right along the chromosome. On the <code>+</code> strand those two directions agree, but on the <code>-</code> strand they are reversed, so the same pair of positions can flip its answer. Take positions 5 and 6: on the <code>+</code> strand, 5 <em>precedes</em> 6, but on the <code>-</code> strand 5 <em>follows</em> 6, because 5’-to-3’ now runs the other way.</p>
+<p>The table below spells out the resulting orientation for every combination of query and subject strand. A <code>*</code> (unstranded) range is treated as belonging to both strands; the one special case is when <em>both</em> <code>x</code> and <code>subject</code> are <code>*</code>, where they are both taken to be <code>+</code>.</p>
 <pre><code>       x  |  subject  |  orientation 
      -----+-----------+----------------
 a)     +  |  +        |  ---&gt; 
@@ -2197,23 +2211,6 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 <p>These reuse the objects built earlier in the chapter: the 10-range <code>gr</code>, the small single-chromosome toy <code>g</code> and its companion <code>g2</code>, and the <code>grl</code> <code>GRangesList</code>. Run the chapter’s chunks first so those objects exist.</p>
 <p><strong>1. Read the structure.</strong> Without running any code, which of these belong to the <em>left</em> of the <code>|</code> in a <code>GRanges</code> (the coordinates) and which to the <em>right</em> (the metadata): <code>strand</code>, <code>score</code>, <code>seqnames</code>, <code>GC</code>, <code>width</code>?</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Left of the <code>|</code> (coordinates): <code>seqnames</code>, <code>strand</code>, and <code>width</code> (part of <code>ranges</code>). Right of the <code>|</code> (metadata): <code>score</code> and <code>GC</code>. The coordinate columns have dedicated accessors; the metadata columns are reached together with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>.</p>
-</div>
-</div>
-</div>
-<p><strong>2. Promoters by hand.</strong> A common task is to grab the region just upstream of a feature’s start — a rough promoter. Use <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> to get the 50 bases upstream of each range in <code>g</code>, then confirm with <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code> that each result is 50 bases wide.</p>
-<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -2224,6 +2221,23 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Left of the <code>|</code> (coordinates): <code>seqnames</code>, <code>strand</code>, and <code>width</code> (part of <code>ranges</code>). Right of the <code>|</code> (metadata): <code>score</code> and <code>GC</code>. The coordinate columns have dedicated accessors; the metadata columns are reached together with <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html">mcols()</a></code>.</p>
+</div>
+</div>
+</div>
+<p><strong>2. Promoters by hand.</strong> A common task is to grab the region just upstream of a feature’s start — a rough promoter. Use <code><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank()</a></code> to get the 50 bases upstream of each range in <code>g</code>, then confirm with <code><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html">width()</a></code> that each result is 50 bases wide.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb124"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">prom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html">flank</a></span><span class="op">(</span><span class="va">g</span>, <span class="fl">50</span><span class="op">)</span></span>
@@ -2251,7 +2265,7 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 </div>
 <p><strong>3. Collapse overlaps.</strong> Use <code><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce()</a></code> on <code>gr</code> to merge overlapping or adjacent ranges into a minimal set, then report how many ranges remain with <code><a href="https://rdrr.io/r/base/length.html">length()</a></code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2260,7 +2274,7 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb128"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html">reduce</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span></span>
@@ -2290,7 +2304,7 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 </div>
 <p><strong>4. Overlap counting.</strong> Build <code>q &lt;- gr[1:4]</code> and <code>s &lt;- gr[3:8]</code>, then use <code>countOverlaps(q, s)</code> to find how many ranges in <code>s</code> each range in <code>q</code> overlaps. Which range in <code>q</code> has the most overlaps?</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2299,7 +2313,7 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb132"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="va">gr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
@@ -2322,7 +2336,7 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 </div>
 <p><strong>5. Nearest with distance.</strong> Use <code>distanceToNearest(g, g2)</code> and pull out the <code>distance</code> metadata column with <code>mcols(...)$distance</code>. What does a distance of 0 tell you?</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2331,7 +2345,7 @@ Table&nbsp;34.3: Range operations, by family, with a biological use for each.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb136"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/nearest-methods.html">distanceToNearest</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">g2</span><span class="op">)</span></span>

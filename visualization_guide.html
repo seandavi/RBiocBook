@@ -503,7 +503,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./dplyr_intro_msleep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Introduction to dplyr: mammal sleep dataset</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reshaping tables with dplyr</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -816,7 +816,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 22, 2026</p>
+      <p class="date-modified">June 23, 2026</p>
     </div>
   </div>
     
@@ -839,15 +839,7 @@ gtag('config', 'G-KLLV1GCF4E', { 'anonymize_ip': true});
 <p>Before we touch a single <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot()</a></code> call, it helps to know what we are aiming for. Two ideas carry most of the weight.</p>
 <section id="maximize-the-data-ink-ratio" class="level3 page-columns page-full" data-number="20.2.1"><h3 data-number="20.2.1" class="anchored" data-anchor-id="maximize-the-data-ink-ratio">
 <span class="header-section-number">20.2.1</span> Maximize the data-ink ratio</h3>
-<p>The statistician Edward Tufte coined the term <strong>data-ink ratio</strong>: the proportion of a graphic’s ink that is actually showing your data, rather than decoration. The goal is to keep that ratio high. Put simply, <strong>every mark on the plot should earn its place.</strong></p>
-<div id="fig-tufte-book" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-tufte-book-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="images/tufte-visual-display.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;20.1: Edward Tufte’s landmark book, The Visual Display of Quantitative Information, popularized the data-ink ratio."><img src="images/tufte-visual-display.jpg" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tufte-book-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.1: Edward Tufte’s landmark book, <em>The Visual Display of Quantitative Information</em>, popularized the data-ink ratio.
-</figcaption></figure>
-</div>
+<p>The statistician Edward Tufte, in his landmark book <em>The Visual Display of Quantitative Information</em>, coined the term <strong>data-ink ratio</strong>: the proportion of a graphic’s ink that is actually showing your data, rather than decoration. The goal is to keep that ratio high. Put simply, <strong>every mark on the plot should earn its place.</strong></p>
 <p>Common “chart junk” to delete:</p>
 <ul>
 <li>Redundant or heavy grid lines</li>
@@ -870,10 +862,10 @@ Figure&nbsp;20.1: Edward Tufte’s landmark book, <em>The Visual Display of Quan
 <div class="cell-output-display page-columns page-full">
 <div id="fig-bad-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-bad-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-bad-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;20.2: A cluttered plot with a low data-ink ratio. The gray background and heavy gridlines are decoration, not information."><img src="visualization_guide_files/figure-html/fig-bad-plot-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-bad-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;20.1: A cluttered plot with a low data-ink ratio. The gray background and heavy gridlines are decoration, not information."><img src="visualization_guide_files/figure-html/fig-bad-plot-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-bad-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.2: A cluttered plot with a low data-ink ratio. The gray background and heavy gridlines are decoration, not information.
+Figure&nbsp;20.1: A cluttered plot with a low data-ink ratio. The gray background and heavy gridlines are decoration, not information.
 </figcaption></figure>
 </div>
 </div>
@@ -890,15 +882,15 @@ Figure&nbsp;20.2: A cluttered plot with a low data-ink ratio. The gray backgroun
 <div class="cell-output-display page-columns page-full">
 <div id="fig-good-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-good-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-good-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;20.3: The same data with a high data-ink ratio. The eye goes straight to the points."><img src="visualization_guide_files/figure-html/fig-good-plot-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-good-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;20.2: The same data with a high data-ink ratio. The eye goes straight to the points."><img src="visualization_guide_files/figure-html/fig-good-plot-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-good-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.3: The same data with a high data-ink ratio. The eye goes straight to the points.
+Figure&nbsp;20.2: The same data with a high data-ink ratio. The eye goes straight to the points.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>The only change between <a href="#fig-bad-plot" class="quarto-xref">Figure&nbsp;<span>20.2</span></a> and <a href="#fig-good-plot" class="quarto-xref">Figure&nbsp;<span>20.3</span></a> is the theme, yet the second reads more easily: the trend (bigger engines get worse mileage) jumps out because nothing competes with it. This is a guideline, not a law — a faint gridline can genuinely help a reader estimate values — but “could I delete this?” is always worth asking.</p>
+<p>The only change between <a href="#fig-bad-plot" class="quarto-xref">Figure&nbsp;<span>20.1</span></a> and <a href="#fig-good-plot" class="quarto-xref">Figure&nbsp;<span>20.2</span></a> is the theme, yet the second reads more easily: the trend (bigger engines get worse mileage) jumps out because nothing competes with it. This is a guideline, not a law — a faint gridline can genuinely help a reader estimate values — but “could I delete this?” is always worth asking.</p>
 </section><section id="label-everything" class="level3" data-number="20.2.2"><h3 data-number="20.2.2" class="anchored" data-anchor-id="label-everything">
 <span class="header-section-number">20.2.2</span> Label everything</h3>
 <p>A plot without labels is just a picture. To be analysis, it has to carry its context with it. Every finished plot should have:</p>
@@ -938,15 +930,15 @@ Figure&nbsp;20.3: The same data with a high data-ink ratio. The eye goes straigh
 <div class="cell-output-display page-columns page-full">
 <div id="fig-color-palettes" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-color-palettes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-color-palettes-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;20.4: RColorBrewer palettes, grouped into sequential (top), qualitative (middle), and diverging (bottom) families."><img src="visualization_guide_files/figure-html/fig-color-palettes-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-color-palettes-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;20.3: RColorBrewer palettes, grouped into sequential (top), qualitative (middle), and diverging (bottom) families."><img src="visualization_guide_files/figure-html/fig-color-palettes-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-color-palettes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.4: RColorBrewer palettes, grouped into sequential (top), qualitative (middle), and diverging (bottom) families.
+Figure&nbsp;20.3: RColorBrewer palettes, grouped into sequential (top), qualitative (middle), and diverging (bottom) families.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-color-palettes" class="quarto-xref">Figure&nbsp;<span>20.4</span></a> is a menu: pick a palette name (like <code>"Set2"</code> or <code>"RdBu"</code>) and hand it to a <code><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_color_brewer()</a></code> or <code><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_fill_brewer()</a></code> layer.</p>
+<p><a href="#fig-color-palettes" class="quarto-xref">Figure&nbsp;<span>20.3</span></a> is a menu: pick a palette name (like <code>"Set2"</code> or <code>"RdBu"</code>) and hand it to a <code><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_color_brewer()</a></code> or <code><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html">scale_fill_brewer()</a></code> layer.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -965,15 +957,15 @@ Figure&nbsp;20.4: RColorBrewer palettes, grouped into sequential (top), qualitat
 <div class="cell-output-display page-columns page-full">
 <div id="fig-colorblind-friendly" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-colorblind-friendly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-colorblind-friendly-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;20.5: The subset of RColorBrewer palettes that remain distinguishable for viewers with common color-vision deficiencies."><img src="visualization_guide_files/figure-html/fig-colorblind-friendly-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-colorblind-friendly-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;20.4: The subset of RColorBrewer palettes that remain distinguishable for viewers with common color-vision deficiencies."><img src="visualization_guide_files/figure-html/fig-colorblind-friendly-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-colorblind-friendly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.5: The subset of RColorBrewer palettes that remain distinguishable for viewers with common color-vision deficiencies.
+Figure&nbsp;20.4: The subset of RColorBrewer palettes that remain distinguishable for viewers with common color-vision deficiencies.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>The palettes in <a href="#fig-colorblind-friendly" class="quarto-xref">Figure&nbsp;<span>20.5</span></a> are the safe default set. When in doubt, choose from here.</p>
+<p>The palettes in <a href="#fig-colorblind-friendly" class="quarto-xref">Figure&nbsp;<span>20.4</span></a> are the safe default set. When in doubt, choose from here.</p>
 </section></section><section id="sec-grammar" class="level2 page-columns page-full" data-number="20.3"><h2 data-number="20.3" class="anchored" data-anchor-id="sec-grammar">
 <span class="header-section-number">20.3</span> The grammar of graphics, layer by layer</h2>
 <p><code>ggplot2</code> is built on an idea called the <strong>grammar of graphics</strong>: every plot is assembled from a small set of independent parts, the way a sentence is built from nouns, verbs, and adjectives. Once you know the parts, you can describe an enormous variety of plots with the same handful of “words.” The parts are:</p>
@@ -1023,15 +1015,15 @@ $ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-blank" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-blank-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;20.6: Data plus aesthetics, but no geom: ggplot() sets up the axes but draws nothing yet."><img src="visualization_guide_files/figure-html/fig-grammar-blank-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-blank-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;20.5: Data plus aesthetics, but no geom: ggplot() sets up the axes but draws nothing yet."><img src="visualization_guide_files/figure-html/fig-grammar-blank-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.6: Data plus aesthetics, but no geom: ggplot() sets up the axes but draws nothing yet.
+Figure&nbsp;20.5: Data plus aesthetics, but no geom: ggplot() sets up the axes but draws nothing yet.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-grammar-blank" class="quarto-xref">Figure&nbsp;<span>20.6</span></a> looks empty — and that’s the point. We’ve declared the axes (<code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> mapped <code>flipper_length_mm</code> to x and <code>body_mass_g</code> to y), but we haven’t said <em>what shape</em> to draw. A plot with no geom has nothing to show.</p>
+<p><a href="#fig-grammar-blank" class="quarto-xref">Figure&nbsp;<span>20.5</span></a> looks empty — and that’s the point. We’ve declared the axes (<code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> mapped <code>flipper_length_mm</code> to x and <code>body_mass_g</code> to y), but we haven’t said <em>what shape</em> to draw. A plot with no geom has nothing to show.</p>
 </section><section id="step-2-add-a-geom" class="level3 page-columns page-full" data-number="20.3.2"><h3 data-number="20.3.2" class="anchored" data-anchor-id="step-2-add-a-geom">
 <span class="header-section-number">20.3.2</span> Step 2: add a geom</h3>
 <p>A <strong>geom</strong> is the layer that draws something. We add layers with <code>+</code>. For two continuous variables, points make a scatterplot:</p>
@@ -1042,15 +1034,15 @@ Figure&nbsp;20.6: Data plus aesthetics, but no geom: ggplot() sets up the axes b
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-points" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-points-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;20.7: Adding geom_point() draws one point per penguin."><img src="visualization_guide_files/figure-html/fig-grammar-points-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-points-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;20.6: Adding geom_point() draws one point per penguin."><img src="visualization_guide_files/figure-html/fig-grammar-points-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.7: Adding geom_point() draws one point per penguin.
+Figure&nbsp;20.6: Adding geom_point() draws one point per penguin.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>Now <a href="#fig-grammar-points" class="quarto-xref">Figure&nbsp;<span>20.7</span></a> tells a story: heavier penguins tend to have longer flippers, a clear positive relationship. But the points seem to fall into a couple of clusters. Could that be the species?</p>
+<p>Now <a href="#fig-grammar-points" class="quarto-xref">Figure&nbsp;<span>20.6</span></a> tells a story: heavier penguins tend to have longer flippers, a clear positive relationship. But the points seem to fall into a couple of clusters. Could that be the species?</p>
 </section><section id="step-3-map-a-third-variable-to-color" class="level3 page-columns page-full" data-number="20.3.3"><h3 data-number="20.3.3" class="anchored" data-anchor-id="step-3-map-a-third-variable-to-color">
 <span class="header-section-number">20.3.3</span> Step 3: map a third variable to color</h3>
 <p>Aesthetics aren’t limited to x and y. We can map a <em>categorical</em> variable onto <strong>color</strong> to encode a third dimension on the same flat plot:</p>
@@ -1061,15 +1053,15 @@ Figure&nbsp;20.7: Adding geom_point() draws one point per penguin.
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-color" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-color-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-color-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;20.8: Mapping species to the color aesthetic reveals three clusters."><img src="visualization_guide_files/figure-html/fig-grammar-color-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-color-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;20.7: Mapping species to the color aesthetic reveals three clusters."><img src="visualization_guide_files/figure-html/fig-grammar-color-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-color-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.8: Mapping species to the color aesthetic reveals three clusters.
+Figure&nbsp;20.7: Mapping species to the color aesthetic reveals three clusters.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>The clusters in <a href="#fig-grammar-color" class="quarto-xref">Figure&nbsp;<span>20.8</span></a> resolve cleanly: Gentoo penguins are the large ones (long flippers, heavy), while Adelie and Chinstrap overlap at the smaller end. We answered our biological question by adding <em>one word</em> to <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>.</p>
+<p>The clusters in <a href="#fig-grammar-color" class="quarto-xref">Figure&nbsp;<span>20.7</span></a> resolve cleanly: Gentoo penguins are the large ones (long flippers, heavy), while Adelie and Chinstrap overlap at the smaller end. We answered our biological question by adding <em>one word</em> to <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1094,15 +1086,15 @@ Figure&nbsp;20.8: Mapping species to the color aesthetic reveals three clusters.
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-smooth" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-smooth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-smooth-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;20.9: A second geom (a linear trend line) layered over the points, one line per species."><img src="visualization_guide_files/figure-html/fig-grammar-smooth-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-smooth-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;20.8: A second geom (a linear trend line) layered over the points, one line per species."><img src="visualization_guide_files/figure-html/fig-grammar-smooth-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-smooth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.9: A second geom (a linear trend line) layered over the points, one line per species.
+Figure&nbsp;20.8: A second geom (a linear trend line) layered over the points, one line per species.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-grammar-smooth" class="quarto-xref">Figure&nbsp;<span>20.9</span></a> adds three regression lines (<code>method = "lm"</code>). All three slope upward, confirming the flipper-mass relationship holds <em>within</em> each species, not just across the pooled cloud. We also set <code>alpha = 0.6</code> (outside <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>, so it’s constant) to make overlapping points semi-transparent.</p>
+<p><a href="#fig-grammar-smooth" class="quarto-xref">Figure&nbsp;<span>20.8</span></a> adds three regression lines (<code>method = "lm"</code>). All three slope upward, confirming the flipper-mass relationship holds <em>within</em> each species, not just across the pooled cloud. We also set <code>alpha = 0.6</code> (outside <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code>, so it’s constant) to make overlapping points semi-transparent.</p>
 </section><section id="step-5-control-scales" class="level3 page-columns page-full" data-number="20.3.5"><h3 data-number="20.3.5" class="anchored" data-anchor-id="step-5-control-scales">
 <span class="header-section-number">20.3.5</span> Step 5: control scales</h3>
 <p><strong>Scales</strong> govern the translation from data to pixels and colors. Let’s swap in a colorblind-safe Brewer palette and label the axis ticks with units:</p>
@@ -1116,15 +1108,15 @@ Figure&nbsp;20.9: A second geom (a linear trend line) layered over the points, o
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-scales" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-scales-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-scales-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;20.10: A Brewer qualitative palette via scale_color_brewer() and tidy axis breaks."><img src="visualization_guide_files/figure-html/fig-grammar-scales-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-scales-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;20.9: A Brewer qualitative palette via scale_color_brewer() and tidy axis breaks."><img src="visualization_guide_files/figure-html/fig-grammar-scales-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-scales-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.10: A Brewer qualitative palette via scale_color_brewer() and tidy axis breaks.
+Figure&nbsp;20.9: A Brewer qualitative palette via scale_color_brewer() and tidy axis breaks.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p>In <a href="#fig-grammar-scales" class="quarto-xref">Figure&nbsp;<span>20.10</span></a> the colors come from the qualitative <code>"Set2"</code> palette (safe under color blindness, per <a href="#sec-principles" class="quarto-xref"><span>Section 20.2</span></a>), and <code><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous()</a></code> sets even gridline breaks. Scales are where you take control of <em>how</em> the mapping looks without changing <em>what</em> is mapped.</p>
+<p>In <a href="#fig-grammar-scales" class="quarto-xref">Figure&nbsp;<span>20.9</span></a> the colors come from the qualitative <code>"Set2"</code> palette (safe under color blindness, per <a href="#sec-principles" class="quarto-xref"><span>Section 20.2</span></a>), and <code><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous()</a></code> sets even gridline breaks. Scales are where you take control of <em>how</em> the mapping looks without changing <em>what</em> is mapped.</p>
 </section><section id="step-6-facet-into-small-multiples" class="level3 page-columns page-full" data-number="20.3.6"><h3 data-number="20.3.6" class="anchored" data-anchor-id="step-6-facet-into-small-multiples">
 <span class="header-section-number">20.3.6</span> Step 6: facet into small multiples</h3>
 <p><strong>Faceting</strong> splits one plot into a grid of panels, one per group — often clearer than cramming everything together. <code>facet_wrap(~ species)</code> gives each species its own panel:</p>
@@ -1138,15 +1130,15 @@ Figure&nbsp;20.10: A Brewer qualitative palette via scale_color_brewer() and tid
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-facet" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-facet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-facet-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;20.11: Faceting by species puts each species in its own panel for side-by-side comparison."><img src="visualization_guide_files/figure-html/fig-grammar-facet-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-facet-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;20.10: Faceting by species puts each species in its own panel for side-by-side comparison."><img src="visualization_guide_files/figure-html/fig-grammar-facet-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-facet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.11: Faceting by species puts each species in its own panel for side-by-side comparison.
+Figure&nbsp;20.10: Faceting by species puts each species in its own panel for side-by-side comparison.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-grammar-facet" class="quarto-xref">Figure&nbsp;<span>20.11</span></a> makes the per-species spread easy to compare: Gentoo not only sit higher and to the right, they also span a wider range of body mass than the other two.</p>
+<p><a href="#fig-grammar-facet" class="quarto-xref">Figure&nbsp;<span>20.10</span></a> makes the per-species spread easy to compare: Gentoo not only sit higher and to the right, they also span a wider range of body mass than the other two.</p>
 </section><section id="step-7-labels-and-theme" class="level3 page-columns page-full" data-number="20.3.7"><h3 data-number="20.3.7" class="anchored" data-anchor-id="step-7-labels-and-theme">
 <span class="header-section-number">20.3.7</span> Step 7: labels and theme</h3>
 <p>Finally, the <strong>theme</strong> controls non-data styling, and <code><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs()</a></code> supplies the human context from <a href="#sec-principles" class="quarto-xref"><span>Section 20.2</span></a>. Putting it together:</p>
@@ -1165,15 +1157,15 @@ Figure&nbsp;20.11: Faceting by species puts each species in its own panel for si
 <div class="cell-output-display page-columns page-full">
 <div id="fig-grammar-final" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-grammar-final-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-grammar-final-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;20.12: The finished plot: data, aesthetics, two geoms, a scale, facets, labels, and a clean theme."><img src="visualization_guide_files/figure-html/fig-grammar-final-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-grammar-final-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;20.11: The finished plot: data, aesthetics, two geoms, a scale, facets, labels, and a clean theme."><img src="visualization_guide_files/figure-html/fig-grammar-final-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-grammar-final-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.12: The finished plot: data, aesthetics, two geoms, a scale, facets, labels, and a clean theme.
+Figure&nbsp;20.11: The finished plot: data, aesthetics, two geoms, a scale, facets, labels, and a clean theme.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-grammar-final" class="quarto-xref">Figure&nbsp;<span>20.12</span></a> is publication-grade, and you built it one layer at a time. Read the call top to bottom and you can <em>name</em> every part: data, the <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> mapping, two geoms, a color scale, facets, labels, and a minimal theme. That is the whole grammar of graphics — every <code>ggplot2</code> plot you ever write is some combination of these same pieces.</p>
+<p><a href="#fig-grammar-final" class="quarto-xref">Figure&nbsp;<span>20.11</span></a> is publication-grade, and you built it one layer at a time. Read the call top to bottom and you can <em>name</em> every part: data, the <code><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes()</a></code> mapping, two geoms, a color scale, facets, labels, and a minimal theme. That is the whole grammar of graphics — every <code>ggplot2</code> plot you ever write is some combination of these same pieces.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1208,15 +1200,15 @@ Figure&nbsp;20.12: The finished plot: data, aesthetics, two geoms, a scale, face
 <div class="cell-output-display page-columns page-full">
 <div id="fig-upset-plot" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-upset-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-upset-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;20.13: An UpSet plot of movie genres. Each bar is the size of one intersection; the dots below say which genres it combines. Read it as a scalable Venn diagram."><img src="visualization_guide_files/figure-html/fig-upset-plot-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-upset-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;20.12: An UpSet plot of movie genres. Each bar is the size of one intersection; the dots below say which genres it combines. Read it as a scalable Venn diagram."><img src="visualization_guide_files/figure-html/fig-upset-plot-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-upset-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.13: An UpSet plot of movie genres. Each bar is the size of one intersection; the dots below say which genres it combines. Read it as a scalable Venn diagram.
+Figure&nbsp;20.12: An UpSet plot of movie genres. Each bar is the size of one intersection; the dots below say which genres it combines. Read it as a scalable Venn diagram.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-upset-plot" class="quarto-xref">Figure&nbsp;<span>20.13</span></a> reads left to right by decreasing intersection size. The tallest bars with a single filled dot are the “only this set” groups; bars over two or more filled dots are the overlaps. You can see at a glance, for example, how many movies are <em>both</em> Drama and Comedy versus Drama alone — a comparison that a five-circle Venn diagram simply cannot show clearly. Swap the movie genres for your gene lists and the reading is identical.</p>
+<p><a href="#fig-upset-plot" class="quarto-xref">Figure&nbsp;<span>20.12</span></a> reads left to right by decreasing intersection size. The tallest bars with a single filled dot are the “only this set” groups; bars over two or more filled dots are the overlaps. You can see at a glance, for example, how many movies are <em>both</em> Drama and Comedy versus Drama alone — a comparison that a five-circle Venn diagram simply cannot show clearly. Swap the movie genres for your gene lists and the reading is identical.</p>
 </section><section id="heatmaps-for-data-matrices" class="level3 page-columns page-full" data-number="20.4.2"><h3 data-number="20.4.2" class="anchored" data-anchor-id="heatmaps-for-data-matrices">
 <span class="header-section-number">20.4.2</span> Heatmaps for data matrices</h3>
 <p>A <strong>heatmap</strong> turns a matrix of numbers into a grid of colored tiles, so the eye can pick out blocks and patterns that a table hides. In genomics, the rows are typically genes, the columns are samples, and the color is expression level. Heatmaps also usually <em>cluster</em> similar rows and columns together, so co-behaving genes and similar samples sit next to each other.</p>
@@ -1246,15 +1238,15 @@ Figure&nbsp;20.13: An UpSet plot of movie genres. Each bar is the size of one in
 <div class="cell-output-display page-columns page-full">
 <div id="fig-pheatmap" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full"><div aria-describedby="fig-pheatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-pheatmap-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;20.14: A clustered heatmap of scaled car measurements. Rows (cars) and columns (features) are reordered so similar profiles sit together; the color shows how far above (red) or below (blue) average each value is."><img src="visualization_guide_files/figure-html/fig-pheatmap-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-pheatmap-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;20.13: A clustered heatmap of scaled car measurements. Rows (cars) and columns (features) are reordered so similar profiles sit together; the color shows how far above (red) or below (blue) average each value is."><img src="visualization_guide_files/figure-html/fig-pheatmap-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-pheatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.14: A clustered heatmap of scaled car measurements. Rows (cars) and columns (features) are reordered so similar profiles sit together; the color shows how far above (red) or below (blue) average each value is.
+Figure&nbsp;20.13: A clustered heatmap of scaled car measurements. Rows (cars) and columns (features) are reordered so similar profiles sit together; the color shows how far above (red) or below (blue) average each value is.
 </figcaption></figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-pheatmap" class="quarto-xref">Figure&nbsp;<span>20.14</span></a> clusters the rows and columns automatically. The tree diagrams (<strong>dendrograms</strong>) on the top and left show how cars and features were grouped. You can read off blocks: the fuel-efficiency feature (<code>mpg</code>) sits opposite the power/weight features, and the cars split into a heavy-and-powerful block versus a light-and-efficient one. Read genes for cars and samples for features, and this is exactly how an expression heatmap is interpreted.</p>
+<p><a href="#fig-pheatmap" class="quarto-xref">Figure&nbsp;<span>20.13</span></a> clusters the rows and columns automatically. The tree diagrams (<strong>dendrograms</strong>) on the top and left show how cars and features were grouped. You can read off blocks: the fuel-efficiency feature (<code>mpg</code>) sits opposite the power/weight features, and the cars split into a heavy-and-powerful block versus a light-and-efficient one. Read genes for cars and samples for features, and this is exactly how an expression heatmap is interpreted.</p>
 <p>For richer needs — multiple annotation bars, split heatmaps, precise control over legends — Bioconductor’s <code>ComplexHeatmap</code> is the standard. It uses the same mental model (a matrix plus optional row/column annotations) with far more knobs; its <a href="https://jokergoo.github.io/ComplexHeatmap-reference/book/">reference book</a> is the place to go when <code>pheatmap</code> runs out of room.</p>
 </section><section id="visualizing-the-genome-further-exploration" class="level3" data-number="20.4.3"><h3 data-number="20.4.3" class="anchored" data-anchor-id="visualizing-the-genome-further-exploration">
 <span class="header-section-number">20.4.3</span> Visualizing the genome (further exploration)</h3>
@@ -1289,7 +1281,7 @@ Figure&nbsp;20.14: A clustered heatmap of scaled car measurements. Rows (cars) a
 <div class="cell-output-display">
 <div id="fig-ex-bill" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-ex-bill-caption"><div aria-describedby="fig-ex-bill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-ex-bill-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;20.15: Bill length vs.&nbsp;depth, colored by species."><img src="visualization_guide_files/figure-html/fig-ex-bill-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-ex-bill-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;20.14: Bill length vs.&nbsp;depth, colored by species."><img src="visualization_guide_files/figure-html/fig-ex-bill-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 </figure>
 </div>
@@ -1300,7 +1292,7 @@ Figure&nbsp;20.14: A clustered heatmap of scaled car measurements. Rows (cars) a
 </div>
 </div>
 <div id="fig-ex-bill-caption" class="margin-figure-caption column-margin callout-6-contents callout-collapse collapse callout-margin-content">
-Figure&nbsp;20.15: Bill length vs.&nbsp;depth, colored by species.
+Figure&nbsp;20.14: Bill length vs.&nbsp;depth, colored by species.
 </div></li>
 <li class="page-columns page-full">
 <p><strong>A distribution, not a relationship.</strong> Use <code><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot()</a></code> to compare body mass across the three species (species on x, <code>body_mass_g</code> on y). Which species is heaviest?</p>
@@ -1323,7 +1315,7 @@ Figure&nbsp;20.15: Bill length vs.&nbsp;depth, colored by species.
 <div class="cell-output-display">
 <div id="fig-ex-box" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-ex-box-caption"><div aria-describedby="fig-ex-box-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-ex-box-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" title="Figure&nbsp;20.16: Body-mass distribution by species."><img src="visualization_guide_files/figure-html/fig-ex-box-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-ex-box-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;20.15: Body-mass distribution by species."><img src="visualization_guide_files/figure-html/fig-ex-box-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 </figure>
 </div>
@@ -1334,7 +1326,7 @@ Figure&nbsp;20.15: Bill length vs.&nbsp;depth, colored by species.
 </div>
 </div>
 <div id="fig-ex-box-caption" class="margin-figure-caption column-margin callout-7-contents callout-collapse collapse callout-margin-content">
-Figure&nbsp;20.16: Body-mass distribution by species.
+Figure&nbsp;20.15: Body-mass distribution by species.
 </div></li>
 <li class="page-columns page-full">
 <p><strong>Add the labels.</strong> Take your boxplot from Exercise 2 and give it a title and properly-labeled axes with units, following <a href="#sec-principles" class="quarto-xref"><span>Section 20.2</span></a>.</p>
@@ -1361,7 +1353,7 @@ Figure&nbsp;20.16: Body-mass distribution by species.
 <div class="cell-output-display">
 <div id="fig-ex-labels" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure" aria-labelledby="fig-ex-labels-caption"><div aria-describedby="fig-ex-labels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="visualization_guide_files/figure-html/fig-ex-labels-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" title="Figure&nbsp;20.17: The boxplot, now properly labeled."><img src="visualization_guide_files/figure-html/fig-ex-labels-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="visualization_guide_files/figure-html/fig-ex-labels-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" title="Figure&nbsp;20.16: The boxplot, now properly labeled."><img src="visualization_guide_files/figure-html/fig-ex-labels-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 </figure>
 </div>
@@ -1372,7 +1364,7 @@ Figure&nbsp;20.16: Body-mass distribution by species.
 </div>
 </div>
 <div id="fig-ex-labels-caption" class="margin-figure-caption column-margin callout-8-contents callout-collapse collapse callout-margin-content">
-Figure&nbsp;20.17: The boxplot, now properly labeled.
+Figure&nbsp;20.16: The boxplot, now properly labeled.
 </div></li>
 <li>
 <p><strong>Pick the right palette family.</strong> You’re plotting log-fold-changes that range from strongly negative to strongly positive, with zero as the meaningful midpoint. Which <code>RColorBrewer</code> palette <em>family</em> should you use, and why?</p>
