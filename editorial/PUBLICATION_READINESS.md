@@ -10,6 +10,20 @@ This extends `editorial/JOSE_AND_LICENSING.md` §3 (which framed options A/B/C).
 decision below is a hybrid of A+B, enabled by the scope call on 2026-06-23: *hotlinks
 and screenshots are fine if appropriately licensed or fair use.*
 
+## Status (2026-06-23)
+
+**Essentially complete.** Phases 0–4 done; Phase 5 pending final CI.
+- **Phase 0** ✓ — CC-BY 4.0 (ADR 0001); license.qmd/about.qmd/contributors.qmd updated; SPDX flipped in CITATION.cff/.zenodo.json.
+- **Phase 1** ✓ — 1.1 data-structures fig, 1.2 ggplot2 (de-Kabacoff → penguins), 1.3 STHDA, 1.4 SCE fig, 1.5 ATAC figs (NCBI hotlink removed), 1.6 both Turner chapters rewritten. HOPR fully removed from the book.
+- **Phase 2** ✓ — 2.1 GenomicRanges reword+attribute, 2.2 Carpentries block, 2.3 norm.qmd figures (dnorm mislabel fixed), 2.4 ranges_exercises redesign, 2.5 OMA caption.
+- **Phase 3** ✓ — 3.1 screenshots, 3.2 YouTube thumbnail, 3.3 sklearn BSD, 3.4 Tsompana, 3.5 biology_primer (verified), 3.6 Tufte cover, 3.7 se.png (Artistic-2.0 vignette fig).
+- **Phase 4** — 4.1 ✓ orphan hopr deleted; 4.3 ✓ sweep clean (in-book chapters: no NC/ND/ARR, only approved hotlinks, only Sean/Lori/Martin bylines); 4.4 ✓ contributors pruned.
+- **Phase 5** — 5.1/5.2 pending (final all-format render + CI green); 5.3 ✓ SPDX flipped; Zenodo re-release on next tag.
+
+**Open decisions for the author:**
+- **4.2 orphan drafts** (NOT in the book, so no published-licensing exposure): `simulation_basics.qmd` + `protein_simulation_basics.qmd` (byline Grolemund) and `data_vis_hadley.qmd` (byline Hadley Wickham). Delete, or keep-and-rewrite? Flagged, not actioned.
+- **`images/treesummarizedexperiment.png`** (2.5): caption reworded, but the image's provenance (OMA-NC vs TreeSummarizedExperiment-package) is unconfirmed — confirm or replace the image.
+
 ## The decision rule (applies to every item)
 
 | Source license | Mitigation |
