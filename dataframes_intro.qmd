@@ -6,7 +6,6 @@ author:
     affiliation: University of Colorado<br/>Anschutz School of Medicine
     affiliation-url: https://medschool.cuanschutz.edu/
     email: seandavi@gmail.com
-  - name: Stephen Turner
 ---
 
 Almost every dataset you will meet in genomics arrives as a table: genes down the
@@ -19,185 +18,162 @@ on a theme you already know.
 A data.frame looks a bit like an R matrix in that it has two dimensions, rows and
 columns. The difference that matters is this: a matrix **must** hold a single data
 type, while a data.frame may hold a *different* data type in each column — numbers
-in one, gene names in another, an experimental condition in a third. That is
-exactly what a real dataset looks like, which is why the data.frame, not the
-matrix, is the workhorse for tabular data in R.
+in one, gene names in another, a logical flag in a third. That is exactly what a
+real dataset looks like, which is why the data.frame, not the matrix, is the
+workhorse for tabular data in R.
 
 ## What you'll learn
 
 By the end of this chapter you will be able to:
 
 - Explain how a `data.frame` differs from a matrix, and why that difference matters.
-- Load tabular data from a file or URL with `read.csv()`.
-- Inspect a data frame with `head()`, `dim()`, `summary()`, and friends.
-- Pull out columns and rows by position, name, and logical condition.
-- Summarize measurements by category with `aggregate()`.
-- Build a `data.frame` from scratch and save it back to disk.
+- Build a `data.frame` from scratch with `data.frame()`.
+- Inspect a data frame with `str()`, `head()`, `dim()`, `nrow()`, `ncol()`, and `summary()`.
+- Pull out columns with `$` and `[[ ]]`, and rows and columns with `[rows, columns]`.
+- Add a new column and select rows by a logical condition.
+- Save a data frame back to disk with `write.csv()`.
 
-We'll do all of this on a real yeast gene-expression dataset.
+We'll do all of this on a small gene-expression table that we build ourselves, so
+there is nothing to download and every value is in plain sight.
 
-## Dataset
+## Building a data.frame from scratch
 
-The data used here are borrowed directly from the [fantastic
-Bioconnector tutorials](http://bioconnector.org/index.html) and are a
-cleaned up version of the data from [Brauer et al. Coordination of
-Growth Rate, Cell Cycle, Stress Response, and Metabolic Activity in
-Yeast (2008) Mol Biol Cell
-19:352-367](http://www.ncbi.nlm.nih.gov/pubmed/17959824). These data
-are from a gene expression microarray, and in this paper the authors
-examine the relationship between growth rate and gene expression in
-yeast cultures limited by one of six different nutrients (glucose,
-leucine, ammonium, sulfate, phosphate, uracil). If you give yeast a
-rich media loaded with nutrients except restrict the supply of a
-single nutrient, you can control the growth rate to any rate you
-choose. By starving yeast of specific nutrients you can find genes
-that:
+The most direct way to understand a data.frame is to make one. Recall from the
+[vectors](vectors.qmd) chapter that a column of a data frame is just a vector. So a
+data.frame is really a set of equal-length vectors stood up side by side, each one
+becoming a named column. The `data.frame()` function does exactly that assembly.
 
-1. Raise or lower their expression in response to growth
-   rate. Growth-rate dependent expression patterns can tell us a lot
-   about cell cycle control, and how the cell responds to stress. The
-   authors found that expression of >25% of all yeast genes is
-   linearly correlated with growth rate, independent of the limiting
-   nutrient. They also found that the subset of negatively
-   growth-correlated genes is enriched for peroxisomal functions, and
-   positively correlated genes mainly encode ribosomal functions.
-2. Respond differently when different nutrients are being limited. If
-   you see particular genes that respond very differently when a
-   nutrient is sharply restricted, these genes might be involved in
-   the transport or metabolism of that specific nutrient.
-
-The dataset can be downloaded directly from:
-
-- [brauer2007_tidy.csv](https://raw.githubusercontent.com/bioconnector/workshops/master/data/brauer2007_tidy.csv)
-
-We are going to read this dataset into R and then use it as a playground for learning about data.frames.
-
-## Reading in data
-
-R has many capabilities for reading in data. Many of the functions
-have names that help us to understand what data format is to be
-expected. In this case, the filename that we want to read ends in
-`.csv`, meaning comma-separated-values. The `read.csv()` function
-reads in `.csv` files.  As usual, it is worth reading
-`help('read.csv')` to get a better sense of the possible
-bells-and-whistles.
-
-The `read.csv()` function can read directly from a URL, so we do not
-need to download the file directly.  This dataset is relatively large
-(about 16MB), so this may take a bit depending on your network
-connection speed.
+Imagine we have measured a handful of genes: each gene has a symbol, the
+chromosome it sits on, an average expression value, the log~2~ fold change between
+a tumor and a normal sample, and a flag for whether it is a known cancer gene.
+Each of those is a vector, and they are all the same length — one entry per gene.
 
 ```{r}
-options(width=60)
-```
-
-
-```{r cache=TRUE}
-url <- paste0(
-    'https://raw.githubusercontent.com',
-    '/bioconnector/workshops/master/data/brauer2007_tidy.csv'
+genes <- data.frame(
+  symbol     = c("TP53", "BRCA1", "EGFR", "MYC", "PTEN", "KRAS", "ALK", "RB1"),
+  chromosome = c("17", "17", "7", "8", "10", "12", "2", "13"),
+  expression = c(8.2, 5.1, 11.4, 9.8, 6.7, 7.3, 4.2, 5.9),
+  log2fc     = c(-1.4, -0.8, 2.1, 3.0, -2.2, 1.1, 0.3, -1.7),
+  is_cancer  = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE)
 )
-ydat <- read.csv(url)
+genes
 ```
 
-Our variable, `ydat`, now "contains" the downloaded and read data. We can check to see what data type
-read.csv gave us:
+Notice that R lined up our five vectors into five columns and numbered the rows
+`1` through `8` down the left edge. Those row numbers are the default *row names*.
+Each column kept its own type: `symbol` and `chromosome` are character, `expression`
+and `log2fc` are numeric, and `is_cancer` is logical. That mix of types in one
+object is the whole point of a data.frame — and the one thing a matrix could never
+do.
+
+We can confirm that R really did give us a `data.frame`:
 
 ```{r}
-class(ydat)
+class(genes)
 ```
 
-R reports `"data.frame"`, so `read.csv()` did what its name promises: it turned a
-table of text into the structure we want to work with.
+## Inspecting a data.frame
 
-## Inspecting data.frames
+Our table is small enough to print in full, but real datasets have thousands or
+tens of thousands of rows and you will not be able to look at them all at once.
+Fortunately, R gives you a toolkit for inspecting a data.frame a piece at a time.
 
-Your `ydat` variable is a data.frame. The dataset is fairly large, so you will not be
-able to look at it all at once on the screen. Fortunately, R gives you many tools to
-inspect a data.frame a piece at a time.
-
+- Structure at a glance
+  + `str()` to see the columns, their types, and a preview of each
 - Overviews of content
-  + `head()` to show first few rows
-  + `tail()` to show last few rows
+  + `head()` to show the first few rows
+  + `tail()` to show the last few rows
 - Size
   + `dim()` for dimensions (rows, columns)
-  + `nrow()`
-  + `ncol()`
-  + `object.size()` for power users interested in the memory used to store an object
-- Data and attribute summaries
-  + `colnames()` to get the names of the columns
-  + `rownames()` to get the "names" of the rows--may not be present
-  + `summary()` to get per-column summaries of the data in the data.frame.
-  
-```{r dataframeinspection}
-head(ydat)
-tail(ydat)
-dim(ydat)
-nrow(ydat)
-ncol(ydat)
-colnames(ydat)
-summary(ydat)
+  + `nrow()` for the number of rows
+  + `ncol()` for the number of columns
+- Names and summaries
+  + `colnames()` for the column names
+  + `rownames()` for the row "names" (often just the row numbers)
+  + `summary()` for a per-column thumbnail of the data
+
+The single most useful one is `str()`, which you met in the
+[lists](lists.qmd) chapter. It reports the structure: how many rows ("obs."), how
+many columns ("variables"), and for each column its name, type, and first few values.
+
+```{r}
+str(genes)
 ```
 
-The `dim()` output tells you the shape at a glance — tens of thousands of rows and a
-handful of columns — and `summary()` gives a per-column thumbnail: numeric ranges for
-the measurement columns and counts for the categorical ones.
+`head()` and `tail()` show the top and bottom of the table — invaluable when the
+full thing is too long to read:
+
+```{r}
+head(genes, 3)
+tail(genes, 3)
+```
+
+The size functions answer "how big is this?" at a glance. `dim()` returns the rows
+and columns together; `nrow()` and `ncol()` return them one at a time, which is
+handy inside other calculations:
+
+```{r}
+dim(genes)
+nrow(genes)
+ncol(genes)
+```
+
+The name functions tell you what the rows and columns are called. `colnames()` is
+the one you'll reach for constantly — it's a menu of everything you can ask for:
+
+```{r}
+colnames(genes)
+rownames(genes)
+```
+
+Finally, `summary()` walks across the columns and gives each an appropriate
+thumbnail: numeric ranges and quartiles for the measurement columns, simple counts
+for the others.
+
+```{r}
+summary(genes)
+```
 
 ::: {.callout-note}
 ## Look before you leap with `View()`
 
 In RStudio there is one more inspection tool, `View()` (note the capital "V"), that
-opens the first 1000 rows in a spreadsheet-style window you can scroll and sort. It
-is a great way to *get a feel* for a dataset before you start writing code against
-it. We don't run it here because it only works in interactive RStudio, not when the
+opens the data frame in a spreadsheet-style window you can scroll and sort. It is a
+great way to *get a feel* for a dataset before you start writing code against it.
+We don't run it here because it only works in interactive RStudio, not when the
 book is rendered.
 
 ```{r eval=FALSE}
-View(ydat)
+View(genes)
 ```
 :::
 
-## Accessing variables (columns) and subsetting
+## Accessing columns
 
-In R, data.frames can be subset similarly to other two-dimensional data structures. The `[` in R is used 
-to denote subsetting of any kind. When working with two-dimensional data, we need two values inside the `[ ]`
-to specify the details. The specification is `[rows, columns]`. For example, to get the first three rows of `ydat`,
-use:
+Because pulling out a single column is such a common operation, R gives data.frames
+two shortcuts for it. The first, the `$` operator, takes the data frame on the left
+and a column name on the right:
 
 ```{r}
-ydat[1:3, ]
+genes$symbol
+genes$expression
 ```
 
-Note how the second number, the columns, is blank. R takes that to mean "all the columns". Similarly, we can
-combine rows and columns specification arbitrarily.
+Each of these hands you back a plain vector — exactly the vector you put in when
+you built the data frame. So everything you learned about vectors applies directly.
+You can, for example, take the mean of the expression column:
 
 ```{r}
-ydat[1:3, 1:3]
+mean(genes$expression)
 ```
 
-Because selecting a single variable, or column, is such a common operation, there are two shortcuts for
-doing so *with data.frames*. The first, the `$` operator works like so:
+The second shortcut comes from a fact worth remembering: in R, a data.frame is also
+a list, where each column is one element. So the list notation `[[ ]]` works too,
+either by position or by name:
 
 ```{r}
-# Look at the column names, just to refresh memory
-colnames(ydat)
-# Note that I am using "head" here to limit the output
-head(ydat$symbol)
-# What is the actual length of "symbol"?
-length(ydat$symbol)
-```
-
-The second is related to the fact that, in R, data.frames are also lists. We subset a list by using `[[]]` notation.
-To get the second column of `ydat`, we can use:
-
-```{r}
-head(ydat[[2]])
-```
-
-Alternatively, we can use the column name:
-
-```{r}
-head(ydat[["systematic_name"]])
+genes[[3]]               # the third column, by position
+genes[["expression"]]    # the same column, by name
 ```
 
 ::: {.callout-note}
@@ -205,163 +181,220 @@ head(ydat[["systematic_name"]])
 
 Both pull out a single column as a plain vector, so why two notations? `$` is the
 quick, everyday form when you know the column name as you type it
-(`ydat$symbol`). `[[ ]]` is the form to reach for when the column is chosen by a
-*value* — a number (`ydat[[2]]`) or a name stored in a variable
-(`col <- "symbol"; ydat[[col]]`), which `$` cannot do. Reach for `$` by default and
-`[[ ]]` when you're programming with the column choice.
+(`genes$expression`). `[[ ]]` is the form to reach for when the column is chosen by
+a *value* — a number (`genes[[3]]`) or a name stored in a variable
+(`col <- "expression"; genes[[col]]`), which `$` cannot do. Reach for `$` by default
+and `[[ ]]` when you're programming with the column choice.
 :::
 
-## Aggregating and exploring
+## Subsetting with `[rows, columns]`
 
-There are a couple of columns that hold numeric values. You can confirm which by
-asking each column its `class()`:
+A data.frame has two dimensions, so to pull out a rectangular piece we use the
+square brackets with **two** values inside, separated by a comma: `[rows, columns]`.
+Leaving one side of the comma blank means "all of them."
 
-```{r}
-class(ydat$symbol)
-class(ydat$rate)
-class(ydat$expression)
-```
-
-So `symbol` is a character column, while `rate` and `expression` are numeric. We'll
-put those numeric columns to work in the exercises at the end of the chapter.
-
-### More advanced indexing and subsetting
-
-We can use, for example, logical values (TRUE/FALSE) to subset data.frames. Here we
-keep only the rows where the `symbol` column equals `LEU1`:
+To get the first three rows and *all* columns, fill in the rows and leave the
+columns blank:
 
 ```{r}
-head(ydat[ydat$symbol == 'LEU1', ])
-tail(ydat[ydat$symbol == 'LEU1', ])
+genes[1:3, ]
 ```
 
-Notice the rows full of `NA` that came along for the ride. That is not a bug in your
-code — it is one of the most common surprises in R, and worth understanding once so
-it never trips you up again.
-
-::: {.callout-warning}
-## Logical subsetting and missing values
-
-When you filter with a condition like `ydat$symbol == 'LEU1'`, any row whose
-`symbol` is `NA` returns `NA` for the test — not `FALSE` — so R keeps it, and you
-get phantom rows full of `NA`. The fix is to exclude the missing values explicitly
-with `!is.na()`:
+To get specific rows *and* specific columns, fill in both:
 
 ```{r}
-head(ydat[ydat$symbol == 'LEU1' & !is.na(ydat$symbol), ])
+genes[1:3, c("symbol", "expression")]
 ```
 
-Now only the genuine `LEU1` rows remain.
+And to get one whole column while leaving the rows blank, name the column on the
+right of the comma:
+
+```{r}
+genes[, "chromosome"]
+```
+
+::: {.callout-tip}
+## The comma is the whole trick
+
+With a one-dimensional vector you write `x[i]` — one value in the brackets. With a
+two-dimensional data.frame you write `df[i, j]` — two values, separated by a comma,
+meaning `[rows, columns]`. If you ever see an error like *"incorrect number of
+dimensions,"* you've almost always forgotten the comma.
 :::
 
-Sometimes, looking at the data themselves is not that important. Using `dim()` is one possibility to look at the
-number of rows and columns after subsetting.
+## Adding a column
+
+Adding a column works just like assigning to a column that doesn't exist yet: name
+it with `$` on the left of the assignment arrow, and give it a vector of the right
+length. Here we add an `abs_log2fc` column holding the *absolute* fold change,
+which is often what we sort on when we care about the size of a change regardless
+of its direction:
 
 ```{r}
-dim(ydat[ydat$expression > 3, ])
+genes$abs_log2fc <- abs(genes$log2fc)
+genes
 ```
 
-Find the high expressed genes when leucine-starved. For this task we can also use `subset` which allows 
-us to treat column names as R variables (no `$` needed).
+The data frame now has six columns instead of five. Because `abs()` is vectorized
+(see the [vectors](vectors.qmd) chapter), one short line computed the new value for
+every row at once.
+
+## Selecting rows by a logical condition
+
+This is where data.frames earn their keep. Recall the logical-indexing pattern from
+the vectors chapter: ask a yes/no question of a column, get back a `TRUE`/`FALSE`
+vector, then use it to keep only the rows where the answer is `TRUE`. With a
+data.frame, that logical vector goes in the *row* position of `[rows, columns]`.
+
+For example, keep only the genes with expression above 7:
 
 ```{r}
-subset(ydat, nutrient == 'Leucine' & rate == 0.05 & expression > 3)
+genes[genes$expression > 7, ]
 ```
 
-## Aggregating data
+Read the inside first: `genes$expression > 7` produces a logical vector — one
+`TRUE`/`FALSE` per gene — and `genes[..., ]` keeps the rows where it is `TRUE`, with
+the blank after the comma keeping all the columns.
 
-Aggregating data, or summarizing by category, is a common way to look
-for trends or differences in measurements between categories. Use `aggregate`
-to find the mean expression by gene symbol.
+You can combine conditions with `&` ("and") and `|` ("or"). Here we ask for cancer
+genes whose expression is also above 7:
 
 ```{r}
-head(aggregate(ydat$expression, by = list(ydat$symbol), mean))
-# or
-head(aggregate(expression ~ symbol, mean, data = ydat))
+genes[genes$is_cancer & genes$expression > 7, ]
 ```
 
-Both calls do the same thing: collapse the many measurements for each gene into a
-single mean expression value, one row per `symbol`. The formula form
-(`expression ~ symbol`) reads as "expression *by* symbol" and is usually the easier
-to type and to read.
-
-## Creating a data.frame from scratch
-
-Sometimes it is useful to combine related data into one object. For example, let's simulate some data.
+And of course you can select rows and columns at the same time — keep the up-regulated
+genes (`log2fc > 0`) but show only their symbol and fold change:
 
 ```{r}
-set.seed(42)
-smoker <- factor(rep(c("smoker", "non-smoker"), each = 50))
-smoker_numeric <- as.numeric(smoker)
-x <- rnorm(100)
-risk <- x + 2 * smoker_numeric
+genes[genes$log2fc > 0, c("symbol", "log2fc")]
 ```
 
-We set a seed first with `set.seed(42)` so the random draws are reproducible — you
-and a reader will see the same numbers. We now have two related variables, `risk`
-and `smoker`. We can make a data.frame out of them:
+::: {.callout-tip}
+## `subset()`: the same idea, less typing
+
+Writing `genes$` in front of every column name gets repetitive. The `subset()`
+function lets you refer to the columns by their bare names, because it knows to look
+them up inside the data frame:
 
 ```{r}
-smoker_risk <- data.frame(smoker = smoker, risk = risk)
-head(smoker_risk)
+subset(genes, is_cancer & expression > 7)
 ```
 
-R also has plotting shortcuts that work with data.frames. Because `smoker` is a
-factor, `plot()` recognizes the `risk ~ smoker` formula and draws a boxplot of risk
-in each group:
-
-```{r}
-plot(risk ~ smoker, data = smoker_risk)
-```
-
-As we built the data, smokers carry the higher simulated risk — and the boxplot
-shows exactly that.
+It reads almost like English: *subset the genes where `is_cancer` is true and
+`expression` exceeds 7.* Use whichever form is clearer to you; they do the same job.
+:::
 
 ## Saving a data.frame
 
-Once we have a data.frame of interest, we may want to save it. The most
-portable way to save a data.frame is to use one of the `write` functions. In
-this case, let's save the data as a `.csv` file.
+Once you have a data.frame worth keeping, you'll want to save it. The most portable
+way is to write it to a `.csv` file (comma-separated values), which any other
+program — R, Python, even a spreadsheet — can read. The `write.csv()` function does
+this. We pass `row.names = FALSE` so the default row numbers aren't written as an
+extra unnamed column:
 
 ```{r eval=FALSE}
-write.csv(smoker_risk, "smoker_risk.csv")
+write.csv(genes, "genes.csv", row.names = FALSE)
 ```
+
+Reading it back later is just as direct, with `read.csv()`:
+
+```{r eval=FALSE}
+genes <- read.csv("genes.csv")
+```
+
+The function names follow a pattern worth noticing: `read.csv()` and `write.csv()`
+are mirror images, and the `.csv` in each name tells you the file format. As always,
+`help('read.csv')` is worth a look for the many options these functions accept.
 
 ## Exercises
 
-These all use the yeast dataset, `ydat`, from earlier in the chapter.
+These all use the `genes` data frame we built earlier in the chapter (including the
+`abs_log2fc` column we added).
 
-1. Which columns of `ydat` are numeric? Check `rate` and `expression`.
-2. Make a histogram of the `expression` values, then of the `rate` values.
-3. `rate` has only a handful of distinct values. Use `table()` to count how many
-   rows fall at each rate. Which `rate` corresponds to the most nutrient-starved
-   condition?
+1. **How many genes, how many columns?** Report the number of rows and the number
+   of columns in `genes` two ways: with a single call to `dim()`, and with `nrow()`
+   and `ncol()` separately.
 
-::: {.callout-note collapse="true"}
-## Solutions
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   dim(genes)
+   nrow(genes)
+   ncol(genes)
+   ```
+   `dim()` returns both numbers as a length-2 vector (rows first, then columns);
+   `nrow()` and `ncol()` return each one on its own, which is handier inside other
+   calculations.
+   :::
 
-```{r}
-class(ydat$rate); class(ydat$expression)   # both numeric
-hist(ydat$expression)
-hist(ydat$rate)
-table(ydat$rate)                            # the smallest rate = most starved
-```
+2. **Extract a column and summarize it.** Pull the `log2fc` column out as a plain
+   vector and compute its mean. Confirm the extracted object is numeric.
 
-Growth rate is the *limiting nutrient* dialed down, so the **lowest** `rate`
-(0.05) is the most starved condition.
-:::
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   fc <- genes$log2fc
+   class(fc)
+   mean(fc)
+   ```
+   `$` extracts the column as the plain numeric vector you put in, so ordinary
+   vector functions like `mean()` work on it directly.
+   :::
+
+3. **Subset by condition.** Keep only the rows where `is_cancer` is `TRUE` *and*
+   `log2fc` is negative (down-regulated cancer genes). How many are there?
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   down_cancer <- genes[genes$is_cancer & genes$log2fc < 0, ]
+   down_cancer
+   nrow(down_cancer)
+   ```
+   The two conditions are joined with `&`; the combined logical vector goes in the
+   *row* position of `[rows, columns]`, and the blank after the comma keeps every
+   column. `nrow()` then counts the surviving rows.
+   :::
+
+4. **Add a column.** Add a logical column called `strong` that is `TRUE` when a
+   gene's absolute fold change (`abs_log2fc`) is at least 2. Then count how many
+   genes are `strong`.
+
+   ::: {.callout-note collapse="true"}
+   ## Solution
+   ```{r}
+   genes$strong <- genes$abs_log2fc >= 2
+   sum(genes$strong)
+   ```
+   Assigning to `genes$strong` creates the new column from a logical comparison.
+   Because `TRUE` counts as 1, `sum()` of a logical column tallies the `TRUE`s — the
+   same count-by-summing trick from the vectors chapter.
+   :::
 
 ## Summary
 
-You can now load a real dataset into a `data.frame`, inspect its shape and
-contents, pull out the rows and columns you care about (by position, name, or a
-logical test), summarize values by category with `aggregate()`, and write results
-back to disk. These are the moves you'll repeat on every dataset for the rest of the
+You can now build a `data.frame` from a set of equal-length vectors, inspect its
+shape and contents, pull out the rows and columns you care about, add new columns,
+and write the result back to disk. Specifically, you can:
+
+- **Build** a data frame with `data.frame(name = vector, ...)`, mixing column types
+  freely — the one thing a matrix cannot do.
+- **Inspect** it with `str()` (structure), `head()`/`tail()` (content), `dim()` /
+  `nrow()` / `ncol()` (size), and `summary()` (per-column thumbnail).
+- **Extract a column** with `$` or `[[ ]]`, getting back a plain vector.
+- **Subset** a rectangle with `[rows, columns]`, where a blank means "all."
+- **Filter rows** by a logical condition in the row position — the single most
+  important move, and the same logical-indexing pattern you learned for vectors.
+- **Add** a column by assigning to `df$newname`, and **save** with `write.csv()`.
+
+The logical-indexing pattern — ask a yes/no question of a column, then use the
+answer to keep rows — is the move you'll repeat on every dataset for the rest of the
 book.
 
 ## Reflection
 
 - Can you state one thing a `data.frame` can do that a matrix cannot?
-- Given a column `ydat$rate`, can you write the subset that keeps only rows where
-  `rate < 0.1`?
-- When would you reach for `aggregate()` instead of subsetting?
+- Given the column `genes$expression`, can you write the subset that keeps only rows
+  where `expression < 6`?
+- What's the difference between `genes[2]`, `genes[[2]]`, and `genes[, 2]`?

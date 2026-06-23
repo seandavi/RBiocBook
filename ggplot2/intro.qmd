@@ -8,11 +8,9 @@ author:
     email: seandavi@gmail.com
 ---
 
-A plot answers questions a table of numbers cannot. Does a cost rise with age? Do two groups behave differently? Are there outliers worth a second look? `ggplot2` is the package most R users reach for to ask those questions, and it does so with a small, consistent vocabulary you can combine to build almost any graphic. In this chapter you'll start from a blank canvas and, one layer at a time, build up a single plot that shows four variables at once.
+A plot answers questions a table of numbers cannot. Does one measurement rise with another? Do two groups behave differently? Are there outliers worth a second look? `ggplot2` is the package most R users reach for to ask those questions, and it does so with a small, consistent vocabulary you can combine to build almost any graphic. In this chapter you'll start from a blank canvas and, one layer at a time, build up a single plot that shows four variables at once.
 
-This chapter is based on the [Intro to ggplot2 chapter](https://rkabacoff.github.io/datavis/IntroGGPLOT.html) from the book [Modern Data Visualization with R](https://rkabacoff.github.io/datavis/) by Robert Kabacoff, which is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/). The original chapter has been modified to fit the context of this book.
-
-The [insurance dataset](https://www.kaggle.com/datasets/mirichoi0218/insurance) is described in the book *Machine Learning with R* by Brett Lantz. A cleaned version of the dataset is also available on Kaggle. The dataset describes medical information and costs billed by health insurance companies in 2013, as compiled by the United States Census Bureau. Variables include age, sex, body mass index, number of children covered by health insurance, smoker status, US region, and individual medical costs billed by health insurance for 1338 individuals.
+For our running example we'll use the `penguins` dataset from the `palmerpenguins` package. It records body measurements — bill length and depth, flipper length, and body mass — for 344 penguins of three species (Adélie, Chinstrap, and Gentoo) living on three islands in the Palmer Archipelago near Antarctica. It's a small, tidy table of real measurements, which makes it a friendly stand-in for the kind of morphometric and phenotype data you'll meet throughout biology. (The data are released into the public domain under a CC0 license by Allison Horst, Alison Hill, and Kristen Gorman.)
 
 ## What you'll learn
 
@@ -29,39 +27,39 @@ The [insurance dataset](https://www.kaggle.com/datasets/mirichoi0218/insurance) 
 `ggplot2` is built on an idea called the *grammar of graphics*: a plot is assembled from independent pieces you stack with `+`. The pieces are always the same — **data** (the data frame), **aesthetics** (which variable maps to x, to y, to colour, …), **geoms** (the shapes that get drawn: points, lines, bars), and optional **scales**, **facets**, **labels**, and **themes**. You don't memorize a separate function for every chart type; you learn this handful of building blocks and recombine them. That is why the same code patterns produce a scatterplot here and, with a different data frame, a plot of gene-expression values.
 :::
 
-To get started, you need to install and load the `ggplot2` package. If you haven't installed it yet, you can do so with:
+To get started, you need to install and load the packages we'll use. If you haven't installed them yet, you can do so with:
 
 ```{r eval=FALSE}
-install.packages("ggplot2")
+install.packages(c("ggplot2", "palmerpenguins"))
 ```
 
-Once installed, load the package:
+Once installed, load them:
 
 ```{r}
 library(ggplot2)
+library(palmerpenguins)
 ```
 
-Next, read the insurance dataset into R. We'll use a convenient online version and the `read.csv()` function to load it:
+The `penguins` data frame comes with the package, so there's no file to read in. A handful of penguins are missing one or another measurement (a scale that wasn't read, a bird that wasn't sexed), and those gaps show up as `NA`. To keep our first plots tidy and free of distracting warnings, we'll work with the rows that have a complete set of values:
 
 ```{r}
-# load the data
-url <- "https://tinyurl.com/mtktm8e5"
-insurance <- read.csv(url)
+# keep only rows with no missing values
+penguins <- penguins[complete.cases(penguins), ]
 ```
 
 In RStudio you can use the `View()` function to inspect the dataset in a spreadsheet-style window. We don't run it here because it only works in interactive RStudio, not when the book is rendered:
 
 ```{r eval=FALSE}
 # view the dataset
-View(insurance)
+View(penguins)
 ```
 
-Next, we'll add a variable indicating whether a patient is obese. We'll define obesity as a body mass index greater than or equal to 30:
+Next, we'll add a variable that splits the penguins into two weight groups. We'll call a penguin "heavy" if its body mass is at least 4200 grams and "light" otherwise. This kind of derived, categorical variable is handy for grouping later on:
 
-```{r make-obesity-variable}
-# create an obesity variable
-insurance$obese <- ifelse(insurance$bmi >= 30,
-                          "obese", "not obese")
+```{r make-size-class-variable}
+# create a body-size category
+penguins$size_class <- ifelse(penguins$body_mass_g >= 4200,
+                              "heavy", "light")
 ```
 
 When you build a `ggplot2` graph, only the first two pieces below — `ggplot()` and at least one `geom_*()` — are required. The rest are optional and can appear in any order.
@@ -74,10 +72,10 @@ The `ggplot()` function initializes the plot. It takes a data frame as its first
 #| label: fig-ggplot-init
 #| fig-cap: "Initialize the plot with ggplot()."
 # initialize the plot
-ggplot(data = insurance, aes(x = age, y = expenses))
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g))
 ```
 
-Why is @fig-ggplot-init showing an empty panel? Because we haven't added any layers yet. The `ggplot()` function only sets up the canvas; it doesn't draw anything until we add a geom. We told it to map `age` to the x-axis and `expenses` to the y-axis, but we haven't yet said *what shape* to put on the graph.
+Why is @fig-ggplot-init showing an empty panel? Because we haven't added any layers yet. The `ggplot()` function only sets up the canvas; it doesn't draw anything until we add a geom. We told it to map `flipper_length_mm` to the x-axis and `body_mass_g` to the y-axis, but we haven't yet said *what shape* to put on the graph.
 
 ## geom_*()
 
@@ -87,12 +85,12 @@ The `geom_*()` functions add layers to the plot. Each one corresponds to a speci
 #| label: fig-ggplot-geom-point
 #| fig-cap: "Add points to the plot with geom_point()."
 # add points to the plot
-ggplot(data = insurance,
-       mapping = aes(x = age, y = expenses)) +
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
   geom_point()
 ```
 
-In @fig-ggplot-geom-point we added points with `geom_point()`. The `+` operator stacks layers onto the plot, and the `mapping` argument in `aes()` specifies how variables map to visual properties. You can already see that insurance expenses tend to rise with age, though there is a lot of variability.
+In @fig-ggplot-geom-point we added points with `geom_point()`. The `+` operator stacks layers onto the plot, and the `mapping` argument in `aes()` specifies how variables map to visual properties. You can already see that heavier penguins tend to have longer flippers — body mass climbs steadily with flipper length.
 
 A geom can take parameters (options) of its own. For `geom_point()`, the common ones are `color`, `size`, and `alpha`. These control point colour, point size, and transparency. Transparency ranges from 0 (completely transparent) to 1 (completely opaque).
 
@@ -100,8 +98,8 @@ A geom can take parameters (options) of its own. For `geom_point()`, the common 
 #| label: fig-ggplot-geom-point-options
 #| fig-cap: "Modify point colour, size, and transparency."
 # make points blue, larger, and semi-transparent
-ggplot(data = insurance,
-       mapping = aes(x = age, y = expenses)) +
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
   geom_point(color = "cornflowerblue",
              alpha = .7,
              size = 2)
@@ -110,7 +108,7 @@ ggplot(data = insurance,
 ::: {.callout-tip}
 ## Use `alpha` to see through crowded points
 
-When many points land on top of one another — common with hundreds or thousands of observations — a solid plot hides how the data pile up. Setting `alpha` below 1 makes each point partly transparent, so dense regions render darker and sparse ones lighter. It's the cheapest fix for an overplotted scatterplot, and it works the same way whether your points are patients or single cells.
+When many points land on top of one another — common with hundreds or thousands of observations — a solid plot hides how the data pile up. Setting `alpha` below 1 makes each point partly transparent, so dense regions render darker and sparse ones lighter. It's the cheapest fix for an overplotted scatterplot, and it works the same way whether your points are penguins or single cells.
 :::
 
 Next, let's layer on a line of best fit — in other words, a regression fit. We do that with `geom_smooth()`. Its options control the type of line (linear, quadratic, nonparametric), the line's thickness and colour, and whether a confidence band is shown. Here we ask for a linear regression line with `method = "lm"` (where `lm` stands for *linear model*).
@@ -119,8 +117,8 @@ Next, let's layer on a line of best fit — in other words, a regression fit. We
 #| label: fig-ggplot-line-of-best-fit
 #| fig-cap: "Add a line of best fit with geom_smooth()."
 # add a line of best fit
-ggplot(data = insurance,
-       mapping = aes(x = age, y = expenses)) +
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
   geom_point(color = "cornflowerblue",
              alpha = .7,
              size = 2) +
@@ -131,70 +129,72 @@ In @fig-ggplot-line-of-best-fit we added a fitted line with `geom_smooth(method 
 
 ## Grouping
 
-Beyond the x and y axes, you can map groups of observations to colour, shape, size, transparency, and other visual characteristics. This lets you superimpose several groups in a single graph. Let's add smoker status and show it with colour.
+Beyond the x and y axes, you can map groups of observations to colour, shape, size, transparency, and other visual characteristics. This lets you superimpose several groups in a single graph. Let's add the penguin's species and show it with colour.
 
 ```{r}
 #| label: fig-ggplot-grouping
-#| fig-cap: "Group points by smoker status."
-# group points by smoker status
-ggplot(data = insurance,
-       mapping = aes(x = age, y = expenses, color = smoker)) +
+#| fig-cap: "Group points by species."
+# group points by species
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
   geom_point(alpha = .7, size = 2) +
   geom_smooth(method = "lm", se = FALSE)
 ```
 
-In @fig-ggplot-grouping we moved the `color` aesthetic into `aes()` and mapped it to the `smoker` variable. Because `color` is now part of the mapping, `ggplot2` splits the data by smoker status and draws a separate set of points *and* a separate fitted line for each group. It probably comes as no surprise that smokers appear to incur greater expenses than non-smokers.
+In @fig-ggplot-grouping we moved the `color` aesthetic into `aes()` and mapped it to the `species` variable. Because `color` is now part of the mapping, `ggplot2` splits the data by species and draws a separate set of points *and* a separate fitted line for each group. A pattern that the single cloud of points hid now stands out: Gentoo penguins are noticeably larger, occupying the upper-right of the plot, while Adélie and Chinstrap penguins overlap at the lower end.
 
 ## Scales
 
-Scales control how variables are translated into the visual characteristics of the plot. Scale functions (which start with `scale_`) let you adjust that translation. Next we'll change the spacing of the x and y axis tick marks, format the y-axis as dollars, and pick our own colours.
+Scales control how variables are translated into the visual characteristics of the plot. Scale functions (which start with `scale_`) let you adjust that translation. Next we'll change the spacing of the x and y axis tick marks and pick our own colours.
 
 ```{r}
 #| label: fig-ggplot-scales
 #| fig-cap: "Modify scales for the x and y axes and the colours."
 # modify the x and y axes and specify the colours to be used
-ggplot(data = insurance,
-       mapping = aes(x = age,
-                     y = expenses,
-                     color = smoker)) +
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
   geom_point(alpha = .5,
              size = 2) +
   geom_smooth(method = "lm",
               se = FALSE,
               linewidth = 1.5) +
-  scale_x_continuous(breaks = seq(0, 70, 10)) +
-  scale_y_continuous(breaks = seq(0, 60000, 20000),
-                     label = scales::dollar) +
-  scale_color_manual(values = c("indianred3",
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
                                 "cornflowerblue"))
 ```
 
-In @fig-ggplot-scales we used `scale_x_continuous()` and `scale_y_continuous()` to set the axis tick marks. The `breaks` argument specifies where the ticks fall, and the `label` argument formats the y-axis values as dollar amounts with `scales::dollar`. `scale_color_manual()` then assigns our chosen colours to the two smoker groups. (Note that line thickness in `geom_smooth()` is set with `linewidth`, the current argument for the width of a line geom.)
+In @fig-ggplot-scales we used `scale_x_continuous()` and `scale_y_continuous()` to set the axis tick marks. The `breaks` argument specifies where the ticks fall, and the `label` argument formats the y-axis values with comma separators using `scales::comma`. `scale_color_manual()` then assigns our chosen colours to the three species. (Note that line thickness in `geom_smooth()` is set with `linewidth`, the current argument for the width of a line geom.)
 
 ## Facets
 
-Faceting splits a plot into small multiples — one panel per level of a categorical variable. This is handy for comparing relationships across groups. The `facet_wrap()` function does this; the `~obese` formula tells it to make one panel for each value of the `obese` variable.
+Faceting splits a plot into small multiples — one panel per level of a categorical variable. This is handy for comparing relationships across groups. The `facet_wrap()` function does this; the `~size_class` formula tells it to make one panel for each value of the `size_class` variable.
 
 ```{r}
 #| label: fig-ggplot-facets
-#| fig-cap: "Create facets based on the obese variable."
-# reproduce the plot for obese and non-obese individuals
-ggplot(data = insurance,
-       mapping = aes(x = age,
-                     y = expenses,
-                     color = smoker)) +
+#| fig-cap: "Create facets based on the size_class variable."
+# reproduce the plot for heavy and light penguins
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
   geom_point(alpha = .5) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  scale_x_continuous(breaks = seq(0, 70, 10)) +
-  scale_y_continuous(breaks = seq(0, 60000, 20000),
-                     label = scales::dollar) +
-  scale_color_manual(values = c("indianred3",
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
                                 "cornflowerblue")) +
-  facet_wrap(~obese)
+  facet_wrap(~size_class)
 ```
 
-In @fig-ggplot-facets, `facet_wrap(~obese)` produced separate panels for obese and non-obese individuals, letting us compare the age-versus-expenses relationship side by side. We have now packed four dimensions of data — age, smoking status, obesity, and annual expenses — into a single two-dimensional figure.
+In @fig-ggplot-facets, `facet_wrap(~size_class)` produced separate panels for heavy and light penguins, letting us compare the flipper-versus-mass relationship side by side. We have now packed four dimensions of data — flipper length, species, body-size class, and body mass — into a single two-dimensional figure.
 
 ## Labels and titles
 
@@ -204,28 +204,28 @@ Labels and titles make a plot self-explanatory. The `labs()` function sets the a
 #| label: fig-ggplot-labels
 #| fig-cap: "Add labels and a title to the plot."
 # add informative labels
-ggplot(data = insurance,
-       mapping = aes(x = age,
-                     y = expenses,
-                     color = smoker)) +
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
   geom_point(alpha = .5) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  scale_x_continuous(breaks = seq(0, 70, 10)) +
-  scale_y_continuous(breaks = seq(0, 60000, 20000),
-                     label = scales::dollar) +
-  scale_color_manual(values = c("indianred3",
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
                                 "cornflowerblue")) +
-  facet_wrap(~obese) +
-  labs(title = "Relationship between patient demographics and medical costs",
-       subtitle = "US Census Bureau 2013",
-       caption = "source: http://mosaic-web.org/",
-       x = "Age (years)",
-       y = "Annual expenses",
-       color = "Smoker?")
+  facet_wrap(~size_class) +
+  labs(title = "Body mass increases with flipper length across penguin species",
+       subtitle = "Palmer Archipelago penguins, 2007-2009",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Species")
 ```
 
-In @fig-ggplot-labels we used `labs()` to add a title, subtitle, caption, and clearer axis and legend labels. A reader can now understand the figure without hunting for context elsewhere.
+In @fig-ggplot-labels we used `labs()` to add a title, subtitle, and clearer axis and legend labels. A reader can now understand the figure without hunting for context elsewhere.
 
 ## Theming
 
@@ -235,67 +235,67 @@ Finally, you can fine-tune the plot's overall appearance with a theme. Theme fun
 #| label: fig-ggplot-theming
 #| fig-cap: "Customize the plot's appearance with a theme."
 # use a minimalist theme
-ggplot(data = insurance,
-       mapping = aes(x = age,
-                     y = expenses,
-                     color = smoker)) +
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
   geom_point(alpha = .5) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  scale_x_continuous(breaks = seq(0, 70, 10)) +
-  scale_y_continuous(breaks = seq(0, 60000, 20000),
-                     label = scales::dollar) +
-  scale_color_manual(values = c("indianred3",
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
                                 "cornflowerblue")) +
-  facet_wrap(~obese) +
-  labs(title = "Relationship between age and medical expenses",
-       subtitle = "US Census Data 2013",
-       caption = "source: https://github.com/dataspelunking/MLwR",
-       x = "Age (years)",
-       y = "Medical expenses",
-       color = "Smoker?") +
+  facet_wrap(~size_class) +
+  labs(title = "Body mass increases with flipper length across penguin species",
+       subtitle = "Palmer Archipelago penguins, 2007-2009",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Species") +
   theme_minimal()
 ```
 
 ## Exercises
 
-The insurance data is a convenient, non-biological playground, but every technique below is exactly what you'd use to plot a biological dataset — swap `expenses` for a gene's expression level and `region` for a treatment group and the code is unchanged. Try these on the `insurance` data frame you loaded above.
+The penguin data is a convenient, compact playground, but every technique below is exactly what you'd use to plot a biological dataset — swap `body_mass_g` for a gene's expression level and `species` for a treatment group and the code is unchanged. Try these on the `penguins` data frame you loaded above.
 
-1. **A boxplot by group.** Instead of a scatterplot, draw a boxplot of `expenses` split by `smoker`. Map `smoker` to the x-axis and `expenses` to the y-axis, and use `geom_boxplot()`.
+1. **A boxplot by group.** Instead of a scatterplot, draw a boxplot of `body_mass_g` split by `species`. Map `species` to the x-axis and `body_mass_g` to the y-axis, and use `geom_boxplot()`.
 
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r}
-   ggplot(data = insurance,
-          mapping = aes(x = smoker, y = expenses)) +
+   ggplot(data = penguins,
+          mapping = aes(x = species, y = body_mass_g)) +
      geom_boxplot()
    ```
-   A boxplot is just a different geom on the same `aes()` skeleton. The boxes make it obvious that smokers' expenses are both higher and more spread out than non-smokers'.
+   A boxplot is just a different geom on the same `aes()` skeleton. The boxes make it obvious that Gentoo penguins are both heavier and more spread out in mass than the other two species.
    :::
 
-2. **Colour by region.** Make a scatterplot of `expenses` against `age` and colour the points by `region`. Add `alpha = .6` so crowded points stay readable.
+2. **Colour by island.** Make a scatterplot of `body_mass_g` against `flipper_length_mm` and colour the points by `island`. Add `alpha = .6` so crowded points stay readable.
 
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r}
-   ggplot(data = insurance,
-          mapping = aes(x = age, y = expenses, color = region)) +
+   ggplot(data = penguins,
+          mapping = aes(x = flipper_length_mm, y = body_mass_g, color = island)) +
      geom_point(alpha = .6)
    ```
-   Mapping `region` to `color` inside `aes()` gives each of the four regions its own colour. The clouds overlap heavily, which tells you region alone doesn't explain much of the variation in expenses.
+   Mapping `island` to `color` inside `aes()` gives each of the three islands its own colour. Because some species live on only one island, the colours separate cleanly — a hint that island and species are closely tied in this dataset.
    :::
 
-3. **Facet by sex.** Take the age-versus-expenses scatterplot and split it into one panel per `sex` with `facet_wrap()`.
+3. **Facet by sex.** Take the flipper-versus-mass scatterplot and split it into one panel per `sex` with `facet_wrap()`.
 
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r}
-   ggplot(data = insurance,
-          mapping = aes(x = age, y = expenses)) +
+   ggplot(data = penguins,
+          mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
      geom_point(alpha = .5) +
      facet_wrap(~sex)
    ```
-   `facet_wrap(~sex)` draws the same plot once for each sex. The two panels look very similar, suggesting sex has little effect on the age-expenses relationship on its own.
+   `facet_wrap(~sex)` draws the same plot once for each sex. The two panels have a similar shape, but males sit a little higher and to the right, reflecting that they tend to be larger.
    :::
 
 4. **Add a fitted line.** Starting from the plot in Exercise 3, add a linear fit with `geom_smooth(method = "lm")` so each panel gets its own trend line.
@@ -303,13 +303,13 @@ The insurance data is a convenient, non-biological playground, but every techniq
    ::: {.callout-note collapse="true"}
    ## Solution
    ```{r}
-   ggplot(data = insurance,
-          mapping = aes(x = age, y = expenses)) +
+   ggplot(data = penguins,
+          mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
      geom_point(alpha = .5) +
      geom_smooth(method = "lm") +
      facet_wrap(~sex)
    ```
-   Because faceting splits the data first, `geom_smooth()` fits a separate line within each panel. Both slopes point upward and look nearly parallel, reinforcing that the age trend holds for both groups.
+   Because faceting splits the data first, `geom_smooth()` fits a separate line within each panel. Both slopes point upward and look nearly parallel, reinforcing that the flipper-mass relationship holds for both groups.
    :::
 
 ## Summary
@@ -318,11 +318,11 @@ You can now build a `ggplot2` graphic from the ground up. You initialized a plot
 
 Reading the final figure (@fig-ggplot-theming), it appears that:
 
-* There is a positive linear relationship between age and expenses, and the slope stays roughly constant across smoking and obesity status.
-* Smokers and obese patients have higher medical expenses.
-* Smoking and obesity interact. Non-smokers look similar across obesity groups, but among smokers, obese patients have much higher expenses.
-* A few very high outliers sit in the obese-smoker group.
+* There is a positive linear relationship between flipper length and body mass, and the slope stays roughly constant across species and size classes.
+* Gentoo penguins are larger overall, with both longer flippers and greater mass.
+* The relationship is consistent: within every species and size class, longer-flippered penguins are heavier.
+* A few penguins sit well above or below their species' trend line — individual variation worth a closer look.
 
-These findings are tentative. They rest on a limited sample and involve no statistical testing to assess whether the differences could be due to chance.
+These findings are descriptive. They rest on a single study's sample and involve no statistical testing to assess whether the differences could be due to chance.
 
 For the design principles behind these plots — the data-ink ratio, colorblind-safe palettes — and specialized plot types for genomics such as UpSet plots and heatmaps, see [A self-guided tour of data visualization in R](../visualization_guide.qmd).
