@@ -31,20 +31,20 @@ and screenshots are fine if appropriately licensed or fair use.*
 
 ## Phase 0 — License framing & decisions (do first; unblocks Phases 1–3)
 
-- [ ] **0.1 Confirm the licensing model.** *Recommended:* original content stays
-  **CC0** (matches the existing Zenodo deposit and is acceptable to JOSE); third-party
-  content is **carved out** and retains its own (open) license, enumerated in
-  `contributors.qmd`. After Phase 1 the only carve-outs left are CC-BY-family/BSD/PD,
-  so the book is uniformly *open* even though not uniformly CC0. *(Alternative: move
-  original content to CC-BY 4.0 — more conventional for a textbook. Either is fine; the
-  rest of this plan is identical under both.)*
+- [x] **0.1 Licensing model — DECIDED: CC-BY 4.0 for original content.** Recorded in
+  [`docs/adr/0001-license-original-content-cc-by-4-0.md`](../docs/adr/0001-license-original-content-cc-by-4-0.md)
+  (2026-06-23). Original content → **CC-BY 4.0**; third-party content is **carved out**
+  and retains its own (open) license, enumerated in `contributors.qmd`. After Phase 1 the
+  only carve-outs left are CC-BY-family/BSD/PD, so the book is uniformly *open*.
 - [ ] **0.2 Fix `license.qmd`.** Correct the stale title ("Statistical analysis of
-  functional genomics dataa" → the real book title) and reword the blanket CC0 claim to
-  "Original content is dedicated to the public domain under CC0; third-party material is
-  listed in [Contributors] and retains its own license." Link to `contributors.qmd`.
-- [ ] **0.3 Align metadata.** Make `about.qmd`, `CITATION.cff`, and `.zenodo.json` state
-  the identical license sentence as `license.qmd`. (Check whether `CITATION.cff`/Zenodo
-  should encode `CC0-1.0` for the *aggregate* — likely keep CC0 with a note.)
+  functional genomics dataa" → the real book title) and replace the CC0 text with:
+  "Original content is licensed **CC-BY 4.0**; third-party material is listed in
+  [Contributors] and retains its own license." Link to `contributors.qmd`. *(Safe to do
+  now — accurate as an interim carve-out statement regardless of Phase 1 progress.)*
+- [ ] **0.3 Align metadata.** Update `about.qmd` to match `license.qmd` now. For the
+  machine-readable SPDX fields `CITATION.cff:22` and `.zenodo.json:14`, change
+  `CC0-1.0` → `CC-BY-4.0` **after Phase 1** (so the aggregate SPDX field is truthful once
+  NC/ND/ARR content is gone), then cut a fresh Zenodo release (Phase 5.3).
 - [ ] **0.4 Make `contributors.qmd` the canonical third-party registry.** It already is
   (lines 27–49); ensure every retained third-party asset links back to it, and prune it
   in Phase 4 as items get replaced.
