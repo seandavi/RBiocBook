@@ -58,9 +58,9 @@ genomic data with Bioconductor, teaching against public datasets. It interleaves
 explanations, statistical and data science concepts, and biological context. 
 It has been taught in four formal
 course offerings (~100 trainees, 2025–2026) and, as an online resource, recorded
-7,513 page views by 876 readers between May 2024 and June 2026, with per-chapter
-active-engagement times indicating readers work through rather than skim the
-material. Instructors can adopt a chapter as a lab, fork it for a local course, or
+7,513 page views between May 2024 and June 2026 — with 876 unique readers reaching
+the landing page alone — and per-chapter active-engagement times indicating readers
+work through rather than skim the material. Instructors can adopt a chapter as a lab, fork it for a local course, or
 assign it for self-paced study; every result is reproducible by re-running the code.
 
 **Conclusions.** *The RBioc Book* is a feature-complete, reusable, openly-licensed
@@ -154,10 +154,10 @@ Spring Harbor Laboratory data-analysis course (2025 and 2026) and the BigCARE pr
 over two years).
 
 **Open readership.** Beyond the classroom, between May 2024 and June 2026 the online
-edition recorded 7,513 page views across chapters by 876 readers, with substantial
-per-chapter engagement (for example, the single-cell setup chapter averaged over
-seven minutes of active engagement per reader), indicating that readers work through
-the material rather than skim it. The book continues to be developed in the open and
+edition recorded 7,513 page views across chapters, with 876 unique readers reaching
+the landing page alone, and substantial per-chapter engagement (for example, the
+single-cell setup chapter averaged over seven minutes of active engagement per
+reader), indicating that readers work through the material rather than skim it. The book continues to be developed in the open and
 contains social coding best practice guidance to accept contributions.
 
 # Summary

@@ -10,15 +10,15 @@ tags:
   - reproducible research
   - open educational resource
 authors:
-  - name: Sean Davis
-    orcid: 0000-0002-8991-6458
-    affiliation: 1
   - name: Lori Shepherd Kern
     orcid: 0000-0002-5910-4010
     affiliation: 2
   - name: Martin Morgan
     orcid: 0000-0002-5874-8148
     affiliation: 2
+  - name: Sean Davis
+    orcid: 0000-0002-8991-6458
+    affiliation: 1
 affiliations:
   - name: University of Colorado Anschutz School of Medicine, Aurora, CO, USA
     index: 1
@@ -35,7 +35,7 @@ their first line of R to the analysis of real genomic data with Bioconductor
 [@huber2015]. It is written for biologists and biomedical trainees who know the
 biology and have been introduced to programming, statistics, and computation but 
 want a more formal and thorough treatment of concepts and skills. The book also
-includes biology primer, for computational readers approaching biological data for
+includes a biology primer, for computational readers approaching biological data for
 the first time. The book is built as a Quarto book [@quarto2024] in which every
 chapter executes its own R [@rcore2024] code at render time, so the prose, the code,
 and the output the reader sees are always in sync.
@@ -88,7 +88,7 @@ classes practitioners actually use, so the skills transfer directly to the reade
 analyses. A biology primer lowers the barrier for readers without a biology background,
 making the book usable from either direction. All materials provide substantial context
 and rationale for the analyses, so that readers understand not just how to perform an
-but why. 
+analysis but why. 
 
 # Evidence of use
 
@@ -97,7 +97,8 @@ Laboratory data-analysis course (2025 and 2026) and the BigCARE program (2025 an
 2026), each with approximately 25 participants per session — roughly 100 trainees over
 two years. Beyond the classroom, the online edition has reached a broad audience:
 between May 2024 and June 2026, the site recorded 7,513 page views across all the
-chapters and 876 readers, with substantial per-chapter engagement (for
+chapters, with 876 unique readers reaching the landing page alone and substantial
+per-chapter engagement (for
 example, the single-cell setup chapter averaged over seven minutes of active
 engagement per reader), indicating that readers work through the material rather than
 skim it. Authorship and per-chapter contributions reflect both the primary author and
