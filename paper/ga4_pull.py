@@ -7,6 +7,14 @@
 Reports the SITE-WIDE totals (from GA4's own de-duplicated aggregate, not a
 sum of the per-page column) plus the per-page breakdown, and writes a CSV
 alongside the existing export in paper/data/.
+
+CREDENTIALS: `gcloud auth application-default login` will NOT work for this.
+Google blocks the analytics.readonly scope for gcloud's default OAuth client
+("application denied" at the consent screen; the real error is only visible in
+gcloud's stderr). Use a service account granted Viewer on the GA4 property
+(GA4 Admin -> Property Access Management), then point
+GOOGLE_APPLICATION_CREDENTIALS at its key -- this script picks up whatever ADC
+it finds. Supplying your own OAuth client ID also works.
 """
 
 from __future__ import annotations
