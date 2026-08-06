@@ -34,6 +34,30 @@ the BOOK's is 1,475. Quoting the property figure would overstate readership by
 2.2x. ga4_pull.py now filters on pagePath BEGINS_WITH /RBiocBook/ and prints
 both numbers under explicit labels so they cannot be swapped again.
 
+Revised 2026-08-06 (final pre-submission pass), after Lori Shepherd Kern's
+sign-off cleared the co-author gate. Checked against F1000Research's Software
+Tool Article guidelines and fixed two conformance gaps:
+  - The guidelines call it "good scholarly practice to mention previously
+    developed tools that address similar needs, and why the current tool is
+    needed." The draft had NO related-work discussion at all -- the single
+    most likely reviewer objection ("how is this different from OSCA?").
+    Added a "Relation to existing resources" subsection positioning the book
+    against R4DS, Modern Statistics for Modern Biology, and OSCA, and stating
+    the contribution as continuity across the span they leave open rather than
+    depth in any one of them.
+  - Guidelines specify Methods with Implementation and Operation as
+    SUBsections; these were top-level. Restructured.
+Also cited the three tools the book teaches but never referenced
+(GenomicRanges, tidyverse, ggplot2). All 11 bib entries are now cited; no
+missing keys, no orphans. The two new references were verified against
+multiple independent sources before being added (Holmes & Huber 2019, CUP,
+ISBN 978-1-108-70529-5; Wickham/Cetinkaya-Rundel/Grolemund 2023, O'Reilly 2nd
+ed., ISBN 978-1-4920-9740-2) -- do not add a reference here without doing the
+same, see the amc-ai-governance citation audit for why.
+Concept DOI 10.5281/zenodo.20574829 verified resolving (-> record 20818328).
+APC at time of writing: USD 1,595, payable on acceptance regardless of the
+peer-review outcome.
+
 Window extended to 2026-08-01 (was 06-22) since the pull was being redone.
 All figures verified against paper/data/ga4_book_2024-05-26_to_2026-08-01.csv:
   9,098 views / 62 pages / 1,475 de-duplicated readers
@@ -128,7 +152,32 @@ executable and openly licensed, an instructor can adopt a chapter as a lab, fork
 for a local course, or assign it for self-paced study, and a learner can reproduce
 every result by running the same code.
 
-# Implementation
+**Relation to existing resources.** Excellent open teaching resources already exist
+at both ends of this path, and the gap *The RBioc Book* addresses is the span between
+them. *R for Data Science* [@wickham2023r4ds] is the standard introduction to data
+analysis in R, but it teaches against general-purpose datasets and does not carry the
+reader toward biological data or the Bioconductor classes that biology requires.
+*Modern Statistics for Modern Biology* [@holmes2019msmb] treats statistical reasoning
+for biological data with far greater depth than we attempt, but assumes a reader
+already fluent in R and comfortable with mathematical statistics. *Orchestrating
+Single-Cell Analysis with Bioconductor* [@amezquita2020] is the reference work for one
+domain and, by design, begins where a competent Bioconductor user begins. A learner
+starting from no R at all must therefore assemble a path across three resources with
+different notational conventions, different assumed backgrounds, and no shared
+running example — and, in our teaching experience, most stall at the seams rather
+than inside any one text.
+
+*The RBioc Book* is deliberately not a deeper treatment of any of these. Its
+contribution is continuity: one notation, one cumulative scaffold, and one executable
+artifact spanning from a first line of R to real Bioconductor genomics, with the
+biological motivation present from the beginning rather than deferred. It is intended
+to precede rather than replace the resources above, and it points to them where a
+reader should go deeper. This positioning also reflects a broader need identified
+across the Bioconductor teaching community [@biocteaching2025].
+
+# Methods
+
+## Implementation
 
 The book is built as a Quarto book [@quarto2024]
 so that rendering *executes* the R code in each chapter: the prose, the code, and the
@@ -144,10 +193,14 @@ consistent callout taxonomy (objectives, notes, warnings, exercises) gives the r
 predictable signposts throughout. The narrative is intentionally cumulative: early
 chapters earn the vocabulary and data structures that the statistics, machine-learning,
 and genomics chapters reuse. The genomics material is taught against real, public
-datasets and the Bioconductor classes practitioners actually use, so the skills
-transfer directly to the reader's own analyses.
+datasets and the Bioconductor classes practitioners actually use — including the
+genomic-interval infrastructure of `GenomicRanges` [@lawrence2013] — so the skills
+transfer directly to the reader's own analyses. Data manipulation and visualization
+are taught with the `tidyverse` [@tidyverse2019] and `ggplot2` [@wickham2016ggplot2]
+alongside base R, so that readers encounter the idioms actually used in practice
+rather than a single house style.
 
-# Operation
+## Operation
 
 **Minimal requirements.** Reading the book online requires only a web browser
 (<https://seandavi.github.io/RBiocBook>). Building or extending it locally requires R
