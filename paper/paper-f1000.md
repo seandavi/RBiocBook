@@ -6,6 +6,30 @@ The JOSE micro-paper is preserved untouched in paper/paper.md.
 Resolved 2026-07-01: grant = Bioc U24 CA289073; author order senior-last
 (Shepherd Kern, Davis); Martin Morgan moved to acknowledgements (author list
 trimmed to two); competing interests = none disclosed. Abstract ~235 words (<300).
+
+Revised 2026-08-06 (pre-submission review pass). All four 2026-07-01 TODOs were
+already closed; these are the issues found on a reviewer-style read:
+  1. Readership claim mixed scopes (site-wide views vs landing-page-only uniques
+     in one clause). Restated as an explicit bound: 876 (landing page, lower
+     bound) to 4,090 (sum of per-page uniques, upper bound because multi-chapter
+     readers are counted once per chapter). This makes the claim rigorous AND
+     removes the dependency on the blocked GA4 site-wide pull — ga4_pull.py is
+     now a nice-to-have, not a submission blocker.
+  2. Paper title ("Data Science for Biologists...") differs from the artifact's
+     actual name everywhere else ("The RBioc Book" — site, Zenodo, CITATION.cff).
+     Relationship now stated explicitly at first mention in the Introduction.
+  3. "Feature-complete" (abstract) contradicted "continues to be developed in the
+     open" (Use cases). Now "complete, classroom-tested".
+  4. The representative-use-case paragraph was abstract ("a representative
+     chapter..."). Now names the single-cell chapter concretely — which is also
+     the highest-engagement page in the GA4 data, so evidence and pedagogy claim
+     land on the same chapter.
+  5. Added a Scope and limitations subsection — F1000 reviewers routinely ask,
+     and the honest answer (no controlled learning-outcomes study) is better
+     volunteered than extracted.
+All figures re-verified against paper/data/ on 2026-08-06:
+7,513 views / 60 pages / 876 landing-page uniques / 4,090 summed uniques /
+single-cell 464.1s=7.7min, r-basics 262.7s=4.4min, simulation 361.9s=6.0min.
 -->
 
 ---
@@ -54,16 +78,15 @@ statistical reasoning that the genomics and single-cell chapters later reuse. It
 openly licensed (CC-BY 4.0), versioned, and archived with a citable DOI.
 
 **Results.** The book takes a reader from a first line of R to the analysis of real
-genomic data with Bioconductor, teaching against public datasets. It interleaves conceptual
-explanations, statistical and data science concepts, and biological context. 
+genomic data with Bioconductor, teaching against public datasets.
 It has been taught in four formal
 course offerings (~100 trainees, 2025–2026) and, as an online resource, recorded
-7,513 page views between May 2024 and June 2026 — with 876 unique readers reaching
-the landing page alone — and per-chapter active-engagement times indicating readers
+7,513 page views across 60 pages between May 2024 and June 2026, from between 876 and
+4,090 unique readers, with per-chapter active-engagement times indicating readers
 work through rather than skim the material. Instructors can adopt a chapter as a lab, fork it for a local course, or
 assign it for self-paced study; every result is reproducible by re-running the code.
 
-**Conclusions.** *The RBioc Book* is a feature-complete, reusable, openly-licensed
+**Conclusions.** *The RBioc Book* is a complete, classroom-tested, openly-licensed
 teaching resource that closes the concept-and-reproducibility gap for biologists endeavoring
 to understand data science, statistics, and reproducible computational research. It is
 also a template for large-scale executable, community-maintained teaching
@@ -79,7 +102,9 @@ courses show *how* to perform an analysis but do not motivate it with concept an
 rationale, leaving learners able to copy a workflow but not to reason about it or
 adapt it to their own problems.
 
-*The RBioc Book* is an open-access, executable textbook that takes a reader from
+*The RBioc Book* — the resource described here, published under that name at
+<https://seandavi.github.io/RBiocBook> and archived under it at Zenodo — is an
+open-access, executable textbook that takes a reader from
 their first line of R [@rcore2024] to the analysis of real genomic data with
 Bioconductor [@huber2015]. It is written for biomedical researchers who
 know the biology and have been introduced to programming, statistics, and
@@ -141,10 +166,15 @@ specific version.
 learners ingest material at their own pace, freeing instructors to engage
 participants directly rather than lecture syntax.
 
-**Executable chapter (input → output).** A representative chapter loads a public
-dataset, constructs the relevant Bioconductor container (e.g., a
-`SummarizedExperiment`), and produces the summary or figure inline; the reader
-reproduces the output by rendering the same chapter, with no hidden state. This
+**Executable chapter (input → output).** The single-cell RNA-seq chapter is
+representative. It loads a published mouse-brain dataset as a `SingleCellExperiment`,
+log-normalizes the counts, selects highly variable genes, runs PCA and UMAP, clusters
+the cells, and identifies and visualizes the marker genes that define each cluster —
+producing every table and figure inline at render time, with no hidden state, so a
+reader reproduces the chapter by rendering it. It also shows the cumulative design
+concretely: `SingleCellExperiment` is introduced as an extension of the
+`SummarizedExperiment` class taught in an earlier chapter, and the chapter tells the
+reader to revisit that chapter first if the container's structure is not fresh. This
 input (chapter source + declared R environment) → output (rendered prose, code, and
 result) round-trip is the unit the book is built from.
 
@@ -154,10 +184,17 @@ Spring Harbor Laboratory data-analysis course (2025 and 2026) and the BigCARE pr
 over two years).
 
 **Open readership.** Beyond the classroom, between May 2024 and June 2026 the online
-edition recorded 7,513 page views across chapters, with 876 unique readers reaching
-the landing page alone, and substantial per-chapter engagement (for example, the
-single-cell setup chapter averaged over seven minutes of active engagement per
-reader), indicating that readers work through the material rather than skim it. The book continues to be developed in the open and
+edition recorded 7,513 page views across 60 distinct pages. Unique readership over
+that window is bounded rather than point-estimated: Google Analytics 4 recorded 876
+unique readers on the landing page alone, which is a lower bound on the site-wide
+figure, while the sum of per-page unique readers is 4,090, which is an upper bound
+because a reader who works through several chapters is counted once per chapter. The
+true site-wide count therefore lies between these values. Engagement is substantial
+where the material is hardest: the single-cell chapter averaged 7.7 minutes of active
+engagement per reader, and the R-basics and simulation chapters 4.4 and 6.0 minutes
+respectively, indicating that readers work through the material rather than skim it.
+The underlying per-page export is archived in the repository (`paper/data/`) so these
+bounds can be recomputed. The book continues to be developed in the open and
 contains social coding best practice guidance to accept contributions.
 
 # Summary
@@ -168,6 +205,20 @@ line of R to real Bioconductor genomics. Its executable, openly-licensed,
 version-archived design makes it a reusable teaching resource — adoptable whole or in
 part — and a template for community-maintained, reproducible teaching materials in
 the Bioconductor ecosystem.
+
+**Scope and limitations.** The book is a teaching resource, not a methods reference:
+it teaches the reasoning and the standard workflow for each topic rather than
+surveying alternatives, and it deliberately stops short of specialized or
+fast-moving areas — among them multi-omic integration, spatial transcriptomics,
+and workflow-level pipeline orchestration — that would date quickly or require
+prerequisites the book does not build. The evidence of use reported here is
+adoption and engagement data; the book has not been evaluated against learning
+outcomes in a controlled setting, and such a study would be the natural next step
+for assessing pedagogical effect rather than reach. Being executable also carries an
+ongoing maintenance obligation: chapters are re-rendered against current package
+versions, and upstream Bioconductor changes require corresponding updates — a cost
+the design converts from silent documentation rot into a visible build failure, but
+does not eliminate.
 
 # Data availability
 
