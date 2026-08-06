@@ -330,6 +330,18 @@ Lori Shepherd Kern — authored *Base R versus the tidyverse*, *Control statemen
 Sean Davis — conceived the book; primary author and editor; wrote most chapters. Both
 authors reviewed and approved the manuscript.
 
+# Use of generative AI
+
+Claude (Anthropic; Opus 4.8 and Fable 5) was used in preparing this manuscript:
+drafting and revising prose, including the comparison to existing resources;
+restating the readership analysis after a scoping error in the underlying
+Google Analytics 4 export was identified; and reviewing the manuscript against
+this journal's article guidelines. All reported figures were computed from the
+archived data by the script provided (`paper/ga4_pull.py`), and every claim and
+citation was verified against primary sources by the authors, who take full
+responsibility for the content of this article. Generative AI is not an author
+and does not meet authorship criteria.
+
 # Competing interests
 
 No competing interests were disclosed.
