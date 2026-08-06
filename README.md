@@ -33,4 +33,7 @@ The DOI above is the *concept* DOI — it always resolves to the latest version.
 
 ## License
 
-Released under [CC0 1.0](license.qmd) — a public-domain dedication. Use it freely.
+Original content (prose, original figures, example code) is released under
+[CC-BY 4.0](license.qmd). Some third-party figures, datasets, and adapted passages
+retain their own (open) license — each is listed, with its license, on the
+[Contributors & acknowledgments](contributors.qmd) page.

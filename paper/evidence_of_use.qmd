@@ -1,0 +1,123 @@
+---
+title: "Evidence of use — *The RBioc Book*"
+subtitle: "Reproducible provenance for the figures cited in `paper.md`"
+author: Sean Davis
+date: 2026-06-23
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+This document is the reproducible source for the *Evidence of use* numbers reported in
+the JOSE paper (`paper.md`). It summarizes (1) formal teaching offerings and (2) the
+online readership recorded by Google Analytics 4 (GA4). It is **not** part of the book
+render (the `paper/` directory is listed in `.quartoignore`) and is **not** submitted to
+JOSE; it exists so the headline figures are traceable to their source data.
+
+## Formal teaching offerings
+
+The book has been taught, in whole or in part, in the following formal courses.
+
+```{r}
+#| label: teaching
+library(tibble)
+library(knitr)
+
+teaching <- tribble(
+  ~Offering,                                  ~Year, ~`Approx. participants`,
+  "Cold Spring Harbor Laboratory (CSHL)",     2025L, 25L,
+  "Cold Spring Harbor Laboratory (CSHL)",     2026L, 25L,
+  "BigCARE",                                  2025L, 25L,
+  "BigCARE",                                  2026L, 25L
+)
+
+kable(teaching, caption = "Formal offerings of *The RBioc Book*.")
+
+cat(sprintf(
+  "Total: %d offerings across %d programs over %d years; ~%d trainees.\n",
+  nrow(teaching),
+  length(unique(sub(" .*", "", teaching$Offering))),
+  length(unique(teaching$Year)),
+  sum(teaching$`Approx. participants`)
+))
+```
+
+## Online readership (GA4)
+
+Source: GA4 export for the property `seandavi.github.io`, page-path report filtered to
+`/RBiocBook/*`, for **2024-05-26 → 2026-06-22**. The raw export is archived alongside
+this file at `data/ga4_page_views_2024-05-26_to_2026-06-22.csv`.
+
+```{r}
+#| label: ga-load
+library(readr)
+library(dplyr)
+
+ga <- read_csv(
+  "data/ga4_page_views_2024-05-26_to_2026-06-22.csv",
+  comment = "#",
+  show_col_types = FALSE
+) |>
+  rename(
+    page       = `Page path and screen class`,
+    views      = Views,
+    users      = `Active users`,
+    engagement = `Average engagement time per active user`
+  )
+
+glimpse(ga)
+```
+
+```{r}
+#| label: ga-headline
+total_views   <- sum(ga$views)
+n_pages       <- nrow(ga)
+landing_users <- ga |> filter(page == "/RBiocBook/") |> pull(users)
+
+# Per-page average engagement is reported in seconds. Highlight a worked-through
+# chapter (single-cell setup) as evidence of depth, not just reach.
+sc_setup_sec <- ga |>
+  filter(page == "/RBiocBook/single_cell/setup.html") |>
+  pull(engagement)
+
+summary_tbl <- tibble::tibble(
+  Metric = c(
+    "Total page views",
+    "Distinct chapters/pages viewed",
+    "Readers on the landing page (reach proxy)",
+    "Avg. engagement on single-cell setup chapter (min)"
+  ),
+  Value = c(
+    format(total_views, big.mark = ","),
+    as.character(n_pages),
+    format(landing_users, big.mark = ","),
+    sprintf("%.1f", sc_setup_sec / 60)
+  )
+)
+
+knitr::kable(summary_tbl, caption = "GA4 headline figures (2024-05-26 to 2026-06-22).")
+```
+
+```{r}
+#| label: ga-top-pages
+ga |>
+  arrange(desc(views)) |>
+  slice_head(n = 10) |>
+  transmute(
+    Page = sub("^/RBiocBook/", "", page),
+    Views = views,
+    Readers = users,
+    `Avg. engagement (s)` = round(engagement)
+  ) |>
+  knitr::kable(caption = "Ten most-viewed pages.")
+```
+
+The combination of recurring classroom adoption (~100 trainees across four offerings)
+and sustained, deep online engagement (7,500+ views across 60 chapters, ~876 landing-page
+readers, multi-minute per-chapter engagement) is the basis for the *Evidence of use*
+section of `paper.md`.
