@@ -24,9 +24,28 @@ affiliations:
     index: 1
   - name: Roswell Park Comprehensive Cancer Center, Buffalo, NY, USA (Bioconductor Core Team)
     index: 2
+# DORMANT DRAFT -- JOSE paused submissions 2026-07-01; the live target is
+# paper-f1000.md. Two known divergences from that draft, both deliberate:
+#   1. Author list. This JOSE draft has three authors (Shepherd Kern, Morgan,
+#      Davis). The F1000 draft has two, with Martin Morgan in acknowledgements.
+#      That was a decision made for the F1000 submission -- if JOSE ever
+#      reopens, re-decide it rather than assuming either list is current.
+#   2. Readership figures were synced to the corrected book-scoped GA4 numbers
+#      on 2026-08-06 so the two drafts cannot diverge on facts.
+# `authors:` below is structured metadata pandoc does not read; without the
+# `author:` list the built PDF renders with NO author line. Keep them in sync,
+# and keep `author:` entries short -- the default template clips long ones.
+author:
+  - "Lori Shepherd Kern^2^"
+  - "Martin Morgan^2^"
+  - "Sean Davis^1^"
 date: 23 June 2026
 bibliography: paper.bib
 ---
+
+^1^ University of Colorado Anschutz School of Medicine, Aurora, CO, USA
+
+^2^ Roswell Park Comprehensive Cancer Center, Buffalo, NY, USA (Bioconductor Core Team)
 
 # Summary
 

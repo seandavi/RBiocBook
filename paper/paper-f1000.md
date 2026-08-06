@@ -82,19 +82,36 @@ keywords:
 authors:
   - name: Lori Shepherd Kern
     orcid: 0000-0002-5910-4010
-    affiliation: 2
+    affiliation: 1
   - name: Sean Davis
     orcid: 0000-0002-8991-6458
-    affiliation: 1
+    affiliation: 2
     corresponding: true
 affiliations:
-  - name: University of Colorado Anschutz School of Medicine, Aurora, CO, USA
-    index: 1
   - name: Roswell Park Comprehensive Cancer Center, Buffalo, NY, USA (Bioconductor Core Team)
+    index: 1
+  - name: University of Colorado Anschutz School of Medicine, Aurora, CO, USA
     index: 2
-date: 1 July 2026
+# `authors:` above is the structured record (ORCIDs, affiliation indices) for the
+# submission portal. Pandoc does NOT read it -- it only understands `author:` --
+# so without the list below the built PDF renders with NO author line at all.
+# Keep names and affiliation numbers in sync between the two, and keep the
+# `author:` entries SHORT: pandoc's default LaTeX template does not wrap the
+# author block, so a long line is silently clipped at the page margin.
+# Affiliations therefore go in the body, immediately below.
+author:
+  - "Lori Shepherd Kern^1^"
+  - "Sean Davis^2^ (corresponding)"
+date: 6 August 2026
 bibliography: paper.bib
 ---
+
+^1^ Roswell Park Comprehensive Cancer Center, Buffalo, NY, USA (Bioconductor Core
+Team). ORCID [0000-0002-5910-4010](https://orcid.org/0000-0002-5910-4010)
+
+^2^ University of Colorado Anschutz School of Medicine, Aurora, CO, USA. ORCID
+[0000-0002-8991-6458](https://orcid.org/0000-0002-8991-6458). Corresponding author:
+<seandavi@gmail.com>
 
 # Abstract
 
