@@ -96,10 +96,10 @@ analysis but why.
 Laboratory data-analysis course (2025 and 2026) and the BigCARE program (2025 and
 2026), each with approximately 25 participants per session — roughly 100 trainees over
 two years. Beyond the classroom, the online edition has reached a broad audience:
-between May 2024 and June 2026, the site recorded 7,513 page views across all the
-chapters, with 876 unique readers reaching the landing page alone and substantial
-per-chapter engagement (for
-example, the single-cell setup chapter averaged over seven minutes of active
+between May 2024 and August 2026, the book recorded 9,098 page views across 62
+chapter pages from 1,475 unique readers (Google Analytics 4, de-duplicated and
+restricted to the book's path prefix), with substantial per-chapter engagement (for
+example, the single-cell chapter averaged over seven minutes of active
 engagement per reader), indicating that readers work through the material rather than
 skim it. Authorship and per-chapter contributions reflect both the primary author and
 members of the Bioconductor Core Team, and the book continues to be developed in the

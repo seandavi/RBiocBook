@@ -10,11 +10,7 @@ trimmed to two); competing interests = none disclosed. Abstract ~235 words (<300
 Revised 2026-08-06 (pre-submission review pass). All four 2026-07-01 TODOs were
 already closed; these are the issues found on a reviewer-style read:
   1. Readership claim mixed scopes (site-wide views vs landing-page-only uniques
-     in one clause). Restated as an explicit bound: 876 (landing page, lower
-     bound) to 4,090 (sum of per-page uniques, upper bound because multi-chapter
-     readers are counted once per chapter). This makes the claim rigorous AND
-     removes the dependency on the blocked GA4 site-wide pull — ga4_pull.py is
-     now a nice-to-have, not a submission blocker.
+     in one clause). SUPERSEDED same day — see the 2026-08-06 (later) note below.
   2. Paper title ("Data Science for Biologists...") differs from the artifact's
      actual name everywhere else ("The RBioc Book" — site, Zenodo, CITATION.cff).
      Relationship now stated explicitly at first mention in the Introduction.
@@ -27,9 +23,23 @@ already closed; these are the issues found on a reviewer-style read:
   5. Added a Scope and limitations subsection — F1000 reviewers routinely ask,
      and the honest answer (no controlled learning-outcomes study) is better
      volunteered than extracted.
-All figures re-verified against paper/data/ on 2026-08-06:
-7,513 views / 60 pages / 876 landing-page uniques / 4,090 summed uniques /
-single-cell 464.1s=7.7min, r-basics 262.7s=4.4min, simulation 361.9s=6.0min.
+Revised again 2026-08-06 (later), once GA4 credentials landed. The real
+de-duplicated reader count is now in the paper, replacing the bound above.
+
+CAUTION FOR ANYONE UPDATING THESE FIGURES — the trap that has now bitten this
+paper three times is SCOPE. The GA4 property "Sean Davis — web" hosts much more
+than the book (BigCARE course site, talks, campus-llm-kb, the agentic-AI
+workshop site, the root). Property-wide activeUsers for this window is 3,233;
+the BOOK's is 1,475. Quoting the property figure would overstate readership by
+2.2x. ga4_pull.py now filters on pagePath BEGINS_WITH /RBiocBook/ and prints
+both numbers under explicit labels so they cannot be swapped again.
+
+Window extended to 2026-08-01 (was 06-22) since the pull was being redone.
+All figures verified against paper/data/ga4_book_2024-05-26_to_2026-08-01.csv:
+  9,098 views / 62 pages / 1,475 de-duplicated readers
+  bounds check: 990 (landing page) <= 1,475 <= 4,933 (sum of per-page) OK
+  single-cell 444.0s=7.4min, ggplot2 399.7s=6.7min,
+  simulation 361.9s=6.0min, r-basics 262.7s=4.4min
 -->
 
 ---
@@ -81,8 +91,8 @@ openly licensed (CC-BY 4.0), versioned, and archived with a citable DOI.
 genomic data with Bioconductor, teaching against public datasets.
 It has been taught in four formal
 course offerings (~100 trainees, 2025–2026) and, as an online resource, recorded
-7,513 page views across 60 pages between May 2024 and June 2026, from between 876 and
-4,090 unique readers, with per-chapter active-engagement times indicating readers
+9,098 page views across 62 pages from 1,475 unique readers between May 2024 and
+August 2026, with per-chapter active-engagement times indicating readers
 work through rather than skim the material. Instructors can adopt a chapter as a lab, fork it for a local course, or
 assign it for self-paced study; every result is reproducible by re-running the code.
 
@@ -183,18 +193,18 @@ Spring Harbor Laboratory data-analysis course (2025 and 2026) and the BigCARE pr
 (2025 and 2026), each with roughly 25 participants per session (about 100 trainees
 over two years).
 
-**Open readership.** Beyond the classroom, between May 2024 and June 2026 the online
-edition recorded 7,513 page views across 60 distinct pages. Unique readership over
-that window is bounded rather than point-estimated: Google Analytics 4 recorded 876
-unique readers on the landing page alone, which is a lower bound on the site-wide
-figure, while the sum of per-page unique readers is 4,090, which is an upper bound
-because a reader who works through several chapters is counted once per chapter. The
-true site-wide count therefore lies between these values. Engagement is substantial
-where the material is hardest: the single-cell chapter averaged 7.7 minutes of active
-engagement per reader, and the R-basics and simulation chapters 4.4 and 6.0 minutes
-respectively, indicating that readers work through the material rather than skim it.
-The underlying per-page export is archived in the repository (`paper/data/`) so these
-bounds can be recomputed. The book continues to be developed in the open and
+**Open readership.** Beyond the classroom, between May 2024 and August 2026 the online
+edition recorded 9,098 page views across 62 distinct pages from 1,475 unique readers.
+The reader count is Google Analytics 4's own de-duplicated figure for pages under the
+book's path prefix, so a reader who works through several chapters is counted once; it
+is not a sum of per-page counts, which would over-count the same reader to 4,933. For
+scale, the landing page alone accounts for 990 of those readers. Engagement is
+substantial where the material is hardest: the single-cell chapter averaged 7.4 minutes
+of active engagement per reader, the `ggplot2` and simulation chapters 6.7 and 6.0
+minutes, and the R-basics chapter 4.4 minutes, indicating that readers work through
+the material rather than skim it. The underlying export is archived in the repository
+(`paper/data/`), and the script that produced it is included (`paper/ga4_pull.py`), so
+every figure here can be recomputed. The book continues to be developed in the open and
 contains social coding best practice guidance to accept contributions.
 
 # Summary
@@ -224,9 +234,11 @@ does not eliminate.
 
 The book teaches against publicly available datasets, cited and linked in place
 within the relevant chapters. Website usage figures reported here were derived from
-Google Analytics 4 for the book site over May 2024–June 2026; the underlying
-per-page export used for the reported totals is included in the source repository
-(`paper/data/`).
+Google Analytics 4, restricted to pages under the book's path prefix, over
+May 2024–August 2026. Both the export used for the reported totals and the script
+that generated it are included in the source repository (`paper/data/` and
+`paper/ga4_pull.py`), so the figures can be reproduced or recomputed for a later
+window.
 
 # Software and resource availability
 
