@@ -308,7 +308,9 @@ Google Analytics 4, restricted to pages under the book's path prefix, over
 May 2024–August 2026. Both the export used for the reported totals and the script
 that generated it are included in the source repository (`paper/data/` and
 `paper/ga4_pull.py`), so the figures can be reproduced or recomputed for a later
-window.
+window. They are also captured in the archived release of the book deposited at
+Zenodo (version 2026.08.06, <https://doi.org/10.5281/zenodo.21823063>; concept DOI
+<https://doi.org/10.5281/zenodo.20574829> always resolves to the latest version).
 
 # Software and resource availability
 
