@@ -5,6 +5,8 @@ project:
   # Hand-curated keys in references.bib are left untouched. Requires the
   # quartobot CLI on PATH (`uv tool install quartobot`).
   pre-render: quartobot resolve --from-scan . --id-mode citation-key
+  # Strip Pandoc span markup from chapter titles in the generated llms.txt.
+  post-render: tools/clean_llms_txt.py
 
 author:
   - name: Sean Davis
@@ -33,6 +35,12 @@ execute:
 lightbox: true
 
 
+# Emit llms.txt plus a .llms.md per page so AI assistants can ingest the book.
+# Set under website: because Quarto (1.9) does not copy llms-txt from book:
+# into the website config it builds for books.
+website:
+  llms-txt: true
+
 book:
   google-analytics: "G-KLLV1GCF4E"
   title: "The RBioc Book"
@@ -40,6 +48,7 @@ book:
   search: true
   repo-url: https://github.com/seandavi/RBiocBook
   url: https://seandavi.github.io/RBiocBook
+  site-url: https://seandavi.github.io/RBiocBook
   repo-actions: [edit, issue, source]
   downloads: [pdf, epub]
   sharing: [twitter, facebook]
