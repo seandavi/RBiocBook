@@ -1,0 +1,87 @@
+# The RBioc Book
+
+Code
+
+A collection of chapters more than a book, but….
+
+Authors
+
+Affiliations
+
+[Sean Davis](https://seandavi.github.io/) [](mailto:seandavi@gmail.com)
+
+[University of Colorado  
+Anschutz School of Medicine](https://medschool.cuanschutz.edu/)
+
+Lori Shepherd Kern
+
+[Roswell Park Comprehensive Cancer Center  
+Bioconductor Core Team](https://www.roswellpark.org/)
+
+Martin Morgan
+
+[Roswell Park Comprehensive Cancer Center  
+Bioconductor Core Team](https://www.roswellpark.org/)
+
+Published
+
+September 19, 2026
+
+Modified
+
+September 19, 2026
+
+# Preface
+
+The goal of the material is NOT to teach you R or Bioconductor, but rather to provide enough groundwork to enable you to learn R and Bioconductor on your own. The idea is that we learn faster and better by developing “schemata” that allow us to organize and understand new information. When a new concept is introduced, it is easier to understand if it can be related to something we already know (see [Figure fig-schema-theory](#fig-schema-theory)).
+
+[![](images/schema_theory1.png)](images/schema_theory1.png "Figure 1: Schema theory of learning. While probably not entirely applicable to how adults learn, it does highlight the importance of building on prior knowledge. When new knowledge is introducted, it is more quickly stored into long-term memory if strongly-related concepts are already available for connection.")
+
+Figure 1: Schema theory of learning. While probably not entirely applicable to how adults learn, it does highlight the importance of building on prior knowledge. When new knowledge is introducted, it is more quickly stored into long-term memory if strongly-related concepts are already available for connection.
+
+This book is a collection of resources meant to help build your data science, statistical, and computational schemata. It is meant to be largely self-directed, but for those looking to teach data science, it can also be used as a guide for structuring a course. Material is a bit variable in terms of difficulty, prerequisites, and format which is a reflection of the organic creation of the material. See below for additional thoughts on adult learning and how it relates to this material.
+
+## What are the goals?
+
+We can often get lost in the weeds of technical details of lessons, focusing only on the syntax and semantics of R and Bioconductor. Let’s take a step back and consider the big picture. The goals are to:
+
+1.  Have a foundation for reading and writing R code to solve problems and understand data.
+2.  Be able to find and use online resources including AI and tutorials to solve problems and learn new concepts.
+3.  Be able to effectively communicate with others about R code and data science concepts.
+4.  Most importantly, to develop the confidence to become a self-directed learner, experimenting with concepts and practice of data science to address real-world problems.
+
+## Adult learners
+
+Adult Learning Theory, also known as Andragogy, is the concept and practice of designing, developing, and delivering instructional experiences for adult learners. It is based on the belief that adults learn differently than children, and thus, require distinct approaches to engage, motivate, and retain information ([Center 2016](#ref-author_lifelong_2016)). The term was first introduced by Malcolm Knowles, an American educator who is known for his work in adult education ([Knowles et al. 2005](#ref-knowles_adult_2005)).
+
+One of the fundamental principles of Adult Learning Theory is that adults are self-directed learners. This means that we prefer to take control of our own learning process and set personal goals for themselves. We are motivated by our desire to solve problems or gain knowledge to improve our lives (see [Figure fig-why-learn](#fig-why-learn)). As a result, educational content for adults should be relevant and applicable to real-life situations. Furthermore, adult learners should be given opportunities to actively engage in the learning process by making choices, setting goals, and evaluating their progress.
+
+[![](images/why_learn.png)](images/why_learn.png "Figure 2: Why do adults choose to learn something?")
+
+Figure 2: Why do adults choose to learn something?
+
+Another key aspect of Adult Learning Theory is the role of experience. We bring a wealth of experience to the learning process, which serves as a resource for new learning. We often have well-established beliefs, values, and mental models that can influence our willingness to accept new ideas and concepts. Therefore, it is essential to acknowledge and respect our shared and unique past experiences and create an environment where we all feel comfortable sharing our perspectives.
+
+To effectively learn as a group of adult learners, it is crucial to establish a collaborative learning environment that promotes open communication and fosters trust among participants. We all appreciate and strive for a respectful and supportive atmosphere where we can express our opinions without fear of judgment. Instructors should help facilitate discussions, encourage peer-to-peer interactions, and incorporate group activities and collaboration to capitalize on the collective knowledge of participants.
+
+Additionally, adult learners often have multiple responsibilities outside of the learning environment, such as work and family commitments. As a result, we require flexible learning opportunities that accommodate busy schedules. Offering a variety of instructional formats, such as online modules, self-paced learning, or evening classes, can help ensure that adult learners have access to education despite any time constraints.
+
+Adult learners benefit from a learner-centered approach that focuses on the individual needs, preferences, and interests of each participant can greatly enhance the overall learning experience. In addition, we tend to be more intrinsically motivated to learn when we have a sense of autonomy and can practice and experiment (see [Figure fig-stuck-ds](#fig-stuck-ds)) with new concepts in a safe environment.
+
+[![](index_files/figure-html/fig-stuck-ds-1.png)](index_files/figure-html/fig-stuck-ds-1.png "Figure 3: How to stay stuck in data science (or anything). The “Read-Do” loop tends to deliver the best results. Too much reading between doing can be somewhat effective. Reading and simply copy-paste is probably the least effective. When working through material, experiment. Try to break things. Incorporate your own experience or applications whenever possible.")
+
+Figure 3: How to stay stuck in data science (or anything). The “Read-Do” loop tends to deliver the best results. Too much reading between doing can be somewhat effective. Reading and simply copy-paste is probably the least effective. When working through material, experiment. Try to break things. Incorporate your own experience or applications whenever possible.
+
+Understanding Adult Learning Theory and its principles can significantly enhance the effectiveness of teaching and learning as adults. By respecting our autonomy, acknowledging our experiences, creating a supportive learning environment, offering flexible learning opportunities, and utilizing diverse teaching methods, we can better cater to the unique needs and preferences of adult learners.
+
+In practice, that means that we will will not be prescriptive in our approach to teaching data science. We will not tell you what to do, but rather we will provide you with a variety of options and you can choose what works best for you. We will also provide you with a variety of resources and you can choose where to focus your time. Given that we cannot possibly cover everything, we will provide you with a framework for learning and you can fill in the gaps as you see fit. A key component of our success as adult learners is to gain the confidence to ask questions and problem-solve on our own.
+
+## AI is part of the solution
+
+Artificial Intelligence (AI) is becoming an increasingly important tool in education, and it can be a powerful ally in our quest to learn data science. As it turns out, AI is excellent at helping us learn. It can provide tailored explanations, generate practice problems, and even simulate real-world scenarios for us to work through. AI can also help us find resources, summarize complex topics, and even provide feedback on our work. However, it is important to remember that AI is a tool, not a replacement for our own learning. We still need to engage with the material, ask questions, and seek out additional resources when needed. AI can help us learn more efficiently, but it cannot do the learning for us.
+
+I encourage you to use AI tools to help you learn and to even do work for you when appropriate; AI is an excellent partner in analysis and programming. However, I also encourage you to be critical of the information that AI provides. AI is not perfect and can make mistakes. Throughout this course and book, use AI to dive deeper into the material, to provide additional explanations, and to generate additional depth and breadth to the material.
+
+Center, Pew Research. 2016. “Lifelong Learning and Technology.” In *Pew Research Center: Internet, Science & Tech*. <https://www.pewresearch.org/internet/2016/03/22/lifelong-learning-and-technology/>.
+
+Knowles, Malcolm S., Elwood F. Holton, and Richard A. Swanson. 2005. *The Adult Learner: The Definitive Classic in Adult Education and Human Resource Development*. 6th ed. Elsevier.

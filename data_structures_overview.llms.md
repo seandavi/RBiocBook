@@ -1,0 +1,67 @@
+# R Data Structures
+
+Code
+
+Authors
+
+Affiliations
+
+[Sean Davis](https://seandavi.github.io/) [](mailto:seandavi@gmail.com)
+
+[University of Colorado  
+Anschutz School of Medicine](https://medschool.cuanschutz.edu/)
+
+Lori Shepherd Kern
+
+[Roswell Park Comprehensive Cancer Center  
+Bioconductor Core Team](https://www.roswellpark.org/)
+
+Martin Morgan
+
+[Roswell Park Comprehensive Cancer Center  
+Bioconductor Core Team](https://www.roswellpark.org/)
+
+Published
+
+June 1, 2024
+
+Modified
+
+September 19, 2026
+
+Welcome to the section on R data structures! As you begin your journey in learning R, it is essential to understand the fundamental building blocks of this powerful programming language. R offers a variety of data structures to store and manipulate data, each with its unique properties and capabilities. In this section, we will cover the core data structures in R, including:
+
+- Vectors
+- Matrices
+- Lists
+- Data.frames
+
+By the end of this section, you will have a solid understanding of these data structures, and you will be able to choose and utilize the appropriate data structure for your specific data manipulation and analysis tasks.
+
+In each chapter, we will delve into the properties and usage of each data structure, starting with their definitions and moving on to their practical applications. We will provide examples, exercises, and active learning approaches to help you better understand and apply these concepts in your work.
+
+[![](images/data_structures.png)](images/data_structures.png "Figure 1: R’s most common data structures. A vector is a one-dimensional sequence of values that all share a single type; a matrix extends that to two dimensions, and an array to higher dimensions, still with a single type throughout. A list is also one-dimensional but its elements may each be a different type (here a number, a string, a logical, and even another vector). A data frame is a table built from columns that are each a vector, so different columns may hold different types while every column has the same length.")
+
+Figure 1: R’s most common data structures. A **vector** is a one-dimensional sequence of values that all share a single type; a **matrix** extends that to two dimensions, and an **array** to higher dimensions, still with a single type throughout. A **list** is also one-dimensional but its elements may each be a *different* type (here a number, a string, a logical, and even another vector). A **data frame** is a table built from columns that are each a vector, so different columns may hold different types while every column has the same length.
+
+## Chapter overview
+
+- Vectors  
+  In this chapter, we will introduce you to the simplest data structure in R, the vector. We will cover how to create, access, and manipulate vectors, as well as discuss their unique properties and limitations.
+
+- Matrices  
+  Next, we will explore matrices, which are two-dimensional data structures that extend vectors. You will learn how to create, access, and manipulate matrices, and understand their usefulness in mathematical operations and data organization.
+
+- Lists  
+  The third chapter will focus on lists, a versatile data structure that can store elements of different types and sizes. We will discuss how to create, access, and modify lists, and demonstrate their flexibility in handling complex data structures.
+
+- Data.frames  
+  Next, we will examine data.frames, a widely-used data structure for organizing and manipulating tabular data. You will learn how to create, access, and manipulate data.frames, and understand their advantages over other data structures for data analysis tasks.
+
+- Factors  
+  Finally, we will look at factors, R’s way of representing categorical data (such as treatment groups or sample conditions). You will learn how factors store their categories as **levels**, why that matters for statistical modeling and plotting, and how to create and reorder them.
+
+- Arrays  
+  While we will not focus directly on the `array` data type, which are multidimensional data structures that extend matrices, they are very similar to matrices, but with a third dimension.
+
+As you progress through these chapters, practice the examples and exercises provided, engage in discussion, and collaborate with your peers to deepen your understanding of R data structures. This solid foundation will serve as the basis for more advanced data manipulation, analysis, and visualization techniques in R.

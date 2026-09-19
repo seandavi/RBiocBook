@@ -1,0 +1,104 @@
+# 2  RStudio
+
+Code
+
+Author
+
+Affiliation
+
+[Sean Davis](https://seandavi.github.io/) [](mailto:seandavi@gmail.com)
+
+[University of Colorado  
+Anschutz School of Medicine](https://medschool.cuanschutz.edu/)
+
+Published
+
+June 1, 2024
+
+Modified
+
+September 19, 2026
+
+RStudio is an integrated development environment (IDE) for R. It provides a graphical user interface (GUI) for R, making it easier to write and execute R code. RStudio also provides several other useful features, including a built-in console, syntax-highlighting editor, and tools for plotting, history, debugging, workspace management, and workspace viewing. RStudio is available in both free and commercial editions; the commercial edition provides some additional features, including support for multiple sessions and enhanced debugging.
+
+## 2.1 What you’ll learn
+
+- Install R and RStudio and launch the RStudio IDE.
+- Identify the four panes of the RStudio interface and what each is for.
+- Recognize that only the **console** talks to R directly — the other panes are a convenience layer on top.
+- Customize the layout to suit your screen and preferences.
+- Name the main alternatives to RStudio (Jupyter, VS Code, Positron, plain command-line R) and when you might reach for them.
+
+## 2.2 Getting started with RStudio
+
+To get started with RStudio, you first need to install both R and RStudio on your computer. Follow these steps:
+
+1.  Download and install R from the [official R website](https://cran.r-project.org/).
+2.  Download and install RStudio from the [official RStudio website](https://posit.co/downloads/).
+3.  Launch RStudio. You should see the RStudio interface with four panels.
+
+> **NOTE:**
+>
+> RStudio works with all versions of R, but it is recommended to use the latest version of R to take advantage of the latest features and improvements. You can check your R version by running `version` (no parentheses)in the R console.
+>
+> You can check the latest version of R on the [R-project website](https://www.r-project.org/).
+
+## 2.3 The RStudio Interface
+
+RStudio’s interface consists of four panels (see [Figure fig-rstudio-interface](#fig-rstudio-interface)):
+
+- Console  
+  This panel displays the R console, where you can enter and execute R commands directly. The console also shows the output of your code, error messages, and other information.
+
+- Source  
+  This panel is where you write and edit your R scripts. You can create new scripts, open existing ones, and run your code from this panel.
+
+- Environment  
+  This panel displays your current workspace, including all variables, data objects, and functions that you have created or loaded in your R session.
+
+- Plots, Packages, Help, and Viewer  
+  These panels display plots, installed packages, help files, and web content, respectively.
+
+[![](images/rstudio_image.png)](images/rstudio_image.png "Figure 2.1: The RStudio interface. In this layout, the source pane is in the upper left, the console is in the lower left, the environment panel is in the top right and the viewer/help/files panel is in the bottom right.")
+
+Figure 2.1: The RStudio interface. In this layout, the **source** pane is in the upper left, the **console** is in the lower left, the **environment** panel is in the top right and the **viewer/help/files** panel is in the bottom right.
+
+> **NOTE:**
+>
+> No. You can use R without RStudio. However, RStudio makes it easier to write and execute R code, and it provides several useful features that are not available in the basic R console. Note that the only part of RStudio that is actually interacting with R directly is the console. The other panels are simply providing a GUI that enhances the user experience.
+
+> **TIP:**
+>
+> You can customize the layout of RStudio to suit your preferences. To do so, go to **Tools \> Global Options \> Appearance**. Here, you can change the theme, font size, and panel layout. You can also resize the panels as needed to gain screen real estate (see [Figure fig-rstudio-resize](#fig-rstudio-resize)).
+
+[![](images/rstudio_resize.png)](images/rstudio_resize.png "Figure 2.2: Dealing with limited screen real estate can be a challenge, particularly when you want to open another window to, for example, view a web page. You can resize the panes by sliding the center divider (red arrows) or by clicking on the minimize/maximize buttons (see blue arrow).")
+
+Figure 2.2: Dealing with limited screen real estate can be a challenge, particularly when you want to open another window to, for example, view a web page. You can resize the panes by sliding the center divider (red arrows) or by clicking on the minimize/maximize buttons (see blue arrow).
+
+In summary, R and RStudio are powerful tools for genomics data analysis. By understanding the advantages of using R and RStudio and familiarizing yourself with the RStudio interface, you can efficiently analyze and visualize your data. In the following chapters, we will delve deeper into the functionality of R, Bioconductor, and various statistical methods to help you gain a comprehensive understanding of genomics data analysis.
+
+## 2.4 Alternatives to RStudio
+
+While RStudio is a popular choice for R development, there are several alternatives you can consider:
+
+1.  [**Jupyter Notebooks**](https://jupyter.org/): Jupyter Notebooks provide an interactive environment for writing and executing R code, along with rich text support for documentation. You can use the IRKernel to run R code in Jupyter.
+
+[![Jupyter Notebook interface. This is an interactive environment for writing and executing R code, along with rich text support for documentation.](images/jupyter_interface.png)](images/jupyter_interface.png "Jupyter Notebook interface. This is an interactive environment for writing and executing R code, along with rich text support for documentation.")
+
+Jupyter Notebook interface. This is an interactive environment for writing and executing R code, along with rich text support for documentation.
+
+2.  [**Visual Studio Code**](https://code.visualstudio.com/docs/languages/r): With the R extension for Visual Studio Code, you can write and execute R code in a lightweight editor. This setup provides features like syntax highlighting, code completion, and integrated terminal support.
+
+[![Visual Studio Code (VSCode) with the R extension. This is a lightweight alternative to RStudio that provides syntax highlighting, code completion, and integrated terminal support. Screenshot © Microsoft Corporation, from the VS Code documentation (CC BY 3.0 US).](https://code.visualstudio.com/assets/docs/languages/r/overview.png)](https://code.visualstudio.com/assets/docs/languages/r/overview.png "Visual Studio Code (VSCode) with the R extension. This is a lightweight alternative to RStudio that provides syntax highlighting, code completion, and integrated terminal support. Screenshot © Microsoft Corporation, from the VS Code documentation (CC BY 3.0 US).")
+
+Visual Studio Code (VSCode) with the R extension. This is a lightweight alternative to RStudio that provides syntax highlighting, code completion, and integrated terminal support. Screenshot © Microsoft Corporation, from the [VS Code documentation](https://code.visualstudio.com/docs/languages/r) (CC BY 3.0 US).
+
+3.  [Positron Workbench](https://positron.posit.co/): This is a commercial IDE that supports R and Python. It provides a similar interface to RStudio but with additional features for data science workflows, including support for multiple languages and cloud integration.
+
+[![Positron Workbench interface. This IDE supports R and Python, providing a similar interface to RStudio with additional features for data science workflows. Screenshot © Posit Software, PBC; shown for identification only, no endorsement implied.](https://positron.posit.co/images/astropy.png)](https://positron.posit.co/images/astropy.png "Positron Workbench interface. This IDE supports R and Python, providing a similar interface to RStudio with additional features for data science workflows. Screenshot © Posit Software, PBC; shown for identification only, no endorsement implied.")
+
+Positron Workbench interface. This IDE supports R and Python, providing a similar interface to RStudio with additional features for data science workflows. Screenshot © Posit Software, PBC; shown for identification only, no endorsement implied.
+
+4.  **Command Line R**: For those who prefer a minimalistic approach, you can use R directly from the command line. This method lacks the GUI features of RStudio but can be efficient for quick tasks, scripting, automation, or when working on remote servers.
+
+Each of these alternatives has its own strengths and weaknesses, so you may want to try a few to see which one best fits your workflow. All are available for free, and you can install them alongside RStudio if you wish to use multiple environments. Each can be installed in Windows, Mac, and Linux.

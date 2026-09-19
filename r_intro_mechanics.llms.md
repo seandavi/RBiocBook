@@ -1,0 +1,233 @@
+# 3  R mechanics
+
+Code
+
+Author
+
+Affiliation
+
+[Sean Davis](https://seandavi.github.io/) [](mailto:seandavi@gmail.com)
+
+[University of Colorado  
+Anschutz School of Medicine](https://medschool.cuanschutz.edu/)
+
+Published
+
+June 1, 2024
+
+Modified
+
+September 19, 2026
+
+## 3.1 What you’ll learn
+
+- Start R and interact with it by typing at the console.
+- Tell the two basic kinds of input apart: **assignments** (storing a value) and **expressions** (computing a result).
+- Use R as a calculator, applying its arithmetic operators and order of operations.
+- Assign values to named **objects** with the `<-` operator, and inspect, change, and remove them.
+- Apply R’s rules for naming objects.
+- Look up documentation with [`help()`](https://rdrr.io/r/utils/help.html) and `?`.
+
+## 3.2 Starting R
+
+We’ve installed R and RStudio. Now, let’s start R and get going. How to start R depends a bit on the operating system (Mac, Windows, Linux) and interface. In this course, we will largely be using an Integrated Development Environment (IDE) called *RStudio*, but there is nothing to prohibit using R at the command line or in some other interface (and there are a few).
+
+## 3.3 *RStudio*: A Quick Tour
+
+The RStudio interface has multiple panes. All of these panes are simply for convenience except the “Console” panel, typically in the lower left corner (by default). The console pane contains the running R interface. If you choose to run R outside RStudio, the interaction will be *identical* to working in the console pane. This is useful to keep in mind as some environments, such as a computer cluster, encourage using R without RStudio.
+
+- Panes
+- Options
+- Help
+- Environment, History, and Files
+
+## 3.4 Interacting with R
+
+The only meaningful way of interacting with R is by typing into the R console. At the most basic level, anything that we type at the command line will fall into one of two categories:
+
+1.  Assignments
+
+    ``` downlit
+    x = 1
+    y <- 2
+    ```
+
+2.  Expressions
+
+    ``` downlit
+    1 + pi + sin(42)
+    ```
+
+        [1] 3.225071
+
+The assignment type is obvious because either the The `<-` or `=` are used. Note that when we type expressions, R will return a result. In this case, the result of R evaluating `1 + pi + sin(42)` is 3.2250711.
+
+The standard R prompt is a “\>” sign. When present, R is waiting for the next expression or assignment. If a line is not a complete R command, R will continue the next line with a “+”. For example, typing the following with a “Return” after the second “+” will result in R giving back a “+” on the next line, a prompt to keep typing.
+
+``` downlit
+1 + pi +
+sin(3.7)
+```
+
+    [1] 3.611757
+
+R can be used as a glorified calculator by using R expressions. Mathematical operations include:
+
+- Addition: `+`
+- Subtraction: `-`
+- Multiplication: `*`
+- Division: `/`
+- Exponentiation: `^`
+- Modulo: `%%`
+
+The `^` operator raises the number to its left to the power of the number to its right: for example `3^2` is `9`. The modulo returns the remainder of the division of the number to the left by the number on its right, for example 5 modulo 3 or `5 %% 3` is 2.
+
+### 3.4.1 Expressions
+
+``` downlit
+5 + 2
+28 %% 3
+3^2
+5 + 4 * 4 + 4 ^ 4 / 10
+```
+
+Note that R follows order-of-operations and groupings based on parentheses.
+
+``` downlit
+5 + 4 / 9
+(5 + 4) / 9
+```
+
+### 3.4.2 Assignment
+
+While using R as a calculator is interesting, to do useful and interesting things, we need to assign *values* to *objects*. To create an object, we give it a name, followed by the assignment operator `<-` (or, entirely equivalently, `=`), and the value we want to store. Here we record the length of a gene, in base pairs:
+
+``` downlit
+gene_length_bp <- 2400
+```
+
+`<-` is the assignment operator: it stores the value on the right in the object named on the left, like an arrow pointing from the value into the name. An `=` is equivalent (in nearly all cases), but learning to use `<-` is good programming practice.
+
+> **NOTE:**
+>
+> The `<-` and `=` both work fine for assignment. You’ll see both used and it is up to you to choose a standard for yourself. However, some programming communities, such as Bioconductor, will strongly suggest using the `<-` as it is clearer that it represents an *assignment* operation.
+
+Objects can be given almost any name, such as `x`, `gene_length_bp`, or `subject_id`. Aim for names that are explicit but not too long. They cannot start with a number (`2x` is not valid, but `x2` is), and R is case sensitive (so `gene_length_bp` is different from `Gene_Length_bp`). A few names are reserved because they are fundamental parts of the language (`if`, `else`, `for`, and others — see the [list of reserved words](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html)). Even when it is allowed, avoid reusing the names of common functions (`c`, `T`, `mean`, `data`, `df`), and avoid dots inside names (`my.dataset`), since dots carry special meaning in some contexts. A useful convention is to use nouns for variable names and verbs for function names.
+
+When you assign a value to an object, R prints nothing. To see what is stored, type the object’s name:
+
+``` downlit
+gene_length_bp
+```
+
+    [1] 2400
+
+Now that R holds `gene_length_bp` in memory (its “global environment”), we can do arithmetic with it. Gene lengths are often quoted in kilobases, so let’s convert by dividing by 1000:
+
+``` downlit
+gene_length_bp / 1000
+```
+
+    [1] 2.4
+
+We can also change an object’s value by assigning a new one:
+
+``` downlit
+gene_length_bp <- 1800
+gene_length_bp / 1000
+```
+
+    [1] 1.8
+
+Here is a subtle but important point: assigning a value to one object does **not** update other objects that were computed from it earlier. Suppose we store the length in kilobases in its own object:
+
+``` downlit
+gene_length_kb <- gene_length_bp / 1000
+```
+
+and then change `gene_length_bp` to a new value:
+
+``` downlit
+gene_length_bp <- 3000
+```
+
+What do you think `gene_length_kb` holds now — `1.8` or `3.0`? R computed `gene_length_kb` once, from the value `gene_length_bp` had *at that moment* (1800), and stored the result (1.8). Re-assigning `gene_length_bp` afterward does not reach back and recompute `gene_length_kb`:
+
+``` downlit
+gene_length_kb
+```
+
+    [1] 1.8
+
+You can see what objects are stored by viewing the Environment tab in RStudio, or with the [`ls()`](https://rdrr.io/r/base/ls.html) function. You can remove objects with [`rm()`](https://rdrr.io/r/base/rm.html), one at a time or several at once (the little broom button in the Environment pane clears everything):
+
+``` downlit
+ls()
+rm(gene_length_kb, gene_length_bp)
+ls()
+```
+
+What happens when you type the following, now?
+
+``` downlit
+gene_length_kb # error: object no longer exists, because we just removed it!
+```
+
+## 3.5 Rules for Names in R
+
+R allows users to assign names to objects such as variables, functions, and even dimensions of data. However, these names must follow a few rules.
+
+- Names may contain any combination of letters, numbers, underscore, and “.”
+- Names may not start with numbers, underscore.
+- R names are case-sensitive.
+
+Examples of valid R names include:
+
+    pi
+    x
+    camelCaps
+    my_stuff
+    MY_Stuff
+    this.is.the.name.of.the.man
+    ABC123
+    abc1234asdf
+    .hi
+
+## 3.6 About R functions
+
+When you see a name followed by parentheses `()`, you are likely looking a name that represents an R function (or method, but we’ll sidestep that distinction for now). Examples of R functions include [`print()`](https://rdrr.io/r/base/print.html), [`help()`](https://rdrr.io/r/utils/help.html), and [`ls()`](https://rdrr.io/r/base/ls.html). We haven’t seen examples yet, but when a name is followed by `[]`, that name represents a variable of some kind and the `[]` are used for “subsetting” the variable. So:
+
+- Name followed by `()` is a function.
+- Name with `[]` means a variable that is being subset.
+
+In many cases, when you see a new function used, you may not know what it does. The R [`help()`](https://rdrr.io/r/utils/help.html) function takes the name of another function and gives back the R help document for that function if there is one. The next section reviews that technique.
+
+## 3.7 Resources for Getting Help
+
+There is extensive built-in help and documentation within R. A separate page contains a collection of [additional resources](additional_resources.llms.md).
+
+If the name of the function or object on which help is sought is known, the following approaches with the name of the function or object will be helpful. For a concrete example, examine the help for the `print` method.
+
+``` downlit
+help(print)
+help('print')
+?print
+```
+
+There are also tons of online resources that Google will include in searches if online searching feels more appropriate.
+
+I strongly recommend using `help("newfunction")` for all functions that are new or unfamiliar to you.
+
+There are also many open and free resources and reference guides for R.
+
+- [Quick-R](http://www.statmethods.net/): a quick online reference for data input, basic statistics and plots
+- R reference card [PDF](https://cran.r-project.org/doc/contrib/Short-refcard.pdf) by Tom Short
+- Rstudio [cheatsheets](https://www.rstudio.com/resources/cheatsheets/)
+
+## 3.8 Reflection
+
+- Can you recognize the difference between *assignment* and *expressions* when interacting with R?
+- Can you demonstrate an assignment to a variable?
+- Do you know the rules for “names” in R?
+- Are you able to get help using the R [`help()`](https://rdrr.io/r/utils/help.html) function?
+- Do you know that functions are recognizable as names followed by `()`?

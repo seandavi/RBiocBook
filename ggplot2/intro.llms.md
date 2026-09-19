@@ -1,0 +1,378 @@
+# 18  Exploring data with ggplot2
+
+Code
+
+Author
+
+Affiliation
+
+[Sean Davis](https://seandavi.github.io/) [](mailto:seandavi@gmail.com)
+
+[University of Colorado  
+Anschutz School of Medicine](https://medschool.cuanschutz.edu/)
+
+Published
+
+June 1, 2024
+
+Modified
+
+September 19, 2026
+
+A plot answers questions a table of numbers cannot. Does one measurement rise with another? Do two groups behave differently? Are there outliers worth a second look? `ggplot2` is the package most R users reach for to ask those questions, and it does so with a small, consistent vocabulary you can combine to build almost any graphic. In this chapter you’ll start from a blank canvas and, one layer at a time, build up a single plot that shows four variables at once.
+
+For our running example we’ll use the `penguins` dataset from the `palmerpenguins` package. It records body measurements — bill length and depth, flipper length, and body mass — for 344 penguins of three species (Adélie, Chinstrap, and Gentoo) living on three islands in the Palmer Archipelago near Antarctica. It’s a small, tidy table of real measurements, which makes it a friendly stand-in for the kind of morphometric and phenotype data you’ll meet throughout biology. (The data are released into the public domain under a CC0 license by Allison Horst, Alison Hill, and Kristen Gorman.)
+
+## 18.1 What you’ll learn
+
+- Initialize a plot with [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html) and tell it which data frame to use.
+- Add geometric layers (points, lines) with `geom_*()` functions.
+- Map variables to aesthetics such as the x-axis, y-axis, and colour, and use colour to group observations.
+- Adjust how variables are displayed with `scale_*()` functions.
+- Split a plot into small multiples with [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
+- Add informative labels and titles with [`labs()`](https://ggplot2.tidyverse.org/reference/labs.html), and restyle the plot with a `theme_*()`.
+
+> **NOTE:**
+>
+> `ggplot2` is built on an idea called the *grammar of graphics*: a plot is assembled from independent pieces you stack with `+`. The pieces are always the same — **data** (the data frame), **aesthetics** (which variable maps to x, to y, to colour, …), **geoms** (the shapes that get drawn: points, lines, bars), and optional **scales**, **facets**, **labels**, and **themes**. You don’t memorize a separate function for every chart type; you learn this handful of building blocks and recombine them. That is why the same code patterns produce a scatterplot here and, with a different data frame, a plot of gene-expression values.
+
+To get started, you need to install and load the packages we’ll use. If you haven’t installed them yet, you can do so with:
+
+``` downlit
+install.packages(c("ggplot2", "palmerpenguins"))
+```
+
+Once installed, load them:
+
+``` downlit
+library(ggplot2)
+library(palmerpenguins)
+```
+
+
+    Attaching package: 'palmerpenguins'
+
+    The following objects are masked from 'package:datasets':
+
+        penguins, penguins_raw
+
+The `penguins` data frame comes with the package, so there’s no file to read in. A handful of penguins are missing one or another measurement (a scale that wasn’t read, a bird that wasn’t sexed), and those gaps show up as `NA`. To keep our first plots tidy and free of distracting warnings, we’ll work with the rows that have a complete set of values:
+
+``` downlit
+# keep only rows with no missing values
+penguins <- penguins[complete.cases(penguins), ]
+```
+
+In RStudio you can use the [`View()`](https://rdrr.io/r/utils/View.html) function to inspect the dataset in a spreadsheet-style window. We don’t run it here because it only works in interactive RStudio, not when the book is rendered:
+
+``` downlit
+# view the dataset
+View(penguins)
+```
+
+Next, we’ll add a variable that splits the penguins into two weight groups. We’ll call a penguin “heavy” if its body mass is at least 4200 grams and “light” otherwise. This kind of derived, categorical variable is handy for grouping later on:
+
+``` downlit
+# create a body-size category
+penguins$size_class <- ifelse(penguins$body_mass_g >= 4200,
+                              "heavy", "light")
+```
+
+When you build a `ggplot2` graph, only the first two pieces below — [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html) and at least one `geom_*()` — are required. The rest are optional and can appear in any order.
+
+## 18.2 ggplot()
+
+The [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html) function initializes the plot. It takes a data frame as its first argument and can also include aesthetic mappings ([`aes()`](https://ggplot2.tidyverse.org/reference/aes.html)) that define how variables in the data map to visual properties such as the x and y axes, colour, and size.
+
+``` downlit
+# initialize the plot
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g))
+```
+
+[![](intro_files/figure-html/fig-ggplot-init-1.png)](intro_files/figure-html/fig-ggplot-init-1.png "Figure 18.1: Initialize the plot with ggplot().")
+
+Figure 18.1: Initialize the plot with ggplot().
+
+Why is [Figure fig-ggplot-init](#fig-ggplot-init) showing an empty panel? Because we haven’t added any layers yet. The [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html) function only sets up the canvas; it doesn’t draw anything until we add a geom. We told it to map `flipper_length_mm` to the x-axis and `body_mass_g` to the y-axis, but we haven’t yet said *what shape* to put on the graph.
+
+## 18.3 geom\_\*()
+
+The `geom_*()` functions add layers to the plot. Each one corresponds to a specific geometric object: [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html) adds points, [`geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html) adds lines, [`geom_bar()`](https://ggplot2.tidyverse.org/reference/geom_bar.html) adds bars, and so on. Let’s add points.
+
+``` downlit
+# add points to the plot
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+[![](intro_files/figure-html/fig-ggplot-geom-point-1.png)](intro_files/figure-html/fig-ggplot-geom-point-1.png "Figure 18.2: Add points to the plot with geom_point().")
+
+Figure 18.2: Add points to the plot with geom_point().
+
+In [Figure fig-ggplot-geom-point](#fig-ggplot-geom-point) we added points with [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html). The `+` operator stacks layers onto the plot, and the `mapping` argument in [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html) specifies how variables map to visual properties. You can already see that heavier penguins tend to have longer flippers — body mass climbs steadily with flipper length.
+
+A geom can take parameters (options) of its own. For [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html), the common ones are `color`, `size`, and `alpha`. These control point colour, point size, and transparency. Transparency ranges from 0 (completely transparent) to 1 (completely opaque).
+
+``` downlit
+# make points blue, larger, and semi-transparent
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(color = "cornflowerblue",
+             alpha = .7,
+             size = 2)
+```
+
+[![](intro_files/figure-html/fig-ggplot-geom-point-options-1.png)](intro_files/figure-html/fig-ggplot-geom-point-options-1.png "Figure 18.3: Modify point colour, size, and transparency.")
+
+Figure 18.3: Modify point colour, size, and transparency.
+
+> **TIP:**
+>
+> When many points land on top of one another — common with hundreds or thousands of observations — a solid plot hides how the data pile up. Setting `alpha` below 1 makes each point partly transparent, so dense regions render darker and sparse ones lighter. It’s the cheapest fix for an overplotted scatterplot, and it works the same way whether your points are penguins or single cells.
+
+Next, let’s layer on a line of best fit — in other words, a regression fit. We do that with [`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html). Its options control the type of line (linear, quadratic, nonparametric), the line’s thickness and colour, and whether a confidence band is shown. Here we ask for a linear regression line with `method = "lm"` (where `lm` stands for *linear model*).
+
+``` downlit
+# add a line of best fit
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(color = "cornflowerblue",
+             alpha = .7,
+             size = 2) +
+  geom_smooth(method = "lm")
+```
+
+    `geom_smooth()` using formula = 'y ~ x'
+
+[![](intro_files/figure-html/fig-ggplot-line-of-best-fit-1.png)](intro_files/figure-html/fig-ggplot-line-of-best-fit-1.png "Figure 18.4: Add a line of best fit with geom_smooth().")
+
+Figure 18.4: Add a line of best fit with geom_smooth().
+
+In [Figure fig-ggplot-line-of-best-fit](#fig-ggplot-line-of-best-fit) we added a fitted line with `geom_smooth(method = "lm")`. The `method` argument chooses the type of fit; here a straight line summarizes the upward trend, and the shaded band around it is the confidence interval.
+
+## 18.4 Grouping
+
+Beyond the x and y axes, you can map groups of observations to colour, shape, size, transparency, and other visual characteristics. This lets you superimpose several groups in a single graph. Let’s add the penguin’s species and show it with colour.
+
+``` downlit
+# group points by species
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = .7, size = 2) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+    `geom_smooth()` using formula = 'y ~ x'
+
+[![](intro_files/figure-html/fig-ggplot-grouping-1.png)](intro_files/figure-html/fig-ggplot-grouping-1.png "Figure 18.5: Group points by species.")
+
+Figure 18.5: Group points by species.
+
+In [Figure fig-ggplot-grouping](#fig-ggplot-grouping) we moved the `color` aesthetic into [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html) and mapped it to the `species` variable. Because `color` is now part of the mapping, `ggplot2` splits the data by species and draws a separate set of points *and* a separate fitted line for each group. A pattern that the single cloud of points hid now stands out: Gentoo penguins are noticeably larger, occupying the upper-right of the plot, while Adélie and Chinstrap penguins overlap at the lower end.
+
+## 18.5 Scales
+
+Scales control how variables are translated into the visual characteristics of the plot. Scale functions (which start with `scale_`) let you adjust that translation. Next we’ll change the spacing of the x and y axis tick marks and pick our own colours.
+
+``` downlit
+# modify the x and y axes and specify the colours to be used
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
+  geom_point(alpha = .5,
+             size = 2) +
+  geom_smooth(method = "lm",
+              se = FALSE,
+              linewidth = 1.5) +
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
+                                "cornflowerblue"))
+```
+
+    `geom_smooth()` using formula = 'y ~ x'
+
+[![](intro_files/figure-html/fig-ggplot-scales-1.png)](intro_files/figure-html/fig-ggplot-scales-1.png "Figure 18.6: Modify scales for the x and y axes and the colours.")
+
+Figure 18.6: Modify scales for the x and y axes and the colours.
+
+In [Figure fig-ggplot-scales](#fig-ggplot-scales) we used [`scale_x_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) and [`scale_y_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) to set the axis tick marks. The `breaks` argument specifies where the ticks fall, and the `label` argument formats the y-axis values with comma separators using [`scales::comma`](https://scales.r-lib.org/reference/comma.html). [`scale_color_manual()`](https://ggplot2.tidyverse.org/reference/scale_manual.html) then assigns our chosen colours to the three species. (Note that line thickness in [`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html) is set with `linewidth`, the current argument for the width of a line geom.)
+
+## 18.6 Facets
+
+Faceting splits a plot into small multiples — one panel per level of a categorical variable. This is handy for comparing relationships across groups. The [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) function does this; the `~size_class` formula tells it to make one panel for each value of the `size_class` variable.
+
+``` downlit
+# reproduce the plot for heavy and light penguins
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
+                                "cornflowerblue")) +
+  facet_wrap(~size_class)
+```
+
+    `geom_smooth()` using formula = 'y ~ x'
+
+[![](intro_files/figure-html/fig-ggplot-facets-1.png)](intro_files/figure-html/fig-ggplot-facets-1.png "Figure 18.7: Create facets based on the size_class variable.")
+
+Figure 18.7: Create facets based on the size_class variable.
+
+In [Figure fig-ggplot-facets](#fig-ggplot-facets), `facet_wrap(~size_class)` produced separate panels for heavy and light penguins, letting us compare the flipper-versus-mass relationship side by side. We have now packed four dimensions of data — flipper length, species, body-size class, and body mass — into a single two-dimensional figure.
+
+## 18.7 Labels and titles
+
+Labels and titles make a plot self-explanatory. The [`labs()`](https://ggplot2.tidyverse.org/reference/labs.html) function sets the axis labels, the legend title, and the plot title, subtitle, and caption.
+
+``` downlit
+# add informative labels
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
+                                "cornflowerblue")) +
+  facet_wrap(~size_class) +
+  labs(title = "Body mass increases with flipper length across penguin species",
+       subtitle = "Palmer Archipelago penguins, 2007-2009",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Species")
+```
+
+    `geom_smooth()` using formula = 'y ~ x'
+
+[![](intro_files/figure-html/fig-ggplot-labels-1.png)](intro_files/figure-html/fig-ggplot-labels-1.png "Figure 18.8: Add labels and a title to the plot.")
+
+Figure 18.8: Add labels and a title to the plot.
+
+In [Figure fig-ggplot-labels](#fig-ggplot-labels) we used [`labs()`](https://ggplot2.tidyverse.org/reference/labs.html) to add a title, subtitle, and clearer axis and legend labels. A reader can now understand the figure without hunting for context elsewhere.
+
+## 18.8 Theming
+
+Finally, you can fine-tune the plot’s overall appearance with a theme. Theme functions (which start with `theme_`) control background colours, fonts, grid lines, legend placement, and other non-data features. Let’s switch to a cleaner look.
+
+``` downlit
+# use a minimalist theme
+ggplot(data = penguins,
+       mapping = aes(x = flipper_length_mm,
+                     y = body_mass_g,
+                     color = species)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  scale_x_continuous(breaks = seq(170, 240, 10)) +
+  scale_y_continuous(breaks = seq(2000, 6500, 1000),
+                     label = scales::comma) +
+  scale_color_manual(values = c("darkorange",
+                                "purple",
+                                "cornflowerblue")) +
+  facet_wrap(~size_class) +
+  labs(title = "Body mass increases with flipper length across penguin species",
+       subtitle = "Palmer Archipelago penguins, 2007-2009",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Species") +
+  theme_minimal()
+```
+
+    `geom_smooth()` using formula = 'y ~ x'
+
+[![](intro_files/figure-html/fig-ggplot-theming-1.png)](intro_files/figure-html/fig-ggplot-theming-1.png "Figure 18.9: Customize the plot’s appearance with a theme.")
+
+Figure 18.9: Customize the plot’s appearance with a theme.
+
+## 18.9 Exercises
+
+The penguin data is a convenient, compact playground, but every technique below is exactly what you’d use to plot a biological dataset — swap `body_mass_g` for a gene’s expression level and `species` for a treatment group and the code is unchanged. Try these on the `penguins` data frame you loaded above.
+
+1.  **A boxplot by group.** Instead of a scatterplot, draw a boxplot of `body_mass_g` split by `species`. Map `species` to the x-axis and `body_mass_g` to the y-axis, and use [`geom_boxplot()`](https://ggplot2.tidyverse.org/reference/geom_boxplot.html).
+
+    > **NOTE:**
+    > ``` downlit
+    > ggplot(data = penguins,
+    >        mapping = aes(x = species, y = body_mass_g)) +
+    >   geom_boxplot()
+    > ```
+    >
+    > [![](intro_files/figure-html/unnamed-chunk-5-1.png)](intro_files/figure-html/unnamed-chunk-5-1.png)
+    >
+    > A boxplot is just a different geom on the same [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html) skeleton. The boxes make it obvious that Gentoo penguins are both heavier and more spread out in mass than the other two species.
+
+2.  **Colour by island.** Make a scatterplot of `body_mass_g` against `flipper_length_mm` and colour the points by `island`. Add `alpha = .6` so crowded points stay readable.
+
+    > **NOTE:**
+    > ``` downlit
+    > ggplot(data = penguins,
+    >        mapping = aes(x = flipper_length_mm, y = body_mass_g, color = island)) +
+    >   geom_point(alpha = .6)
+    > ```
+    >
+    > [![](intro_files/figure-html/unnamed-chunk-6-1.png)](intro_files/figure-html/unnamed-chunk-6-1.png)
+    >
+    > Mapping `island` to `color` inside [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html) gives each of the three islands its own colour. Because some species live on only one island, the colours separate cleanly — a hint that island and species are closely tied in this dataset.
+
+3.  **Facet by sex.** Take the flipper-versus-mass scatterplot and split it into one panel per `sex` with [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
+
+    > **NOTE:**
+    > ``` downlit
+    > ggplot(data = penguins,
+    >        mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
+    >   geom_point(alpha = .5) +
+    >   facet_wrap(~sex)
+    > ```
+    >
+    > [![](intro_files/figure-html/unnamed-chunk-7-1.png)](intro_files/figure-html/unnamed-chunk-7-1.png)
+    >
+    > `facet_wrap(~sex)` draws the same plot once for each sex. The two panels have a similar shape, but males sit a little higher and to the right, reflecting that they tend to be larger.
+
+4.  **Add a fitted line.** Starting from the plot in Exercise 3, add a linear fit with `geom_smooth(method = "lm")` so each panel gets its own trend line.
+
+    > **NOTE:**
+    > ``` downlit
+    > ggplot(data = penguins,
+    >        mapping = aes(x = flipper_length_mm, y = body_mass_g)) +
+    >   geom_point(alpha = .5) +
+    >   geom_smooth(method = "lm") +
+    >   facet_wrap(~sex)
+    > ```
+    >
+    >     `geom_smooth()` using formula = 'y ~ x'
+    >
+    > [![](intro_files/figure-html/unnamed-chunk-8-1.png)](intro_files/figure-html/unnamed-chunk-8-1.png)
+    >
+    > Because faceting splits the data first, [`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html) fits a separate line within each panel. Both slopes point upward and look nearly parallel, reinforcing that the flipper-mass relationship holds for both groups.
+
+## 18.10 Summary
+
+You can now build a `ggplot2` graphic from the ground up. You initialized a plot with [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html), drew data with [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html) and [`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html), mapped variables to aesthetics and used colour to separate groups, reshaped the display with `scale_*()` functions, split the plot into panels with [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html), labelled it with [`labs()`](https://ggplot2.tidyverse.org/reference/labs.html), and restyled it with [`theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html). Each was an independent layer added with `+` — the grammar of graphics in action.
+
+Reading the final figure ([Figure fig-ggplot-theming](#fig-ggplot-theming)), it appears that:
+
+- There is a positive linear relationship between flipper length and body mass, and the slope stays roughly constant across species and size classes.
+- Gentoo penguins are larger overall, with both longer flippers and greater mass.
+- The relationship is consistent: within every species and size class, longer-flippered penguins are heavier.
+- A few penguins sit well above or below their species’ trend line — individual variation worth a closer look.
+
+These findings are descriptive. They rest on a single study’s sample and involve no statistical testing to assess whether the differences could be due to chance.
+
+For the design principles behind these plots — the data-ink ratio, colorblind-safe palettes — and specialized plot types for genomics such as UpSet plots and heatmaps, see [A self-guided tour of data visualization in R](../visualization_guide.llms.md).

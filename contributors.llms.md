@@ -1,0 +1,66 @@
+# Appendix A — Contributors & acknowledgments
+
+Code
+
+Authors
+
+Affiliations
+
+[Sean Davis](https://seandavi.github.io/) [](mailto:seandavi@gmail.com)
+
+[University of Colorado  
+Anschutz School of Medicine](https://medschool.cuanschutz.edu/)
+
+Lori Shepherd Kern
+
+[Roswell Park Comprehensive Cancer Center  
+Bioconductor Core Team](https://www.roswellpark.org/)
+
+Martin Morgan
+
+[Roswell Park Comprehensive Cancer Center  
+Bioconductor Core Team](https://www.roswellpark.org/)
+
+Published
+
+June 1, 2024
+
+Modified
+
+September 19, 2026
+
+This book is the work of many hands, and it stands on a great deal of generously shared material. Individual chapters carry their own author bylines; this page is the single place that credits everyone — and every adapted source — across the whole book.
+
+## A.1 Authors
+
+People who wrote or substantially shaped material that appears in the book:
+
+- **Sean Davis** (University of Colorado Anschutz School of Medicine) — primary author and editor; most chapters.
+- **Lori Shepherd Kern** (Roswell Park Comprehensive Cancer Center; Bioconductor Core Team) — *Base R versus the tidyverse*, *Control statements*, *Factors*, *Organizing, saving, and loading your work*, and edits throughout.
+- **Martin Morgan** (Roswell Park Comprehensive Cancer Center; Bioconductor Core Team) — *Base R versus the tidyverse*, and much of the *BRFSS case study*.
+
+## A.2 Third-party material and sources
+
+A few figures, explanations, and screenshots come from others’ openly-licensed work. We are grateful to their authors; each item is used with attribution and retains its own license.
+
+- **Bioconductor *GenomicRanges* and *SummarizedExperiment* vignettes** (Artistic-2.0) — explanatory passages in the *Genomic ranges* chapter and the SummarizedExperiment schematic (`se.png`), credited in place.
+- **scikit-learn** (BSD 3-Clause) — the machine-learning overview figure.
+- **Tsompana & Buck (2014)**, *Epigenetics & Chromatin* (CC BY 4.0) — the chromatin- accessibility comparison figure in the ATAC-seq chapter.
+- **Wikimedia Commons** contributors (CC BY-SA 3.0/4.0) and **NIH BioArt** (public domain) — figures in the *Biology primer*, credited in each caption.
+- **Microsoft VS Code documentation** (CC BY 3.0 US) and **Posit** product screenshots (RStudio, Positron; used for identification only) — IDE screenshots.
+
+> **NOTE:**
+>
+> The original content of this book is released under [CC-BY 4.0](license.llms.md). Third-party material is openly licensed (CC-BY family, BSD, or public domain) or used as fair-use product screenshots, and is attributed where it appears; so the book is uniformly open. See the [publication-readiness plan](https://github.com/seandavi/RBiocBook/blob/main/editorial/PUBLICATION_READINESS.md) for the provenance cleanup history.
+
+## A.3 Datasets
+
+The book reuses several published datasets, cited in the chapters that use them — among them the `palmerpenguins` data (CC0) and `msleep` (bundled with ggplot2) used in the tidyverse chapters, the DeRisi et al. (1997) diauxic-shift time course, the `airway` RNA-seq dataset (Himes et al.), GEO accession GSE103512, ENCODE CTCF peaks (`ENCFF960ZGP`), a DNA-methylation dataset from a Galaxy Training Network tutorial (CC BY 4.0), and curated microbiome and single-cell datasets from Bioconductor data packages. Datasets we redistribute are vendored under `data/`; figure sources are recorded in [`images/README.md`](https://github.com/seandavi/RBiocBook/blob/main/images/README.md).
+
+## A.4 Tools
+
+Built with [Quarto](https://quarto.org), [R](https://www.r-project.org/), and [Bioconductor](https://bioconductor.org/), and published openly so others can read, reuse, and contribute.
+
+## A.5 Contributing
+
+Corrections, suggestions, and contributions are welcome through the [GitHub repository](https://github.com/seandavi/RBiocBook) — open an issue or a pull request. If you contribute material, you’ll be credited here and in the relevant chapter.
